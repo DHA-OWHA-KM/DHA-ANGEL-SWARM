@@ -5,7 +5,7 @@
 **Decision sought:** Go / no-go and budget approval for fielding ANGEL SWARM out of its single-folder prototype configuration into a Department of War (DoW, formerly DoD) Cloud Computing SRG **Impact Level 5 (IL5)** environment as a **Minimally Viable Product (MVP)**, hosted as a capability inside an already-authorised platform, at the lowest defensible cost.
 **Document type:** Rough Order of Magnitude (ROM) planning estimate. **Not a bid.** Every dollar figure is a planning range with the driving assumption stated next to it.
 **Classification ceiling priced:** Controlled Unclassified Information (CUI), including Protected Health Information (PHI), on **IL5**. IL6 (SIPR / Secret) is explicitly **out of scope**.
-**Date of analysis:** August 2026. **Revised against the shipped v6.5 build, 5 September 2026** — every byte size, model count and architecture row below re-checked against the folder as shipped.
+**Date of analysis:** September 2026. **Revised against the shipped v6.5 build, 8 September 2026** — every byte size, model count and architecture row below re-checked against the folder as shipped.
 
 ---
 
@@ -599,7 +599,7 @@ Moving to IL6 (Secret / SIPR) is driven by the **tasking** side, not the medical
 
 ### System-of-record references for §2.1
 - **ANGEL SWARM shipped prototype** — `cmd/angelswarm/main.go` (Go launcher, loopback bind, non-loopback rejection), `cmd/angelswarm/telemetry.go` (optional receive-only CoT/UDP ingest listener, off by default, loopback unless `-cot-external`, 8,192-byte bound), `cmd/cotsim/main.go` (device emitter — not a device driver), `app/js/telemetry.js`, `app/index.html`, `app/js/`, `app/models/ppg_cri.onnx` (419,797 bytes, 104,162 parameters, opset 13, input 1×1×500), `app/models/minilm/minilm.onnx` (22,898,176 bytes, int8, Apache-2.0), `app/data/basemap.json` (329,624 bytes), `app/js/theater3d.js` (443,996 bytes, carrying 223,486 bytes of embedded globe geometry), `app/vendor/` (deck.gl, ONNX Runtime Web, DuckDB-WASM, llama.cpp/WebAssembly runtime with no weights).
-- **ANGEL SWARM use case document, v6.5, 5 September 2026** — reference run figures, role profiles, escalation grounds, deployment verification (thirteen destinations populated, 0 uncaught page errors, 0 off-origin requests), and §7.5 for the telemetry ingest tier and the three-tier architecture.
+- **ANGEL SWARM use case document, v6.5, 8 September 2026** — reference run figures, role profiles, escalation grounds, deployment verification (thirteen destinations populated, 0 uncaught page errors, 0 off-origin requests), and §7.5 for the telemetry ingest tier and the three-tier architecture.
 
 ### Estimated lines (no public source)
 - **Host platform tenancy / onboarding charge-back** in §4 and §10.3 ($150K–$500K / yr, ~$250K most likely) — **pure estimate. No public price for hosting a capability on the War Data Platform or Maven Smart System was found.** The largest unsourced recurring line here.

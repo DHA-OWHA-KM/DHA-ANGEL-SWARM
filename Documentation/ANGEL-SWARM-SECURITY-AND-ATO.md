@@ -5,7 +5,7 @@
 **Document type:** Threat model and accreditation pathway. **It is not an accreditation artefact and it is not a System Security Plan.** It is the input a program would use to write one.
 **Companion document:** `OUT/ANGEL-SWARM-IL5-deployment-cost-impact-analysis.md` — the cost and schedule case. This document does not restate it, does not contradict it, and defers to it on every dollar figure and every date.
 **Companion artefacts:** `OUT/ANGEL-SWARM-SBOM.json` / `.md` (CycloneDX 1.6), `app/selftest.html` (118 engine assertions), `OUT/sec/verification.txt` (the measurement record behind §2).
-**Date:** 28 August 2026. **Re-verified 4 September (§2.0), 5 September against v6.4 (§2.0b), and again 5 September against v6.5 (§2.0c).** The body below is the 28 August assessment and is unchanged; where a measurement has been retaken, the later section says so and takes precedence.
+**Date:** 8 September 2026. **Re-verified 4 September (§2.0), 5 September against v6.4 (§2.0b), and again 5 September against v6.5 (§2.0c).** The body below is the 28 August assessment and is unchanged; where a measurement has been retaken, the later section says so and takes precedence.
 **Classification:** UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY.
 
 ---
@@ -40,7 +40,7 @@ The consequence for a threat model is that the classical web attack surface — 
 
 ## 2. What is demonstrably true today (MEASURED)
 
-Every row below was measured on this build on 28 August 2026 by an instrumented headless Chromium run that intercepted **every** request at the browser, not sampled from a proxy log. The full record is `OUT/sec/verification.txt`; the harness is `_sec_verify.mjs`.
+Every row below was measured on this build on 8 September 2026 by an instrumented headless Chromium run that intercepted **every** request at the browser, not sampled from a proxy log. The full record is `OUT/sec/verification.txt`; the harness is `_sec_verify.mjs`.
 
 | Property | Measurement | Result |
 |---|---|---|
@@ -56,7 +56,7 @@ Every row below was measured on this build on 28 August 2026 by an instrumented 
 | **The engine does what it claims** | `app/selftest.html` — **118 assertions, 118 passed, 0 failed**, run against `sim.js`, `optimizer.js`, `mc.worker.js` and `angel-engine.js` loaded as plain scripts. | Includes the reference result, determinism, conservation invariants, cold-chain enforcement, range gating, and audit-chain tamper evidence. |
 | **The reference result is stable** | seed 42 / JOA CORAL / deployed. | **23 / 34 / 35** survivable deaths on **20 / 38 / 0** sorties — the published figures. |
 
-### 2.0 Re-verified on the current build, 4 September 2026
+### 2.0 Re-verified on the current build, 8 September 2026
 
 The measurements above were taken on 28 August. The application has changed
 since — a fourth map scale, a route-stage strip, a guided walkthrough — and
@@ -71,7 +71,7 @@ the network posture was re-measured rather than assumed:
 | **The reference result is unchanged** | seed 42 / JOA CORAL / deployed | **23 / 34 / 35** survivable deaths on **20 / 38 / 0** sorties, 125 casualties, 47 in the survivable cohort |
 | **The SBOM was regenerated against the changed files** | `_sbom_gen.mjs` re-run; the map host and all five map renderers are now digested components in their own right, because the globe's geography ships **inside** one of them and a bill of materials that omits the file omits the data | **49 components**, every hash re-measured off disk, schema-validated against CycloneDX 1.6 |
 
-### 2.0b Re-verified again on the v6.4 build, 5 September 2026
+### 2.0b Re-verified again on the v6.4 build, 8 September 2026
 
 The globe's geography was regenerated at **4.18× the vertex count** on 5
 September, its rotation and its zoom handoff were rebuilt, the panel scroll
@@ -111,7 +111,7 @@ them was a security control.
 open. That was wrong: the two badges it describes had already been replaced in
 v6.3. The error was in this document, not in the build.
 
-### 2.0c Re-verified on the v6.5 build, 5 September 2026 — and one finding against this document
+### 2.0c Re-verified on the v6.5 build, 8 September 2026 — and one finding against this document
 
 v6.5 changed no engine code and no security control. `app/js/sim.js`,
 `app/js/optimizer.js` and `app/angel-engine.js` are byte-identical to v6.0,
@@ -389,7 +389,7 @@ tasks unarmed aircraft carrying blood. It is excluded on both counts.
 
 ## 7. ATO pathway
 
-### 7.1 The policy landscape as it actually stands in August 2026 — and why this section has to be careful
+### 7.1 The policy landscape as it actually stands in September 2026 — and why this section has to be careful
 
 A document written a year ago would say "follow RMF under DoDI 8510.01" and stop. That is no longer the whole answer, and getting this wrong in front of a knowledgeable AO is worse than saying nothing.
 

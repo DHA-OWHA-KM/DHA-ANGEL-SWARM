@@ -453,7 +453,7 @@ Full analysis: [`Documentation/ANGEL-SWARM-IL5-deployment-cost-impact-analysis.m
 **Prepared for:** DHA / PACOM J4 program leadership, comptroller, and the supporting ISSM
 **Decision sought:** Go / no-go and budget approval for fielding out of the single-folder prototype configuration into a DoW Cloud Computing SRG **Impact Level 5** environment as an **MVP**, hosted as a capability inside an already-authorised platform
 **Classification ceiling priced:** CUI, **including PHI**, on IL5. IL6 (SIPR / Secret) is explicitly out of scope
-**Date:** August 2026, revised against the shipped v6.5 build on 5 September 2026
+**Date:** September 2026, revised against the shipped v6.5 build on 8 September 2026
 
 ### The four MVP levers
 
@@ -546,7 +546,7 @@ This repository is the v6.5 package, restructured and renumbered for publication
 | This `README.md` rewritten | The v6.5 README's links pointed at `OUT/`, `RESEARCH/` and `cmd/` — paths that do not exist in this layout. Preserved unchanged at [`Documentation/README-original-v6.5.md`](Documentation/README-original-v6.5.md). |
 | Version renumbered to **v1.0** | Public release numbering. Applied to the current-version markers only; the recorded build history (v1.1–v6.5) is unchanged in the changelog, and `CHECKSUMS.txt` is preserved as the v6.5 package record. |
 | The vendored canvas runtime is referred to as **Design Canvas** | Naming normalised across the document set, the CSS headers and the in-app dependency table. `app/support.js` itself is byte-for-byte unchanged; its SBOM entry, hash and size are unchanged. |
-| `CHECKSUMS-REPO.txt` added | `CHECKSUMS.txt` records the original package paths and is preserved unchanged; this one records the repository layout. See [`CHECKSUMS.md`](CHECKSUMS.md). |
+| `CHECKSUMS-REPO.txt` added | `CHECKSUMS.txt` records the original package paths; its digests are untouched and only its header date moved with the rest of the document set. This one records the repository layout. See [`CHECKSUMS.md`](CHECKSUMS.md). |
 
 ---
 

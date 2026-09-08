@@ -1,4 +1,4 @@
-ANGEL SWARM v6.5 — 5 September 2026
+ANGEL SWARM v6.5 — 8 September 2026
 SHA-256 of every file in this package.
 Verify on Linux/macOS:  shasum -a 256 -c CHECKSUMS.txt
 

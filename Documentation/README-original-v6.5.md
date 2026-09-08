@@ -1,6 +1,6 @@
 > **Archive copy — preserved unchanged.**
 >
-> This is the `README.md` exactly as it shipped in the ANGEL SWARM v6.5 package on 5 September 2026, kept here as a record. It is not the repository's front page — see [`../README.md`](../README.md) for that.
+> This is the `README.md` exactly as it shipped in the ANGEL SWARM v6.5 package on 8 September 2026, kept here as a record. It is not the repository's front page — see [`../README.md`](../README.md) for that.
 >
 > **Its relative links do not resolve in this repository.** It was written against the full working tree, where the documents lived in `OUT/`, the landscape research in `RESEARCH/`, the Go source in `cmd/` and the contracts at the root. In this repository those are `Documentation/`, `Documentation/`, `src/cmd/` and — in the case of `PROV_CONTRACT.md` — not published at all. Nothing below has been edited to fix that; the links are left broken on purpose, because correcting them would make this something other than the archive copy it exists to be.
 

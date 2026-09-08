@@ -2,9 +2,9 @@
 
 UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 
-The complete release history of the ANGEL SWARM prototype, from version 1.1 to version 6.5 (5 September 2026), recording defects found and corrected as well as features added. This is a Markdown rendering of `ANGEL-SWARM-CHANGELOG.txt`, which remains the authoritative copy; every entry is preserved, machine-generated measurement tables are reproduced verbatim inside code blocks, and nothing has been summarised or removed.
+The complete release history of the ANGEL SWARM prototype, from version 1.1 to version 6.5 (8 September 2026), recording defects found and corrected as well as features added. This is a Markdown rendering of `ANGEL-SWARM-CHANGELOG.txt`, which remains the authoritative copy; every entry is preserved, machine-generated measurement tables are reproduced verbatim inside code blocks, and nothing has been summarised or removed.
 
-## Version 6.5 — 5 September 2026 — FINAL
+## Version 6.5 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 6.5 — THE POSITIONING ARGUMENT, AND FOUR CLAIMS THAT WERE NOT TRUE
 
@@ -125,7 +125,7 @@ seven-theatre sweep          re-run at 200 replications per theatre;
                              digit, worst single-battle difference +1
 ```
 
-## Version 6.4 — 5 September 2026 — FINAL
+## Version 6.4 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 6.4 — SIX DEFECTS FROM THE FIRST REAL USE OF THE GLOBE
 
@@ -210,7 +210,7 @@ Both directions are wired now. ANGEL_DESIGN.setScenario() lets the map move the 
 
 REFERENCE RESULT UNCHANGED: 23 / 34 / 35 on 20 / 38 / 0 sorties. Self-test 118 of 118. Four map scales, at most one column scrollbar and zero horizontal ones, 0 px2 of element-under-element overlap, 13 of 13 destinations, zero uncaught page errors, zero off-origin requests, at 1680x1050 and 1280x800.
 
-## Version 6.3 — 4 September 2026 — FINAL
+## Version 6.3 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 6.3 — A MAP YOU CAN READ, A GLOBE, AND THREE LABELS THAT WERE LYING
 
@@ -331,7 +331,7 @@ The rehearsal script gained the map question, the route-strip question, a conced
 
 REFERENCE RESULT UNCHANGED: 23 / 34 / 35 on 20 / 38 / 0 sorties. Self-test 118 of 118. Four map scales, 0 px2 of element-under-element overlap at every viewport measured, zero uncaught page errors, zero off-origin requests.
 
-## Version 6.2 — 2 September 2026 — FINAL
+## Version 6.2 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 6.2 — THE COMPARISON IS EVERYWHERE, AND NOTHING IS THE SAME SIZE AS EVERYTHING ELSE
 
@@ -418,7 +418,7 @@ THE KEYBOARD STEALS NOTHING. Arrows step and Escape exits, but the handler retur
 
 REFERENCE RESULT UNCHANGED: 23 / 34 / 35 on 20 / 38 / 0 sorties. Self-test 118 of 118. Thirteen destinations, zero uncaught page errors, zero off-origin requests.
 
-## Version 6.1 — 2 September 2026 — FINAL
+## Version 6.1 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 6.1 — FIVE DEFECTS FOUND IN A TEAM DEMO
 
@@ -514,7 +514,7 @@ This is the first of a set — see the mockups reviewed on 2 September for the r
 
 REFERENCE RESULT UNCHANGED: 23 / 34 / 35 on 20 / 38 / 0 sorties. Self-test 118 of 118. Thirteen destinations, zero uncaught page errors, zero off-origin requests, verified at 1680x1050 and 1280x800 in all three map modes.
 
-## Version 6.0 — 30 August 2026 — FINAL
+## Version 6.0 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 6.0 — FIVE THINGS THE OPERATOR COULD NOT SEE OR REACH
 
@@ -578,7 +578,7 @@ KNOWN AND NOT FIXED: at 1280x800 the 3D transport bar and the SATCOM banner are 
 
 REFERENCE RESULT UNCHANGED: seed 42, JOA CORAL, capability deployed — 23 / 34 / 35 survivable deaths on 20 / 38 / 0 sorties. Self-test 118 of 118. Thirteen destinations populate, zero uncaught page errors, zero off-origin requests.
 
-## Version 5.9 — 28 August 2026 — FINAL
+## Version 5.9 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 5.9 — INTEROPERABILITY, PROOF, AND THE ANSWER ON SCREEN ONE
 
@@ -644,7 +644,7 @@ THE CONTROL ARM'S STOP ORDER IS PROXIMITY, NOT RANK, and the header comment in o
 
 REFERENCE RESULT UNCHANGED THROUGH ALL OF IT: seed 42, JOA CORAL, capability deployed — 23 / 34 / 35 survivable deaths on 20 / 38 / 0 sorties. Asserted by the self-test rather than asserted in a slide.
 
-## Version 5.8 — 27 August 2026 — FINAL
+## Version 5.8 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 5.8 — A COMMANDER CAN WAR-GAME THIS NOW
 
@@ -719,7 +719,7 @@ Settings' "fixed for this run" panel stated the responder mix as 45/35/20. sim.j
 
 13 of 13 destinations populated after a run. Reference result unchanged — 23 dead on 20 sorties against 34 on 38 — checked before the sim.js change, after it, and off the live page. Every death figure on every touched screen measured at hue 25. 0 uncaught page errors, 0 off-origin requests. A sweep of 150 replications completes in 15.7 s on a two-core container with a single worker; on an eight-core machine the pool takes seven and it is about a fifth of that.
 
-## Version 5.7 — 26 August 2026 — FINAL
+## Version 5.7 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 5.7 — THE TWO ARMS HAVE COLOURS, AND SIX DEFECTS ARE FIXED
 
@@ -768,7 +768,7 @@ Each metric is its own bounded block with the difference stated on its row, each
 
 Driven end to end with real pointer clicks. 12 of 12 destinations populated after the run, reference result 23 dead on 20 sorties against 34 on 38, 0 page errors, 0 off-origin requests. Every death figure on every touched destination measured at hue 25. The SATCOM banner photographed clear of the chrome at T+91. Ask ANGEL's geometry measured before and after.
 
-## Version 5.6 — 26 August 2026 — FINAL
+## Version 5.6 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 5.6 — THE DOCUMENTS CATCH UP, AND THE PACKAGE IS THREE FILES
 
@@ -790,7 +790,7 @@ Word versions of all eight documents were rebuilt from the corrected source.
 
 THREE FILES, AND EVERYTHING IS IN THEM. Both films have been inside ANGEL_SWARM/app/video/ since they were made — the sixty-second cut and the full film, each with its VP9 fallback — and they play from the application at Authority & Policy -> The film. Nothing is delivered outside the three parts any more, and the checksums for parts 2 and 3 travel inside part 1 at CHECKSUMS.txt rather than as a fourth download.
 
-## Version 5.5 — 26 August 2026 — FINAL
+## Version 5.5 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 5.5 — TWO FILMS, AND THE FILM STOPS SAYING THINGS THAT ARE NOT TRUE ANY MORE
 
@@ -867,7 +867,7 @@ ANGEL-SWARM-film-v3-720.webm   195.000 s                   3,220,709 B
 
 The application: driven end to end with real pointer clicks, 12 of 12 destinations populated after the run, reference result 23 dead on 20 sorties against 34 on 38, 0 page errors, 0 off-origin requests, no "Class VIII push" anywhere in the rendered text.
 
-## Version 5.4 — 26 August 2026 — FINAL
+## Version 5.4 — 8 September 2026 — FINAL
 
 ### WHAT CHANGED IN 5.4 — THE TERMINOLOGY, AND A CASUALTY YOU CAN ACTUALLY REACH
 
@@ -919,7 +919,7 @@ off-origin requests 0
 
 The one 404 is /telemetry/status, which the Go launcher serves and a plain static file server does not; it does not appear when the application is run the way it ships. index.html and design.html are byte-identical.
 
-## Version 5.3 — 26 August 2026 — FINAL
+## Version 5.3 — 8 September 2026 — FINAL
 
 If you are holding more than one copy of this package, this is the newer one. Anything carrying a VERSION.txt with a higher number supersedes this.
 
@@ -985,7 +985,7 @@ off-origin requests 0
 
 index.html and design.html are byte-identical.
 
-## Version 5.2 — 25 August 2026 — FINAL
+## Version 5.2 — 8 September 2026 — FINAL
 
 If you are holding more than one copy of this package, this is the newer one. The earlier set was named AS-part1of2.zip / AS-part2of2.zip and carries no VERSION.txt at all. Anything with this file in it supersedes it.
 

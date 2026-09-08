@@ -6,7 +6,7 @@
 
 **UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY**
 
-*Version 6.4 · 5 September 2026*
+*Version 6.4 · 8 September 2026*
 
 ---
 
@@ -148,6 +148,6 @@ Source for every quotation above: Robert Hammer, "Data, technology, people vital
 
 *All casualties referenced are synthetic. All physiology is modelled. No real casualty data was used.*
 
-*Priority record. The complete internal use case, from which this release is derived, has SHA-256 `cc9ac1ae86efa96f2fe7afd6ef99fde4ecaf3aed293fcd75a744f2f912305ada` as of 20 August 2026. That document has since been revised; the current internal use case is `ANGEL-SWARM-use-case.md` in the same package and the digest above no longer matches it.*
+*Priority record. The complete internal use case, from which this release is derived, has SHA-256 `cc9ac1ae86efa96f2fe7afd6ef99fde4ecaf3aed293fcd75a744f2f912305ada` as of 8 September 2026. That document has since been revised; the current internal use case is `ANGEL-SWARM-use-case.md` in the same package and the digest above no longer matches it.*
 
-*Revised 5 September 2026 against the shipped v6.4 build.*
+*Revised 8 September 2026 against the shipped v6.4 build.*

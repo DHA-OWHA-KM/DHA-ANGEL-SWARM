@@ -9,7 +9,7 @@
 #
 # Non-obvious entries carry a reason inline. Read those before deleting a line.
 #
-# REVISED 5 September 2026 for publication as DHA-OWHA-KM/DHA-ANGEL-SWARM-DEV.
+# REVISED 8 September 2026 for publication as DHA-OWHA-KM/DHA-ANGEL-SWARM-DEV.
 # Two changes from the v6.5 package copy, both marked REVISED below and both
 # made so that a plain ZIP download of this repository is a working program:
 # the eight prebuilt launcher binaries are now TRACKED, and train/train.log is
@@ -26,7 +26,7 @@
 node_modules/
 
 # ── Compiled launcher binaries — TRACKED, deliberately ───────────────────────
-# REVISED 5 September 2026 for repository publication. The v6.5 package ignored
+# REVISED 8 September 2026 for repository publication. The v6.5 package ignored
 # these on the reasoning that the source is the artefact and `go build` on
 # go 1.24 reproduces them within 1% with no module downloads. That reasoning is
 # still correct, and it is still the wrong trade HERE: this repository's first

@@ -1,4 +1,4 @@
-# ANGEL SWARM — Complement, Not Compete: Landscape as of 5 September 2026
+# ANGEL SWARM — Complement, Not Compete: Landscape as of 8 September 2026
 
 Research conducted 5 Sep 2026. Every claim below carries a URL and a date. Anything
 I could not source is marked **UNVERIFIED** and must not be spoken.
@@ -47,7 +47,7 @@ The strongest single sentence the evidence supports:
 > MEDRAS portfolio and NAVAIR's PMA-263 each place allocation outside their own stated scope.
 > ANGEL SWARM is that missing rule, not a new aircraft and not a new command system.*
 
-> **CORRECTION, 5 September 2026 — read this before reusing any sentence from this file.**
+> **CORRECTION, 8 September 2026 — read this before reusing any sentence from this file.**
 > An earlier version of this BLUF read "the aircraft were autonomous and the tasking was
 > manual — soldiers were trained to 'manually operate the systems.'" That is a
 > MISATTRIBUTION. army.mil 292841 (27 May 2026) says soldiers learned "how to manually

@@ -1,6 +1,6 @@
 # GITHUB-PREP — measurements, findings, and the decisions that are yours
 
-**Prepared 5 September 2026.** Everything below was measured on this tree, not assumed. Nothing was deleted, moved or committed. Two files were created: `/README.md` and `/.gitignore`. This file is the third.
+**Prepared 8 September 2026.** Everything below was measured on this tree, not assumed. Nothing was deleted, moved or committed. Two files were created: `/README.md` and `/.gitignore`. This file is the third.
 
 ---
 

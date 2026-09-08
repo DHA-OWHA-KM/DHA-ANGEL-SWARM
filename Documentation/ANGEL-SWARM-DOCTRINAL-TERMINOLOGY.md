@@ -1,6 +1,6 @@
 # Doctrinal terminology audit
 
-**ANGEL SWARM — Version 1.0 · 8 September 2026.** First issued 26 August 2026; adoption record added 4 September 2026; occurrence counts re-measured against the shipped build on 5 September 2026, and re-measured again the same day after the analyst console was swept — see §4a.
+**ANGEL SWARM — Version 1.0 · 8 September 2026.** First issued 8 September 2026; adoption record added 8 September 2026; occurrence counts re-measured against the shipped build on 8 September 2026, and re-measured again the same day after the analyst console was swept — see §4a.
 Prepared for a terminology overhaul of the solution, its documents and its film.
 **This document is authoritative for naming across the application, every
 shipped document and both films.** §4a records what was actually adopted, and
@@ -71,13 +71,13 @@ function is named `allocateCurrentMethod`. Only the on-screen label says push.
 VIII push", 36 of "CLASS VIII PUSH", 10 of "doctrinal push" across
 `index.html`, `js/` and `angel-engine.js`.
 
-**As shipped at v6.4, re-counted on 5 September 2026:** across `index.html`,
+**As shipped at v6.4, re-counted on 8 September 2026:** across `index.html`,
 `js/` and `angel-engine.js` there are **zero** occurrences of "Class VIII push"
 in any casing, and **one** of "doctrinal push" — inside a copilot input-matching
 regular expression, so that a judge who types the old phrase is still
 understood. It is not a label on any screen. `CURRENT — TRIAGE & PROXIMITY`
 appears 54 times across the same files. **The standalone analyst console
-`app/console.html` was swept on 5 September 2026 and is now zero as well**, which
+`app/console.html` was swept on 8 September 2026 and is now zero as well**, which
 closes the last user-visible gap. See §4a for where the old phrase legitimately
 survives.
 
@@ -174,7 +174,7 @@ names."* That is both accurate and harder to argue with.
 
 | Adopted | Not | Note |
 |---|---|---|
-| `CURRENT — TRIAGE & PROXIMITY` | "Class VIII push", "the doctrinal push", "EVACUATION PRECEDENCE" | **The sweep is now complete across every presented surface.** In the **design application** (`app/index.html`, `app/design.html`, `app/js/`, `angel-engine.js`) the phrase is gone: zero occurrences. In the **standalone analyst console `app/console.html`** it is now also gone: the seven occurrences recorded in v6.4 — six as `CLASS VIII PUSH` on panel and card headings, one in running text — were corrected on 5 September 2026, and `grep -ic "class viii push" app/console.html` returns **0**. In the **shipped documents** the phrase survives only where it is deliberate: the sentences that explain the correction itself, in this document and in the use case's line that this is *not* a push. One occurrence remains in the codebase, in a **prose code comment** at `app/angel-map.js:1399` — narrative text inside a `/* */` block explaining deployment ordering, not a string the application ever renders. It is the only one left and it is not user-visible. Verified 5 September 2026 |
+| `CURRENT — TRIAGE & PROXIMITY` | "Class VIII push", "the doctrinal push", "EVACUATION PRECEDENCE" | **The sweep is now complete across every presented surface.** In the **design application** (`app/index.html`, `app/design.html`, `app/js/`, `angel-engine.js`) the phrase is gone: zero occurrences. In the **standalone analyst console `app/console.html`** it is now also gone: the seven occurrences recorded in v6.4 — six as `CLASS VIII PUSH` on panel and card headings, one in running text — were corrected on 8 September 2026, and `grep -ic "class viii push" app/console.html` returns **0**. In the **shipped documents** the phrase survives only where it is deliberate: the sentences that explain the correction itself, in this document and in the use case's line that this is *not* a push. One occurrence remains in the codebase, in a **prose code comment** at `app/angel-map.js:1399` — narrative text inside a `/* */` block explaining deployment ordering, not a string the application ever renders. It is the only one left and it is not user-visible. Verified 8 September 2026 |
 | **Class VIIIB** for blood and blood products | bare "Class VIII" | DoDI 5101.15 |
 | **NO FORWARD DELIVERY** for the third arm | "do nothing", "the null arm" | It models no intervention reaching the casualty inside the 180-minute window; it does **not** claim evacuation never arrives, and it does not claim everyone dies |
 | **36 minutes, JTS CPG ID 18** as the blood standard | the Golden Hour | The Golden Hour is kept as **problem framing only** — a 60-minute *evacuation* mandate. A distribution system built to the sixty-minute figure is built to the wrong number by almost half |

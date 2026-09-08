@@ -700,7 +700,7 @@ itself.*
 ### The portfolio questions — Q16 to Q21
 
 **Every name, date and quotation below is in `RESEARCH/COMPLEMENT-SECTION.md` and was
-verified by search on 5 September 2026. Do not add a program to these answers. Do not
+verified by search on 8 September 2026. Do not add a program to these answers. Do not
 round a date. If you are asked about something not in here, Q8's answer applies: "I
 don't know — I'd have to look."**
 

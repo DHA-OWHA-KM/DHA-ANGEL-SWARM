@@ -3,7 +3,7 @@
 `UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
 
 [`CHECKSUMS.txt`](CHECKSUMS.txt) is the SHA-256 digest of every file in the ANGEL SWARM
-v6.5 package as it was shipped, on 5 September 2026, as three zips. It is the record of
+v6.5 package as it was shipped, on 8 September 2026, as three zips. It is the record of
 what left the machine it was built on. This page explains how to use it and where it no
 longer lines up with the repository.
 

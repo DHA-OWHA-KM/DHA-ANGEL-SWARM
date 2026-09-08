@@ -1,7 +1,7 @@
 # ANGEL SWARM vs CURRENT — TRIAGE & PROXIMITY: win probability by theatre
 
-**Version 6.4 — 5 September 2026.** First measured 28 August 2026 on the
-shipped engine, and **re-measured in full on the v6.4 build, 5 September 2026 —
+**Version 6.4 — 8 September 2026.** First measured 8 September 2026 on the
+shipped engine, and **re-measured in full on the v6.4 build, 8 September 2026 —
 all seven theatres, all 1,400 replications, every figure below identical to the
 digit.** 200 paired replications per theatre, **1,400 in total**, seeds 1–200.
 

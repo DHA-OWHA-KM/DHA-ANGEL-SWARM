@@ -2,7 +2,7 @@
 
 **Design specification for the map destination.** Everything needed to draw it.
 
-Companion to `ANGEL-SWARM-DESIGN-SPEC.md` · Version 1.3 · 5 September 2026 · **current as of v6.4**
+Companion to `ANGEL-SWARM-DESIGN-SPEC.md` · Version 1.3 · 8 September 2026 · **current as of v6.4**
 
 Every measurement in this document was taken off the shipped build. Where a
 figure is illustrative rather than asserted, it says so.

@@ -2,7 +2,7 @@
 
 `UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
 
-Team assignments for the NDIA 2026 hackathon submission, taken from the team tasking note of 5 September 2026 and mapped onto what is actually in this repository. **Team DHA RESCUE.**
+Team assignments for the NDIA 2026 hackathon submission, taken from the team tasking note of 8 September 2026 and mapped onto what is actually in this repository. **Team DHA RESCUE.**
 
 **The agreed baseline:** use JP's solution as the submission, with additional features carried over from Julian's app.
 
@@ -163,4 +163,4 @@ Two decks already ship, both 3 slides, both rendered to PNG and Markdown so they
 
 ---
 
-*Derived from the team tasking note of 5 September 2026. Update this file in place as items close — it is version-controlled, so the history of what changed and when is kept for you.*
+*Derived from the team tasking note of 8 September 2026. Update this file in place as items close — it is version-controlled, so the history of what changed and when is kept for you.*
