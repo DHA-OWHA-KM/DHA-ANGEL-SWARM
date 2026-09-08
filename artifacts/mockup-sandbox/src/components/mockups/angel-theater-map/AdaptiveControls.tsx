@@ -43,7 +43,7 @@ export function AdaptiveControls() {
           <button className="nav-item"><ShieldAlert size={14} /> <span>Sensor &amp; Model</span></button>
           <div className="nav-rule" />
           <div className="nav-section">REFERENCE</div>
-          <button className="nav-item"><Layers3 size={14} /> <span>Evidence</span></button>
+          <button className="nav-item nav-item-evidence"><Layers3 size={14} /> <span>Evidence</span></button>
           <button className="nav-item"><LocateFixed size={14} /> <span>War Game</span></button>
           <button className="nav-item"><Activity size={14} /> <span>Ask ANGEL</span></button>
           <div className="nav-spacer" />
