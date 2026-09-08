@@ -187,13 +187,13 @@
     return '';
   }
 
-  var stAt = 0, stFor = '', stRetried = false;
+  var stAt = 0, stFor = '', stFrom = '', stRetried = false;
   /* NOTHING IS SAID ABOUT A MAP THAT IS SIMPLY ARRIVING. Switching scale takes
      the pane a moment to hand over and the operator does not need a card
      about it; a state that flashed on every press of a chip would be worse
      furniture than the problem it is for. Nothing is shown until a renderer
      has been asked for and not answered for a second and a half. */
-  var BUSY_AT = 1500, RETRY_AT = 6000, FAIL_AT = 15000;
+  var BUSY_AT = 1500, HANDOFF_BUSY_AT = 3000, RETRY_AT = 6000, FAIL_AT = 15000;
   function publishPaneState() {
     if (!dock || dock.style.display === 'none') return;
     var now = (window.performance || Date).now();
@@ -204,7 +204,12 @@
       return;
     }
     var s = scope();
-    if (s !== stFor) { stFor = s; stAt = now; stRetried = false; }
+    if (s !== stFor) {
+      stFrom = stFor;
+      stFor = s;
+      stAt = now;
+      stRetried = false;
+    }
     if (!s) { showState(''); return; }
     if (paneLive(s)) { stAt = now; stRetried = false; showState(''); return; }
 
@@ -221,7 +226,14 @@
       catch (e) { /* contained */ }
       try { W.APP._paneForce = true; W.render(); } catch (e) { /* contained */ }
     }
-    if (age < BUSY_AT) { showState(''); return; }
+    /* The first Globe → Theatre handoff has to return the globe's canvas,
+       reacquire the GPU theatre and paint its first frame. On some machines
+       that lands just beyond the ordinary 1.5-second grace period, which made
+       this card flash for a frame or two over an otherwise healthy switch.
+       Give that specific handoff one extra beat; a genuinely stalled renderer
+       still reaches the retry and failure states on the original schedule. */
+    var busyAt = s === 'THEATRE' && stFrom === 'GLOBE' ? HANDOFF_BUSY_AT : BUSY_AT;
+    if (age < busyAt) { showState(''); return; }
     if (age < FAIL_AT) {
       showState('busy', 'BUILDING ' + name,
         stRetried ? 'The first attempt did not come up. Trying once more.'
