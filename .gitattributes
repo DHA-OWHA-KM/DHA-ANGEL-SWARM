@@ -1,0 +1,6 @@
+# Disable all line-ending and text normalisation.
+# This repository ships CHECKSUMS.txt / CHECKSUMS.md covering text files as well
+# as binaries. Any LF<->CRLF conversion by git would change those bytes and make
+# `shasum -a 256 -c CHECKSUMS.txt` fail on checkout. Every file is stored and
+# restored byte-for-byte, on every platform.
+* -text

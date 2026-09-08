@@ -1,0 +1,180 @@
+/* ==========================================================================
+   AFTER-ACTION REPORT — layout only.
+
+   The complaint this sheet was written against, in the operator's words:
+   "After Action Report is nothing but chock full of shit text everywhere."
+   It was: six numbered sections, every one of them opening with two or three
+   paragraphs of justification, and the figures a commander actually needs
+   buried three screens down inside them.
+
+   What replaced it is a briefing: the result as figures, what drove it as
+   short labelled findings, what to change as a short list, and every word of
+   the working behind a disclosure that is shut when the page opens. This
+   sheet carries the layout for those three visible blocks and nothing else.
+
+   THE DISCLOSURE IS NOT DEFINED HERE. `.disc` is the shared pattern from
+   js/page-kpi.js — a native <details>, shut on arrival, with the figure that
+   matters on the summary line — and it is reused rather than reinvented.
+   Nothing below touches it.
+
+   COLOUR. Every value is a custom property from THEME_CONTRACT.md; there is
+   not one colour literal in this file. There is no pink and no magenta in
+   this application and none is introduced here. A death toll is never green:
+   the two inks a toll may take are --tollHi and --tollLo, and the better of
+   the two is amber, because fewer dead is still dead.
+   ========================================================================== */
+
+#aarBody{ display:flex; flex-direction:column; gap:14px; flex:0 0 auto; padding-bottom:14px }
+
+/* ---- 1 · the result, as figures ---------------------------------------- */
+.aarTop{
+  display:grid; grid-template-columns:auto 1px minmax(0,1fr); gap:26px; align-items:center;
+  border:1px solid var(--line); border-radius:12px; padding:18px 22px; background:var(--panel);
+}
+@media (max-width:1180px){ .aarTop{ grid-template-columns:1fr; gap:16px } .aarTopRule{ display:none } }
+.aarTopRule{ width:1px; align-self:stretch; background:var(--line) }
+
+.aarDelta{ min-width:0 }
+.aarDelta b{ display:block; font:800 72px/.86 var(--mono); letter-spacing:-.035em; color:var(--tollLo) }
+.aarDelta.up b{ color:var(--tollHi) }
+.aarDelta.flat b{ font-size:30px; line-height:1.1; letter-spacing:.02em; color:var(--dim) }
+.aarDelta span{
+  display:block; margin-top:10px; max-width:25ch;
+  font:700 9px/1.45 var(--mono); letter-spacing:.13em; color:var(--dim);
+}
+/* NOT DEPLOYED is a state, not a result, so it does not get a result's
+   typography. It is set in the same key as a pill. */
+.aarNot{
+  display:inline-block; max-width:27ch; border:1px solid var(--warn); border-radius:6px; padding:9px 13px;
+  font:700 12px/1.35 var(--mono); letter-spacing:.13em; color:var(--warn);
+  background:color-mix(in srgb, var(--warn) 8%, transparent);
+}
+
+.aarRight{ min-width:0; display:flex; flex-direction:column; gap:12px }
+.aarScore{ width:100%; border-collapse:collapse }
+.aarScore th, .aarScore td{ padding:7px 0; text-align:right; border-bottom:1px solid var(--line) }
+.aarScore tbody tr:last-child td{ border-bottom:0 }
+.aarScore th:first-child, .aarScore td:first-child{
+  text-align:left; font:400 11.5px/1.4 var(--sans); color:var(--dim); padding-right:14px;
+}
+.aarScore thead th{
+  font:700 8.5px/1.3 var(--mono); letter-spacing:.11em; color:var(--faint);
+  text-transform:uppercase; white-space:nowrap; padding-left:18px;
+}
+.aarScore tbody td{ font:700 15px/1 var(--mono); color:var(--text); padding-left:18px; width:1%; white-space:nowrap }
+/* The toll row is the one that carries an ink. Nothing else in this table
+   does, because a workload figure has no better and no worse. */
+.aarScore tr.toll td.a{ color:var(--tollLo) }
+.aarScore tr.toll td.b{ color:var(--tollHi) }
+.aarScore tr.toll.up td.a{ color:var(--tollHi) }
+.aarScore tr.toll.up td.b{ color:var(--tollLo) }
+.aarScore tr.toll.flat td.a, .aarScore tr.toll.flat td.b{ color:var(--text) }
+.aarZero{
+  margin:0; font:700 9px/1.5 var(--mono); letter-spacing:.13em; color:var(--dim);
+  text-transform:uppercase;
+}
+.aarSay{ margin:0; font:400 12px/1.6 var(--sans); color:var(--dim) }
+.aarSay b{ color:var(--text); font-weight:700 }
+
+/* ---- 2 · what drove it, as labelled findings --------------------------- */
+.aarBlock{
+  border:1px solid var(--line); border-radius:12px; padding:15px 18px 16px; background:var(--panel);
+  display:flex; flex-direction:column; gap:11px;
+}
+.aarBlock > h3{
+  margin:0; font:700 10px/1 var(--mono); letter-spacing:.15em; text-transform:uppercase;
+  color:var(--faint);
+}
+.aarFind{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0 }
+.aarFind > li{
+  display:grid; grid-template-columns:56px minmax(0,1fr); gap:14px; align-items:baseline;
+  padding:9px 0; border-bottom:1px solid var(--line);
+}
+.aarFind > li:last-child{ border-bottom:0 }
+.aarFind > li > b{ font:800 26px/1 var(--mono); color:var(--tollHi); text-align:right }
+.aarFind > li > span{ min-width:0 }
+.aarFind em{
+  display:block; font-style:normal; font:700 11px/1.3 var(--mono); letter-spacing:.07em;
+  text-transform:uppercase; color:var(--text); margin-bottom:3px;
+}
+.aarFind i{ display:block; font-style:normal; font:400 11.5px/1.5 var(--sans); color:var(--dim) }
+
+/* ---- 3 · what to change ------------------------------------------------ */
+.aarDo{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0 }
+.aarDo > li{
+  display:grid; grid-template-columns:20px minmax(0,1fr); gap:12px; align-items:baseline;
+  padding:8px 0; border-bottom:1px solid var(--line);
+  font:400 12px/1.55 var(--sans); color:var(--text);
+}
+.aarDo > li:last-child{ border-bottom:0 }
+.aarDo > li > u{
+  text-decoration:none; font:700 9px/1.6 var(--mono); color:var(--faint);
+}
+.aarDo > li b{ font-weight:700; color:var(--text) }
+.aarDo > li i{ font-style:normal; color:var(--dim) }
+
+/* ---- 4 · the working, all of it behind disclosures ---------------------- */
+.aarMore{
+  border:1px solid var(--line); border-radius:12px; padding:4px 18px 10px; background:var(--panel);
+}
+/* .disc draws its own top rule, so the first one in the stack does not need
+   a second one directly under the card edge. */
+.aarMore > .disc:first-of-type{ border-top:0 }
+.aarMore .discBody{ display:flex; flex-direction:column; gap:11px; padding-bottom:6px }
+.aarMore p{ margin:0; font:400 11.5px/1.65 var(--sans); color:var(--dim); max-width:104ch }
+.aarMore p b{ color:var(--text); font-weight:600 }
+.aarScroll{ overflow-x:auto }
+.aarTools{ display:flex; gap:8px; flex-wrap:wrap }
+
+/* the cost table: read, not clicked, so it gives up the row cursor and the
+   hover that table.grid gives every other table in the application. */
+.aarCost th.num, .aarCost td.num{ text-align:right; width:150px }
+.aarCost td.num b{ font:700 12.5px/1 var(--mono); color:var(--text) }
+.aarCost td.num b.q{ color:var(--dim); font-weight:500 }
+.aarCost tbody tr{ cursor:default }
+.aarCost tbody tr:hover{ background:transparent }
+.aarCost th .thSub{
+  display:block; margin-top:2px; font:600 8px/1.2 var(--mono);
+  letter-spacing:.08em; color:var(--faint); text-transform:none;
+}
+
+/* the replication split. No gap: the three segments are percentages of the
+   replication count and have to sum to the track exactly. */
+.aarSplit{
+  display:flex; height:9px; border-radius:4px; overflow:hidden;
+  background:var(--panel2); min-width:260px;
+}
+.aarSplit i{ display:block; height:100% }
+.aarSplit i.better{ background:var(--tollLo) }
+.aarSplit i.tie{ background:var(--line2) }
+.aarSplit i.worse{ background:var(--tollHi) }
+.aarKey{
+  display:flex; gap:16px; flex-wrap:wrap; font:600 8.5px/1 var(--mono);
+  letter-spacing:.1em; color:var(--faint);
+}
+.aarKey span{ display:flex; align-items:center; gap:6px }
+.aarKey i{ width:9px; height:9px; border-radius:2px; display:inline-block }
+.aarKey i.better{ background:var(--tollLo) }
+.aarKey i.tie{ background:var(--line2) }
+.aarKey i.worse{ background:var(--tollHi) }
+
+/* the source list */
+.aarSrc{ display:flex; flex-direction:column; gap:0 }
+.aarSrcRow{
+  display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;
+  gap:16px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line);
+}
+.aarSrcRow:last-child{ border-bottom:0 }
+@media (max-width:900px){ .aarSrcRow{ grid-template-columns:1fr; gap:7px } }
+.aarSrcRow .aarWhat{ font:400 11.5px/1.55 var(--sans); color:var(--text) }
+.aarSrcRow .aarWhere{ font:400 11px/1.5 var(--sans); color:var(--faint) }
+.aarSrcRow .mini{ white-space:nowrap }
+
+/* ---- before anything has happened -------------------------------------- */
+.aarStand{
+  border:1px solid var(--line); border-radius:12px; padding:18px 22px; background:var(--panel);
+  display:flex; flex-direction:column; gap:11px;
+}
+.aarStand h3{ margin:0; font:800 18px/1.25 var(--sans); color:var(--text) }
+.aarStand p{ margin:0; font:400 12.5px/1.65 var(--sans); color:var(--dim) }
+.aarStand p b{ color:var(--text); font-weight:700 }

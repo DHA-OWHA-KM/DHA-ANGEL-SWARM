@@ -1,0 +1,178 @@
+# ANGEL SWARM — installing the language model
+
+`UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
+
+*This is the Markdown rendering of [`GET-MODEL.txt`](GET-MODEL.txt), which is preserved
+unchanged.*
+
+---
+
+## THE SHORT VERSION
+
+Everything in ANGEL SWARM works right now, with no internet and no setup.
+
+One pane — "Mission brief" — has a second half that needs a file this folder does not
+ship with. To install that file, connect this computer to the internet once and run the
+script for your system from THIS folder:
+
+| System | Command |
+| --- | --- |
+| macOS or Linux | `./get-model.sh` |
+| Windows | `.\get-model.ps1` |
+
+It takes a few minutes and downloads about 400 MB. When it finishes, the computer never
+needs an internet connection again — not to start, not to run, not ever.
+
+If you do not run it, nothing breaks. The "Mission brief" pane tells you the model is
+not installed, shows you the same command, and still displays every figure and every
+doctrinal passage it would have used. You lose the written paragraphs; you lose nothing
+else.
+
+---
+
+## WHAT IS BEING INSTALLED, AND WHY IT IS NOT ALREADY HERE
+
+The file is a language model called Qwen2.5-0.5B-Instruct. It is published by the Qwen
+team at Alibaba Cloud under the Apache-2.0 licence, which allows anybody to use, modify
+and redistribute it, including commercially.
+
+So it is not withheld for legal reasons. It is withheld because it is 400 MB, and
+putting 400 MB of neural network weights inside a demonstration folder that is otherwise
+a few tens of megabytes is unreasonable. Anybody who wants the pane complete can fetch
+it in one command; anybody who does not, does not carry the weight.
+
+"0.5B" means roughly half a billion numbers. By the standards of the models people
+discuss in the news this is very small — a thousandth of the size. That is deliberate,
+and the next section explains why it is enough.
+
+---
+
+## WHAT THE MODEL DOES — AND, MORE IMPORTANTLY, WHAT IT DOES NOT
+
+After a mission runs, a medical officer writes an after-action summary: what happened,
+how many died, where the losses came from, what the system did, how it compared to doing
+it the current way. That summary is written by hand today and it takes twenty minutes of
+somebody's evening.
+
+The model drafts it. That is all it does.
+
+Before it writes a word, ANGEL SWARM assembles a block of context: every relevant figure
+read straight out of the simulation that just ran, an aggregate computed by the database
+engine over that same run, and any relevant doctrinal passages, quoted word for word by
+the retrieval system with their match scores. The model is handed that block and told,
+in plain terms, that it knows nothing else and must say so when the block runs out.
+
+Then the block is printed on the screen, item by item, right next to what the model
+wrote. If a number appears in the prose that is not in the list, you can see it. That is
+the point of printing the list.
+
+The model does NOT:
+
+- make any medical or clinical decision,
+- assess any casualty,
+- influence which drone flies where, or when, or with what,
+- answer questions about medicine from its own training,
+- send anything anywhere.
+
+It composes sentences from figures that were computed without it. A 0.5B model is more
+than good enough for that, and small enough to run on the processor of an ordinary
+laptop with no graphics card, which is the situation this system is designed for.
+
+---
+
+## WHAT THE SCRIPT CHECKS
+
+A 400 MB download over a bad connection is the sort of thing that half succeeds. The
+script is written for that.
+
+- It resumes. If the transfer breaks, run it again and it carries on from where it
+  stopped rather than starting over.
+- It checks the size against the size the source declares.
+- It checks the file actually begins with the four letters "GGUF", which is the model
+  file format. An error page saved under the right filename does not.
+- It computes the SHA-256 of what arrived and compares it with the SHA-256 the source
+  declares for that file. A mismatch means corruption, and the file is deleted rather
+  than installed.
+- It prints that SHA-256 so you can compare it yourself.
+- Nothing is moved into place until every check has passed. Until then it sits in a file
+  ending `.part`.
+- Running it twice is safe. If a valid model is already installed it says so and stops.
+
+ONE HONEST LIMITATION. The script has a slot near the top called `EXPECTED_SHA256`, and
+it ships empty. If you fill it in with a digest you trust, every install on every machine
+afterwards is checked against that fixed value. It is empty because this software was
+assembled on a machine that is not allowed to reach the download site, so the true digest
+could not be recorded at the time of writing — and inventing one would have been much
+worse than leaving it blank. The comment above that variable explains how to fill it in
+from a machine you do trust. The digest check against the source still happens either
+way; it catches a corrupted download but it is not the same as a value somebody audited.
+
+---
+
+## IF IT DOES NOT WORK
+
+**"curl: command not found" (macOS/Linux)**
+
+Install curl. On Debian or Ubuntu:
+
+```sh
+sudo apt-get install curl
+```
+
+On Fedora or RHEL:
+
+```sh
+sudo dnf install curl
+```
+
+On macOS it is normally present; if not, run:
+
+```sh
+xcode-select --install
+```
+
+**"cannot be loaded because running scripts is disabled" (Windows)**
+
+Windows blocks unsigned scripts by default. Run it this way instead:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\get-model.ps1
+```
+
+**"neither source could be reached"**
+
+The computer has no internet, or something on the network is blocking huggingface.co.
+Many corporate and government networks do. In that case, on any machine that can reach
+it, open this page in a browser:
+
+```
+https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF
+```
+
+download the file named `qwen2.5-0.5b-instruct-q4_k_m.gguf`, copy it onto this machine,
+and save it as:
+
+| System | Path |
+| --- | --- |
+| macOS/Linux | `app/models/llm.gguf` |
+| Windows | `app\models\llm.gguf` |
+
+Then run the script again — with the file already there it will simply check it and
+confirm.
+
+**"a file called llm.gguf is present but does not begin with the GGUF magic"**
+
+Shown by the application when the download stopped part way through or an error page was
+saved instead of the model. Delete `app/models/llm.gguf` and run the script again.
+
+**The pane still says the model is not installed after a successful install**
+
+Reload the page in the browser. The check runs once, at start-up.
+
+---
+
+## REMOVING IT
+
+Delete `app/models/llm.gguf`. Nothing else refers to it. The application returns to its
+shipping state, and the "Mission brief" pane goes back to explaining that the model is
+not installed.

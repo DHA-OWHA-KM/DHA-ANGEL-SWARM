@@ -1,0 +1,339 @@
+/* ==========================================================================
+   ANGEL SWARM — ANALYST TERMINAL · OPS CENTRE WALL · EVIDENCE · ASK ANGEL
+   ==========================================================================
+   The four destinations in this file are the ones that absorb a working
+   subsystem rather than a table: the DuckDB console, the MiniLM retrieval
+   index, the replication study, the cost model, the after-action report.
+   None of them is re-implemented here. The real pane is moved into the
+   design's frame and its own module keeps rendering it.
+
+   HOW THE MOVE WORKS, AND WHY IT IS #views RATHER THAN ONE PANE. The shell
+   rewrites #dMain every second, so anything parked inside it is destroyed on
+   the next tick — which would blank a half-typed query and steal focus at
+   1 Hz. So the old <main id="views"> is adopted once into #dDock, a box that
+   lives under #dShell and therefore survives the repaint, and #dDock is then
+   positioned over an empty slot the page draws. Moving #views rather than a
+   single pane keeps every `#views .x` rule in polish.css applying, keeps
+   app.js's own `.viewport.active` switching untouched, and means navigating
+   between the tabs is a goView() call with no DOM surgery at all.
+
+   Colour, type and spacing are design.css's. Nothing new is declared here
+   except geometry and the overrides that let a pane written for an absolute,
+   inset-0, self-scrolling box flow inside a page that scrolls as a whole.
+   ========================================================================== */
+
+/* ---- the dock -------------------------------------------------------- */
+#dDock{ position:absolute; left:0; top:0; z-index:1 }
+#dDock[hidden]{ display:none }
+
+#dDock > #views{
+  position:static !important; overflow:visible !important;
+  flex:none !important; background:transparent !important;
+  height:auto !important; min-height:0 !important; width:100% !important;
+}
+#dDock #views > .viewport{
+  position:static !important; inset:auto !important;
+  height:auto !important; width:auto !important;
+  visibility:visible !important; pointer-events:auto !important;
+  z-index:auto !important;
+}
+#dDock #views > .viewport:not(.active){ display:none !important }
+#dDock #views > .viewport.active{ display:block !important }
+
+/* A pane is written as an absolutely-positioned self-scrolling box. Kept
+   `relative` rather than `static` so the handful of absolutely-positioned
+   children inside it — the theatre stage, the map overlays — still have the
+   containing block they were written against. */
+#dDock .pane{
+  position:relative !important; inset:auto !important;
+  overflow:visible !important; height:auto !important;
+  padding:0 0 8px !important;
+}
+#dDock #mcBody{ padding:0 }
+#dDock .viewport[data-pane="DASHBOARD"] .pane{ min-height:660px !important }
+#dDock .viewport[data-pane="MISSION"] .pane{ min-height:620px !important }
+
+/* ---- the slot the dock is positioned over ---------------------------- */
+.b-slot{ position:relative; min-height:120px }
+.b-slot > .b-wait{ font:400 11px var(--d-mono); color:var(--d-t6); padding:18px 0 }
+
+/* ---- a page-wide segmented strip ------------------------------------- */
+.b-segbar{ display:flex; align-items:center; justify-content:space-between;
+  gap:14px; padding:11px 20px; border-bottom:1px solid var(--d-line-soft);
+  flex-wrap:wrap }
+.b-segbar .d-seg{ flex-wrap:wrap }
+
+/* ==========================================================================
+   ANALYST TERMINAL
+   ========================================================================== */
+.b-tty{ background:oklch(0.12 0.006 250); font-family:var(--d-mono); min-height:88vh }
+.b-tty-bar{ padding:9px 20px; border-bottom:1px solid var(--d-line-soft);
+  display:flex; justify-content:space-between; gap:16px;
+  font-size:10px; letter-spacing:.1em; color:var(--d-t6) }
+.b-blk{ padding:20px 20px 0; display:flex; flex-direction:column; gap:2px }
+.b-cmd{ font-size:12.5px; color:var(--d-t7) }
+.b-out{ font-size:12.5px; line-height:1.85; color:var(--d-t3) }
+.b-note{ font-size:11px; color:var(--d-t7); padding-top:6px }
+.b-tbl{ padding:10px 20px 0; font-size:12px; line-height:2.05;
+  color:oklch(0.84 0.006 250); overflow-x:auto }
+.b-tbl > div{ white-space:pre; min-width:900px }
+.b-tbl .hd{ color:oklch(0.5 0.008 250); border-bottom:1px solid var(--d-line-soft);
+  padding-bottom:5px }
+.b-tbl .brc{ background:oklch(0.2 0.045 25); color:oklch(0.94 0.02 25) }
+.b-tbl .qt{ color:var(--d-t6) }
+.b-id{ color:var(--d-cyan); border-bottom:1px dotted oklch(0.6 0.1 210); cursor:pointer }
+.b-id.r{ color:oklch(0.86 0.13 25); border-bottom-color:oklch(0.7 0.12 25) }
+.b-ast{ color:var(--d-teal-2) }
+.b-pos{ color:var(--d-teal) }
+.b-neg{ color:var(--d-red); font-weight:700 }
+.b-esc{ margin-top:8px; border-left:2px solid var(--d-amb-mark);
+  padding:2px 0 2px 16px; display:flex; flex-direction:column; gap:5px }
+.b-esc span{ font-size:12px; line-height:1.7; color:var(--d-t2) }
+.b-esc span.q{ color:var(--d-t4) }
+.b-why{ margin-top:8px; padding:12px 14px; border:1px solid var(--d-line-lift);
+  border-radius:var(--d-r-card); background:oklch(0.16 0.012 250);
+  display:flex; flex-direction:column; gap:8px }
+.b-why .t{ font-size:12px; line-height:1.75; color:oklch(0.86 0.006 250) }
+.b-foot{ padding:20px; margin-top:20px; border-top:1px solid var(--d-line-soft);
+  display:flex; justify-content:space-between; gap:16px;
+  font-size:11px; color:var(--d-t6) }
+.b-caret{ border-left:1.5px solid var(--d-teal); padding-left:1px }
+
+/* ==========================================================================
+   OPS CENTRE WALL — the one screen designed to be read from across a room
+   ========================================================================== */
+.b-wall{ background:oklch(0.11 0.006 250); min-height:92vh }
+.b-wall-bar{ padding:11px 26px; display:flex; justify-content:space-between;
+  gap:20px; border-bottom:2px solid var(--d-raise);
+  font:700 11px var(--d-mono); letter-spacing:.18em; color:var(--d-t6) }
+.b-band{ display:grid; grid-template-columns:1fr 1fr 1fr;
+  border-bottom:2px solid var(--d-raise) }
+.b-band > div{ padding:24px 26px; display:flex; flex-direction:column; gap:10px;
+  border-right:2px solid var(--d-raise) }
+.b-band > div:last-child{ border-right:0 }
+.b-band .k{ font-family:var(--d-cond); font-size:19px; font-weight:600;
+  letter-spacing:.14em; color:var(--d-t5) }
+.b-band .v{ display:flex; align-items:baseline; gap:12px }
+.b-band .n{ font:700 92px var(--d-mono); color:oklch(0.9 0.005 250);
+  line-height:.9; letter-spacing:-.03em }
+.b-band .u{ font-family:var(--d-cond); font-size:26px; font-weight:600;
+  letter-spacing:.1em; color:var(--d-t6) }
+.b-band .s{ font:400 15px var(--d-mono); color:var(--d-t4) }
+.b-band .crit{ background:oklch(0.19 0.05 25) }
+.b-band .crit .k{ color:oklch(0.8 0.07 25) }
+.b-band .crit .n{ color:var(--d-red) }
+.b-band .crit .u{ color:oklch(0.74 0.09 25) }
+.b-band .crit .s{ color:oklch(0.86 0.06 25) }
+.b-band .amb{ background:oklch(0.18 0.045 75) }
+.b-band .amb .k{ color:oklch(0.84 0.08 75) }
+.b-band .amb .n{ color:oklch(0.88 0.14 75) }
+.b-band .amb .u{ color:oklch(0.78 0.09 75) }
+.b-band .amb .s{ color:oklch(0.88 0.07 75) }
+
+.b-low{ display:grid; grid-template-columns:1.35fr 1fr }
+.b-low > .l{ border-right:2px solid var(--d-raise); min-width:0 }
+.b-h{ padding:18px 26px 12px; font-family:var(--d-cond); font-size:19px;
+  font-weight:600; letter-spacing:.14em; color:var(--d-t5) }
+.b-board{ overflow-x:auto }
+.b-brow{ display:grid; grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;
+  padding:13px 26px; border-top:1px solid oklch(0.22 0.01 250);
+  font:400 20px var(--d-mono); color:oklch(0.92 0.005 250); align-items:baseline;
+  min-width:640px }
+.b-brow .site{ font-size:16px; color:var(--d-t5) }
+.b-brow .r{ text-align:right }
+.b-brow .as{ text-align:right; font-size:16px; color:var(--d-t4) }
+.b-brow.breach{ background:oklch(0.19 0.045 25); color:oklch(0.95 0.02 25) }
+.b-brow.breach .site{ color:oklch(0.8 0.05 25) }
+.b-bhd{ display:grid; grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;
+  padding:0 26px 8px; font:400 12px var(--d-mono); letter-spacing:.1em;
+  color:oklch(0.5 0.008 250); min-width:640px }
+.b-bfoot{ padding:13px 26px 20px; border-top:1px solid oklch(0.22 0.01 250);
+  font:400 15px var(--d-mono); color:var(--d-t7) }
+.b-post{ padding:0 26px 22px; display:flex; flex-direction:column; gap:14px;
+  font-family:var(--d-mono) }
+.b-prow{ display:flex; justify-content:space-between; align-items:baseline;
+  gap:14px; padding-bottom:12px; border-bottom:1px solid oklch(0.22 0.01 250) }
+.b-prow > span:first-child{ font-size:16px; color:var(--d-t5) }
+.b-prow b{ font-size:34px; font-weight:600; color:oklch(0.92 0.005 250); line-height:1 }
+.b-prow b i{ font-style:normal; font-size:17px; color:var(--d-t6) }
+.b-delta{ display:flex; flex-direction:column; gap:7px; padding:14px 16px;
+  border-radius:var(--d-r-card); background:var(--d-red-bg);
+  border:1px solid var(--d-red-line) }
+.b-delta .d-lab{ font-size:13px; letter-spacing:.1em; color:var(--d-red-t) }
+.b-delta .d-fig{ font:700 38px var(--d-mono); color:var(--d-red); line-height:1 }
+.b-chips{ display:flex; gap:10px }
+.b-chips > div{ flex:1; padding:11px 13px; border-radius:var(--d-r-card);
+  display:flex; flex-direction:column; gap:4px }
+.b-chips .ok{ border:1px solid oklch(0.38 0.05 165) }
+.b-chips .ok span{ font-size:12px; letter-spacing:.08em; color:oklch(0.72 0.05 165) }
+.b-chips .ok b{ font-size:15px; font-weight:600; color:oklch(0.9 0.03 165) }
+.b-chips .warn{ background:oklch(0.24 0.05 75) }
+.b-chips .warn span{ font-size:12px; letter-spacing:.08em; color:oklch(0.82 0.07 75) }
+.b-chips .warn b{ font-size:15px; font-weight:600; color:oklch(0.92 0.06 75) }
+
+@media (max-width:1180px){
+  .b-band{ grid-template-columns:1fr }
+  .b-band > div{ border-right:0; border-bottom:2px solid var(--d-raise) }
+  .b-low{ grid-template-columns:1fr }
+  .b-low > .l{ border-right:0; border-bottom:2px solid var(--d-raise) }
+  .b-band .n{ font-size:64px }
+}
+
+/* ==========================================================================
+   EVIDENCE — a page that is entirely about a death count
+   ========================================================================== */
+.b-ev{ padding:24px 28px 30px }
+.b-ev-top{ display:grid; grid-template-columns:1fr 460px; gap:36px;
+  align-items:start; padding-bottom:24px; border-bottom:1px solid var(--d-line) }
+.b-kick{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  font:700 9.5px var(--d-mono); letter-spacing:.14em; color:var(--d-t6) }
+.b-claim{ font-size:29px; line-height:1.35; font-weight:500; color:var(--d-t1);
+  letter-spacing:-.015em; margin-top:13px; max-width:700px; text-wrap:pretty }
+.b-claim em{ font-style:normal; color:var(--d-red) }
+.b-three{ display:flex; gap:14px; margin-top:22px; font-family:var(--d-mono);
+  flex-wrap:wrap }
+.b-three > div{ flex:1; min-width:170px; padding:16px 18px;
+  border-radius:var(--d-r-lift); background:var(--d-panel);
+  border:1px solid var(--d-line-lift); display:flex; flex-direction:column; gap:9px }
+.b-three .d-lab{ font-size:9.5px; letter-spacing:.1em; color:var(--d-t6) }
+.b-three .d-fig{ font:700 40px var(--d-mono); line-height:1;
+  color:oklch(0.9 0.005 250) }
+.b-three .cap{ font-size:10px; line-height:1.5; color:var(--d-t6) }
+.b-three .d-death{ background:var(--d-red-bg); border-color:var(--d-red-line) }
+.b-three .d-death .cap{ color:oklch(0.74 0.04 25) }
+
+.b-lever{ border-radius:var(--d-r-lift); background:oklch(0.19 0.012 250);
+  border:1px solid var(--d-line-lift); padding:18px 20px;
+  display:flex; flex-direction:column; gap:14px; font-family:var(--d-mono) }
+.b-lever > .h{ display:flex; justify-content:space-between; align-items:baseline;
+  gap:12px; font:700 9.5px var(--d-mono); letter-spacing:.11em; color:var(--d-t3) }
+.b-lever > .h span:last-child{ font-weight:400; color:var(--d-t7); letter-spacing:.06em }
+.b-bars{ display:flex; flex-direction:column; gap:11px }
+.b-bar{ display:flex; flex-direction:column; gap:5px }
+.b-bar .t{ display:flex; justify-content:space-between; gap:10px }
+.b-bar .t > span:first-child{ font-size:10.5px; color:var(--d-t4) }
+.b-bar .t > span:last-child{ font-size:11px; font-weight:600 }
+.b-bar .d-bar{ height:8px; background:oklch(0.24 0.01 250);
+  border-radius:2px; overflow:hidden }
+.b-bar .d-bar > i{ display:block; height:100%; background:var(--d-red-mark) }
+.b-lever .foot{ font-size:10px; line-height:1.65; color:var(--d-t6);
+  padding-top:10px; border-top:1px solid var(--d-raise) }
+
+.b-cols3{ display:grid; grid-template-columns:1fr 1fr 1fr; padding-top:20px; gap:0 }
+.b-cols3 > div{ display:flex; flex-direction:column; gap:13px;
+  font-family:var(--d-mono); min-width:0 }
+.b-cols3 > div:not(:last-child){ padding-right:26px;
+  border-right:1px solid var(--d-line) }
+.b-cols3 > div + div{ padding-left:26px }
+.b-cols3 .h{ font:700 9.5px var(--d-mono); letter-spacing:.11em; color:var(--d-t6) }
+.b-kv{ display:flex; justify-content:space-between; align-items:baseline; gap:12px }
+.b-kv > span:first-child{ font-size:11px; color:var(--d-t3) }
+.b-kv > span:last-child{ font-size:11px; font-weight:600; color:var(--d-t1) }
+.b-kv.pos > span:last-child{ color:var(--d-teal-2) }
+.b-kv.neg > span:last-child{ color:var(--d-red); font-weight:700 }
+.b-kv.dim > span{ color:var(--d-t5) }
+.b-cols3 .note{ font-size:10px; line-height:1.6; color:var(--d-t6); padding-top:4px }
+.b-cols3 .prose{ font-size:10.5px; line-height:1.7; color:var(--d-t3) }
+.b-dot{ display:flex; align-items:center; gap:7px }
+.b-dot i{ width:5px; height:5px; border-radius:50%; background:oklch(0.75 0.13 165);
+  flex:none }
+.b-dot span{ font-size:10px; line-height:1.5; color:var(--d-t4) }
+.b-link{ font-size:10px; color:var(--d-cyan-2); cursor:pointer; padding-top:4px;
+  background:none; border:0; font-family:var(--d-mono); text-align:left; padding-left:0 }
+.b-link:hover{ color:var(--d-cyan-hi) }
+
+@media (max-width:1240px){
+  .b-ev-top{ grid-template-columns:1fr }
+  .b-cols3{ grid-template-columns:1fr }
+  .b-cols3 > div:not(:last-child){ padding-right:0; border-right:0;
+    border-bottom:1px solid var(--d-line); padding-bottom:16px }
+  .b-cols3 > div + div{ padding-left:0; padding-top:16px }
+}
+
+/* ==========================================================================
+   ASK ANGEL
+   ========================================================================== */
+.b-chat{ display:grid; grid-template-columns:1fr 300px; min-height:86vh;
+  align-items:start }
+.b-chat-main{ display:flex; flex-direction:column; padding:22px 28px 20px;
+  gap:16px; min-width:0 }
+.b-chat-head{ display:flex; justify-content:space-between; align-items:flex-end;
+  gap:16px; flex-wrap:wrap }
+.b-chat-head h1{ font-size:20px; font-weight:600; color:var(--d-t1);
+  letter-spacing:-.01em; margin:0 }
+.b-chat-head .sub{ font:400 10.5px var(--d-mono); color:var(--d-t6) }
+.b-warn{ font:700 8.5px var(--d-mono); letter-spacing:.08em; padding:2px 7px;
+  border-radius:var(--d-r-chip); background:var(--d-amb-chip);
+  border:1px solid var(--d-amb-line); color:var(--d-amb) }
+.b-thread{ display:flex; flex-direction:column; gap:14px; flex:1; padding-bottom:6px }
+.b-q{ display:flex; justify-content:flex-end }
+.b-q > span{ max-width:60%; padding:11px 15px; border-radius:8px 8px 2px 8px;
+  background:oklch(0.27 0.03 210); font-size:13px; line-height:1.55;
+  color:oklch(0.94 0.01 210) }
+.b-a{ border-radius:var(--d-r-pill); background:oklch(0.19 0.012 250);
+  border:1px solid var(--d-line-lift); overflow:hidden; max-width:88% }
+.b-a > header{ padding:9px 15px; border-bottom:1px solid var(--d-line);
+  display:flex; justify-content:space-between; align-items:center; gap:12px }
+.b-a > header .m{ font:400 9.5px var(--d-mono); color:var(--d-t7) }
+.b-a > .body{ padding:15px; display:flex; flex-direction:column; gap:13px }
+.b-a .lead{ font-size:14px; line-height:1.6; color:var(--d-t1); text-wrap:pretty }
+.b-a .quote{ font-size:12.5px; line-height:1.7; color:var(--d-t2);
+  border-left:2px solid var(--d-vio-line); padding:2px 0 2px 13px; text-wrap:pretty }
+.b-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  font-family:var(--d-mono) }
+.b-cards > div{ padding:13px 15px; border-radius:var(--d-r-card);
+  background:var(--d-panel); border:1px solid oklch(0.32 0.012 250);
+  display:flex; flex-direction:column; gap:7px }
+.b-cards > div.crit{ background:var(--d-red-bg); border-color:var(--d-red-line) }
+.b-cards b{ font-size:10.5px; font-weight:700; color:var(--d-t2) }
+.b-cards > div.crit b{ color:oklch(0.94 0.02 25) }
+.b-cards span{ font-size:10px; line-height:1.6; color:var(--d-t5) }
+.b-cards > div.crit span{ color:oklch(0.84 0.04 25) }
+.b-cited{ display:flex; gap:14px; padding-top:12px; border-top:1px solid var(--d-raise) }
+.b-cited > .k{ font:400 9px var(--d-mono); letter-spacing:.1em; color:var(--d-t7);
+  width:80px; flex:none; padding-top:2px }
+.b-cited > .v{ font:400 9.5px/1.7 var(--d-mono); color:var(--d-t5) }
+.b-refuse{ border-radius:var(--d-r-pill); background:oklch(0.19 0.012 250);
+  border:1px solid var(--d-amb-line); overflow:hidden; max-width:88% }
+.b-refuse > header{ padding:10px 15px; background:var(--d-amb-bg);
+  display:flex; justify-content:space-between; gap:12px;
+  font:700 10px var(--d-mono); letter-spacing:.1em; color:var(--d-amb-hi) }
+.b-refuse > header span:last-child{ font-weight:400; color:oklch(0.86 0.05 75) }
+.b-refuse > .body{ padding:15px; display:flex; justify-content:space-between;
+  align-items:center; gap:20px; flex-wrap:wrap }
+.b-refuse .t{ font-size:13.5px; line-height:1.6; color:var(--d-t2); flex:1;
+  min-width:240px; text-wrap:pretty }
+.b-go{ font:700 10.5px var(--d-mono); padding:10px 16px;
+  border-radius:var(--d-r-btn); background:oklch(0.78 0.1 165);
+  color:oklch(0.18 0.03 165); cursor:pointer; border:0; flex:none }
+.b-ask{ display:flex; gap:12px; align-items:center; padding:9px 12px 9px 15px;
+  border-radius:var(--d-r-pill); background:var(--d-panel);
+  border:1px solid oklch(0.36 0.012 250); position:sticky; bottom:12px;
+  box-shadow:0 6px 22px oklch(0.10 0.008 250 / .8) }
+.b-ask input{ flex:1; min-width:0; background:transparent; border:0; outline:0;
+  font:400 13px var(--d-mono); color:var(--d-t2) }
+.b-ask input::placeholder{ color:var(--d-t7) }
+.b-ask .m{ font:400 9.5px var(--d-mono); color:var(--d-t7) }
+.b-side{ border-left:1px solid var(--d-line); padding:20px 18px;
+  display:flex; flex-direction:column; gap:16px; font-family:var(--d-mono) }
+.b-side .h{ font-size:8.5px; letter-spacing:.11em; color:oklch(0.52 0.008 250) }
+.b-sug{ display:flex; flex-direction:column; gap:9px }
+.b-sug button{ font:400 10.5px/1.5 var(--d-mono); color:var(--d-t4);
+  padding:8px 10px; border-radius:var(--d-r-btn); background:var(--d-panel);
+  border:1px solid oklch(0.29 0.01 250); cursor:pointer; text-align:left }
+.b-sug button:hover{ border-color:oklch(0.4 0.02 250); color:var(--d-t2) }
+.b-box{ padding:12px; border-radius:var(--d-r-card); background:var(--d-panel);
+  border:1px solid oklch(0.29 0.01 250); display:flex; flex-direction:column; gap:6px }
+.b-box p{ font-size:9.5px; line-height:1.6; color:var(--d-t4); margin:0 }
+.b-box.ai{ background:oklch(0.17 0.02 300); border-color:oklch(0.34 0.07 300) }
+.b-box.ai .h{ color:oklch(0.8 0.09 300) }
+.b-box.ai p{ color:oklch(0.82 0.04 300) }
+.b-box.amb{ background:oklch(0.2 0.03 75); border-color:var(--d-amb-line) }
+.b-box.amb .h{ color:var(--d-amb-hi) }
+.b-box.amb p{ color:oklch(0.88 0.04 75) }
+
+@media (max-width:1100px){
+  .b-chat{ grid-template-columns:1fr }
+  .b-side{ border-left:0; border-top:1px solid var(--d-line) }
+  .b-cards{ grid-template-columns:1fr }
+}

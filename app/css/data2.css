@@ -1,0 +1,194 @@
+/* =========================================================================
+   ANGEL SWARM — analytical console.
+
+   Everything inherits from the application's custom properties rather than
+   naming a colour, so the console follows the light/dark switch without
+   knowing it exists. Nothing here is added to style.css; the build links
+   every stylesheet in this folder.
+
+   The visual priority is deliberate and slightly unusual: the two numbers
+   that get the largest type on this pane are the row count and the elapsed
+   milliseconds. On every other pane the largest number is a casualty figure.
+   Here the claim being made is about the engine, so the engine's numbers are
+   the ones sized to be read from across a room.
+   ========================================================================= */
+
+/* The host pane is a column flexbox, and it grants `flex:0 0 auto` only to
+   the block classes the original application shipped with. Anything else
+   inherits the default flex-shrink of 1, which quietly compresses a row of
+   buttons down to a few pixels and clips the labels off them — the console's
+   preset row rendered as eight empty outlines until this rule existed. Any
+   direct child added here has to opt out of shrinking. */
+.q2Engine, .q2Presets, .q2Question, .q2Grid{ flex:0 0 auto }
+
+/* ------------------------------------------------------- engine assertion */
+.q2Engine{
+  display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline;
+  padding:9px 13px; margin:0 0 11px;
+  border:1px solid var(--line); border-left:3px solid var(--ok);
+  border-radius:6px; background:var(--panel);
+  font-family:var(--mono); font-size:11.5px; color:var(--dim);
+}
+.q2Engine.warn{ border-left-color:var(--warn) }
+.q2Engine>b{ color:var(--text); font-size:12.5px; letter-spacing:.4px }
+.q2Engine span b{ color:var(--ok) }
+.q2Engine.warn span b{ color:var(--warn) }
+
+/* ------------------------------------------------------------- presets */
+/* One row of buttons, horizontally scrollable rather than wrapping into a
+   block that pushes the editor below the fold. A judge scans these left to
+   right once and then never looks at them again. */
+.q2Presets{
+  display:flex; gap:7px; overflow-x:auto; padding:0 0 9px;
+  scrollbar-width:thin;
+}
+.q2Preset{
+  flex:0 0 auto; display:flex; flex-direction:column; gap:2px;
+  padding:6px 11px; text-align:left; cursor:pointer;
+  background:var(--panel); color:var(--text);
+  border:1px solid var(--line); border-radius:6px;
+  transition:border-color .12s, background .12s;
+}
+.q2Preset:hover{ border-color:var(--line2); background:var(--panel2) }
+.q2Preset b{ font-size:11.5px; font-weight:600; white-space:nowrap }
+.q2Preset em{
+  font-family:var(--mono); font-style:normal; font-size:10px;
+  color:var(--faint); white-space:nowrap; letter-spacing:.3px;
+}
+.q2Preset.on{ border-color:var(--info); background:var(--panel2) }
+.q2Preset.on em{ color:var(--info) }
+/* The ASOF join is the one the previous engine could not run, so it is the
+   one marked. */
+.q2Preset.hero{ border-color:var(--angel) }
+.q2Preset.hero em{ color:var(--angel) }
+.q2Preset.hero.on{ box-shadow:inset 0 0 0 1px var(--angel) }
+
+.q2Question{
+  min-height:34px; padding:8px 12px; margin:0 0 11px;
+  border:1px solid var(--line); border-radius:6px; background:var(--panel);
+  font-size:12.5px; line-height:1.45;
+}
+.q2Question b{ font-weight:600; color:var(--text) }
+.q2Cant{
+  display:block; margin-top:5px; padding-top:5px;
+  border-top:1px dashed var(--line2);
+  font-size:11.5px; color:var(--warn);
+}
+
+/* ------------------------------------------------------------- the layout */
+.q2Grid{
+  display:grid; grid-template-columns:236px minmax(0,1fr); gap:11px;
+  align-items:start;
+}
+.q2Main{ display:flex; flex-direction:column; gap:11px; min-width:0 }
+
+/* ---------------------------------------------------------- schema browser */
+.q2Side{ position:sticky; top:0; max-height:calc(100vh - 210px); display:flex; flex-direction:column }
+.q2Hint{
+  float:right; font-family:var(--mono); font-size:10px;
+  font-weight:400; color:var(--faint); letter-spacing:.3px;
+}
+.q2Schema{ overflow-y:auto; padding:2px 2px 4px }
+.q2Tbl{ margin:0 0 9px }
+.q2TblName{
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-family:var(--mono); font-size:12px; color:var(--info);
+  cursor:pointer; padding:2px 3px; border-radius:3px;
+}
+.q2TblName:hover{ background:var(--panel2) }
+.q2TblName u{ text-decoration:none; font-size:10px; color:var(--faint) }
+.q2TblNote{
+  font-size:10.5px; line-height:1.35; color:var(--faint);
+  padding:0 3px 4px;
+}
+.q2Cols{ display:flex; flex-wrap:wrap; gap:3px; padding:0 3px }
+.q2Col{
+  font-family:var(--mono); font-size:10.5px; color:var(--dim);
+  padding:1px 5px; border-radius:3px; cursor:pointer;
+  background:var(--chartbg); border:1px solid transparent;
+}
+.q2Col:hover{ border-color:var(--line2); color:var(--text) }
+
+/* ----------------------------------------------------------- the editor */
+.q2Editor{ padding-bottom:0 }
+.q2CM{
+  border:1px solid var(--line); border-radius:5px; overflow:hidden;
+  margin:2px 0 0;
+}
+/* CodeMirror ships its own one-dark surface. It is left alone rather than
+   restyled: an editor that looks like an editor is read faster than one
+   painted to match a dashboard, and every analyst in the room has seen this
+   exact colour scheme before. */
+.q2CM .cm-editor{ height:236px }
+.q2CM .cm-editor.cm-focused{ outline:none }
+.q2CM .cm-scroller{ font-family:var(--mono) }
+
+.q2Bar{
+  display:flex; align-items:center; gap:16px;
+  padding:9px 2px 10px; flex-wrap:wrap;
+}
+.q2Bar .btn.running{ opacity:.55; pointer-events:none }
+
+/* The measurement. This is the demonstration, so it is typeset as a
+   readout rather than as body text. */
+.q2Metrics{ display:flex; align-items:baseline; gap:18px }
+.q2Metric{ display:flex; align-items:baseline; gap:6px }
+.q2Metric b{
+  font-family:var(--mono); font-size:23px; font-weight:600;
+  line-height:1; color:var(--text); font-variant-numeric:tabular-nums;
+}
+.q2Metric em{
+  font-style:normal; font-size:10.5px; letter-spacing:.6px;
+  text-transform:uppercase; color:var(--faint);
+}
+.q2Stat{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.6px;
+  text-transform:uppercase; padding:2px 7px; border-radius:3px;
+  border:1px solid var(--line2); color:var(--faint);
+}
+.q2Stat.ok{ color:var(--ok); border-color:var(--ok) }
+.q2Stat.bad{ color:var(--bad); border-color:var(--bad) }
+.q2Load{
+  margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--faint);
+}
+
+.q2Err{
+  display:none; margin:0 0 10px; padding:8px 11px;
+  border:1px solid var(--bad); border-radius:5px;
+  background:color-mix(in srgb, var(--bad) 8%, transparent);
+  font-family:var(--mono); font-size:11.5px; color:var(--bad);
+  white-space:pre-wrap;
+}
+
+/* ------------------------------------------------------------- the result */
+.q2Result{ min-height:150px }
+.q2Out{ margin-top:2px }
+.qTblWrap{
+  max-height:min(52vh, 560px); overflow:auto;
+  border:1px solid var(--line); border-radius:5px;
+}
+.qTbl{ border-collapse:separate; border-spacing:0; width:100%; font-size:11.5px }
+.qTbl th{
+  position:sticky; top:0; z-index:1;
+  background:var(--panel2); color:var(--dim);
+  text-align:left; font-weight:600; white-space:nowrap;
+  padding:6px 10px; border-bottom:1px solid var(--line2);
+  letter-spacing:.3px;
+}
+.qTbl td{
+  padding:4px 10px; border-bottom:1px solid var(--line);
+  white-space:nowrap; max-width:420px; overflow:hidden; text-overflow:ellipsis;
+  font-variant-numeric:tabular-nums;
+}
+.qTbl tbody tr:hover td{ background:var(--chartbg) }
+.qTbl tbody tr:last-child td{ border-bottom:none }
+.qTbl .q0{ color:var(--faint); font-style:normal; opacity:.65 }
+.qCap{
+  margin:7px 2px 0; font-size:11px; color:var(--dim);
+}
+
+@media (max-width:1180px){
+  .q2Grid{ grid-template-columns:1fr }
+  .q2Side{ position:static; max-height:none }
+  .q2Schema{ max-height:220px }
+}

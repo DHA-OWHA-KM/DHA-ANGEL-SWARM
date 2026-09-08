@@ -1,0 +1,474 @@
+ANGEL SWARM
+Autonomous medical resupply tasking — functional prototype
+UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
+
+
+WHAT IS IN THIS FOLDER
+======================
+
+This package arrives as THREE zips. Unzip all three into the same
+place. They are thirds of one folder and none runs on its own.
+
+  the four platform binaries   the program itself
+  app/                         everything it serves
+  documents/                   every written deliverable — the use
+                               cases, the alignment papers, the
+                               architecture record, the security and
+                               ATO assessment, the bill of materials,
+                               the specifications, the win table, the
+                               rehearsal pack and the changelog.
+                               Full list below.
+  deck/                        the pitch slides
+  app/video/                   two films: a 3 min 15 s cut and a
+                               60-second cut for a five-minute slot
+  src/, train/                 the launcher source and the training code
+  README.md                    the repository front page: what this is,
+                               the result with its conditions, WHERE THIS
+                               SITS IN WHAT THE DEPARTMENT HAS ALREADY
+                               BOUGHT, how to run it, and what is
+                               deliberately not claimed
+  .gitignore                   the ignore rules for publishing this as a
+                               repository. See documents/GITHUB-PREP.md
+                               for the six decisions left open — the
+                               licence above all.
+  START-HERE.txt               this file
+  VERSION.txt, CHECKSUMS.txt   what you are holding, and the digests
+                               for parts 2 and 3
+
+
+NEW IN 6.5 — WHERE THIS SITS
+============================
+
+The one question this package could not previously answer is the first
+one a program office asks: where does this belong among the things we
+already fund? It is answered now, from primary sources researched on
+5 September and recorded with a URL and a date for every claim in
+documents/COMPLEMENT-LANDSCAPE-sources.md.
+
+The short form. In May 2026 the 44th Medical Brigade completed an
+operational validation of autonomous Class VIII aerial resupply with
+Soaring M25 aircraft. THE AIRCRAFT WERE AUTONOMOUS. THE TASKING WAS
+NOT. The Department has bought every layer around the decision this
+system makes — the airframes below it, the triage sensing beside it,
+the Maven Smart System above it — and has bought none of that decision.
+This is the missing tasking rule for aircraft the Services already own.
+It supplements; it does not supplant.
+
+The full argument is in README.md, in the use case, in the DHA
+alignment paper, in the architecture record as four concrete
+interfaces, in the security annex as a new section 6a showing that
+none of those four widens the accreditation boundary today, and in the
+rehearsal pack as a spoken beat with five prepared answers.
+
+
+HOW TO RUN IT
+=============
+
+Windows      double-click  ANGEL-SWARM-windows-x64.exe
+Mac (M1-M4)  double-click  ANGEL-SWARM-macos-apple-silicon
+Mac (Intel)  double-click  ANGEL-SWARM-macos-intel
+Linux        ./ANGEL-SWARM-linux-x64
+
+Your browser opens automatically. That is the whole install.
+
+Nothing is written outside this folder. Nothing is installed. The
+program never originates an outbound request, and by default it opens
+exactly one socket: the loopback HTTP port, on 127.0.0.1, which is your
+own machine and unreachable from any other computer.
+
+It can also ACCEPT casualty telemetry, and that is off unless you ask
+for it. See TELEMETRY below. With no telemetry flag, unplug the network
+before you run it and it behaves identically.
+
+On macOS the first launch may be blocked because the file is not
+notarised. Right-click the file, choose Open, then Open again. Or:
+  xattr -d com.apple.quarantine ANGEL-SWARM-macos-apple-silicon
+
+To pick a different port:  ANGEL-SWARM-linux-x64 -port 9000
+
+
+THE FIRST FIVE MINUTES
+======================
+
+The application opens on COMMAND OVERVIEW, as a COMMANDER. Thirteen
+destinations run down the left rail:
+
+  Command Overview   Theater Map        Live Casualties
+  Decisions          Analyst Terminal   Sensor & Model
+  Ops Center Wall    Evidence           War Game
+  Ask ANGEL          Authority & Policy Data Sources
+  Settings
+
+Four role profiles — COMMANDER, LOGISTICIAN, SURGEON, ANALYST — change
+what the interface offers you on arrival, never what you are allowed to
+reach. They switch live, mid-run, without a reload.
+
+THE FIVE-SCREEN TOUR, IF YOU HAVE FIVE MINUTES:
+
+  1  Command Overview   the answer, before you press anything
+  2  Theater Map        the same battle, at four scales
+  3  Evidence           where the deaths that remain came from
+  4  Ops Center Wall    the result as a board, readable across a room
+  5  Settings ->        118 assertions against this engine, in your
+     Engine self-test   own browser, offline
+
+If you would rather be walked through it, Settings -> Display ->
+Guided walkthrough puts a bar at the foot of the window that steps
+through exactly those five with one line about each. It is OFF by
+default and it only navigates — no screen renders differently because
+it is up.
+
+IMPORTANT: the system starts NOT DEPLOYED, on purpose. ANGEL SWARM is
+a capability that gets deployed into a fight already in progress, so
+the simulation begins with the unit handling casualties the way it
+does today. Press "Deploy" in the top bar to hand tasking authority
+to the system, then watch the two arms separate.
+
+If you never deploy, both arms task by CURRENT — TRIAGE & PROXIMITY
+and nothing has been compared. The two tolls land a death or two apart rather than
+exactly level, because each arm consumes its own random draws — wind,
+attrition, receiver performance — at a slightly different rate. The
+after-action summary says so in those words and refuses to declare a
+winner. That is correct behaviour, not a bug, and it is not a result.
+
+THE ANSWER IS ON THE FIRST SCREEN. Command Overview opens with the
+three tolls of this battle before you press anything:
+
+  NO FORWARD DELIVERY            35   nothing is flown at all
+  CURRENT — TRIAGE & PROXIMITY   34   38 sorties
+  ANGEL SWARM                    23   20 sorties
+
+Same casualties, same aircraft, same blood, same seed. The only thing
+that differs is what the aircraft are tasked against. Those figures are
+read out of the engine at the moment the screen is drawn, not typed in
+— change the scenario on Settings and they change with it.
+
+AND THE COMPARISON FOLLOWS YOU. An ANGEL SWARM figure never appears in
+this application without the CURRENT — TRIAGE & PROXIMITY figure beside
+it, at the same size — under twelve screen titles and on the navigation
+rail, whatever destination is open. Before the comparison is readable it
+says so in words rather than printing a number it cannot stand behind.
+
+Press Ctrl-K (Cmd-K on a Mac) at any time to search everything: every
+view, every action, every casualty, and the doctrine library.
+Press ? for the keyboard shortcuts.
+
+
+THE MAP, AND THE THING WORTH TESTING
+====================================
+
+Theater Map draws the same fight at FOUR scales, chosen with the chips
+above the picture:
+
+  GLOBE         the planet, both combatant commands on it. Drag to
+                spin, scroll to zoom. Keep zooming past a command's
+                own width and it flies the rest of the way in and
+                hands the view down to the tactical picture.
+  THEATRE       the whole combatant command, north-up, with named
+                seas and states and dashed international boundaries.
+                An OBLIQUE control tilts the camera if you want it.
+  TACTICAL 2D   this operation's ground, flat, both arms side by side
+  TACTICAL 3D   the same ground on the GPU, with time drawn as height
+
+On the two tactical scales, CLICK A CASUALTY OR AN AIRCRAFT and a strip
+appears along the bottom showing ONE SORTIE, stop by stop — what each
+casualty was given and how much of their own deadline was left when it
+arrived — with the stop it is flying at this minute highlighted. A stop
+it has not reached yet prints an ETA rather than a fact, and prints no
+margin at all. Press the X on its header, or Escape, to put it away.
+
+It is CLOSED when you arrive, on purpose. Earlier builds opened it on
+some sortie you had not asked about, which is a true statement about an
+arbitrary aircraft — and that is the kind of thing that makes you stop
+trusting the rest of the screen.
+
+NOW THE TEST. Unplug the network, or turn the Wi-Fi off, and spin the
+globe. Nothing on any of those four scales is fetched: there is no
+tile server, no basemap key and no network call anywhere in the map.
+The coastlines and the international boundaries are Natural Earth
+1:50m, generalised offline and shipped inside the build — the globe's
+world outline is embedded in the source file itself as integer deltas,
+34,416 vertices in about 218 kB of source text, so it is not even a
+separate file to fetch. Spin to Japan and you should be able to name
+Honshu, Shikoku, Kyushu, Hokkaido and the Ryukyus; to the Philippines
+and find Luzon, Palawan and Mindanao. The terrain underneath is
+computed on your machine at load, and the map says so on its own face:
+RELIEF IS SHADING, NOT ELEVATION. Every line that carries a claim —
+coastline, boundary, area of responsibility, where an operation
+actually is — is real data drawn over the top of it.
+
+AND KEEP ZOOMING. Past a command's own width the globe flies the rest
+of the way in and hands the picture down — TO THE OPERATION UNDER YOUR
+CAMERA, not to whichever one happens to be loaded. Try it over Korea,
+over the Marianas, over Europe. Over open water it declines rather than
+guessing, holds the zoom where you left it, and says NO OPERATION UNDER
+THIS ZOOM. Whichever way the picture moves, the classification stamp in
+the top right moves with it: the map and the rest of the application
+can no longer name two different operations at once.
+
+The globe is drawn in CANVAS 2-D, not on the GPU. That is deliberate:
+it holds no graphics context, so it cannot be the thing that evicts one
+of the two the tactical maps do hold.
+
+
+HOW YOU KNOW IT WORKS
+=====================
+
+Settings → "Engine self-test" opens selftest.html, a page that runs
+118 assertions directly against the shipped engine — js/sim.js,
+js/optimizer.js, js/mc.worker.js and the adapter — in your own browser,
+offline, with nothing mocked. It asserts the reference result quoted
+above, determinism, the common random numbers that make the three arms
+one battle, the conservation invariants, the deadline arithmetic, the
+SHA-256 audit chain and its tamper-evidence, and every one of the seven
+theatres. A red row would be a real disagreement between what this
+engine does and what this package claims it does. There are none.
+
+
+THE PAPERWORK IS IN documents/
+==============================
+
+Everything written about this prototype is in the documents/ folder,
+as both Markdown and Word:
+
+  ANGEL-SWARM-use-case                  the use case, in full
+  Physiological-Deadline-Blood-
+    Support-USE-CASE-PUBLIC             the sponsor-facing release,
+                                        with the method withheld
+  ANGEL-SWARM-DHA-alignment             the prototype set against what
+                                        DHA leadership asked for, quote
+                                        by quote
+  ANGEL-SWARM-DHA-alignment-onepager    the same on one page
+  ANGEL-SWARM-IL5-deployment-cost-
+    impact-analysis                     what an IL5 MVP fielding would
+                                        cost, and how long it would take
+  ANGEL-SWARM-ARCHITECTURE              how it is built, what was
+                                        rejected, and every trap hit
+  ANGEL-SWARM-WIN-PROBABILITY-v5.9      1,400 paired battles across all seven
+                                        theatres, measured on this engine:
+                                        seven wins from seven, adverse in six
+                                        battles, never by more than one.
+                                        Reproduce it with documents/winprob.mjs
+  ANGEL-SWARM-SECURITY-AND-ATO          the STRIDE threat model, what is
+                                        measured versus what an operational
+                                        fielding would still require, and
+                                        the RMF pathway to an IL5 ATO
+  ANGEL-SWARM-SBOM                      the software bill of materials,
+                                        CycloneDX 1.6, every dependency
+                                        hashed off disk
+  ANGEL-SWARM-DOCTRINAL-TERMINOLOGY     what the current method is actually
+                                        called in doctrine, and the search
+                                        that established that no publication
+                                        names the assignment rule
+  ANGEL-SWARM-DESIGN-SPEC               the specification the interface
+                                        was built to, including the six
+                                        claims that were found untrue
+                                        and what was done about each
+  ANGEL-SWARM-MAP-SPEC                  the Theater Map in full: all
+                                        four scales, the chrome, the
+                                        panels and every state, and how
+                                        the globe's geography, its
+                                        rotation and its handoff work
+  ANGEL-SWARM-REHEARSAL                 the presenter's pack — the
+                                        four-minute script, the click
+                                        path, the hostile questions and
+                                        the failure drills
+  ENGINE-CONTRACT                       what the engine guarantees, and
+                                        what a caller may rely on
+  SPEC-INPUT-engine                     the lifecycle, entities,
+                                        optimiser, deployment, audit
+                                        chain and death accounting,
+                                        cited to file and line
+  SPEC-INPUT-models                     the trained models, replication
+                                        study, database, telemetry,
+                                        maps and provenance
+  SPEC-INPUT-features                   the feature and state matrix,
+                                        every control, and what was
+                                        broken when it was written
+  CONTROL-AUDIT-v3.6                    every control in the build,
+                                        exercised one at a time
+  RAIL-BUTTON-VERIFICATION-v3.5         the navigation rail, button by
+                                        button
+  ANGEL-SWARM-SBOM-validation           the record of validating the
+                                        bill of materials against
+                                        CycloneDX's own schema
+  winprob.mjs                           the harness that re-derives the
+                                        win table. node winprob.mjs
+                                        PACOM_CORAL 200
+  ANGEL-SWARM-CHANGELOG                 what changed in each version,
+                                        including the defects found
+
+The papers are present as both Markdown and Word. Four of the entries
+above are neither: the bill of materials also ships as JSON, which is
+the authoritative copy; its validation record, the rail-button matrix
+and the changelog are plain text; and winprob.mjs is a script you run.
+The changelog is also at the root of this folder; VERSION.txt names the
+build you are holding.
+
+
+WHAT IS ACTUALLY IN HERE
+========================
+
+Two sets of trained weights ship, and both run on your own CPU,
+offline. Neither one steers an aircraft.
+
+CRI-Net — a 104,162-parameter 1-D convolutional network that reads
+five seconds of photoplethysmogram at 100 Hz and estimates the
+casualty's compensatory reserve — how much bleeding they can still
+tolerate before they crash. It was trained from scratch for this
+prototype; the training script is in train/. Held-out mean absolute
+error is 0.069 against 0.159 for heart rate alone, measured on 70
+subjects who appear in no training window. It also reports its own
+uncertainty and declines to be trusted when the signal is poor. See
+"Sensor & model".
+
+CRI-Net's estimate does NOT reach the allocator in this build. The
+deadlines the tasking runs on come from the scenario's own physiology
+model. The Sensor & Model screen says so, and closing that loop is
+named in the documents as the next piece of work. A tighter claim than
+that would not survive one question.
+
+A sentence encoder (all-MiniLM-L6-v2, 22.9 MB, int8) that powers
+doctrine retrieval in the standalone analyst console (app/console.html).
+It answers in verbatim quotes with a similarity score and refuses when
+nothing in the corpus matches. It cannot hallucinate, because it can
+only return text that is already there.
+
+THERE IS NO LANGUAGE MODEL. None is shipped and none is loaded.
+NOTHING ON ANY SCREEN IS GENERATED. Ask ANGEL says so in its own
+header, and that is the stronger position rather than the weaker one:
+a template over the run record cannot hallucinate a casualty count, and
+a verbatim quote cannot invent doctrine. Ask ANGEL answers questions
+about the run from the run's own record, badged RUN RECORD · COMPUTED,
+NOT GENERATED; it quotes doctrine verbatim; and where it can do
+neither it says so and lists what it can be asked instead.
+
+Plus: a DuckDB analytical engine you can type arbitrary SQL into
+(Analyst Terminal -> SQL CONSOLE), four map renderers, a casualty-flow
+Sankey, a five-lever paired Monte Carlo on the War Game screen, and
+ten working exports on Data Sources -> DATA PRODUCTS — a FHIR-shaped
+bundle of 4,151 resources, the hash-chained decision record with full
+64-character digests, the run result as JSON and CSV, five JSON
+Schemas and a data catalogue. The FHIR export is FHIR-SHAPED, NOT
+CONFORMANCE-TESTED, and every single resource carries that caveat in
+its own meta.tag so it cannot be lost by copying one file out.
+
+
+
+WHERE THE AI IS, AND WHERE IT IS NOT
+====================================
+
+A sparkle follows anything a trained model produced, and the words beside it
+name the source — which model, and what it produced:
+
+     AI: CRI-Net · Predicts collapse    AI: CRI-Net · Refuses when unsure
+     AI: MiniLM · Quotes doctrine
+
+The whole mark — the sparkle and the words together — carries a soft glow in
+its own colour, so a marked value can be found by scanning a screen rather
+than by reading it.
+
+Hover any mark for the model itself, what it does and the number it was
+validated on. Press it for the full inventory.
+
+Nothing else in this application carries a sparkle, which is what makes the
+absence of one mean something. Anything unmarked is the tasking optimiser,
+arithmetic over this run's own record, fixed doctrine, published physiology,
+or a human decision. None of those is machine learning and none of them
+pretends to be.
+
+In the left navigation rail, TWO destinations of the thirteen carry a
+sparkle: Sensor & Model, and Ask ANGEL. Nothing else does.
+
+ONE THING WE WOULD RATHER TELL YOU THAN HAVE YOU FIND. On two surfaces
+— Analyst Terminal -> DOCTRINE, and Ask ANGEL's doctrine answers — the
+similarity score shown is produced by term overlap over an eleven-
+passage inline reference set, and the badge above it names the sentence
+encoder. The encoder is real, it ships, and it does run the doctrine
+view in app/console.html over the full 161-passage corpus — but not
+those two panels. The score is honest and its floor was measured; the
+label names the wrong machine. It is recorded as R-11 in
+documents/ANGEL-SWARM-SECURITY-AND-ATO.
+
+Open Data Sources for every model's parameters,
+validation, file path and licence — read out of the models' own metadata at
+the moment the sheet is drawn — and for the named list of what is NOT a
+model: the optimiser, the confidence sweep, the simulation, the maps, the
+charts and the query console.
+
+TELEMETRY — HOW THE READING GETS THERE
+======================================
+
+The tasking layer needs one thing from the edge: a stream of
+physiological readings, one per casualty. Out of the box the simulation
+produces those itself, which demonstrates the tasking logic and
+demonstrates nothing about acquisition. So there is a real ingest path,
+and you can run it.
+
+  1. Start the launcher with a telemetry listener:
+
+       ANGEL-SWARM-linux-x64 -cot :6969
+
+  2. In a second window, start the device emitter, which stands in for
+     the monitors on the soldiers:
+
+       cotsim-linux-x64 -target 127.0.0.1:6969 -devices 125 -rate 0.05
+
+  3. Watch the INGEST chip in the tool row go LIVE, and open
+     "Sensor & model" for the full ingest card.
+
+  4. NOW STOP THE EMITTER. Ctrl+C in the second window. The chip goes
+     LINK STALE after six seconds and LINK DOWN after fifteen, and the
+     tasking layer carries on using the last reading it holds. That is
+     the behaviour the entire concept rests on, and until the ingest
+     path existed there was no way to show it.
+
+WHAT IT SPEAKS. Cursor on Target over UDP — the message format TAK
+already carries across tactical networks. The medical values ride in a
+<detail> extension, which is CoT's own extension mechanism used as
+intended. It is NOT a ratified medical CoT schema and nothing here
+claims otherwise. A wearable that already reaches ATAK or BATDOK
+reaches this with nothing new on the soldier.
+
+WHAT cotsim IS NOT. It is not a device driver, and it is not a claim
+that any monitor speaks this dialect today. It exists so the ingest
+path is exercised by a real socket from outside the program rather than
+by the simulation reading its own memory. Point a real feed at the same
+port and the application cannot tell the difference.
+
+THE SECURITY POSTURE, PLAINLY. The listener is off unless -cot is
+passed. When enabled it binds 127.0.0.1 unless you ALSO pass
+-cot-external — two flags, not one, to put a socket on a real
+interface. It is receive-only: it parses, it never replies, and it
+never originates a packet. Datagrams over 8192 bytes are dropped
+unread.
+
+THE CLAIM THIS SUPPORTS. Not "air-gapped" — that word conflated two
+different things. ANGEL SWARM has no dependency on enterprise reachback
+to decide. It consumes the telemetry the force already carries on its
+tactical network, decides locally, and continues on last-known state
+when reachback drops. A tactical network is not the internet.
+
+
+HONESTY
+=======
+
+The casualties are synthetic. The physiology is a model, not a
+patient. The doctrine passages are summaries written for this
+prototype with their source publications named — they are not
+extracts, and operational use requires the actual publication.
+
+The Monte Carlo reports the confidence interval AND the number of
+replications where the system did worse rather than better, because
+that number is the one worth knowing. Across 1,400 paired battles in
+all seven theatres, ANGEL SWARM produced one more death in six of them
+— 0.43%, never worse by more than one — and four of those six are in
+EUCOM FJORD, which still wins on its interval. Seed 42 in FJORD is one
+of the six, and it is left in the scenario list rather than hidden.
+
+The interface is a demonstration, not a fielded system: there is no
+authentication, no identity and no access control, and the security
+document says so before anyone else has to.
+
+Every number on every screen comes from the simulation you are
+watching. The decision log is hash-chained and exportable.

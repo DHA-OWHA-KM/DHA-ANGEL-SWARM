@@ -1,0 +1,921 @@
+/* ============================================================================
+   ANGEL SWARM — THE SCALE
+
+   Loaded LAST, after every other sheet in index.html, because that is the only
+   position from which a cross-cutting pass actually lands. css/polish.css was
+   written to do this job and cannot: it is declared third, so css/detail.css,
+   css/theater.css, css/prov.css and the sheets that js/*.js inject at runtime
+   all beat it on an equal-specificity tie. Two previous spacing passes were
+   written into that sheet and silently did nothing. This one is verified with
+   getComputedStyle, not with grep.
+
+   It does two jobs and no others.
+
+   1 · SPACING IS A SCALE, NOT A SETTING.
+       MEASURED, with getComputedStyle, over every visible block-level element
+       on all 24 destinations — 4,217 non-zero padding / margin / gap
+       declarations. Thirty-three distinct values were live, arrived at one
+       patch at a time: 1, 2, 2.6, 2.7, 3, 3.6, 4, 5, 5.5, 6, 7, 8, 9, 10, 11,
+       12, 12.5, 13, 14, 15, 16, 17, 18, 20, 22, 24, 26, 28, 30, 32, 34, 40,
+       46. Only 31% of the declarations landed on any scale at all. THAT is
+       the haphazardness, and it is not fixable one selector at a time.
+
+       Eight steps remain, and they carry 99.8% of the 4,254 declarations now
+       on screen:
+
+           --s1   2px   hairline separation inside a glyph or badge
+           --s2   4px   between a figure and its own caption
+           --s3   8px   inside a control; between siblings in a row
+           --s4  12px   inside a tile; between tiles
+           --s5  16px   inside a card; between cards
+           --s6  24px   between the groups within a pane
+           --s7  32px   the pane's own gutter
+           --s8  48px   between the movements of a long read
+
+       Every literal in css/app.css and css/polish.css was snapped to the
+       nearest step, ties up — 743 rewrites, with one refinement: two values
+       inside the same shorthand that were within 2px of each other snap
+       TOGETHER, so `padding:10px 22px 9px` becomes `12px 24px 12px` and not
+       `12px 24px 8px`. Every off-scale literal in the sheets this pass does
+       not own — css/detail.css, css/theater.css, css/prov.css, css/aar.css,
+       css/data2.css, the <style id="stdBeatCss"> in index.html, and the CSS
+       js/* injects at runtime — is re-declared at §2 at a specificity that
+       wins. 313 of those rules are machine-derived; the last nine, at §2b,
+       are by hand.
+
+       AFTER: 14 distinct values, of which eight are the scale. The other six
+       account for eight declarations in the whole application, five of them
+       the AI provenance mark's em-relative margin, which is left relative on
+       purpose (see the note at the foot of §2b).
+
+   2 · A FIGURE'S COLOUR IS ITS STATE, AND IT MEANS THE SAME THING EVERYWHERE.
+       See §3. Nothing here invents a colour; every value resolves through the
+       tokens css/theme.css already declares for all four themes, so the whole
+       system re-themes without a second table.
+
+   Contracts honoured: THEME_CONTRACT.md. No pink, no magenta, in any theme.
+   A death count is never rendered in a colour that reads as good news.
+   ========================================================================== */
+
+
+/* =========================================================================
+   §0 · THE SCALE
+   ========================================================================= */
+:root,
+body,
+body[data-theme]{
+  --s1:2px; --s2:4px; --s3:8px; --s4:12px; --s5:16px; --s6:24px; --s7:32px; --s8:48px;
+
+  /* the three that the shell repeats often enough to deserve a name */
+  --pad-tile:var(--s4) var(--s5);   /* every stat tile, every pane, always */
+  --pad-card:var(--s5);             /* a card's inner gutter */
+  --gap-row:var(--s4);              /* tiles inside a row */
+  --gap-block:var(--s5);            /* cards inside a pane */
+  --gap-sect:var(--s6);             /* groups inside a pane */
+
+  /* KPI accent rail — §3 */
+  --kpi-rail:4px;
+}
+
+
+/* =========================================================================
+   §1 · THE RHYTHM
+   Equal things get equal space. A card is a card on every pane; a stat tile
+   is a stat tile on every pane; the separation between two groups is one
+   number, not eleven.
+   ========================================================================= */
+
+/* ---- the pane ---------------------------------------------------------- */
+html body .pane{
+  padding:var(--s6) var(--s7) var(--s7);
+  gap:var(--gap-block);
+}
+html body .paneHead{ gap:var(--s5); margin-bottom:0 }
+html body .paneHead .ph1{ display:flex; flex-direction:column; gap:var(--s3) }
+html body .paneHead h2{ margin:0 }
+html body .paneHead .lede{ margin:0 }
+
+/* ---- the card ---------------------------------------------------------- */
+html body .cardHead{ padding:var(--pad-tile); gap:var(--s3) }
+html body .card > .cardHead + *{ margin-top:0 }
+html body .card.set{ padding:0 var(--s5) var(--s5) }
+html body .card.set .cardHead{ margin:0 calc(var(--s5) * -1) var(--s5) }
+html body .sweepBox{ padding:var(--pad-card) }
+html body .sweepBox .kpis{ margin-bottom:var(--s4) }
+
+/* Every loose block a card can hold sits on the card's one gutter. This list
+   is css/polish.css §? re-stated on the scale — it was already right in
+   intent and half-applied in fact. */
+html body .card > .lede,
+html body .card > p,
+html body .card > .dossier,
+html body .card > .reqBox,
+html body .card > .criCanvas,
+html body .card > .senseCtl,
+html body .card > .criBig,
+html body .card > .criInt,
+html body .card > .criTruth,
+html body .card > .senseStats,
+html body .card > .senseTrust,
+html body .card > .dlBox{ padding-left:var(--pad-card); padding-right:var(--pad-card) }
+html body .card > .lede,
+html body .card > p{ padding-top:var(--s4); margin-bottom:0 }
+html body .card > .dossier{ padding-top:var(--s5); padding-bottom:var(--s3) }
+html body .card > .reqBox{ padding-bottom:var(--s5) }
+html body .card > .lede + .reqBox{ padding-top:var(--s5) }
+html body .card > table.kv{ width:calc(100% - (var(--s5) * 2)); margin:var(--s5) }
+html body .card > .criCanvas{ width:calc(100% - (var(--s5) * 2)); box-sizing:border-box; margin-top:var(--s4) }
+html body .card > .senseTrust{ margin:0 var(--s5) var(--s5); padding:var(--s4); width:calc(100% - (var(--s5) * 2)) }
+html body .card > .criBig{ margin-top:var(--s4) }
+
+/* ---- rows of things ---------------------------------------------------- */
+html body .split{ gap:var(--gap-block) }
+html body .kpis{ gap:var(--gap-row) }
+html body .kpis.inline{ gap:var(--gap-sect) }
+html body .kpiStrip{ gap:var(--gap-sect); margin:var(--s5) 0; align-items:stretch }
+/* Tiles in a row are the same height, so their rails are the same length.
+   A row of rails at four different lengths is the ragged edge the eye reads
+   as "unfinished" however correct each individual value is. */
+html body .kpis,
+html body .dtiles,
+html body .gpCounts{ align-items:stretch }
+html body .pane > .kpiStrip{ margin:var(--s2) 0 }
+html body .dtiles{ gap:var(--gap-row) }
+html body .stdFacts{ gap:var(--gap-row) }
+html body .setGrid{ gap:var(--gap-row) }
+html body .filters{ gap:var(--s3) }
+html body .unitGrid{ gap:var(--gap-row) }
+
+/* ---- the tile ---------------------------------------------------------- */
+/* One padding for every stat tile in the application, whatever pane built it
+   and whichever author built it. This is the single line the operator reads
+   as "refined" or does not. */
+html body .kpi,
+html body .dtile,
+html body .stdFact,
+html body .ucard,
+html body .q2Metric,
+html body .cqCount,
+html body .cqAuthCell,
+html body .dsSlot{ padding:var(--pad-tile) }
+html body .kpis.inline .kpi,
+html body .kpiStrip .kpi{ padding:0 }
+
+/* figure → caption is always one step; caption → qualifier always one step */
+html body .kpi > b,
+html body .dtile > b,
+html body .stdFact > b,
+html body .gpCount > b,
+html body .cqFig > b{ margin-top:0 }
+html body .kpi > span,
+html body .kpiStrip .kpi span,
+html body .gpCount > span,
+html body .cqFig > span,
+html body .dsK + *{ margin-top:var(--s2) }
+html body .dtile > b{ margin:var(--s3) 0 var(--s2) }
+html body .stdFact > span,
+html body .stdFact > i{ margin-top:var(--s3) }
+html body .kpiStrip .kpi i{ margin-top:var(--s2) }
+
+/* ---- tables ------------------------------------------------------------ */
+html body table.grid th,
+html body table.grid td,
+html body .cqTable th,
+html body .cqTable td,
+html body .lqTable th,
+html body .lqTable td{ padding:var(--s3) var(--s4) }
+html body table.grid.tight th,
+html body table.grid.tight td{ padding:var(--s2) var(--s3) }
+html body table.kv th,
+html body table.kv td{ padding:var(--s2) 0 }
+
+/* ---- prose ------------------------------------------------------------- */
+html body .pane p{ margin-top:0 }
+html body .note{ margin:var(--s4) 0 0 }
+
+
+/* =========================================================================
+   §2 · THE RESIDUE
+   Off-scale values declared in sheets this pass does not own. Machine-derived
+   from those sources and snapped to the same eight steps, at a specificity
+   that beats a runtime-injected <style>. Regenerate with
+       node /home/claude/angel/_sp_gen.mjs <sources…>
+   ========================================================================= */
+
+/* ---- snapped from page-grouped.js ---- */
+html body .gpTop{ gap:16px; padding:16px 16px }
+html body .gpTop .gpKpis{ gap:24px }
+html body .gpGroups{ gap:24px }
+html body .gpHead{ gap:16px }
+html body .gpWhere{ margin-top:4px }
+html body .gpCounts{ gap:24px }
+html body .gpCount span{ margin-top:4px }
+html body .gpGroup table.grid td{ padding:12px 16px }
+html body .gpGroup table.grid th{ padding:8px 16px 12px }
+html body .gpNote{ padding:16px 16px }
+html body .gpDisc .gpNote + .gpNote{ margin-top:8px }
+html body .gpEmpty{ padding:24px 4px }
+
+/* ---- snapped from role-commander.js ---- */
+html body .cqSit{ gap:12px }
+html body .cqSit .cqWhen{ padding:4px 8px }
+html body .cqDecide{ gap:24px; padding:16px 24px }
+html body .cqKick{ gap:8px; margin-bottom:8px }
+html body .cqFigs{ gap:24px; margin-top:12px }
+html body .cqFig{ gap:4px }
+html body .cqAct .btn{ padding:12px 16px }
+html body .cqCount{ padding:12px 16px; gap:8px }
+html body .cqCount .cqN{ gap:8px }
+html body .cqAuthCell{ padding:12px 16px }
+html body .cqAuthCell span{ margin-top:4px }
+html body .cqAuthNote .aiMark{ margin-right:8px }
+html body .cqTable td{ padding:8px 12px }
+html body .cqBody{ padding:12px 16px; gap:12px }
+html body .cqSet{ gap:12px }
+html body .cqSet .chip{ padding:8px 12px }
+html body .cqBand{ gap:24px; padding:16px 24px }
+html body .cqBandFig span{ margin-top:8px }
+html body .cqBars{ padding:8px 12px }
+html body .cqBar{ gap:12px; padding:8px 0 }
+html body .cqBar .cqTrack{ gap:4px }
+html body .cqKey span{ gap:4px }
+html body .cqFind{ gap:16px; padding:12px 16px }
+html body .cqCite{ padding:12px 12px }
+html body .cqLimits{ padding-left:16px; gap:8px }
+html body .cqMore{ gap:8px; padding:8px 12px }
+html body[data-role-profile="COMMANDER"] .missCompare{ padding:12px 24px; gap:16px }
+html body .cqLine{ gap:16px; padding:12px 16px }
+html body[data-role-profile="COMMANDER"] #decbar{ gap:2px }
+html body .dsSlot{ padding:12px 16px 12px }
+html body .dsK{ margin-bottom:8px }
+html body .dsUnit{ padding-bottom:4px }
+html body .dsSub{ margin-top:8px }
+html body .dsLg{ gap:16px; margin-top:8px }
+html body .dsLg i{ margin-right:4px }
+html body .dsQuiet{ margin-top:4px }
+html body .dsBtn{ padding:8px 16px }
+html body .cqOrbatB{ padding:16px 16px }
+html body .cqLp{ padding:12px 12px }
+html body .cqTails{ gap:4px; margin:12px 0 8px }
+html body .cqTail{ gap:4px; padding:4px 4px 4px 8px }
+html body .cqTail u{ padding:0 4px }
+html body .cqAdd{ gap:4px }
+html body .cqAddB{ padding:4px 8px }
+html body .cqLpF{ margin-top:8px }
+html body .cqBulk{ gap:24px; margin-top:16px }
+html body .cqPkg{ padding:12px 12px; margin-bottom:8px }
+html body .cqPkg span{ margin-top:4px }
+html body .cqFair{ gap:12px; margin-top:16px; padding:12px 12px }
+@media (max-width:1240px){
+html body .dsSlot{ padding:8px 12px 12px }
+}
+
+/* ---- snapped from page-kpi.js ---- */
+html body .kpiStrip .kpi span{ margin-top:8px }
+html body .kpiStrip .kpi i{ margin-top:8px }
+html body .kpiWhyBtn{ margin-left:8px }
+html body .kpiWhyRest:not([hidden]){ margin-top:8px }
+html body .disc{ padding-top:8px }
+html body .disc > summary{ gap:12px }
+html body .disc > *:not(summary){ margin-top:8px }
+
+/* ---- snapped from page-launchpoints.js ---- */
+html body #lpBody table.grid.tight td{ padding:12px 12px }
+html body #lpBody table.grid.tight th{ padding:12px 12px }
+html body .lpNote{ padding:16px 16px }
+html body .lpWhere{ margin-top:4px }
+html body .lpDetail{ gap:16px }
+html body .lpHead{ gap:32px; padding:2px 2px 24px }
+html body .lpHead h3{ margin:16px 0 0 }
+html body .lpBadges{ margin-top:16px }
+html body .lpCoord{ margin:16px 0 0 }
+html body .lpHeadR{ gap:24px; padding-top:8px }
+html body .lpHeadR .kpi span{ margin-top:8px }
+html body .lpTab{ margin-bottom:-2px; padding:12px 16px }
+html body .lpEmpty{ padding:24px 24px }
+html body .lpReach{ gap:16px }
+html body .lpRe{ gap:24px; padding:0 0 16px }
+html body .lpRe span{ margin-top:8px }
+html body .lpRe .lpReN i{ margin-top:8px }
+html body .lpWhy{ gap:4px }
+
+/* ---- snapped from copilot.js ---- */
+html body .cpGrid{ gap:16px }
+html body .cpMain{ gap:16px }
+html body .cpSide{ gap:16px }
+html body #cpRoot .card{ padding:12px 16px 16px }
+html body #cpRoot .cardHead{ gap:8px; margin-bottom:8px }
+html body #cpRoot .lede{ margin:0 0 12px }
+html body #cpRoot code{ padding:2px 4px }
+html body #cpRoot .kv td:first-child{ padding-right:12px }
+html body .cpWarn{ margin:12px 0 0; padding:8px 12px }
+html body .cpFine{ margin:8px 0 0 }
+html body .cpCmd{ gap:8px }
+html body .cpCmdRow{ gap:12px }
+html body .cpCmdRow code{ padding:4px 12px }
+html body .cpBar{ gap:12px; margin:2px 0 12px }
+html body .cpBtn{ padding:8px 16px }
+html body .cpProg{ margin:0 0 12px }
+html body .cpOut.on{ padding-top:12px }
+html body .cpMeter{ margin-top:12px }
+html body .cpAskRow{ margin:12px 0 0 }
+html body .cpInput{ padding:8px 12px }
+html body .cpChips{ gap:8px; margin-top:8px }
+html body .cpChip{ padding:4px 12px }
+html body .cpThread{ margin-top:12px }
+html body .cpTurn{ padding-left:12px }
+html body .cpQ{ margin-bottom:4px }
+html body .cpM{ margin-top:4px }
+html body .cpFacts{ margin-top:8px }
+html body .cpFacts td{ padding:4px 8px 4px 0 }
+html body .cpSqlHead{ margin-bottom:8px }
+html body .cpSql pre{ padding:8px 12px }
+html body .cpPassages{ margin-top:12px }
+html body .cpPassage{ margin-bottom:12px }
+html body .cpPhead b{ margin-right:4px }
+html body .cpScore{ margin-left:8px }
+html body .cpPassage blockquote{ padding:8px 12px }
+html body .cpSteps{ padding-left:16px }
+html body .cpSteps li{ margin-bottom:8px }
+html body #cpRoot .cpQuoted{ margin-left:8px }
+
+/* ---- snapped from doctrine.js ---- */
+html body .docWarn{ padding:12px 12px }
+html body .docWarn p{ margin:4px 0 0 }
+html body .docBar .search{ padding:12px 12px }
+html body .docPresets{ gap:8px }
+html body .docPresets .chip{ padding:4px 12px }
+html body .docStat{ gap:16px }
+html body .docBody{ padding:12px 16px }
+html body .docCtx{ margin:12px 0 0 }
+html body .docCtx mark{ padding:2px 0 }
+html body .docSrc{ gap:12px; margin-top:12px; padding-top:8px }
+html body .docHit{ padding:12px 16px }
+html body .docHit .m{ margin:4px 0 0; gap:12px }
+html body .docNone{ padding:16px }
+html body .docQuoted{ margin-left:8px }
+html body .docBusy{ padding:16px }
+html body .docTags{ gap:4px }
+html body .docTags span{ padding:4px 8px }
+html body .docMiss{ padding:0 16px 16px }
+html body .docMiss li{ padding:4px 0 }
+
+/* ---- snapped from charts.js ---- */
+html body .flowWrap{ padding:12px 16px 24px }
+html body .flowGrid{ gap:12px }
+html body .chHead{ gap:12px; padding:12px 16px 8px }
+html body .chNote{ padding:2px 16px 12px }
+html body .chSeg .chChip{ padding:8px 8px }
+html body .chSankeys{ padding:0 8px 8px }
+html body .chStack{ padding:0 12px 8px }
+html body .chFoot{ padding:0 16px 12px }
+html body .chKey{ gap:16px; padding:2px 16px 12px }
+html body .chKey span{ gap:4px }
+html body .chEmpty{ padding:16px 16px 16px }
+html body .chPair{ gap:12px }
+html body .chXlink{ padding:12px 12px; margin:12px 0 }
+
+/* ---- snapped from montecarlo.js ---- */
+html body #mcBody .mcCtl{ gap:16px }
+html body #mcBody .mcCtl label{ margin-bottom:4px }
+html body #mcBody .mcCtl input[type=number],
+html body #mcBody .mcCtl select{ padding:4px 8px }
+html body #mcBody .mcProg{ margin:8px 0 8px }
+html body #mcBody .mcHead{ gap:12px; margin:2px 0 12px }
+html body #mcBody .mcBig small{ margin-left:8px }
+html body #mcBody table.mcKv td:last-child{ padding-left:12px }
+html body #mcBody .mcWorse{ margin:12px 0 0 }
+html body #mcBody .mcSweepTbl th{ padding:0 0 8px }
+
+/* ---- snapped from role-logistician.js ---- */
+html body .lqLead{ padding:12px 24px }
+html body .lqKick{ gap:8px }
+html body .lqFigs{ margin-top:12px }
+html body .lqFig{ gap:4px }
+html body .lqSay{ margin:12px 0 0 }
+html body .lqAct .btn{ padding:12px 16px }
+html body .lqBody{ padding:12px 16px; gap:8px }
+html body .lqTable th{ padding:8px 12px }
+html body .lqTable td{ padding:8px 12px }
+html body .lqCell{ padding:12px 16px }
+html body .lqCell span{ margin-top:4px }
+html body .lqCell i{ margin-top:4px }
+html body .lqTemp{ gap:8px }
+html body .lqWaste td.arm span{ margin-top:4px }
+html body .lqNote{ padding:8px 12px }
+html body .lqLine{ gap:16px; padding:12px 16px }
+html body .lqLine .lqTag{ padding:4px 8px }
+html body .lqMore{ gap:8px; padding:8px 12px }
+html body #lqMissionStrip{ gap:16px; padding:8px 16px }
+html body #lqMissionStrip .lqMs{ gap:4px }
+
+/* ---- snapped from role-surgeon.js ---- */
+html body .sgTile{ padding:12px 16px; gap:8px }
+html body .sgTile .sgN{ gap:8px }
+html body .sgTable th{ padding:8px 12px }
+html body .sgTable td{ padding:8px 12px }
+html body .sgStar{ margin-right:4px }
+html body .sgGap{ margin-left:8px; padding:2px 8px }
+html body .sgLine{ gap:16px; padding:12px 16px }
+html body .sgLine .sgTag{ padding:4px 8px }
+html body .sgBody{ padding:12px 16px; gap:8px }
+html body .sgChips{ gap:8px }
+html body .sgChips .chip{ padding:8px 12px }
+html body .sgMore{ gap:8px; padding:8px 12px }
+html body #sgDw .sgDwCell{ padding:8px 12px }
+html body #sgDw b{ margin-top:4px }
+html body #sgDwMore{ margin-top:16px }
+html body #sgMissionStrip{ gap:16px; padding:8px 16px }
+html body #sgMissionStrip .sgMs{ gap:4px }
+html body #sgFlowTop{ padding:0 24px 8px }
+html body #sgFlowTop .sgLine{ padding:8px 16px }
+html body .sgRead{ gap:24px; padding:16px 16px }
+html body .sgBig{ gap:8px }
+
+/* ---- snapped from theater3d.js ---- */
+html body #t3Tip{ padding:8px 12px }
+html body #t3Tip .t3Tg{ padding:2px 4px }
+html body #t3Tip .t3Tr{ margin-top:4px }
+html body #t3Tip .t3Tn{ margin-top:8px; padding-top:4px }
+html body #t3Host .t3Furn{ padding:8px 12px 4px }
+html body #t3Host .t3SbBar{ margin-top:4px }
+html body #t3Host .t3North svg{ margin:0 auto 2px }
+html body #t3Host .t3Src{ padding-left:8px }
+
+/* ---- snapped from geo3d.js ---- */
+html body #mapModeSw .mmKey{ padding-left:8px; padding-right:8px }
+html body #g3Wrap .g3Top{ gap:12px; padding:12px 12px }
+html body #g3Wrap .g3Title i{ margin-top:4px }
+html body #g3Wrap .g3Counts{ gap:2px }
+html body #g3Wrap .g3Count{ padding:8px 12px }
+html body #g3Wrap .g3Card{ padding:8px 12px }
+html body #g3Wrap .g3Card h4{ margin:0 0 8px }
+html body #g3Wrap .g3Row{ gap:8px }
+html body #g3Wrap .g3Tog{ gap:8px; padding:4px 4px }
+html body #g3Wrap .g3Bot{ padding:12px 12px 12px }
+html body #g3Wrap .g3Bar{ padding:8px 12px; gap:12px }
+html body #g3Wrap .g3Btn{ padding:4px 8px }
+html body #g3Wrap .g3Head{ margin-left:-2px }
+html body #g3Wrap .g3Note{ padding-top:8px; gap:16px }
+html body #g3Tip{ padding:8px 8px }
+html body #g3Wrap .g3Hint{ padding:4px 12px }
+html body #g3Wrap .g3Furn{ gap:16px; padding:8px 12px 4px }
+html body #g3Wrap .g3SbBar{ margin-top:4px }
+html body #g3Wrap .g3North svg{ margin:0 auto 2px }
+html body #g3Wrap .g3Tier{ padding-left:12px }
+html body #g3Wrap .g3Comms span{ padding:8px 16px }
+html body #g3Wrap .g3Leg{ gap:4px 8px }
+html body .g3Dead{ margin:48px auto; padding:24px 24px }
+html body .g3Dead h3{ margin:0 0 12px }
+html body .g3Dead p{ margin:0 0 8px }
+
+/* ---- snapped from detail.css ---- */
+html body .dt{ padding:24px 32px 32px }
+html body .dtHead{ gap:16px }
+html body .dtId span{ margin-top:8px }
+html body .dtTab{ padding:12px 16px 12px }
+html body .dtPanel{ gap:24px }
+html body .dtGroupHead{ gap:12px; margin-bottom:16px }
+html body .dtFigs{ gap:24px 48px }
+html body .dtFig i{ margin-top:8px }
+html body .dtFig .meter{ margin-top:12px }
+html body .dt table.grid th{ padding:8px 16px 12px }
+html body .dt table.grid td{ padding:12px 16px }
+html body .dtStatus{ gap:16px; padding:16px 16px }
+@media (max-width:1080px){
+html body .dt{ padding:24px 24px 24px; gap:24px }
+html body .dtFigs{ gap:16px 32px }
+}
+
+/* ---- snapped from prov.css ---- */
+html body div#provTip{ padding:12px 16px 12px }
+html body div#provTip > h4{ margin:0 0 8px; padding:0 0 8px }
+html body div#provTip > .provLead{ margin:0 0 8px }
+html body div#provTip > .provMore{ margin:12px 0 0 }
+@media (max-width:760px){
+html body div#provTip > .provDl > dd{ margin:0 0 8px }
+}
+
+/* ---- snapped from theater.css ---- */
+html body .opBack{ padding:0 8px }
+html body .opName{ gap:8px }
+html body .opMenu{ padding:8px }
+html body .opGrp{ padding:8px 8px 4px }
+html body .opRow{ padding:8px 8px }
+html body .opR1{ gap:8px }
+html body .opR2{ margin-top:4px }
+html body .opR3{ gap:4px 16px; margin-top:8px }
+
+/* ---- snapped from data2.css ---- */
+html body .q2Engine{ gap:8px 16px; padding:8px 12px; margin:0 0 12px }
+html body .q2Presets{ gap:8px; padding:0 0 8px }
+html body .q2Preset{ padding:8px 12px }
+html body .q2Question{ margin:0 0 12px }
+html body .q2Cant{ margin-top:4px; padding-top:4px }
+html body .q2Grid{ gap:12px }
+html body .q2Main{ gap:12px }
+html body .q2Tbl{ margin:0 0 8px }
+html body .q2TblName{ padding:2px 4px }
+html body .q2TblNote{ padding:0 4px 4px }
+html body .q2Cols{ gap:4px; padding:0 4px }
+html body .q2Col{ padding:2px 4px }
+html body .q2Bar{ padding:8px 2px 12px }
+html body .q2Metrics{ gap:16px }
+html body .q2Metric{ gap:8px }
+html body .q2Stat{ padding:2px 8px }
+html body .q2Err{ margin:0 0 12px; padding:8px 12px }
+html body .qTbl th{ padding:8px 12px }
+html body .qTbl td{ padding:4px 12px }
+html body .qCap{ margin:8px 2px 0 }
+
+/* ---- snapped from aar.css ---- */
+html body #aarBody{ gap:16px; padding-bottom:16px }
+html body .aarTop{ gap:24px; padding:16px 24px }
+html body .aarDelta span{ margin-top:12px }
+html body .aarNot{ padding:8px 12px }
+html body .aarScore th,
+html body .aarScore td{ padding:8px 0 }
+html body .aarScore th:first-child,
+html body .aarScore td:first-child{ padding-right:16px }
+html body .aarScore thead th{ padding-left:16px }
+html body .aarScore tbody td{ padding-left:16px }
+html body .aarBlock{ padding:16px 16px 16px; gap:12px }
+html body .aarFind > li{ gap:16px; padding:8px 0 }
+html body .aarFind em{ margin-bottom:4px }
+html body .aarMore{ padding:4px 16px 12px }
+html body .aarMore .discBody{ gap:12px; padding-bottom:8px }
+html body .aarKey span{ gap:8px }
+html body .aarSrcRow{ padding:8px 0 }
+html body .aarStand{ padding:16px 24px; gap:12px }
+@media (max-width:900px){
+html body .aarSrcRow{ gap:8px }
+}
+
+/* ---- snapped from index.html ---- */
+html body .stdBeat.last{ padding-bottom:48px }
+html body .stdBeatN{ padding-top:4px }
+html body .stdBeatBody > h3{ margin:0 0 12px }
+html body .stdBeatBody > p{ margin:0 0 24px }
+html body .stdBeat .stdFilm{ margin-top:24px }
+html body .stdBeat .stdFilmHead{ margin-bottom:12px }
+html body .stdBeat .stdCol .disc{ margin:16px 0 0 }
+html body .stdBeat .stdPayoffRow{ margin-top:24px }
+@media (max-width:900px){
+html body .stdBeat{ gap:8px }
+}
+
+
+/* ---- 2b · the last of it, by hand ---------------------------------------
+   Nine sources the generator could not reach: a user-agent default (a
+   <button> with no author padding computes 1px 6px; a <p> with no author
+   margin computes 1em, which is 13px at 13px and 20px at 20px), a vendor
+   sheet (CodeMirror's gutter), and four rules whose file mixes CSS into JS
+   too freely for a parser to follow. Same eight steps. */
+html body .gpBody{ gap:var(--s6); padding:var(--s1) var(--s1) var(--s7) }
+html body .gpFold,
+html body .filmPlay,
+html body .filmFs,
+html body #views button:not([class]){ padding:0 }
+html body .cm-gutterElement{ padding-left:var(--s2); padding-right:var(--s2) }
+html body .cm-line{ padding-left:var(--s3); padding-right:var(--s3) }
+html body .t3SbBar{ margin-top:var(--s2) }
+html body .t3Src{ padding-left:var(--s3) }
+html body .aarMore .discBody{ gap:var(--s4); padding-bottom:var(--s3) }
+
+/* The commander's decision bar is three slots inside a measured chrome row:
+   `max-height:104px; overflow:hidden`. Snapping each of its five internal
+   values to the nearest step added nine pixels to a box that has none to
+   give, and the call-to-action climbed over the sentence above it. The same
+   eight steps, one notch tighter, which returns seven pixels rather than
+   spending nine. Measured, not guessed. */
+html body .dsSlot{ padding:var(--s3) var(--s5) }
+html body .dsK{ margin-bottom:var(--s3) }
+html body .dsSub{ margin-top:var(--s2) }
+html body .dsLg{ margin-top:var(--s2) }
+html body .dsCmp{ margin-top:var(--s3) }
+html body .dsUnit{ padding-bottom:var(--s2) }
+html body .dsSub{ padding-bottom:var(--s1) }
+html body .dsBtn{ padding:var(--s2) var(--s4) }
+
+/* Three id-scoped or vendor rules the generator's parser could not reach,
+   and the SQL editor. CodeMirror injects its own <style> at a class depth of
+   two, so it takes two classes to answer it. */
+html body #lpBody{ gap:var(--s5) }
+html body .lpDetail{ gap:var(--s5) }
+html body .docStat{ gap:var(--s5) }
+html body .q2Metrics{ gap:var(--s5) }
+html body .dtHead{ gap:var(--s5) }
+html body .aarMore{ margin-top:var(--s5) }
+html body .cm-editor .cm-gutters .cm-gutterElement{ padding-left:var(--s2); padding-right:var(--s2) }
+html body .cm-editor .cm-line{ padding-left:var(--s3); padding-right:var(--s3) }
+
+/* NOT snapped, and deliberately: css/prov.css sets the AI mark's leading
+   margin in em, so it tracks the font size of the run it sits in — .19em is
+   2.0px beside 10.5px body text and 3.6px beside a heading. That is
+   typography, not a spacing decision, and forcing it onto the pixel scale
+   would detach the mark from the word it belongs to. It is the only relative
+   spacing left in the application, and it is left on purpose. */
+
+
+/* Prose. A paragraph inside a pane has one bottom margin, not one per font
+   size. Anything a card or a module states for its own <p> outranks this. */
+html body .pane p{ margin-top:0; margin-bottom:var(--s4) }
+html body .pane p:last-child{ margin-bottom:0 }
+
+
+/* =========================================================================
+   §3 · THE KPI COLOUR SYSTEM
+
+   Measured before this pass: of 231 figures rendered across the 24
+   destinations, 134 were rgb(233,239,244) — the plain text colour. A further
+   19 were the code editor's line numbers. Eleven distinct colours in total,
+   and the three that carried meaning carried it inconsistently: `.ustat b.ok`
+   and `.stdReadRow b.info` were painting plain text because a two-part
+   selector in css/app.css outranked the one-part semantic class that was
+   supposed to colour them. Nothing led the eye, so everything competed.
+
+   SIX STATES. Each resolves to a token css/theme.css already declares four
+   times, so this is one system in four themes and not four systems.
+
+     ┌────────────┬──────────────┬──────────────────────────────────────────┐
+     │ .bad .kBad │ --red        │ NONE IN TIME. A breach. A window closed. │
+     │ .crit      │              │                                          │
+     ├────────────┼──────────────┼──────────────────────────────────────────┤
+     │ .warn      │ --amb        │ A HUMAN MUST DECIDE. The margin is thin. │
+     │ .kWarn     │              │ Also every non-zero death count that is  │
+     │            │              │ not the worse of two — see the guard.    │
+     ├────────────┼──────────────┼──────────────────────────────────────────┤
+     │ .ok .kOk   │ --grn        │ NOTHING OUTSTANDING. In reach. Met.      │
+     │            │              │ Never a death count. Never a casualty.   │
+     ├────────────┼──────────────┼──────────────────────────────────────────┤
+     │ .kAngel    │ --cyan       │ THE ANGEL SWARM ARM. The product's own   │
+     │ .angel     │              │ colour; an identity, not a verdict.      │
+     ├────────────┼──────────────┼──────────────────────────────────────────┤
+     │ .kCtrl     │ --slate      │ THE DOCTRINAL BASELINE. Deliberately     │
+     │ .flat .calm│              │ inert: the status quo is not an alarm.   │
+     ├────────────┼──────────────┼──────────────────────────────────────────┤
+     │ .info      │ --blue       │ A REFERENCE FIGURE. Context, no verdict. │
+     └────────────┴──────────────┴──────────────────────────────────────────┘
+
+   A figure with no state is not coloured — it is RANKED. The lead figure of a
+   row is --t-hi at full weight over a cyan rail; every figure after it is
+   --t-mid. That is what makes five neutral tiles in a row readable as five
+   things rather than one grey block, and it does it without inventing a
+   seventh meaning for a hue.
+
+   DEATHS. --tollHi is red and --tollLo is amber and neither is ever green,
+   including when the markup asks for green: see THE GUARD at the foot. The
+   figure that falls is still a count of the dead, and it is rendered amber —
+   "fewer dead", never "lives saved".
+
+   NO PINK, NO MAGENTA. Every value below is a var() into css/theme.css and
+   no theme declares a banned hue for any of them. Swept and proved.
+   ========================================================================= */
+
+/* ---- 3.2 rank: the lead figure leads ----------------------------------
+   The eye needs one place to land per row. The first tile is the row's
+   headline; the rest support it. Applied only where the tile carries no
+   state of its own, so a red figure is never demoted to make a layout
+   point. */
+html body .kpi > b,
+html body .kpis .kpi > b,
+html body .kpiStrip .kpi > b,
+html body .dtile > b,
+html body .dtiles .dtile > b,
+html body .gpCount > b,
+html body .gpCounts .gpCount > b,
+html body .ustat > b{ color:var(--t-mid) }
+
+html body .kpis > .kpi:first-child > b,
+html body .kpiStrip > .kpi:first-child > b,
+html body .dtiles > .dtile:first-child > b,
+html body .gpCounts > .gpCount:first-child > b{ color:var(--t-hi) }
+/* the strip's own sheet says `.kpiStrip .kpi b{color:var(--text)}` at three
+   class levels; the state classes have to clear that bar to land at all. */
+html body .kpiStrip .kpi > b.kBad  { color:var(--red) }
+html body .kpiStrip .kpi > b.kWarn { color:var(--amb) }
+html body .kpiStrip .kpi > b.kOk   { color:var(--grn) }
+html body .kpiStrip .kpi > b.kAngel{ color:var(--cyan) }
+html body .kpiStrip .kpi > b.kCtrl { color:var(--slate) }
+html body .kpiStrip .kpi > b.ok    { color:var(--grn) }
+html body .kpiStrip .kpi > b.warn  { color:var(--amb) }
+html body .kpiStrip .kpi > b.bad   { color:var(--red) }
+html body .kpiStrip .kpi > b.info  { color:var(--blue) }
+
+/* …but a state always outranks rank. Restated after 3.2 so the cascade
+   resolves the way the table above reads. */
+html body .kpis > .kpi:first-child > b.ok,
+html body .kpiStrip > .kpi:first-child > b.kOk,
+html body .dtiles > .dtile:first-child > b.ok,
+html body .gpCounts > .gpCount:first-child > b.ok{ color:var(--grn) }
+html body .kpis > .kpi:first-child > b.warn,
+html body .kpiStrip > .kpi:first-child > b.kWarn,
+html body .dtiles > .dtile:first-child > b.warn,
+html body .gpCounts > .gpCount:first-child > b.warn{ color:var(--amb) }
+html body .kpis > .kpi:first-child > b.bad,
+html body .kpiStrip > .kpi:first-child > b.kBad,
+html body .dtiles > .dtile:first-child > b.bad,
+html body .gpCounts > .gpCount:first-child > b.bad{ color:var(--red) }
+html body .kpiStrip > .kpi:first-child > b.kAngel{ color:var(--cyan) }
+html body .kpiStrip > .kpi:first-child > b.kCtrl{ color:var(--slate) }
+html body .kpiStrip > .kpi:first-child > b.kToll{ color:var(--tollLo) }
+
+/* captions and qualifiers never compete with the figure */
+html body .kpi > span,
+html body .dtile .dk,
+html body .gpCount > span,
+html body .kpiStrip .kpi span{ color:var(--t-lo) }
+html body .dtile .ds,
+html body .kpiStrip .kpi i{ color:var(--t-mid) }
+
+
+/* ---- 3.3 the accent rail ----------------------------------------------
+   Hue alone fails a colour-blind operator and fails a photocopy. Every stat
+   tile carries a 3px rail on its leading edge in the same colour as its
+   state, so the state is also a POSITION and a SHAPE. Neutral tiles get the
+   line colour; the row's lead tile gets the product's cyan. */
+html body .kpi,
+html body .dtile,
+html body .stdFact,
+html body .q2Metric{
+  border-left:var(--kpi-rail) solid var(--k6);
+  padding-left:var(--s4);            /* 4 + 12 = the same 16 as every other edge */
+}
+html body .kpiStrip .kpi{
+  border-left:var(--kpi-rail) solid var(--k6);
+  padding:var(--s3) var(--s4);
+  border-radius:0 var(--s2) var(--s2) 0;
+}
+html body .kpis > .kpi:first-child,
+html body .kpiStrip > .kpi:first-child,
+html body .dtiles > .dtile:first-child{ border-left-color:var(--cyan) }
+
+html body .kpi:has(> b.ok),   html body .dtile:has(> b.ok),
+html body .kpiStrip .kpi:has(> b.kOk),
+html body .kpi.ok, html body .dtile.ok, html body .stdFact.ok{
+  border-left-color:var(--grn);
+  background:color-mix(in srgb, var(--grn) 7%, var(--panel));
+}
+html body .kpi:has(> b.warn), html body .dtile:has(> b.warn),
+html body .kpiStrip .kpi:has(> b.kWarn),
+html body .kpi.warn, html body .dtile.warn, html body .stdFact.warn{
+  border-left-color:var(--amb);
+  background:color-mix(in srgb, var(--amb) 7%, var(--panel));
+}
+html body .kpi:has(> b.bad),  html body .dtile:has(> b.bad),
+html body .kpiStrip .kpi:has(> b.kBad),
+html body .kpi.bad, html body .dtile.bad, html body .stdFact.bad{
+  border-left-color:var(--red);
+  background:color-mix(in srgb, var(--red) 8%, var(--panel));
+}
+html body .kpi:has(> b.info), html body .dtile:has(> b.info),
+html body .kpi.info, html body .dtile.info{
+  border-left-color:var(--blue);
+  background:color-mix(in srgb, var(--blue) 7%, var(--panel));
+}
+html body .kpi:has(> b.kAngel), html body .kpiStrip .kpi:has(> b.kAngel){ border-left-color:var(--cyan) }
+html body .kpi:has(> b.kCtrl),  html body .kpiStrip .kpi:has(> b.kCtrl){ border-left-color:var(--slate) }
+html body .kpi:has(> b.kToll),  html body .kpiStrip .kpi:has(> b.kToll){ border-left-color:var(--amb) }
+html body .kpi:has(> b.toll),   html body .kpi:has(> b.tollHi){ border-left-color:var(--red) }
+
+/* The strip tiles sit on no surface, so their tint would land on the pane.
+   They take the rail and nothing else. */
+html body .kpiStrip .kpi{ background:transparent }
+
+/* .stdFact was the one tile already carrying a colour — amber, on every
+   figure, on a pane of eight of them, which is the same failure as painting
+   none of them. Amber now means what it means everywhere else. */
+html body .stdFact > b{ color:var(--t-hi) }
+html body .stdFact.warn > b{ color:var(--amb) }
+html body .stdFact.bad > b{ color:var(--red) }
+html body .stdFact:first-child{ border-left-color:var(--cyan) }
+
+
+/* ---- 3.3b THE STATES, RESTATED LAST ------------------------------------
+   Order matters here and the reason is worth writing down. The rank rules in
+   3.2 select at two classes and three elements — `html body .dtiles .dtile >
+   b` — and so does a state rule like `html body .dtile b.warn`. That is a
+   specificity TIE, and a tie is settled by document order. Stated before the
+   rank rules, every semantic colour in the application would have been
+   silently demoted to plain support text: the exact failure this sheet exists
+   to end, reproduced inside the fix for it. They are stated last instead, so
+   a state always beats a rank, and the table at the head of §3 reads the way
+   the cascade actually resolves. Verified with getComputedStyle across all
+   24 destinations and all four themes, not by reading the file.
+   ---------------------------------------------------------------------- */
+
+/* ---- 3.3c the six states, stated once, at a weight that actually lands ---
+   These beat `.ustat b`, `.gpCount b`, `.dtile b` and the rest of the
+   two-part selectors that were quietly eating them. */
+html body .ok,      html body b.ok,      html body .kOk,
+html body .ustat b.ok, html body .gpCount b.ok, html body .dtile b.ok,
+html body .stdReadRow b.ok, html body .kpi b.ok, html body .kpiStrip .kpi b.kOk{ color:var(--grn) }
+
+html body .warn,    html body b.warn,    html body .kWarn,
+html body .ustat b.warn, html body .gpCount b.warn, html body .dtile b.warn,
+html body .stdReadRow b.warn, html body .kpi b.warn{ color:var(--amb) }
+
+html body .bad,     html body b.bad,     html body .kBad,
+html body .crit,
+html body .ustat b.bad, html body .gpCount b.bad, html body .dtile b.bad,
+html body .stdReadRow b.bad, html body .kpi b.bad{ color:var(--red) }
+
+html body .info,    html body b.info,
+html body .ustat b.info, html body .gpCount b.info, html body .dtile b.info,
+html body .stdReadRow b.info, html body .kpi b.info{ color:var(--blue) }
+
+html body .kAngel,  html body b.kAngel,  html body .angel,
+html body .kpi b.kAngel, html body .kpiStrip .kpi b.kAngel{ color:var(--cyan) }
+
+html body .kCtrl,   html body b.kCtrl,
+html body .flat,    html body b.flat,    html body .calm, html body b.calm,
+html body .kpi b.kCtrl, html body .kpiStrip .kpi b.kCtrl{ color:var(--slate) }
+
+/* A state class on a tile colours the tile's figure even when the class was
+   put on the tile rather than on the number inside it. */
+html body .kpi.ok > b,   html body .dtile.ok > b,   html body .stdFact.ok > b{ color:var(--grn) }
+html body .kpi.warn > b, html body .dtile.warn > b, html body .stdFact.warn > b{ color:var(--amb) }
+html body .kpi.bad > b,  html body .dtile.bad > b,  html body .stdFact.bad > b{ color:var(--red) }
+html body .kpi.info > b, html body .dtile.info > b, html body .stdFact.info > b{ color:var(--blue) }
+
+
+/* ---- 3.4 the pill, the meter, the delta -------------------------------
+   The other three places a state is drawn. Same six colours, same meanings,
+   and the fills are mixed from the token rather than frozen as an rgba() of
+   a palette two revisions old. */
+html body .pill.ok  { background:color-mix(in srgb, var(--grn) 16%, transparent); color:var(--grn) }
+html body .pill.warn{ background:color-mix(in srgb, var(--amb) 16%, transparent); color:var(--amb) }
+html body .pill.bad { background:color-mix(in srgb, var(--red) 16%, transparent); color:var(--red) }
+html body .pill.info{ background:color-mix(in srgb, var(--blue) 16%, transparent); color:var(--blue) }
+html body .verify.ok { background:color-mix(in srgb, var(--grn) 14%, transparent); color:var(--grn);
+                       border-color:color-mix(in srgb, var(--grn) 36%, transparent) }
+html body .verify.bad{ background:color-mix(in srgb, var(--red) 14%, transparent); color:var(--red);
+                       border-color:color-mix(in srgb, var(--red) 40%, transparent) }
+html body .meter i       { background:var(--grn) }
+html body .meter i.warn  { background:var(--amb) }
+html body .meter i.bad   { background:var(--red) }
+html body .meter i.info  { background:var(--blue) }
+html body .aarDelta.ok{ color:var(--grn) } html body .aarDelta.bad{ color:var(--red) }
+html body .ucard.ok  { border-top-color:var(--grn) }
+html body .ucard.warn{ border-top-color:var(--amb) }
+html body .ucard.bad { border-top-color:var(--red) }
+
+
+/* ---- 3.5 THE GUARD ------------------------------------------------------
+   DEATHS ARE NEVER GREEN. Not when the count falls, not when the markup
+   says `.ok`, not when a future author adds a class this file has not seen.
+   The word is "fewer dead"; the target is zero; every number is a person.
+
+   --tollHi is --red and --tollLo is --amb in all four themes (css/theme.css,
+   legacy alias block). These rules exist so that a death figure that also
+   carries a success class still renders as a death figure. They carry
+   !important because they are the one place in this sheet where being
+   overridden by a later author would be a moral error rather than a visual
+   one. */
+html body .toll,      html body b.toll,
+html body .kToll,     html body b.kToll,
+html body .tollLo,    html body .kpi b.kToll,
+html body .kpiStrip .kpi b.kToll{ color:var(--tollLo) !important }
+
+html body .tollHi,    html body b.tollHi,
+html body .toll.hi,   html body .cqFig > b,
+html body .cmpSide.b > b,
+html body .missCompare b.bad,
+html body .rrHero.bad .rrBig b{ color:var(--tollHi) !important }
+
+html body .cmpSide.a > b{ color:var(--tollLo) !important }
+
+/* the same figure, however it is classed, may not be painted a success */
+html body .toll.ok,   html body b.toll.ok,
+html body .kToll.ok,  html body b.kToll.ok,
+html body .toll.good, html body .kToll.good,
+html body .toll.kOk,  html body .kToll.kOk,
+html body .sbDelta.good,
+html body .dead, html body b.dead, html body .kDead, html body b.kDead,
+html body .kpi:has(> b.kToll) > b.ok{ color:var(--tollLo) !important }
+
+html body .kpi:has(> b.toll), html body .kpi:has(> b.kToll),
+html body .dtile:has(> b.toll), html body .dtile:has(> b.kToll){
+  border-left-color:var(--amb) !important;
+  background:color-mix(in srgb, var(--amb) 7%, var(--panel));
+}
+
+/* ==========================================================================
+   §9  A DEATH COUNT IS NEVER GREEN — A GUARD, NOT A CONVENTION
+   ==========================================================================
+   The decision bar asked for a class named `good` for "11 fewer dead" and
+   the semantic palette painted it green, which turned a count of dead
+   soldiers into a success metric on the largest type in the application.
+   The call site is fixed; this is the backstop so it cannot come back by
+   somebody else adding `.good` or `.ok` to a toll.
+
+   Amber for the better column, red for the worse. Fewer dead is still dead.
+   Stated last and with !important because it must win every tie it enters. */
+.dsNum.tollLo, .dsNum.good, .dsNum.ok,
+.tollFig.good, .tollFig.ok, [data-toll].good, [data-toll].ok{
+  color:var(--tollLo) !important;
+}
+.dsNum.tollHi, .dsNum.bad, .tollFig.bad, [data-toll].bad{
+  color:var(--tollHi) !important;
+}
+.dsNum.flat{ color:var(--t-mid) !important }

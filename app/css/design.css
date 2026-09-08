@@ -1,0 +1,346 @@
+/* ==========================================================================
+   ANGEL SWARM — THE DESIGN SYSTEM
+   ==========================================================================
+   Extracted verbatim from DHA_ANGEL_SWARM.dc.html, the Claude Design canvas.
+   This file is the single source of truth for colour, type, spacing and
+   component shape. Nothing in this application may introduce a colour or a
+   type size that is not declared here.
+
+   Colour is oklch throughout, exactly as drawn. The hue families are:
+
+      25   red      casualty, breach, and every death figure
+      75   amber    escalation, awaiting a human
+      165  teal     the ANGEL SWARM arm; the active rail item
+      210  cyan     links, live telemetry, information
+      250  slate    every neutral surface and every neutral text tone
+      300  violet   evidence, and the AI provenance chip
+      330  magenta  Ask ANGEL, and only Ask ANGEL
+
+   TWO DEPARTURES FROM THE CANVAS, BOTH ON THE USER'S INSTRUCTION:
+
+   1. DEATHS ARE RED. The canvas draws the delta against doctrinal push on
+      teal — "−12 deaths, same inputs" as a success tile. The instruction is
+      that a death figure is red: the number, the bar and the marker, though
+      not necessarily the sentence around them. Every death token below
+      resolves to hue 25 and there is no path by which one resolves to teal.
+
+   2. PACOM, not INDOPACOM, in the classification bar.
+
+   Everything else is as drawn.
+   ========================================================================== */
+
+:root{
+  /* ---- surfaces, darkest to lightest ---------------------------------- */
+  --d-void:        oklch(0.14 0.008 250);   /* the page behind everything   */
+  --d-rail:        oklch(0.145 0.01 250);   /* the navigation rail          */
+  --d-app:         oklch(0.17 0.01 250);    /* the application ground       */
+  --d-bar:         oklch(0.185 0.01 250);   /* the top bar                  */
+  --d-strip:       oklch(0.2 0.012 250);    /* classification strip, panels */
+  --d-panel:       oklch(0.2 0.012 250);    /* every card                   */
+  --d-panel-2:     oklch(0.22 0.012 250);   /* an inset inside a card       */
+  --d-panel-3:     oklch(0.23 0.012 250);   /* an option row                */
+  --d-raise:       oklch(0.26 0.01 250);    /* a hovered row                */
+
+  /* ---- lines ----------------------------------------------------------- */
+  --d-line:        oklch(0.28 0.01 250);    /* the standard divider         */
+  --d-line-soft:   oklch(0.24 0.01 250);    /* between rows in a table      */
+  --d-line-hard:   oklch(0.3 0.012 250);    /* a card's own border          */
+  --d-line-lift:   oklch(0.31 0.012 250);   /* an inset's border            */
+
+  /* ---- text, brightest to dimmest -------------------------------------- */
+  --d-t1:          oklch(0.96 0.005 250);   /* a figure, a page title       */
+  --d-t2:          oklch(0.92 0.005 250);   /* body at full strength        */
+  --d-t3:          oklch(0.88 0.006 250);   /* body                         */
+  --d-t4:          oklch(0.78 0.006 250);   /* secondary body               */
+  --d-t5:          oklch(0.68 0.008 250);   /* a label                      */
+  --d-t6:          oklch(0.6 0.008 250);    /* a caption                    */
+  --d-t7:          oklch(0.55 0.008 250);   /* the quietest thing that reads*/
+
+  /* ---- red · CASUALTY AND DEATH ---------------------------------------- */
+  /* Every death figure in this application resolves here. There is no
+     variant of this family on any other hue. */
+  --d-red:         oklch(0.82 0.15 25);     /* a death figure               */
+  --d-red-mark:    oklch(0.62 0.19 25);     /* a marker, a bar, an icon     */
+  --d-red-t:       oklch(0.78 0.06 25);     /* the label above it           */
+  --d-red-line:    oklch(0.38 0.09 25);     /* the tile's border            */
+  --d-red-bg:      oklch(0.22 0.035 25);    /* the tile's ground            */
+  --d-red-row:     oklch(0.21 0.03 25);     /* a row that has breached      */
+  --d-red-pill:    oklch(0.4 0.13 25);      /* a count badge on the rail    */
+  --d-red-pill-t:  oklch(0.96 0.02 25);
+
+  /* ---- amber · AWAITING A HUMAN ---------------------------------------- */
+  --d-amb:         oklch(0.86 0.1 75);
+  --d-amb-hi:      oklch(0.92 0.07 75);
+  --d-amb-mark:    oklch(0.78 0.14 75);
+  --d-amb-line:    oklch(0.42 0.1 75);
+  --d-amb-bg:      oklch(0.26 0.06 75);
+  --d-amb-chip:    oklch(0.3 0.07 75);
+  --d-amb-pill:    oklch(0.75 0.15 75);
+  --d-amb-pill-t:  oklch(0.2 0.03 75);
+
+  /* ---- teal · THE ANGEL SWARM ARM, AND THE ACTIVE DESTINATION ---------- */
+  /* Never a death figure. */
+  --d-teal:        oklch(0.86 0.13 165);
+  --d-teal-2:      oklch(0.8 0.11 165);
+  --d-teal-t:      oklch(0.78 0.05 165);
+  --d-teal-line:   oklch(0.36 0.06 165);
+  --d-teal-bg:     oklch(0.21 0.03 165);
+  --d-teal-nav:    oklch(0.26 0.03 165);    /* the active rail item         */
+  --d-teal-nav-t:  oklch(0.95 0.02 165);
+  --d-teal-sel:    oklch(0.3 0.05 165);     /* a selected segment           */
+
+  /* ---- cyan · LINKS AND LIVE TELEMETRY --------------------------------- */
+  --d-cyan:        oklch(0.78 0.12 210);
+  --d-cyan-2:      oklch(0.72 0.14 210);
+  --d-cyan-hi:     oklch(0.85 0.1 210);
+
+  /* ---- violet · EVIDENCE, AND THE AI CHIP ------------------------------ */
+  --d-vio:         oklch(0.88 0.11 300);
+  --d-vio-mark:    oklch(0.72 0.16 300);
+  --d-vio-line:    oklch(0.46 0.12 300);
+  --d-vio-bg:      oklch(0.3 0.08 300);
+
+  /* ---- magenta · ASK ANGEL, AND NOTHING ELSE --------------------------- */
+  --d-mag:         oklch(0.93 0.11 330);
+  --d-mag-mark:    oklch(0.72 0.16 330);
+  --d-mag-bg:      oklch(0.4 0.12 330);
+
+  /* ---- type ------------------------------------------------------------ */
+  --d-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --d-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --d-cond: 'Barlow Condensed', 'IBM Plex Sans', sans-serif;
+
+  /* ---- the spacing scale, as the canvas uses it ------------------------ */
+  --d-1: 2px;  --d-2: 4px;  --d-3: 6px;  --d-4: 9px;
+  --d-5: 11px; --d-6: 14px; --d-7: 18px; --d-8: 22px;
+
+  /* ---- radii ----------------------------------------------------------- */
+  --d-r-chip: 3px; --d-r-btn: 4px; --d-r-card: 5px;
+  --d-r-lift: 6px; --d-r-pill: 8px; --d-r-round: 99px;
+
+  /* ---- the rail -------------------------------------------------------- */
+  --d-rail-w: 250px;
+}
+
+/* ==========================================================================
+   THE DEATH RULE, AS A MECHANISM RATHER THAN A CONVENTION
+   ==========================================================================
+   A death figure is red. Not teal, not amber, not neutral. Anything carrying
+   .d-death takes the red family whatever else has been said about it, and
+   the teal tokens are explicitly unavailable to it — so a future edit that
+   adds .ok or .good to a toll cannot turn it back into a success metric.
+   The footer of this application reads DEATHS COUNTED, NEVER SCORED. */
+.d-death, .d-death .d-fig, [data-death] .d-fig{ color:var(--d-red) !important }
+.d-death .d-bar > i, [data-death] .d-bar > i{ background:var(--d-red-mark) !important }
+.d-death.d-tile{ background:var(--d-red-bg); border-color:var(--d-red-line) }
+.d-death .d-lab{ color:var(--d-red-t) !important }
+
+/* ==========================================================================
+   COMPONENTS — the shapes the canvas draws, as reusable classes
+   ==========================================================================
+   Every measurement below is lifted from the canvas rather than chosen. Where
+   a value looks arbitrary it is because it is the canvas's value.
+   ========================================================================== */
+
+/* ---- the frame ------------------------------------------------------- */
+.d-app{ min-height:100vh; background:var(--d-app); color:var(--d-t2);
+        font-family:var(--d-sans); font-size:12.5px }
+
+.d-class{ background:var(--d-strip); color:var(--d-t5);
+  font:600 9px var(--d-mono); letter-spacing:.15em; padding:7px 18px;
+  display:flex; justify-content:space-between; border-bottom:1px solid oklch(0.29 0.01 250) }
+.d-class > span:last-child{ color:var(--d-t7) }
+
+.d-grid{ display:grid; grid-template-columns:var(--d-rail-w) 1fr; align-items:start }
+
+/* ---- the rail --------------------------------------------------------- */
+.d-rail{ background:var(--d-rail); border-right:1px solid var(--d-line);
+  padding:0 0 22px; position:sticky; top:0; min-height:100vh;
+  max-height:100vh; overflow-y:auto; scrollbar-width:thin }
+.d-brand{ padding:17px 16px 18px; border-bottom:1px solid oklch(0.25 0.01 250);
+  display:flex; gap:11px; align-items:center }
+.d-brand-n{ font:700 13px var(--d-mono); color:var(--d-t1); letter-spacing:.05em }
+.d-brand-s{ font:400 8px/1.45 var(--d-mono); color:var(--d-t7); letter-spacing:.05em }
+
+.d-nav{ padding:14px 10px 0; display:flex; flex-direction:column; gap:2px }
+.d-nav-i{ display:flex; align-items:center; gap:10px; padding:9px 11px;
+  border-radius:var(--d-r-card); cursor:pointer; background:transparent;
+  border:0; width:100%; text-align:left; font-family:inherit }
+.d-nav-i > span.l{ font-size:12.5px; font-weight:600; color:var(--d-t4); flex:1 }
+.d-nav-i:hover{ background:oklch(0.2 0.012 250) }
+.d-nav-i.on{ background:var(--d-teal-nav) }
+.d-nav-i.on > span.l{ color:var(--d-teal-nav-t) }
+.d-nav-i svg{ flex:none }
+.d-pill{ font:600 9.5px var(--d-mono); padding:1px 5px; border-radius:var(--d-r-pill) }
+.d-pill.red{ background:var(--d-red-pill); color:var(--d-red-pill-t) }
+.d-pill.amb{ background:var(--d-amb-pill); color:var(--d-amb-pill-t); font-weight:700 }
+.d-pill.dim{ font-size:9.5px; color:var(--d-t7); background:transparent }
+
+.d-nav-sep{ margin:16px 12px 0; padding:14px 0 0;
+  border-top:1px solid oklch(0.25 0.01 250); display:flex; flex-direction:column; gap:2px }
+.d-nav-sep .d-nav-i > span.l{ font-size:12px; font-weight:400; color:var(--d-t6) }
+
+.d-edge{ margin:20px 12px 0; padding:11px 12px; border-radius:var(--d-r-btn);
+  background:oklch(0.21 0.012 250); border:1px solid var(--d-line);
+  display:flex; flex-direction:column; gap:6px }
+.d-edge b{ font:400 8.5px var(--d-mono); letter-spacing:.11em; color:var(--d-t7) }
+.d-edge .r{ display:flex; align-items:center; gap:6px }
+.d-edge .r i{ width:6px; height:6px; border-radius:50%; flex:none;
+  background:var(--d-amb-mark) }
+.d-edge .r span{ font:400 9.5px/1.4 var(--d-mono); color:var(--d-amb) }
+
+/* ---- the top bar ------------------------------------------------------ */
+.d-top{ display:flex; justify-content:space-between; align-items:center;
+  padding:13px 22px; border-bottom:1px solid var(--d-line); background:var(--d-bar) }
+.d-search{ display:flex; align-items:center; gap:8px; padding:7px 12px;
+  border-radius:var(--d-r-btn); background:var(--d-panel-2);
+  border:1px solid var(--d-line-lift); width:250px;
+  font:400 11px var(--d-mono); color:var(--d-t7) }
+.d-fpcon{ font:600 10px var(--d-mono); letter-spacing:.09em; padding:7px 11px;
+  border-radius:var(--d-r-btn); background:var(--d-amb-chip); color:oklch(0.9 0.06 75) }
+.d-auth{ font:600 10px var(--d-mono); letter-spacing:.08em; padding:6px 11px;
+  border-radius:var(--d-r-btn); border:1px solid oklch(0.38 0.05 165);
+  color:oklch(0.82 0.06 165) }
+.d-clock{ font:600 12px var(--d-mono); color:oklch(0.9 0.005 250) }
+.d-date{ font:400 11px var(--d-mono); color:var(--d-t6) }
+
+/* ---- the page header -------------------------------------------------- */
+.d-head{ padding:20px 22px 0; display:flex; justify-content:space-between;
+  align-items:flex-end; gap:22px }
+.d-head h1{ font-size:21px; font-weight:600; color:var(--d-t1);
+  letter-spacing:-.015em; margin:0 0 5px }
+.d-head p{ font-size:12px; color:var(--d-t6); margin:0 }
+.d-btn{ font:600 10px var(--d-mono); padding:7px 12px; border-radius:var(--d-r-btn);
+  border:1px solid oklch(0.34 0.012 250); color:oklch(0.85 0.006 250);
+  background:transparent; cursor:pointer; letter-spacing:.06em }
+.d-btn:hover{ border-color:oklch(0.44 0.02 250); color:var(--d-t1) }
+.d-meta{ font:400 10px var(--d-mono); color:var(--d-t6) }
+
+/* ---- KPI tiles -------------------------------------------------------- */
+.d-tiles{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; padding:18px 22px 0 }
+.d-tile{ padding:13px 14px; border-radius:var(--d-r-card); background:var(--d-panel);
+  border:1px solid var(--d-line-hard); display:flex; flex-direction:column; gap:7px }
+.d-tile .d-lab{ font:400 9px var(--d-mono); letter-spacing:.1em; color:var(--d-t6) }
+.d-tile .d-val{ display:flex; align-items:baseline; gap:5px }
+.d-fig{ font:600 28px var(--d-mono); color:oklch(0.94 0.005 250); line-height:1 }
+.d-unit{ font:400 10px var(--d-mono); color:var(--d-t6) }
+.d-tile.crit{ background:var(--d-red-bg); border-color:var(--d-red-line) }
+.d-tile.crit .d-lab{ color:var(--d-red-t) }
+.d-tile.crit .d-fig{ color:var(--d-red) }
+.d-tile.good{ background:var(--d-teal-bg); border-color:var(--d-teal-line) }
+.d-tile.good .d-lab{ color:oklch(0.76 0.05 165) }
+.d-tile.good .d-fig{ color:var(--d-teal) }
+
+/* ---- cards ------------------------------------------------------------ */
+.d-cols{ display:grid; grid-template-columns:1fr 400px; gap:14px; padding:16px 22px 22px }
+.d-stack{ display:flex; flex-direction:column; gap:14px }
+.d-card{ border-radius:var(--d-r-card); background:var(--d-panel);
+  border:1px solid var(--d-line-hard); overflow:hidden }
+.d-card > header{ padding:12px 15px; border-bottom:1px solid var(--d-line);
+  display:flex; justify-content:space-between; align-items:center; gap:12px }
+.d-card > header h2{ font-size:12.5px; font-weight:600; color:oklch(0.93 0.005 250); margin:0 }
+.d-card > header .d-meta{ font-size:9.5px; color:oklch(0.56 0.008 250) }
+.d-card > .body{ padding:14px 15px; display:flex; flex-direction:column; gap:11px }
+.d-card.esc{ border-color:var(--d-amb-line) }
+.d-card.esc > header{ background:var(--d-amb-bg); border-bottom:0 }
+.d-card.esc > header h2{ font:700 10px var(--d-mono); letter-spacing:.1em; color:var(--d-amb-hi) }
+
+/* ---- a labelled line inside a card ------------------------------------ */
+.d-line-item{ display:flex; gap:11px }
+.d-line-item > .k{ font:400 9px var(--d-mono); letter-spacing:.09em;
+  width:78px; flex:none; padding-top:2px; color:var(--d-t6) }
+.d-line-item > .v{ font-size:12px; line-height:1.55; color:var(--d-t3) }
+.d-line-item.risk > .k{ color:oklch(0.72 0.05 25) }
+.d-line-item.act  > .k{ color:oklch(0.76 0.05 165) }
+
+/* ---- tables ----------------------------------------------------------- */
+.d-tbl{ font-family:var(--d-mono) }
+.d-tbl .hd{ display:grid; font-size:8.5px; letter-spacing:.09em;
+  color:oklch(0.52 0.008 250); padding:9px 15px;
+  border-bottom:1px solid oklch(0.26 0.01 250) }
+.d-tbl .row{ display:grid; font-size:11px; padding:11px 15px;
+  border-bottom:1px solid var(--d-line-soft); align-items:center; color:oklch(0.9 0.005 250) }
+.d-tbl .row:last-child{ border-bottom:0 }
+.d-tbl .row:hover{ background:oklch(0.22 0.012 250) }
+.d-tbl .row.breach{ background:var(--d-red-row) }
+.d-tbl .row.quiet{ color:oklch(0.72 0.005 250) }
+.d-tbl .sub{ color:var(--d-t5); font-size:10.5px }
+.d-tbl .r{ text-align:right }
+.d-tbl .id{ font-weight:600 }
+.d-slack.pos{ color:var(--d-teal-2); font-weight:600 }
+.d-slack.neg{ color:var(--d-red); font-weight:700; font-size:12.5px }
+
+/* ---- segmented control ------------------------------------------------ */
+.d-seg{ display:flex; gap:6px }
+.d-seg > button{ font:600 10px var(--d-mono); letter-spacing:.08em;
+  padding:6px 11px; border-radius:var(--d-r-btn); cursor:pointer;
+  background:var(--d-panel-2); color:var(--d-t4); border:0 }
+.d-seg > button.on{ background:var(--d-teal-sel); color:var(--d-teal-nav-t) }
+
+/* ---- the AI chip, as the canvas draws it ------------------------------ */
+.d-ai{ display:inline-flex; align-items:center; gap:3px; padding:1px 5px;
+  border-radius:var(--d-r-chip); background:var(--d-vio-bg);
+  border:1px solid var(--d-vio-line); font:700 8px var(--d-mono);
+  letter-spacing:.08em; color:var(--d-vio); white-space:nowrap }
+
+/* ---- an option a human must choose between ---------------------------- */
+.d-opt{ display:flex; justify-content:space-between; gap:12px; padding:8px 11px;
+  border-radius:var(--d-r-btn); background:var(--d-panel-3);
+  border:1px solid oklch(0.32 0.012 250); font-family:var(--d-mono); font-size:10.5px }
+.d-opt .n{ color:oklch(0.9 0.005 250) }
+.d-opt .c{ color:var(--d-t5); font-size:10px }
+.d-note{ font:400 9.5px/1.5 var(--d-mono); color:var(--d-t6) }
+
+/* ---- the whole page scrolls, the rail does not ------------------------ */
+.d-main{ min-width:0 }
+
+/* ==========================================================================
+   THE OLD CHROME STANDS DOWN
+   ==========================================================================
+   The engine underneath — the simulation, the optimiser, the three map
+   renderers, the replication study, the database — is untouched and still
+   running. What is replaced is everything a person looks at. The old chrome
+   and the old panes stay in the document so those modules keep their mount
+   points and keep working; they are simply no longer the thing on screen.
+
+   `visibility:hidden` rather than `display:none`, and kept at a real size,
+   because a canvas with no layout box measures zero and the map renderers
+   size themselves from their host. A hidden element with a size still
+   measures; a display:none one does not, and every map would come up 0×0.
+   ========================================================================== */
+/* Hide EVERY direct child of body except the shell and the panes. Naming the
+   old chrome element by element left three things on screen — a second
+   classification banner, a floating status pill and a toast stack — because
+   that list was written from what I remembered being there rather than from
+   what is actually in the document. An allow-list cannot leak; a deny-list
+   always does. */
+body:has(#dShell) > *:not(#dShell):not(.viewport):not(script):not(style):not(svg):not(.d-keep){
+  display:none !important;
+}
+
+/* MODALS ARE DIRECT CHILDREN OF BODY, AND THE ALLOW-LIST ATE THEM.
+
+   Every dialog here — the deploy sheet, the model sheet, the confirm, the run
+   summary, the accountability record, the shortcut sheet — is appended to
+   <body>, so the allow-list above hid all of them. The deploy sheet is how a
+   person starts the run at all: the console came up and the single most
+   important control in it opened nothing.
+
+   The first attempt was to write `#deployModal.show{display:flex!important}`
+   further down this sheet. It matched and still lost: the allow-list selector
+   carries an id inside `:not()` plus three classes — about (2,3,4) against
+   the exemption's (2,1,1) — and both are !important. A rule cannot exempt
+   itself from a more specific rule by being written later.
+
+   So the exemption is made where it cannot be outranked. The elements are
+   given `.d-keep`, which the allow-list's own `:not(.d-keep)` excludes, and
+   they are governed by their own stylesheet again exactly as before. The
+   class is applied in shell.js at mount, and a MutationObserver catches the
+   shortcut sheet, which is built lazily. */
+
+body:has(#dShell) > .viewport{
+  position:fixed; left:0; top:0; width:1280px; height:800px;
+  visibility:hidden; pointer-events:none; z-index:-1;
+}
+body:has(#dShell){ background:var(--d-app) }
+#dShell{ position:relative; z-index:2 }

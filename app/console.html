@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANGEL SWARM — Autonomous Medical Resupply Tasking</title>
+<!-- An inline mark, not a file. Without it the browser asks for /favicon.ico
+     on every load, the launcher answers 404, and the console opens on an
+     error in an application whose first claim is that it never reaches for
+     anything it does not carry. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='1.6 1.04 20.8 20.8'%3E%3Crect x='1.6' y='1.04' width='20.8' height='20.8' rx='4.4' fill='%230b1119'/%3E%3Cg fill='%23f05653'%3E%3Cpath d='M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z'/%3E%3Cpath d='M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z'/%3E%3Cpath d='M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z'/%3E%3C/g%3E%3C/svg%3E">
+<!-- THE TOKENS. Four themes, one contract, declared four times. It is loaded
+     FIRST so that css/app.css and every pane stylesheet after it resolve
+     against real values, and it wins on specificity anyway — `body[data-theme]`
+     beats the `:root` block css/app.css still carries as a floor for a
+     document that somehow loses the attribute. See THEME_CONTRACT.md. -->
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/app.css">
+<!-- Loaded after the shell stylesheet on purpose: css/polish.css is the
+     cross-cutting pass that reconciles the panes contributed by separate
+     authors, and it needs to win on equal specificity. build.py does not
+     glob app/css/ — every stylesheet is declared here by hand. -->
+<link rel="stylesheet" href="css/polish.css">
+<link rel="stylesheet" href="css/detail.css">
+<!-- The theater map's pan/zoom furniture and the operation picker that hangs
+     off the crumb in the command bar. Last, because it overrides the crumb
+     rules css/app.css carries. -->
+<link rel="stylesheet" href="css/theater.css">
+<!-- The provenance marks and their hover card. LAST of the sheets, because
+     it has to win against both the badge block in css/app.css and the
+     cross-cutting pass in css/polish.css, and because the one thing on the
+     screen that must never be half-applied is the mark that says whether a
+     number came out of a model. See PROV_CONTRACT.md. -->
+<link rel="stylesheet" href="css/prov.css">
+<link rel="stylesheet" href="css/aar.css">
+<!-- The three numbered beats on THE PLANNING STANDARD. Declared here rather
+     than in css/polish.css because that sheet is owned elsewhere; a <style>
+     in the document beats every linked sheet on an equal-specificity tie, so
+     these rules land whatever order the sheets above resolve in. Nothing in
+     here is a colour of its own: --angel, --line, --dim and --sans are the
+     tokens the four themes already define. -->
+<style id="stdBeatCss">
+.stdBeat{display:grid; grid-template-columns:40px minmax(0,1fr); gap:24px;
+  padding:32px 0; border-bottom:1px solid var(--line)}
+.stdBeat.last{border-bottom:0; padding-bottom:46px}
+.stdBeatN{font:800 30px/1 var(--mono); color:var(--angel); letter-spacing:-.03em; padding-top:3px}
+.stdBeatBody{min-width:0}
+.stdBeatBody > h3{margin:0 0 11px; font:700 21px/1.32 var(--sans); letter-spacing:-.015em; max-width:36ch}
+.stdBeatBody > p{margin:0 0 20px; font:400 13.5px/1.78 var(--sans); color:var(--dim); max-width:80ch}
+.stdBeat .stdSplit{padding:0; border-bottom:0; margin-top:2px}
+.stdBeat .stdFilm{margin-top:26px; padding:0; border-top:0}
+.stdBeat .stdFilmHead{margin-bottom:13px}
+/* Four cards, four across, so the fourth does not sit alone on a second row.
+   The shared rule's 272px minimum gives three columns inside a beat body. */
+.stdBeat .stdSteps{margin-top:2px; grid-template-columns:repeat(auto-fit,minmax(226px,1fr))}
+.stdBeat .disc{margin:0 0 24px}
+.stdBeat .stdCol .disc{margin:18px 0 0}
+.stdBeat .stdPayoffRow{margin-top:26px}
+@media (max-width:900px){ .stdBeat{grid-template-columns:1fr; gap:6px} .stdBeatN{padding-top:0} }
+</style>
+<!-- THE SCALE. Loaded LAST, and last is the whole point: css/polish.css is
+     declared third and loses every equal-specificity tie to the five sheets
+     and the runtime <style> blocks that follow it, which is why two previous
+     spacing passes were written and never applied. This sheet carries the
+     eight-step spacing scale and the KPI colour system. See css/scale.css. -->
+<link rel="stylesheet" href="css/scale.css">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/design.css">
+<link rel="stylesheet" href="css/pages-b.css">
+<link rel="stylesheet" href="css/pages-a.css">
+<link rel="stylesheet" href="css/page-map.css">
+<!-- THE COMPARE PANE TAGS, AFTER THE CONTROL ARM WAS RENAMED. Last in the
+     head on purpose: it has to win the equal-specificity tie against
+     css/app.css, which is where .cmpTag lives.
+
+     The control arm's name went from the retired 15-character string to
+     CURRENT — TRIAGE & PROXIMITY (28), and .cmpTag is position:absolute with
+     no width, so its shrink-to-fit box is capped at the pane it sits in.
+     Measured at 1280x720 inside the design shell, where the compare pane is
+     475px wide: the tag clamped to 464px and the name broke across two lines
+     — "CURRENT — TRIAGE &" over "PROXIMITY" — which is the one thing the
+     legend work was supposed to have settled. With the descriptor gone the
+     tag is 303px and the name holds one line at every width tested. The
+     descriptor is the right thing to drop rather than the name: css/app.css
+     already hides .paneTag em unconditionally for the same reason, and the
+     rule is written for both arms so the two tags stay symmetrical.
+
+     1500px matches the breakpoint css/app.css already uses for the
+     scoreboard. Above it the tag has 54px or more of slack and is left
+     exactly as it was. -->
+<style id="cmpTagNarrowCss">
+@media (max-width:1500px){ .cmpTag em{display:none} }
+
+/* THE TWO MAP PANE TAGS IN SIDE-BY-SIDE VIEW, FOR THE SAME REASON.
+   #missCompare is position:absolute, top:10px, centred on #stage with
+   z-index 6; the pane tags are top:10px at left:12px and left:calc(50% +
+   12px) with no z-index of their own. The banner has therefore always sat
+   on top of the arm B tag — measured before this change, at every width
+   from 1280 to 1920, the banner covered 100% of it, so the tag it hid was
+   simply never seen and the collision was never noticed. The longer name
+   does not create the collision; it makes it visible, leaving the tail of
+   the label sticking out from behind the banner.
+
+   So the pair drops below the banner, both together, in compare view only.
+   The banner's own height is what sets the two numbers: it is 88px tall at
+   1280–1440 and 56px at 1500 and above, and it grows to 142px at 1280 once
+   ANGEL SWARM is deployed and the arm figures appear in it. 160 and 100
+   clear the worst case at each end with 8px to spare. Verified with every
+   absolutely positioned box over #stage enumerated and pairwise
+   intersected: zero overlaps at 1280, 1440 and 1920, deployed and not.
+   Single-map view is untouched — arm B's tag is display:none there and
+   arm A's stays at top:10px. */
+body.compare .paneTag{top:160px}
+@media (min-width:1460px){ body.compare .paneTag{top:100px} }
+</style>
+</head>
+<body data-theme="console-dark">
+<!-- NO FLASH. The stored theme has to be on the element before the first
+     style resolution, and js/theme.js cannot be that early — it is a file, and
+     a file is a round trip. Four lines here, running during parse, are the
+     difference between switching themes and watching the console-dark palette
+     paint and then jump. js/theme.js reads this back rather than re-applying,
+     so there is exactly one write per load. -->
+<script>
+try{var t=localStorage.getItem('angel.theme');
+ if(['console-dark','night-ops','field-slate','high-contrast'].indexOf(t)<0){
+   var o=localStorage.getItem('angel.theme.mode');           /* the retired dark/light switch */
+   t=o==='light'?'high-contrast':'console-dark'; }
+ document.body.setAttribute('data-theme',t);
+ document.documentElement.setAttribute('data-theme',t);
+}catch(e){/* storage denied; the markup default stands and nothing flashes */}
+</script>
+
+<!-- ============ icon defs · Tabler 24-grid, carried from mock-G-mark1 ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-drop" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.72 0.72) scale(0.94)"> <path d="M10.708 2.372a2.382 2.382 0 0 0 -.71 .686l-4.892 7.26c-1.981 3.314 -1.22 7.466 1.767 9.882c2.969 2.402 7.286 2.402 10.254 0c2.987 -2.416 3.748 -6.569 1.795 -9.836l-4.919 -7.306c-.722 -1.075 -2.192 -1.376 -3.295 -.686z" /></g></symbol>
+<symbol id="i-dead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5" /> <path d="M10 17v3" /> <path d="M14 17v3" /> <path d="M8 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M14 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.48 0.48) scale(0.96)"> <path d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1 -19.995 .324l-.005 -.324l.004 -.28c.148 -5.393 4.566 -9.72 9.996 -9.72zm.01 13l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -8a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z" /></g></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.48 0.48) scale(0.96)"> <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" /></g></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M12 7v5l3 3" /></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.48 0.48) scale(0.96)"> <path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3 -3v-6a3 3 0 0 1 3 -3v-3a5 5 0 0 1 5 -5m0 12a2 2 0 0 0 -1.995 1.85l-.005 .15a2 2 0 1 0 2 -2m0 -10a3 3 0 0 0 -3 3v3h6v-3a3 3 0 0 0 -3 -3" /></g></symbol>
+<symbol id="i-lp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(0.72 0.72) scale(0.94)"> <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14" /> <path d="M9 8l0 8" /> <path d="M9 12l6 0" /> <path d="M15 8l0 8" /></g></symbol>
+<symbol id="i-expired" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.48 0.48) scale(0.96)"> <path d="M17 2a2 2 0 0 1 1.995 1.85l.005 .15v2a6.996 6.996 0 0 1 -3.393 6a6.994 6.994 0 0 1 3.388 5.728l.005 .272v2a2 2 0 0 1 -1.85 1.995l-.15 .005h-10a2 2 0 0 1 -1.995 -1.85l-.005 -.15v-2a6.996 6.996 0 0 1 3.393 -6a6.994 6.994 0 0 1 -3.388 -5.728l-.005 -.272v-2a2 2 0 0 1 1.85 -1.995l.15 -.005h10z" /></g></symbol>
+<symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.72 0.72) scale(0.94)"> <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></g></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.72 0.72) scale(0.94)"> <path d="M9 4h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h2a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2z" /> <path d="M17 4h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h2a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2z" /></g></symbol>
+<symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(-0.48 -0.48) scale(1.04)"> <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /> <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /> <path d="M3 6l0 13" /> <path d="M12 6l0 13" /> <path d="M21 6l0 13" /></g></symbol>
+<symbol id="i-rotary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M10 10h4v4h-4l0 -4" /> <path d="M10 10l-3.5 -3.5" /> <path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96" /> <path d="M14 10l3.5 -3.5" /> <path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96" /> <path d="M14 14l3.5 3.5" /> <path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96" /> <path d="M10 14l-3.5 3.5" /> <path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96" /></symbol>
+<symbol id="i-wounded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(-1.44 -1.44) scale(1.12)"> <path d="M14 12l0 .01" /> <path d="M10 12l0 .01" /> <path d="M12 10l0 .01" /> <path d="M12 14l0 .01" /> <path d="M4.5 12.5l8 -8a4.94 4.94 0 0 1 7 7l-8 8a4.94 4.94 0 0 1 -7 -7" /></g></symbol>
+<symbol id="i-ground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(-1.20 -1.20) scale(1.1)"> <path d="M3 11a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /> <path d="M10 13h11v-2a3 3 0 0 0 -3 -3h-8v5" /> <path d="M3 16h18" /></g></symbol>
+<symbol id="i-human" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /> <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(-1.44 -1.44) scale(1.12)"> <path d="M3 8h18" /> <path d="M3 16h18" /> <path d="M8 3v18" /> <path d="M16 3v18" /></g></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6" /> <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10" /> <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14" /> <path d="M4 20h14" /></symbol>
+<symbol id="i-fewer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M3 7l6 6l4 -4l8 8" /> <path d="M21 10l0 7l-7 0" /></symbol>
+<symbol id="i-angel" viewBox="0 0 24 24" fill="currentColor"><path d="M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z"/><path d="M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z"/><path d="M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z"/></symbol>
+<!-- map tools + rails · tabler outline 2.2 -->
+<symbol id="i-cursor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.904 17.563a1.2 1.2 0 0 0 2.228 .308l2.09 -3.093l4.907 4.907a1.067 1.067 0 0 0 1.509 0l1.047 -1.047a1.067 1.067 0 0 0 0 -1.509l-4.907 -4.907l3.113 -2.09a1.2 1.2 0 0 0 -.309 -2.228l-13.582 -3.904l3.904 13.563z"/></symbol>
+<symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-7a1 1 0 0 0 -1 1v7a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1"/><path d="M4 8h3"/><path d="M4 12h3"/><path d="M4 16h3"/><path d="M8 4v3"/><path d="M12 4v3"/><path d="M16 4v3"/></symbol>
+<symbol id="i-poly" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5l3.5 -3"/><path d="M14 5.5l3 1.5"/><path d="M18.5 10v3.5"/><path d="M17 17.5l-2 1"/><path d="M11 19l-3 -1.5"/><path d="M5.5 14v-2"/><path d="M3 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M10 4a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 8a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 16a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 0 0 -14 0"/><path d="M21 21l-6 -6"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l-8 4l8 4l8 -4l-8 -4"/><path d="M4 12l8 4l8 -4"/><path d="M4 17l8 4l8 -4"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14"/><path d="M3 10h18"/><path d="M10 3v18"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0"/><path d="M5 12l6 6"/><path d="M5 12l6 -6"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4l4 0l0 4"/><path d="M14 10l6 -6"/><path d="M8 20l-4 0l0 -4"/><path d="M4 20l6 -6"/><path d="M16 20l4 0l0 -4"/><path d="M14 14l6 6"/><path d="M8 4l-4 0l0 4"/><path d="M4 4l6 6"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></symbol>
+<symbol id="i-dots" viewBox="0 0 24 24" fill="currentColor"><path d="M5 10a2 2 0 1 1 0 4a2 2 0 0 1 0 -4M12 10a2 2 0 1 1 0 4a2 2 0 0 1 0 -4M19 10a2 2 0 1 1 0 4a2 2 0 0 1 0 -4"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6 -6l6 6"/></symbol>
+<symbol id="i-chevd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6"/></symbol>
+<symbol id="i-prev" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4.994v14.012c0 .864 -.943 1.393 -1.674 .953l-9.406 -5.55a2.5 2.5 0 0 1 0 -4.288l9.406 -5.548c.731 -.44 1.674 .088 1.674 .953z"/><path d="M4 4a1 1 0 0 1 1 1v14a1 1 0 0 1 -2 0v-14a1 1 0 0 1 1 -1z"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4.994v14.012c0 .864 .943 1.393 1.674 .953l9.406 -5.55a2.5 2.5 0 0 0 0 -4.288l-9.406 -5.548c-.731 -.44 -1.674 .088 -1.674 .953z"/><path d="M20 4a1 1 0 0 1 1 1v14a1 1 0 0 1 -2 0v-14a1 1 0 0 1 1 -1z"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M5 17h5.5a4.5 4.5 0 1 0 0 -9h-3a4.5 4.5 0 1 1 0 -9h.5"/></symbol>
+<symbol id="i-radar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.984 12.535a9 9 0 1 0 -8.463 8.449"/><path d="M16.243 7.757a6 6 0 1 0 .753 8.653"/><path d="M12 12a3 3 0 1 0 3 3"/><path d="M12 12l9 -3"/></symbol>
+<symbol id="i-hist" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4.5v6h6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/></symbol>
+<symbol id="i-north" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l4 18l-4 -5l-4 5l4 -18"/></symbol>
+<!-- Added for the destinations the mockup did not have to name. Same Tabler
+     24-grid, same 2.2 stroke, so they sit with the carried set. -->
+<symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 -3l6 3l6 -3v13l-6 3l-6 -3l-6 3z"/><path d="M9 4v13"/><path d="M15 7v13"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l11 0"/><path d="M9 12l11 0"/><path d="M9 18l11 0"/><path d="M5 6l0 .01"/><path d="M5 12l0 .01"/><path d="M5 18l0 .01"/></symbol>
+<symbol id="i-compare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 17l-18 0"/><path d="M18 20l3 -3l-3 -3"/><path d="M3 7l18 0"/><path d="M6 4l-3 3l3 3"/></symbol>
+<symbol id="i-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8l4 -16l3 8h4"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></symbol>
+<symbol id="i-pm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v9"/><path d="M7.5 8.5h9"/><path d="M7.5 19h9"/></symbol>
+<symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5l-5 5"/><path d="M13 17h6"/></symbol>
+<symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/><path d="M4 6v6a8 3 0 0 0 16 0v-6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/></symbol>
+<symbol id="i-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 3v18"/><path d="M12 9l4.65 -4.65"/><path d="M12 14.3l7.37 -7.37"/><path d="M12 19.6l8.85 -8.85"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5l0 14"/><path d="M18 11l-6 -6"/><path d="M6 11l6 -6"/></symbol>
+<!-- Every destination. A 3x3 grid of filled dots — Tabler `grid-dots`. It is
+     not the 2x2 `i-grid` the side-by-side control uses, on purpose: two
+     controls that mean different things must not share a glyph. -->
+<symbol id="i-alldest" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="1.9"/><circle cx="12" cy="5" r="1.9"/><circle cx="19" cy="5" r="1.9"/><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/><circle cx="5" cy="19" r="1.9"/><circle cx="12" cy="19" r="1.9"/><circle cx="19" cy="19" r="1.9"/></symbol>
+<!-- THE SIX PROVENANCE GLYPHS. Two channels before a word is read:
+       FILLED + violet   a trained model produced this
+       OUTLINE + neutral it did not
+     and within each channel the shape says WHICH, so a reader who has seen
+     the key once never has to read the small type again.
+       hourglass  CRI-Net, which answers "how long has this soldier got"
+       shield     the trust gate, which refuses when the signal is poor
+       book       the encoder, which quotes doctrine and cannot invent it
+       pen        the language model, which drafts the brief and nothing else
+       f(x)       the tasking optimiser — a written function, evaluated
+       sigma      arithmetic over this run's own record -->
+<symbol id="i-p-cri" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a1.6 1.6 0 0 1 0 3.2h-.4v1.3c0 2-1.1 3.8-2.9 4.8l-1.3.7 1.3.7c1.8 1 2.9 2.8 2.9 4.8v1.3h.4a1.6 1.6 0 0 1 0 3.2H6a1.6 1.6 0 0 1 0-3.2h.4v-1.3c0-2 1.1-3.8 2.9-4.8l1.3-.7-1.3-.7C7.5 10.3 6.4 8.5 6.4 6.5V5.2H6A1.6 1.6 0 0 1 6 2m3.6 3.2v1.3c0 1.05.5 2 1.36 2.5l1.04.6 1.04-.6c.86-.5 1.36-1.45 1.36-2.5V5.2z"/></symbol>
+<symbol id="i-p-trust" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.8 3.6 5v6.4c0 5.2 3.5 9.6 8.4 10.8 4.9-1.2 8.4-5.6 8.4-10.8V5zm3.9 7.6-4.6 5.2a1.15 1.15 0 0 1-1.72 0L7.9 12.2a1.15 1.15 0 1 1 1.72-1.52l1.02 1.15 3.74-4.24A1.15 1.15 0 1 1 15.9 9.4"/></symbol>
+<symbol id="i-p-doc" viewBox="0 0 24 24" fill="currentColor"><path d="M4.2 3.2A1.4 1.4 0 0 1 5.6 1.8h5.1c.72 0 1.3.58 1.3 1.3v17.1c0 .5-.6.77-.96.42-.9-.86-2.2-1.42-3.64-1.42H5.6a1.4 1.4 0 0 1-1.4-1.4zm15.6 0a1.4 1.4 0 0 0-1.4-1.4h-5.1c-.72 0-1.3.58-1.3 1.3v17.1c0 .5.6.77.96.42.9-.86 2.2-1.42 3.64-1.42h1.8a1.4 1.4 0 0 0 1.4-1.4z"/></symbol>
+<symbol id="i-p-pen" viewBox="0 0 24 24" fill="currentColor"><path d="M18.1 1.9a3.2 3.2 0 0 1 4.5 4.5l-1.6 1.6-4.5-4.5zM14.7 5.3l4.5 4.5L8.9 20.1a2 2 0 0 1-.92.52l-4.6 1.2a.8.8 0 0 1-.98-.98l1.2-4.6a2 2 0 0 1 .52-.92z"/></symbol>
+<symbol id="i-p-sigma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4H6l6 8-6 8h12"/></symbol>
+<!-- THE AI MARK — 03 SPARKLE TRIO, NEBULA COLOURWAY.
+     Taken verbatim from the ai-marks-v2 sheet: lead star at full weight,
+     satellites stepped to 78% and 50% alpha and moved off the lead's points.
+     Ramp A runs --ai-a to --ai-b across the lead; ramp B runs --ai-b to
+     --ai-c across both satellites. Nebula sets those three in css/theme.css.
+
+     The gradients are declared once, here, rather than per instance: this
+     symbol is the only thing in the application that references them, so the
+     id-collision warning in the sheet does not apply. Custom properties
+     inherit into a <use> shadow tree, which is what lets one symbol re-theme. -->
+<linearGradient id="aiTrioA" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="var(--ai-a)"/><stop offset="1" stop-color="var(--ai-b)"/>
+</linearGradient>
+<linearGradient id="aiTrioB" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="var(--ai-b)"/><stop offset="1" stop-color="var(--ai-c)"/>
+</linearGradient>
+<symbol id="i-sparkle3" viewBox="0 0 24 24">
+  <path fill="url(#aiTrioA)" d="M10.2 3.2C10.2 10.34 11.93 12.6 17.4 12.6C11.93 12.6 10.2 14.86 10.2 22C10.2 14.86 8.47 12.6 3 12.6C8.47 12.6 10.2 10.34 10.2 3.2Z"/>
+  <path fill="url(#aiTrioB)" fill-opacity=".78" d="M19.4 1.7C19.4 4.66 20.12 5.6 22.4 5.6C20.12 5.6 19.4 6.54 19.4 9.5C19.4 6.54 18.68 5.6 16.4 5.6C18.68 5.6 19.4 4.66 19.4 1.7Z"/>
+  <path fill="url(#aiTrioB)" fill-opacity=".5" d="M20.2 15.5C20.2 17.7 20.73 18.4 22.4 18.4C20.73 18.4 20.2 19.1 20.2 21.3C20.2 19.1 19.67 18.4 18 18.4C19.67 18.4 20.2 17.7 20.2 15.5Z"/>
+</symbol>
+<!-- PROVENANCE MARKS. Two icons, and the whole argument about what in this
+     application is machine learning and what is not rests on the difference
+     between them being visible at 13 px.
+       i-neural  Tabler `binary-tree`, filled — a trained network. It is filled
+                 rather than stroked because the mark is 13 px and a 2.2-stroke
+                 graph of five nodes turns to mush at that size; this one does
+                 not. It appears ONLY where a model produced the number.
+       i-fx      Tabler `math-function` — f(x). The optimiser's mark. A written
+                 function, evaluated: no weights, nothing learned, the same
+                 answer every time from the same inputs. -->
+<symbol id="i-neural" viewBox="0 0 24 24" fill="currentColor"><path d="M14 1a3 3 0 0 1 2.348 4.868l2 3.203q .317 -.071 .652 -.071a3 3 0 1 1 -2.347 1.132l-2 -3.203a3 3 0 0 1 -1.304 0l-2.001 3.203c.408 .513 .652 1.162 .652 1.868s-.244 1.356 -.653 1.868l2.002 3.203q .315 -.071 .651 -.071a3 3 0 1 1 -2.347 1.132l-2.003 -3.203a3 3 0 0 1 -1.302 0l-2.002 3.203a3 3 0 1 1 -1.696 -1.06l2.002 -3.204a3 3 0 0 1 2.998 -4.798l2.002 -3.202a3 3 0 0 1 2.348 -4.868"/></symbol>
+<symbol id="i-fx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19a2 2 0 0 0 2 2c2 0 2 -4 3 -9s1 -9 3 -9a2 2 0 0 1 2 2"/><path d="M5 12h6"/><path d="M15 12l6 6"/><path d="M15 18l6 -6"/></symbol>
+</defs></svg>
+
+
+<div class="band">UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY<span class="bandRight" id="bandRight">SCENARIO</span></div>
+
+<!-- ======================== THE CONSOLE SHELL ========================
+     Five strips of chrome and two icon rails, to the approved mock-I1
+     geometry (THEME_CONTRACT.md, "Console layout"):
+
+       18px  classification band, full bleed
+       30px  app row      — vic mark + wordmark, JOA/theatre, role, theme
+       32px  tool row     — entity chip, map tools, search, transport, ONLINE
+       36px  icon rails   — BOTH outer edges, icon-only, tooltip on hover
+       26px  foot ribbon  — grid ref, counts, clock, autonomy, seed
+
+     This is a RE-SHELL, not a rewrite. Every control that was on the old
+     command bar is still here, with the same id, the same handler in
+     js/app.js and the same `data-roles` allow-list — they have been dealt
+     across two rows instead of one wrapping row, and the twenty-one
+     destinations that were on the 196px word rail are now the icon rail on
+     the left, with their labels as hover tooltips. Nothing was deleted.
+     ================================================================= -->
+
+<!-- ============================ APP ROW (30px) ============================ -->
+<header id="cmdbar">
+  <!-- The wordmark is the way home. Every console a person has used has one,
+       and reloading used to drop them on whatever view was last stored with
+       no way back to a starting point. -->
+  <button class="brand" id="btnHome" type="button" title="ANGEL SWARM — back to Overview">
+    <span class="mark"><svg class="ic16"><use href="#i-angel"/></svg></span>
+    <h1>ANGEL&nbsp;SWARM</h1><span class="ver">v5.0</span>
+  </button>
+
+  <!-- THE OPERATION PICKER. This crumb names the operation on screen. It used
+       to be a button that navigated away from it, which is not what the name
+       of the thing you are looking at should do. Clicking the name opens a
+       list of all seven operations across both combatant commands with the
+       numbers you would choose on; the way back to the theater overview is
+       the ◂ button, which now lives on the tool row where the console
+       reference puts a back control.
+       No data-roles: choosing which fight you are looking at is capability,
+       and roles are presentation only. -->
+  <div class="opPick" id="opPick">
+    <button id="btnOpPick" class="ghost opName" aria-haspopup="listbox" aria-expanded="false"
+            aria-controls="opMenu" title="Choose which operation to look at">
+      <b id="scnCrumb">—</b><i class="opCaret" aria-hidden="true">▾</i></button>
+  </div>
+
+  <!-- Duplicated in SETTINGS ▸ Display, and an operator is in one theater. -->
+  <div class="seg" title="Combatant command" data-roles="ANALYST">
+    <span class="chip" data-theaterpick="PACOM">PACOM</span>
+    <span class="chip" data-theaterpick="EUCOM">EUCOM</span>
+  </div>
+
+  <!-- Who is driving the live arm is a tasking-authority state, so it stays
+       for the commander. For a logistician and a surgeon it duplicates the
+       deploy bar two controls to the right. -->
+  <div class="master" title="Which tasking authority is driving the live arm" data-roles="ANALYST COMMANDER">
+    <!-- This control chooses which tasking authority drives the live arm, and
+         that authority is the OPTIMISER — deterministic constrained
+         scheduling. It carried the sparkle glyph the old badge used for
+         machine learning, which claimed something untrue on the busiest row
+         of the application. It carries the f(x) glyph now. -->
+    <span class="mlab">SYSTEM <svg class="detGlyph" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fx"/></svg></span>
+    <div class="seg">
+      <span class="chip act" data-active="on">◈ ANGEL SWARM</span>
+      <span class="chip act" data-active="off">STANDBY</span>
+    </div>
+  </div>
+
+  <div class="deployBar bad" id="deployBar">
+    <span class="dbDot"></span>
+    <span class="dbTxt"><b id="dbState">NOT DEPLOYED</b><em id="dbWhere">capability held</em></span>
+    <button class="btn ok" id="btnDeployBar">Deploy →</button>
+  </div>
+
+  <!-- Evidence furniture. The classification band already states the mode in
+       words a metre wide, so EXERCISE / LIVE stays analyst-only. -->
+  <div class="seg" title="Operating mode" data-roles="ANALYST">
+    <span class="chip" data-opmode="EXERCISE">EXERCISE</span>
+    <span class="chip" data-opmode="LIVE">LIVE</span>
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- ROLE SWITCHER. Four presentation profiles over one application.
+       Flipping COMMANDER → ANALYST in front of a reviewer, mid-sentence, is
+       the demonstration. Nothing here changes what anyone is permitted to do
+       — every role can still deploy, approve, reset and reach every pane
+       through ⌘K. Contract: ROLE_CONTRACT.md. -->
+  <div class="roleSw" id="roleSw"
+       title="Who this screen is written for. Presentation only — every role can still deploy, approve and reset. ` cycles roles; Alt-1 to Alt-4 jump straight to one.">
+    <span class="rlab">ROLE</span>
+    <div class="seg" role="group" aria-label="Role profile">
+      <span class="chip" data-roleset="COMMANDER"   role="button" tabindex="0">COMMANDER</span>
+      <span class="chip" data-roleset="LOGISTICIAN" role="button" tabindex="0">LOGISTICIAN</span>
+      <span class="chip" data-roleset="SURGEON"     role="button" tabindex="0">SURGEON</span>
+      <span class="chip" data-roleset="ANALYST"     role="button" tabindex="0">ANALYST</span>
+    </div>
+  </div>
+
+  <!-- THEME PICKER. Replaces the retired `Theme: Dark` light/dark toggle. It
+       is deliberately the quietest control on the row — an icon and a word,
+       no segmented control shouting four names at an operator who will set it
+       once. The four entries are read from js/theme.js at open time, so a
+       fifth theme needs no edit here. Also in ⌘K and on the ? sheet.
+       No data-roles: an operator who cannot read the screen in the ambient
+       light they are standing in has lost capability, not decoration. -->
+  <div class="themePick" id="themePick">
+    <button id="btnTheme" class="appic wide" aria-haspopup="listbox" aria-expanded="false"
+            aria-controls="themeMenu" title="Colour theme (T)">
+      <svg class="ic16"><use href="#i-theme"/></svg><b id="themeLabel">Console dark</b></button>
+    <div id="themeMenu" class="themeMenu" role="listbox" aria-label="Colour theme" hidden></div>
+  </div>
+
+  <button id="btnAcct" class="appic" data-roles="ANALYST COMMANDER"
+          title="Who decides, and who answers for it"><svg class="ic16"><use href="#i-human"/></svg></button>
+  <button id="btnModel" class="appic" data-roles="ANALYST"
+          title="Model &amp; sources"><svg class="ic16"><use href="#i-book"/></svg></button>
+</header>
+
+<!-- ============================ TOOL ROW (32px) =========================== -->
+<!-- The object you are looking at on the left, the instruments for looking at
+     it on the right. Every control in here already existed; the map tools and
+     the transport were on the old command bar or floating over the map. -->
+<div id="toolbar">
+  <div class="tool-l">
+    <button id="btnBackTheater" class="tbtn" title="Back to the theater overview"
+            aria-label="Back to the theater overview"><svg class="ic16"><use href="#i-back"/></svg></button>
+    <span class="objttl"><svg class="ic14" id="objIcon"><use href="#i-map"/></svg><b id="objTitle">THE FIGHT</b></span>
+    <span class="live idle" id="liveBadge">PAUSED</span>
+  </div>
+
+  <div class="tool-r">
+    <!-- The map instruments. These are the same elements the mission stage
+         used to float over the map; moved here they are in one place for
+         every destination, and the map is edge to edge with no gutter. -->
+    <div class="seg small zoomer" role="group" aria-label="Tactical map zoom">
+      <span class="chip" id="btnZoomOut" title="Zoom out (−)">−</span>
+      <span class="chip zl" id="zoomLabel">1.0×</span>
+      <span class="chip" id="btnZoomIn" title="Zoom in (+)">+</span>
+      <span class="chip" id="btnZoomFit" title="Fit the area of operations (0)">Fit</span>
+    </div>
+    <div class="seg small" role="group" aria-label="Map layout">
+      <span class="chip" data-mapview="COP" title="One map">Single</span>
+      <span class="chip" data-mapview="COMPARE" title="Both arms, side by side">Side&nbsp;by&nbsp;side</span>
+    </div>
+    <!-- THE THREE MAPS, IN ONE CONTROL. This application has always had
+         three map renderers and used to present them as separate places: the
+         theatre picture on its own destination, and a 2D/3D toggle buried in
+         the tool row of another. They answer three scales of the same
+         question, so they are three views of one destination now. -->
+    <div class="seg small" id="mapScopeSw" role="radiogroup" aria-label="Map view">
+      <span class="chip" data-mapscope="THEATRE" role="radio" tabindex="0"
+            title="The combatant command, and every operation inside it">Theatre</span>
+      <span class="chip" data-mapscope="2D" role="radio" tabindex="0"
+            title="The fight itself, drawn flat (V)">Tactical</span>
+      <span class="chip" data-mapscope="3D" role="radio" tabindex="0"
+            title="The fight itself, on the GPU — pitched and rotatable (V)">Tactical&nbsp;3D</span>
+      <span class="chip mmKey" aria-hidden="true">V</span>
+    </div>
+
+    <span class="tsep"></span>
+    <!-- Not an input. The search field in this console is the command palette,
+         which searches every view, action, doctrine passage and casualty; a
+         second search box that did less would be a worse answer to the same
+         click. It opens ⌘K, and it says so. -->
+    <button class="srch" id="btnSearch" title="Search everything (⌘K)">
+      <svg class="ic14"><use href="#i-search"/></svg>
+      <span>e.g. CAS-084</span><u>⌘K</u></button>
+    <span class="tsep"></span>
+
+    <div class="transport">
+      <button id="btnReset" class="icon" title="Reset run (R)"><svg class="ic16"><use href="#i-reset"/></svg></button>
+      <button id="btnPlay" class="play" title="Run / pause (Space)">▶</button>
+      <div class="seg small" role="group" aria-label="Clock speed">
+        <span class="chip" data-speed="1">1×</span>
+        <span class="chip" data-speed="2">2×</span>
+        <span class="chip" data-speed="4">4×</span>
+        <span class="chip" data-speed="10">10×</span>
+      </div>
+    </div>
+
+    <div class="scrubwrap">
+      <span id="clock" class="mono">T+00:00</span>
+      <div id="scrub" title="Click to seek"><i id="scrubFill"></i><b id="scrubHead"></b></div>
+    </div>
+
+    <span class="stat" id="onlineStat">
+      <span class="ok"><i class="statDot"></i>ONLINE</span>
+      <span id="wallClock">—</span>
+      <span class="dimStat" id="seedStat">SEED 42</span>
+    </span>
+  </div>
+</div>
+
+<!-- ------------------------- THE DECISION BAR -------------------------
+     Three questions, always the same three, above every screen a commander
+     stands on: am I winning, does anything need me, what is about to go
+     wrong. Filled by js/role-commander.js from the same situation() the
+     DECIDE pane is built from, so the bar and the pane cannot answer the
+     same question with different arithmetic. Hidden for every other role by
+     a rule in that module's stylesheet; --barH is measured, so the rows
+     below close up when it is not there. -->
+<div id="decbar" aria-label="What needs your decision"></div>
+
+<!-- ============================ SHELL ============================ -->
+<div id="shell">
+
+  <!-- ------------------------- NAV RAIL ------------------------- -->
+  <!-- Every destination carries data-roles: the whitespace-separated list of
+       role profiles that are offered this entry. Absent means "every role".
+       The list is an exact allow-list — ANALYST is not implied, and must be
+       named for an entry to survive the analyst profile. Rail ORDER per role
+       is not DOM order; it is set as a flexbox `order` by the role engine in
+       js/app.js from the same table. See ROLE_CONTRACT.md. -->
+  <nav id="rail">
+    <!-- ==================================================================
+         THE RAIL IS A LIST OF THINGS, NOT A LIST OF ARGUMENTS.
+
+         Through v3.1 this rail carried twenty-three destinations and better
+         than half of them were named for a claim rather than for an object:
+         "Why this exists", "The difference", "The case beyond lives", "What
+         it costs", "How much is the seed?", "Evidence". A reader cannot
+         predict what is behind a claim, so every press was a surprise, and
+         twenty-three surprises is not a console — it is a pile. The
+         complaint it earned was exact: "I can't tell what I'm supposed to
+         look at and then what next."
+
+         Ten entries now, every one of them a noun, in the order a person
+         actually walks them: where am I, what does the ground look like, who
+         is down, what can fly, where does it fly from, what is on the shelf,
+         what needs me, what if I ran it differently, what happened, and what
+         does it say in writing.
+
+         Nothing was deleted. The thirteen destinations that used to sit here
+         are still built and still reachable — through "Show every
+         destination" at the foot of this rail, through the command palette,
+         and from the after-action report, which is where an argument belongs.
+         ================================================================== -->
+
+    <a class="navItem big" data-view="DECIDE">
+      <span class="ni"><svg class="ic"><use href="#i-target"/></svg></span>
+      <span class="nt"><em>Overview</em><i>where this operation stands</i></span><u>1</u></a>
+
+    <!-- ONE map destination. The three renderers this application has always
+         had — the theatre picture, the tactical canvas and the GPU tactical
+         view — are three views of one thing, switched on the tool row, not
+         three separate places to get lost between. -->
+    <a class="navItem big" data-view="MISSION" data-alsoview="DASHBOARD">
+      <span class="ni"><svg class="ic"><use href="#i-map"/></svg></span>
+      <span class="nt"><em>Map</em><i>theatre · tactical · 3D</i></span><u>2</u></a>
+
+    <a class="navItem big" data-view="CASUALTIES">
+      <span class="ni"><svg class="ic"><use href="#i-wounded"/></svg></span>
+      <span class="nt"><em>Casualties</em><i>who is down, and how long they have</i></span><u>3</u></a>
+
+    <a class="navItem big" data-view="FLEET">
+      <span class="ni"><svg class="ic"><use href="#i-rotary"/></svg></span>
+      <span class="nt"><em>Aircraft</em><i>every airframe, and what it is doing</i></span><u>4</u></a>
+
+    <a class="navItem big" data-view="LAUNCHPOINTS">
+      <span class="ni"><svg class="ic"><use href="#i-pin"/></svg></span>
+      <span class="nt"><em>Launch points</em><i>what each one holds and can reach</i></span><u>5</u></a>
+
+    <a class="navItem big" data-view="SUPPLY">
+      <span class="ni"><svg class="ic"><use href="#i-drop"/></svg></span>
+      <span class="nt"><em>Supplies</em><i>blood and Class VIII, forward</i></span><u>6</u></a>
+
+    <a class="navItem big" data-view="TASKING">
+      <span class="ni"><svg class="ic"><use href="#i-check"/></svg></span>
+      <span class="nt"><em>Approvals</em><i>what is waiting on a person</i></span><b id="navBadge">0</b><u>7</u></a>
+
+    <a class="navItem big" data-view="CONFIDENCE">
+      <span class="ni"><svg class="ic"><use href="#i-pm"/></svg></span>
+      <span class="nt"><em>Scenarios</em><i>run it again, differently</i></span><u>8</u></a>
+
+    <a class="navItem big" data-view="AFTERACTION">
+      <span class="ni"><svg class="ic"><use href="#i-table"/></svg></span>
+      <span class="nt"><em>After-action report</em><i>what it cost and what it changed</i></span><u>9</u></a>
+
+    <a class="navItem big" data-view="BRIEF">
+      <span class="ni"><svg class="ic"><use href="#i-pencil"/></svg></span>
+      <span class="nt"><em>Copilot</em><i>the brief, written for you</i></span><u>0</u></a>
+
+    <!-- Everything that was here before. Off by default because a rail is a
+         route, not an inventory; one press away because none of it is gone. -->
+    <button class="navToggle" id="navMore" title="Show every destination, including the ones this role does not use"><span>ALL VIEWS</span><i>&#9656;</i></button>
+    <div class="navGroup" id="navGroup">
+      <div class="navSect sub">THE ARGUMENT</div>
+      <a class="navItem" data-view="STANDARD"><span class="ni"><svg class="ic"><use href="#i-clock"/></svg></span><em>Why this exists</em></a>
+      <a class="navItem" data-view="COMPARE"><span class="ni"><svg class="ic"><use href="#i-compare"/></svg></span><em>The difference</em></a>
+      <a class="navItem" data-view="ANALYSIS"><span class="ni"><svg class="ic"><use href="#i-table"/></svg></span><em>Evidence</em></a>
+      <a class="navItem" data-view="ROI"><span class="ni"><svg class="ic"><use href="#i-fewer"/></svg></span><em>The case beyond lives</em></a>
+      <a class="navItem" data-view="COST"><span class="ni"><svg class="ic"><use href="#i-scale"/></svg></span><em>What it costs</em></a>
+
+      <div class="navSect sub">DURING THE RUN</div>
+      <a class="navItem" data-view="DASHBOARD"><span class="ni"><svg class="ic"><use href="#i-radar"/></svg></span><em>Where the fight is</em></a>
+      <a class="navItem" data-view="UNITS"><span class="ni"><svg class="ic"><use href="#i-shield"/></svg></span><em>Units &amp; overwatch drone</em></a>
+      <a class="navItem" data-view="STREAM"><span class="ni"><svg class="ic"><use href="#i-list"/></svg></span><em>Ground truth stream</em><u>S</u></a>
+      <a class="navItem" data-view="FLOW"><span class="ni"><svg class="ic"><use href="#i-route"/></svg></span><em>Casualty flow</em><u>F</u></a>
+
+      <div class="navSect sub">RECORD &amp; MACHINERY</div>
+      <a class="navItem" data-view="AUDIT"><span class="ni"><svg class="ic"><use href="#i-lock"/></svg></span><em>Decision log</em></a>
+      <a class="navItem" data-view="SENSOR"><span class="ni"><svg class="ic"><use href="#i-pulse"/></svg></span><em>Sensor &amp; model</em><u>M</u></a>
+      <a class="navItem" data-view="DOCTRINE"><span class="ni"><svg class="ic"><use href="#i-book"/></svg></span><em>Doctrine retrieval</em></a>
+      <a class="navItem" data-view="QUERY"><span class="ni"><svg class="ic"><use href="#i-terminal"/></svg></span><em>Analytical console</em><u>Q</u></a>
+      <a class="navItem" data-view="DATA"><span class="ni"><svg class="ic"><use href="#i-db"/></svg></span><em>Export the database</em><u>D</u></a>
+    </div>
+    <div class="railSpacer"></div>
+    <button id="btnNavAll" class="navItem navCmd" type="button" aria-pressed="false">
+      <span class="ni"><svg class="ic"><use href="#i-alldest"/></svg></span><em>Show every destination</em></button>
+    <button id="btnPalette" class="navItem navCmd" type="button">
+      <span class="ni"><svg class="ic"><use href="#i-search"/></svg></span><em>Search everything</em><u>&#8984;K</u></button>
+    <a class="navItem" data-view="SETTINGS"><span class="ni"><svg class="ic"><use href="#i-settings"/></svg></span><em>Settings</em></a>
+  </nav>
+
+  <!-- ---------------------- LEFT INSPECTOR (336px) ---------------------- -->
+  <!-- The record of whatever is selected, standing between the icon rail and
+       the map exactly as it does in the approved mockup. Filled by
+       js/inspector.js from APP.sel and the live run; if that module is not
+       present this element stays empty and collapses to nothing, because its
+       whole width comes from a rule that module injects. -->
+  <aside id="insp" aria-label="Selected object"></aside>
+
+  <!-- --------------------------- VIEWS --------------------------- -->
+  <main id="views">
+
+
+  <!-- ========================== DASHBOARD =========================== -->
+  <section class="viewport" data-pane="DASHBOARD">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Where the fight is</h2>
+          <p class="lede">Soldiers are wounded in several places at once. Pick the one you want ANGEL SWARM to
+             help with, and send the drones.</p></div>
+      </div>
+
+    <div id="theaterStage">
+      <canvas id="mapTheater"></canvas>
+      <div class="thHead">
+        <div class="thTitle"><b id="thName">PACOM</b><span id="thLabel">Indo-Pacific</span></div>
+        <p id="thNote"></p>
+        <div class="thStats">
+          <span><b id="thJoas">0</b>operations areas</span>
+          <span><b id="thCas">0</b>casualties</span>
+          <span><b id="thOpen">0</b>still down</span>
+          <span><b id="thAir">0</b>aircraft committed</span>
+        </div>
+      </div>
+      <aside id="joaList" class="joaList" tabindex="0" aria-label="Operations in this theater"></aside>
+      <!-- The map answers a drag and a wheel now. These say so, and they are
+           the keyboard and touch route to the same thing. -->
+      <div class="thZoom" role="group" aria-label="Theater map view">
+        <button class="thZbtn" data-thzoom="out" title="Zoom out" aria-label="Zoom the theater map out">−</button>
+        <button class="thZbtn" data-thzoom="in" title="Zoom in" aria-label="Zoom the theater map in">+</button>
+        <button class="thZbtn wide" data-thzoom="fit" title="Fit the whole area of responsibility" aria-label="Fit the whole area of responsibility">FIT</button>
+      </div>
+      <div class="thHint">Click an operation to open it.
+        <span class="thHintSub">Drag to pan · scroll to zoom · double-click to fit</span></div>
+      <!-- The GPU theatre map. It builds its own host inside this stage, puts
+           the canvas above it to sleep, and draws the same combatant command
+           on the engine the tactical map uses. If it cannot start — no WebGL2,
+           no deck.gl bundle, anything thrown — it never appears and the canvas
+           map above is what the operator gets, which is why there is nothing
+           for this onerror to remove. -->
+      <script type="module" src="js/theater3d.js" onerror="window.__ANGEL_T3D=null"></script>
+    </div>
+
+      <div class="sysbar bad" id="dbStatus"></div>
+      <div class="alertBar" id="dbAlert" style="display:none"></div>
+      <div class="alertBar cov" id="dbCoverage" style="display:none"></div>
+      <div id="dbTiles" class="dtiles"></div>
+
+      <div class="card"><div class="cardHead">Every operation, worst first</div></div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th style="width:118px">Operation</th>
+            <th style="width:250px">Who is fighting there</th>
+            <th style="width:104px">Wounded</th><th style="width:110px">Still down</th>
+            <!-- "Died" on its own was one of three quantities in this
+                 application wearing that word. This column is every death in
+                 that operation, every triage category, and the tile above it
+                 is the sum of this column. -->
+            <th style="width:132px">Died of wounds<br><span class="thSub">all categories</span></th>
+            <th style="width:110px">Unit strength</th>
+            <th style="width:150px">Drones</th><th style="width:180px"></th>
+          </tr></thead>
+          <tbody id="dbJoas"></tbody>
+        </table>
+      </div>
+      <p class="lede tblNote" id="dbJoaNote"></p>
+
+      <div class="card"><div class="cardHead">What the drones are doing</div>
+        <div id="dbLiveBox" class="dlBox"></div></div>
+
+      <div class="card set">
+        <div class="cardHead">Tell me when an operation needs help</div>
+        <p class="lede">You should not have to be watching when a fight turns. Set the limits below and the system
+           will tell you the moment one is crossed, and say why.</p>
+        <div class="setRow"><label>Thresholds</label><span class="chip" id="thArm">Armed</span>
+          <label style="min-width:0;margin-left:18px">On trip</label><span class="chip" id="thAuto">Confirm first</span></div>
+        <div class="setRow"><label>Casualty rate per hour</label>
+          <input id="thCas" type="range" min="10" max="90" value="34"><b class="mono"><span id="thCasVal">34</span></b></div>
+        <div class="setRow"><label>Casualties below the reserve floor</label>
+          <input id="thCrit" type="range" min="1" max="15" value="4"><b class="mono"><span id="thCritVal">4</span></b></div>
+        <p>A unit readiness threshold of AMBER is also armed: if any unit's combat effectiveness falls to 80% or
+           below, that is a trip on its own.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== MISSION ========================== -->
+  <section class="viewport" data-pane="MISSION">
+
+    <div id="stage">
+      <canvas id="mapA"></canvas>
+      <canvas id="mapB"></canvas>
+
+      <!-- The same fight, rendered on the GPU. One destination, two
+           renderers: this host sits over the 2D canvases and js/geo3d.js
+           owns everything inside it. It is empty and display:none until the
+           operator asks for 3D, and if WebGL2 is absent the module deletes
+           both this host and the switch below, leaving the 2D map as the
+           only path with no dead control on screen. -->
+      <div id="g3Host"></div>
+      <script type="module" src="js/geo3d.js" onerror="var s=document.getElementById('mapModeSw');if(s)s.remove();var h=document.getElementById('g3Host');if(h)h.remove()"></script>
+
+      <div class="paneTag a"><i></i><b id="sbALabel">ANGEL SWARM</b><em>physiological deadlines · receiver-aware · cold-chain in the loop</em></div>
+      <div class="paneTag b"><i></i><b>CURRENT — TRIAGE & PROXIMITY</b><em>sorted by triage category, nearest airframe · one stop per sortie</em></div>
+
+      <div class="missCompare bad" id="missCompare"></div>
+
+      <!-- The map instruments used to float here, over the map. They are on
+           the tool row now — one place, every destination, and the map runs
+           edge to edge with no gutter, which is the whole point of the
+           console layout. Same ids, same handlers, moved not rebuilt. -->
+
+      <aside id="dock">
+        <section class="hud">
+          <div class="hudHead"><span>Soldiers on the ground</span>
+            <span class="hh"><b id="sldOpen">0</b>down<b id="sldCrit" class="bad">0</b>critical<b id="sldSaved" class="ok">0</b>recovered</span>
+          </div>
+          <div class="hudBody"><div id="sldList" class="sldList"></div></div>
+        </section>
+
+        <section class="hud grow">
+          <div class="hudHead"><span>ANGEL SWARM airframes</span>
+            <span class="hh"><b id="drnAir" class="ok">0</b>airborne<b id="drnReady">0</b>ready<b id="drnDeliv">0</b>delivered</span>
+          </div>
+          <div class="hudBody"><div id="drnList" class="drnList"></div></div>
+        </section>
+      </aside>
+
+      <div id="legend">
+        <div class="lgHead">
+          <b>MAP LAYERS</b>
+          <span class="lgHint">filter what is drawn</span>
+          <button class="lgToggle" id="btnLegend" title="Collapse">−</button>
+        </div>
+        <div class="lgBody">
+          <span class="lg"><b>Wounded</b>
+            <span class="li on" data-layer="stable"><svg width="16" height="12"><circle cx="8" cy="6" r="3.6" fill="#5bb4ff" stroke="#04080c" stroke-width="1"/></svg>stable</span>
+            <span class="li on" data-layer="falling"><svg width="20" height="18"><circle cx="10" cy="9" r="7.5" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="2.2"/><path d="M10 1.5 A7.5 7.5 0 0 1 17.5 9" fill="none" stroke="#ffb340" stroke-width="2.2"/><circle cx="10" cy="9" r="4" fill="#ffb340" stroke="#04080c" stroke-width="1"/></svg>reserve falling</span>
+            <span class="li on" data-layer="critical"><svg width="20" height="18"><circle cx="10" cy="9" r="7.5" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="2.2"/><path d="M10 1.5 A7.5 7.5 0 0 1 14 3" fill="none" stroke="#ff4257" stroke-width="2.2"/><circle cx="10" cy="9" r="4" fill="#ff4257" stroke="#04080c" stroke-width="1"/></svg>collapse imminent</span>
+            <span class="li on" data-layer="saved"><svg width="16" height="12"><circle cx="8" cy="6" r="3.6" fill="rgba(45,190,110,.35)" stroke="#3ddc84" stroke-width="1.2"/></svg>survived</span>
+            <span class="li on" data-layer="died"><svg width="16" height="12"><path d="M4 2.4 L12 9.6 M12 2.4 L4 9.6" stroke="#ff3a52" stroke-width="2"/></svg>died, survivable</span>
+            <span class="li on" data-layer="hva"><svg width="20" height="18"><g transform="translate(10,9)"><path d="M0 -7.5 L0 -11 M7.5 0 L11 0 M0 7.5 L0 11 M-7.5 0 L-11 0" stroke="#ffd24a" stroke-width="2" stroke-linecap="round"/><circle cx="0" cy="0" r="3.6" fill="#5bb4ff" stroke="#ffd24a" stroke-width="1.5"/></g></svg>high-value asset</span>
+            <span class="li on" data-layer="hva"><svg width="20" height="18"><g transform="translate(10,9)"><circle cx="0" cy="0" r="8" fill="none" stroke="#5bb4ff" stroke-width="1.3" stroke-dasharray="2.5 3"/><circle cx="0" cy="0" r="3.4" fill="#ff9d3a"/></g></svg>one aircraft or none in range</span>
+          </span>
+          <span class="lg"><b>Air &amp; ground</b>
+            <span class="li on" data-layer="air"><svg width="24" height="14"><g transform="translate(12,7)"><path d="M10 0 L-6 5.8 L-3 0 L-6 -5.8 Z" fill="#31d68a" stroke="#fff" stroke-width="1.1"/></g></svg>medical aircraft</span>
+            <span class="li on" data-layer="uav"><svg width="22" height="18"><g transform="translate(11,9)"><path d="M7 0 L1 1.6 L-0.5 6.5 L-2.5 6.5 L-2 1.3 L-5.5 1 L-6.5 3.2 L-7.5 3.2 L-7 0 L-7.5 -3.2 L-6.5 -3.2 L-5.5 -1 L-2 -1.3 L-2.5 -6.5 L-0.5 -6.5 L1 -1.6 Z" fill="#8fd0ff" stroke="#06101c" stroke-width="0.9"/></g></svg>command UAV</span>
+            <span class="li on" data-layer="base"><svg width="20" height="18"><rect x="2" y="1" width="15" height="15" rx="3" fill="rgba(8,14,20,.95)" stroke="#31d68a" stroke-width="1.8"/><rect x="6" y="7" width="7" height="2.6" fill="#31d68a"/><rect x="8.2" y="4.8" width="2.6" height="7" fill="#31d68a"/></svg>launch point</span>
+            <span class="li on" data-layer="threat"><svg width="20" height="18"><g transform="translate(10,9) rotate(45)"><rect x="-5" y="-5" width="10" height="10" fill="rgba(255,55,80,.3)" stroke="#ff4257" stroke-width="1.6"/></g></svg>enemy air defence</span>
+          </span>
+          <span class="lg"><b>Reference</b>
+            <span class="li on" data-layer="geo"><svg width="20" height="14"><path d="M2 11 L7 3 L12 9 L18 5" fill="none" stroke="#96c8eb" stroke-width="1.6"/></svg>place names &amp; boundary</span>
+            <span class="li on" data-layer="grid"><svg width="18" height="14"><path d="M6 1 V13 M12 1 V13 M1 5 H17 M1 10 H17" stroke="rgba(150,185,215,.6)" stroke-width="1"/></svg>10 km grid</span>
+            <span class="li" data-layer="none" id="lgAll">show all</span>
+          </span>
+        </div>
+      </div>
+      <div id="scnName" class="scnTag">Scenario</div>
+    </div>
+  </section>
+
+
+  <!-- =========================== COMPARE ============================ -->
+  <section class="viewport" data-pane="COMPARE">
+    <div class="cmpWrap">
+      <div class="cmpTop">
+        <div class="cmpScore">
+          <!-- The scope is part of the label. This is one operation, and it
+               is the survivable cohort only — the casualty-flow diagram and
+               the theatre dashboard count every triage category and read
+               larger. The reconciliation sentence below the causes strip
+               states both numbers so nobody has to derive it. -->
+          <span class="cmpTitle">SOLDIERS WHO DIED OF WOUNDS THEY COULD HAVE SURVIVED<em id="cmpScope"></em></span>
+          <div class="cmpNums">
+            <span class="cmpSide a"><b id="cmpA">0</b><span>ANGEL SWARM<i>drones tasked to deadlines</i></span></span>
+            <span class="cmpMid"><b class="cmpDelta" id="cmpDelta">LEVEL</b><span id="cmpPct"></span></span>
+            <span class="cmpSide b"><b id="cmpB">0</b><span>CURRENT — TRIAGE & PROXIMITY<i>the way it is done today</i></span></span>
+          </div>
+          <span class="tollNote"><b>Every number here is a person.</b> The target is zero.</span>
+        </div>
+        <div class="cmpCauses" id="cmpCauses"></div>
+        <div class="cmpState" id="cmpState"></div>
+      </div>
+      <!-- The bridge between the two death counts this application shows.
+           Printed rather than left to the reader: a reviewer who works out
+           for themselves that 23 and 31 are different populations has already
+           spent the doubt. Its own row, not a fourth item in the flex line
+           above — dropped in there it took its width off the deployment note
+           and set it one word to the line. -->
+      <p class="cmpBridge" id="cmpBridge"></p>
+
+      <div class="cmpMaps">
+        <div class="cmpPane a">
+          <div class="cmpTag a"><i></i>ANGEL SWARM<em>physiological deadlines · receiver-aware · cold chain in the loop</em></div>
+          <canvas id="cmpMapA"></canvas>
+        </div>
+        <div class="cmpPane b">
+          <div class="cmpTag b"><i></i>CURRENT — TRIAGE & PROXIMITY<em>sorted by triage category, nearest airframe · one stop per sortie</em></div>
+          <canvas id="cmpMapB"></canvas>
+        </div>
+      </div>
+
+      <div class="cmpBottom">
+        <div class="card cmpChartCard">
+          <div class="cardHead">The moment it starts to matter</div>
+          <canvas id="cmpChart" class="cmpChart"></canvas>
+          <p class="cmpNote">Both arms draw the same casualties from the same seed and fly the same fleet from the
+             same launch points. Outcomes use common random numbers, so the same draw decides each casualty's fate
+             in both arms. The shaded area between the lines is the difference the tasking decision made.</p>
+        </div>
+        <div class="card cmpTableCard">
+          <div class="cardHead">Where the difference comes from</div>
+          <div id="cmpRows" class="cmpRows"></div>
+          <div class="cmpKey"><span><i class="a"></i>ANGEL SWARM</span><span><i class="b"></i>CURRENT — TRIAGE & PROXIMITY</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= CASUALTIES ========================= -->
+  <section class="viewport" data-pane="CASUALTIES">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Wounded soldiers</h2>
+          <p>Ranked by time to hemodynamic collapse. Click a row to open the record.</p></div>
+        <div class="phTools">
+          <input id="casSearch" class="search" placeholder="Search id, injury, triage, responder…">
+          <button class="btn" id="btnExportCas">Export CSV</button>
+        </div>
+      </div>
+      <div class="filters">
+        <span class="chip" data-filter="ALL">All</span>
+        <span class="chip" data-filter="OPEN">Open</span>
+        <span class="chip" data-filter="CRITICAL">Critical</span>
+        <span class="chip" data-filter="TREATED">Treated</span>
+        <span class="chip" data-filter="DIED" title="Every casualty in this run whose outcome was DIED, in every triage category. The survivable-cohort figure the scoreboard carries is smaller.">Died of wounds</span>
+        <span class="chip hvaFilter" data-filter="HVA">★ HVA</span>
+        <span class="cnt"><b id="casCount">0</b> shown</span>
+      </div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th data-sort="hva" style="width:44px" title="Commander designation">★</th>
+            <th data-sort="id" style="width:96px">ID</th>
+            <th data-sort="role" style="width:140px">Duty role</th>
+            <th data-sort="triage" style="width:112px">Triage</th>
+            <th style="width:190px">Injury</th>
+            <th data-sort="reserve" style="width:200px">Compensatory reserve<span class="thAi" data-ai="LEARNED"></span></th>
+            <th data-sort="deadline" style="width:130px">Collapse in<span class="thAi" data-ai="LEARNED"></span></th>
+            <th data-sort="responder" style="width:170px">Responder on scene</th>
+            <th style="width:140px" title="How many aircraft in the force can physically reach this position">Aircraft in range<span class="thAi" data-ai="DERIVED"></span></th>
+            <th style="width:112px">Status</th>
+          </tr></thead>
+          <tbody id="casBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================== UNITS & C2 =========================== -->
+  <section class="viewport" data-pane="UNITS">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Units &amp; the overwatch drone</h2>
+          <!-- How to poll is not written out: the button beside this head and
+               the interval segment below it are the instruction. -->
+          <p>The C2 relay orbits the sector: no payload, no sorties. Inside its footprint telemetry is live.</p></div>
+        <div class="phTools">
+          <button class="btn ok" id="btnPingAll">Poll all units now</button>
+        </div>
+      </div>
+
+      <div class="uavStatus ok" id="uavStatus"></div>
+
+      <div class="intervalRow">
+        <label>Automatic polling</label>
+        <div class="seg">
+          <span class="chip" data-interval="0">On demand</span>
+          <span class="chip" data-interval="5">Every 5 min</span>
+          <span class="chip" data-interval="10">Every 10 min</span>
+          <span class="chip" data-interval="20">Every 20 min</span>
+        </div>
+        <span class="dim">Effectiveness = strength less killed and still down · GREEN ≥90% · AMBER ≥80% · RED ≥70% · BLACK below</span>
+      </div>
+
+      <div id="unitCards" class="unitGrid"></div>
+
+      <div class="card"><div class="cardHead">Health status reports</div></div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th style="width:88px">Time</th><th style="width:120px">Source</th>
+            <th style="width:150px">Unit</th><th style="width:96px">Readiness</th>
+            <th style="width:110px">Effective</th><th style="width:110px">Wounded</th>
+            <th style="width:110px">Critical</th><!-- 132px, not 90px: a width on a th is now a
+              *preferred* width the column may be compressed below (the header wraps rather than
+              holding the table open — see style.css table.grid th, polish.css §7), so it has to be
+              wide enough that "Died of wounds" sits on one line where there is room. At 90px it
+              broke into four lines. --><th style="width:132px">Died of wounds<br><span class="thSub">all categories</span></th><th style="width:90px">HVA down</th>
+          </tr></thead>
+          <tbody id="pingBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FLEET ============================ -->
+  <section class="viewport" data-pane="FLEET">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Drones</h2>
+          <p class="lede">Every drone carrying blood and medical supplies. Hold one back and the system routes
+             around it without stopping the fight.</p></div>
+        <div class="phTools kpis inline">
+          <div class="kpi"><b id="fleetReady">0</b><span>ready</span></div>
+          <div class="kpi"><b id="fleetAir">0</b><span>airborne</span></div>
+          <div class="kpi"><b id="fleetLost" class="bad">0</b><span>lost</span></div>
+        </div>
+      </div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th style="width:104px">Callsign</th><th style="width:170px">Platform</th>
+            <th style="width:132px">Launch point</th><th style="width:104px">State</th>
+            <th style="width:190px">Current task</th>
+            <th style="width:220px">Manifest</th><th style="width:120px">Container</th>
+            <th style="width:78px">Sorties</th><th style="width:88px">Delivered</th>
+            <!-- Sorties, not units. "Wasted" alone appeared on this table and
+                 on the supply tables two panes away meaning blood units. -->
+            <th style="width:96px">Sorties wasted</th><th style="width:96px"></th>
+          </tr></thead>
+          <tbody id="fleetBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== SUPPLY =========================== -->
+  <!-- ========================= LAUNCH POINTS =========================
+       A launch point is a thing in the world — it has aircraft, blood, a
+       cold chain and a reach. Until v3.2 there was no page for one, which is
+       why "no launch point close enough" read as an abstraction rather than
+       as a place you could go and look at. Rendered by js/page-launchpoints.js
+       into #lpBody; the placeholder below is what shows if that file is
+       absent. -->
+  <section class="viewport" data-pane="LAUNCHPOINTS" data-placeholder="1">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Launch points</h2>
+          <p class="lede">Every aircraft belongs to a launch point, and every launch point belongs to this
+             operation. What each one holds, and who it can reach in time.</p></div>
+      </div>
+      <div id="lpBody"></div>
+    </div>
+  </section>
+
+  <!-- ======================= AFTER-ACTION REPORT ======================
+       Everything that argues rather than shows. Seven destinations used to
+       carry this and a reader had to visit all seven to assemble one claim.
+       Rendered by js/page-afteraction.js into #aarBody. -->
+  <section class="viewport" data-pane="AFTERACTION" data-placeholder="1">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>After-action report</h2>
+          <p class="lede">What this run cost, what it changed, and what the evidence behind it is.</p></div>
+      </div>
+      <div id="aarBody"></div>
+    </div>
+  </section>
+
+  <section class="viewport" data-pane="SUPPLY">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Blood &amp; supplies</h2>
+          <p class="lede">What is on the shelf at each launch point. Blood is wasted when it arrives too warm, or
+             arrives for someone who has already died. <span class="jarg">Doctrine calls this Class VIII.</span></p></div>
+      </div>
+      <div class="split">
+        <div class="card">
+          <div class="cardHead"><span class="dotA"></span>ANGEL SWARM<span class="proj">blood stockout in <b id="projA">—</b></span></div>
+          <table class="grid tight">
+            <thead><tr><th>Launch point</th><th>Blood</th><th>Plasma</th><th>TXA</th><th>Hem kit</th><th>Seal</th><th>Units destroyed</th></tr></thead>
+            <tbody id="supplyA"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="cardHead"><span class="dotB"></span>CURRENT — TRIAGE & PROXIMITY<span class="proj">blood stockout in <b id="projB">—</b></span></div>
+          <table class="grid tight">
+            <thead><tr><th>Launch point</th><th>Blood</th><th>Plasma</th><th>TXA</th><th>Hem kit</th><th>Seal</th><th>Units destroyed</th></tr></thead>
+            <tbody id="supplyB"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="split grow">
+        <div class="card"><div class="cardHead">Whole blood on hand, both arms</div><canvas id="chartBlood" class="chart"></canvas></div>
+        <div class="card"><div class="cardHead">Cumulative wasted sorties</div><canvas id="chartWaste" class="chart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== TASKING =========================== -->
+  <section class="viewport" data-pane="TASKING">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Approvals</h2>
+          <p>With human-in-the-loop enabled, the system proposes a sortie and a qualified operator authorises it.
+             Routine flights go without asking you, and are logged. The system stops and asks a person
+             only on named grounds — marginal expected benefit, a routing through a threat envelope, spending a
+             launch point down to its last unit of blood or plasma, or serving a lower-acuity casualty while an
+             IMMEDIATE is still unassigned. Escalated proposals expire after 8 minutes of simulated time:
+             hesitation has a cost, and the log records it.</p></div>
+        <div class="phTools"><button class="btn ok" id="btnApproveAll">Approve all pending</button></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><b id="qPending" class="warn">0</b><span>pending</span></div>
+        <div class="kpi"><b id="qApproved" class="ok">0</b><span>approved</span></div>
+        <div class="kpi"><b id="qRejected" class="bad">0</b><span>rejected</span></div>
+        <div class="kpi"><b id="qAuto">0</b><span>auto-dispatched</span></div>
+        <div class="kpi"><b id="qExpired" class="dim">0</b><span>expired unactioned</span></div>
+      </div>
+      <div class="card"><div class="cardHead">Escalation policy — when a person is asked</div>
+        <div id="policyBox" class="policyBox"></div></div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th style="width:84px">Raised</th><th style="width:210px">Proposal</th>
+            <th style="width:230px">Why you are being asked</th>
+            <th style="width:150px">Payload</th><th style="width:104px">Deadline</th>
+            <th style="width:84px">ETA</th><th style="width:150px">Receiver</th>
+            <th style="width:74px">Gain</th><th style="width:96px">State</th><th style="width:164px"></th>
+          </tr></thead>
+          <tbody id="taskBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ AUDIT ============================ -->
+  <!-- =========================== STANDARD ===========================
+       The argument page, and the one a presenter stands in front of. It is
+       built as a headline, one orienting sentence, four sourced callouts and
+       three numbered beats — the shape DECIDE already uses — because the
+       three long argument blocks that used to live here read as an essay and
+       an essay cannot be presented from. Nothing was deleted for being long:
+       the elaborations are behind the three closed disclosures below, which
+       carry `data-nofold` so the shared lede-fold does not fold a fold. -->
+  <section class="viewport" data-pane="STANDARD">
+    <div class="pane stdPane">
+      <div class="stdHero">
+        <div class="stdHeroText">
+          <span class="stdKicker">THE PLANNING STANDARD</span>
+          <h2>The Golden Hour was a promise the helicopters kept. In the next fight they cannot keep it.</h2>
+          <p>Sixty minutes to surgery is what the force is designed around. Four figures say it will not hold.</p>
+        </div>
+        <div class="stdFacts" id="stdFacts"></div>
+      </div>
+
+      <!-- ---------------------------------------------------- BEAT 1 --- -->
+      <div class="stdBeat">
+        <div class="stdBeatN">1</div>
+        <div class="stdBeatBody">
+          <h3>It cannot be kept in the Pacific.</h3>
+          <p>Air ambulances met it in uncontested skies. The Pacific assumption is days, not hours.</p>
+          <details class="disc" data-nofold>
+            <summary><b>60 min</b><b class="q">what rests on the number</b></summary>
+            <p>Force design, where the surgeons sit, what a medic carries, how many aircraft a
+               division holds — all of it is built on one number, sixty minutes from wounding to
+               surgical care. That standard was met in Iraq and Afghanistan by air ambulances flying
+               in uncontested skies. It is not going to be met in the Pacific, and the people who
+               plan this already know it.</p>
+          </details>
+
+          <div class="stdFilm">
+            <div class="stdFilmHead">
+              <div>
+                <span class="stdKicker">UNDER THREE MINUTES</span>
+                <h3>What it looks like from the ground</h3>
+              </div>
+            </div>
+            <div class="filmBox">
+              <canvas id="filmCv"></canvas>
+              <div class="filmBar">
+                <button class="filmPlay" id="filmPlay" title="Play / pause">▶</button>
+                <span class="filmT mono" id="filmT">0:00</span>
+                <div class="filmScrub" id="filmScrub"><i id="filmFill"></i><b id="filmHead"></b></div>
+                <span class="filmT mono dim" id="filmDur">2:53</span>
+                <button class="filmFs" id="filmFs" title="Full screen">⛶</button>
+              </div>
+            </div>
+            <p class="filmNote" id="filmNote"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------------------------------------------- BEAT 2 --- -->
+      <div class="stdBeat">
+        <div class="stdBeatN">2</div>
+        <div class="stdBeatBody">
+          <h3>It was the wrong number to begin with.</h3>
+          <p>A wearable gives each casualty their own deadline, 16 to 25 minutes before collapse.</p>
+          <div class="stdSplit">
+            <div class="stdCol">
+              <div class="stdRead" id="stdRead"></div>
+              <details class="disc" data-nofold>
+                <summary><b>an average, not a measurement</b><b class="q">where the number came from</b></summary>
+                <p>Sixty minutes was never a measurement. It was an average, turned into a standard
+                   because a standard was needed and nothing better could be measured at the point of
+                   wounding. Now something better can be.</p>
+                <p>Measure a battle's worth of casualties that way and the Golden Hour does not merely
+                   fail to be met. It turns out to have been wrong for nearly every individual it was
+                   applied to, in both directions at once.</p>
+              </details>
+            </div>
+            <div class="stdChartWrap">
+              <div class="stdChartHead">Every casualty's own deadline, against the one clock they all share</div>
+              <canvas id="stdChart"></canvas>
+              <div class="stdChartFoot" id="stdChartFoot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------------------------------------------- BEAT 3 --- -->
+      <div class="stdBeat last">
+        <div class="stdBeatN">3</div>
+        <div class="stdBeatBody">
+          <h3>One clock each — and the medical plan becomes computable.</h3>
+          <p>Deadlines plus known reach makes this a scheduling problem, and it has an answer.</p>
+          <div class="stdSteps" id="stdSteps"></div>
+          <details class="disc" data-nofold>
+            <summary><b>a number, not an estimate</b><b class="q">what a commander could be told</b></summary>
+            <p>Once every casualty carries a deadline and every aircraft carries a known capability,
+               a commander can be told — before the fight — how many people a given force laydown
+               will lose, which constraint is killing them, and what specifically to change. Not an
+               estimate. A number, from the same model that flies the mission.</p>
+          </details>
+          <div class="stdPayoffRow">
+            <button class="btn ok big" data-goreq="1">Show me what this force will lose, and what to buy →</button>
+            <button class="btn" data-gostd="ROI">The case beyond lives</button>
+            <button class="btn" data-gostd="DASHBOARD">Take me to the fight</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== ROI ============================= -->
+  <section class="viewport" data-pane="ROI">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>The case beyond lives</h2>
+          <p class="lede">Fewer dead is the reason to do this. It is not the number that wins the argument,
+             because it is small and contested. These three are large, uncontested, and measured from the same
+             run: the blood you did not destroy, the evacuation demand you did not create, and the flying you
+             did not have to do. Every figure is per 1 000 casualties so it scales to a theatre honestly.</p></div>
+        <div class="phTools">
+          <button class="btn" id="btnRoiSweep">Measure across 35 runs</button>
+          <button class="btn" id="btnExportRoi">Export CSV</button>
+        </div>
+      </div>
+      <div id="roiBox" class="roiBox"></div>
+    </div>
+  </section>
+
+  <!-- ============================ STREAM ============================ -->
+  <section class="viewport" data-pane="STREAM">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>What is happening on the ground</h2>
+          <p class="lede">Every aircraft reports what it is actually doing — on station, payload away,
+             recovered or lost, administered, outcome. OVERWATCH relays it to the FOB; when the link is
+             down the aircraft buffers it and lands with it, so each line carries both the time it
+             happened and the time it was received.</p></div>
+        <div class="phTools">
+          <span class="segRow" id="stFilters">
+            <button class="seg on" data-stf="ALL">All</button>
+            <button class="seg" data-stf="DELIVERY">Deliveries</button>
+            <button class="seg" data-stf="FAIL">Failures</button>
+            <button class="seg" data-stf="DELAYED">Received late</button>
+          </span>
+          <span class="mono dim" id="stCount">0</span><span id="stAi"></span>
+          <button class="btn" id="btnExportStream">Export CSV</button>
+        </div>
+      </div>
+      <div class="strTiles" id="strTiles"></div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th style="width:84px">Happened</th><th style="width:84px">Received</th>
+            <th style="width:96px">Aircraft</th><th style="width:82px">Casualty</th>
+            <th style="width:210px">Phase</th><th>Report</th>
+            <th style="width:150px">Relay</th>
+          </tr></thead>
+          <tbody id="streamBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="viewport" data-pane="AUDIT">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Decision log</h2>
+          <p class="lede">Every decision the system made, and every one you made, in order and hash-linked with
+             SHA-256. Change a single character and the badge turns red. The Hash column shows the first 12
+             characters of each 64-character digest; the CSV export carries the whole of it.</p></div>
+        <div class="phTools">
+          <span class="verify ok" id="auditVerify">CHAIN INTACT</span>
+          <button class="btn" id="btnExportAudit">Export CSV</button>
+        </div>
+      </div>
+      <div class="tableWrap">
+        <table class="grid">
+          <thead><tr>
+            <th style="width:70px">Seq</th><th style="width:86px">Time</th>
+            <th style="width:140px">Actor</th><th style="width:150px">Action</th>
+            <th>Detail</th><th style="width:110px" title="the first 12 characters of each entry's 64-character SHA-256">SHA-256</th>
+          </tr></thead>
+          <tbody id="auditBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== SENSOR =========================== -->
+  <!-- Rendered entirely by js/device.js. If the model fails to load, this
+       pane says so plainly rather than showing an empty frame. -->
+  <section class="viewport" data-pane="SENSOR">
+    <div class="pane" id="sensorPane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Sensor &amp; model</h2>
+          <p class="lede">The wearable produces a waveform. A neural network reads the casualty's remaining
+             compensatory reserve out of that waveform — on this machine, offline, in under a millisecond.
+             It is not told the answer.</p></div>
+      </div>
+      <div id="sensorBody"><p class="lede">Loading the model…</p></div>
+    </div>
+  </section>
+
+  <!-- ========================== DOCTRINE ========================== -->
+  <!-- Rendered entirely by js/doctrine.js. A sentence encoder embeds the
+       question and the answer is quoted verbatim from a corpus shipped in
+       this folder — the module generates no text, so it cannot invent a
+       citation. The onerror removes the pane and its navigation entry if the
+       module is absent, as in a single-file build with no js/ folder. -->
+  <section class="viewport" data-pane="DOCTRINE">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Doctrine retrieval</h2>
+          <p class="lede">Ask in plain English. A sentence encoder running on this machine, offline,
+             matches the question against reference passages and quotes the closest sentence back with
+             its similarity score. It has no ability to generate text, which is exactly why it cannot
+             invent a source. The passages are summaries written for this prototype — read the notice
+             below before you read anything else.</p></div>
+      </div>
+      <div id="doctrineBody"><p class="lede">Loading the encoder…</p></div>
+    </div>
+    <script type="module" src="js/doctrine.js" onerror="document.querySelectorAll('[data-view=\'DOCTRINE\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'DOCTRINE\']');if(s)s.remove()"></script>
+  </section>
+
+  <!-- ========================== MISSION BRIEF ========================== -->
+  <!-- A language model with no permission to know anything. js/copilot.js
+       assembles the figures from the live run, the SQL aggregate over that
+       run and the retrieved doctrine passages, hands that block to a 0.5B
+       model running on the CPU, and prints the block beside what the model
+       wrote. The weights are not shipped in this folder; with no model file
+       present the pane explains that and still shows the whole context. The
+       onerror removes the pane and its navigation entry if the module is
+       absent, as in a single-file build with no js/ folder. -->
+  <section class="viewport" data-pane="BRIEF">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Mission brief</h2>
+          <p class="lede">The after-action summary a medical officer writes by hand today, drafted
+             from the figures this application just computed. Every figure and every quoted passage
+             the model was given is printed beneath the draft, so the prose can be checked against
+             its sources line by line. The model composes; it does not recall, and it is never
+             asked a clinical question.</p></div>
+      </div>
+      <div id="briefBody"><p class="lede">Loading…</p></div>
+    </div>
+    <script type="module" src="js/copilot.js" onerror="document.querySelectorAll('[data-view=\'BRIEF\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'BRIEF\']');if(s)s.remove()"></script>
+  </section>
+
+  <!-- THEATER 3D no longer has a pane of its own. The 3D map is a renderer
+       for the MISSION view rather than a separate destination, so its host
+       and its module tag live inside that view's stage. THEATER3D survives
+       as a navigation alias — see app.js — so every catalogue entry,
+       shortcut and link that names it still lands somewhere real. -->
+
+  <!-- ========================== ANALYSIS ========================== -->
+  <section class="viewport" data-pane="ANALYSIS">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Evidence</h2>
+          <p>Every mission you complete is captured here automatically, with the same after-action reasoning
+             the summary modal showed. Sweep every combination of theatre, control setting, telementoring policy
+             and seed headlessly to see whether the result holds beyond the run you just watched.</p></div>
+        <div class="phTools">
+          <button class="btn" id="btnSaveRun">Capture current run</button>
+          <button class="btn ok" id="btnSweep">Run 40-run sweep</button>
+          <button class="btn" id="btnExportRuns">Export JSON</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardHead">Full analysis of the last mission
+          <span class="dim" id="dosTag" style="margin-left:auto;font:400 11px/1 var(--sans)"></span></div>
+        <div id="dossier" class="dossier"></div>
+      </div>
+
+      <div class="card">
+        <div class="cardHead">What would it take to stop losing anyone?
+          <button class="mini ok" id="btnReq" style="margin-left:auto">Run the requirement analysis</button></div>
+        <p class="lede">Better tasking is what you do while the force is short of something. This asks what
+           the force is actually short of: it re-runs this operation with one constraint relaxed at a time —
+           more aircraft, more launch points, better-trained responders — and reports where the deaths go.
+           The last line is the floor: what happens if every survivable casualty is treated one minute
+           after injury with exactly the right product. Nothing gets below it.</p>
+        <div id="reqBox" class="reqBox"></div>
+      </div>
+      <div class="card"><div class="cardHead">Missions you have run this session</div>
+        <div id="liveBox" class="sweepBox"></div></div>
+
+      <div class="card"><div class="cardHead">Last mission — after-action reasoning</div>
+        <div id="aarBox" class="aarBox"></div></div>
+
+      <div class="card"><div class="cardHead">Parameter sweep — 40 headless missions</div>
+        <div id="sweepBox" class="sweepBox"></div></div>
+
+      <div class="card"><div class="cardHead">Every run · ANGEL SWARM / CURRENT — TRIAGE & PROXIMITY</div></div>
+      <div class="tableWrap">
+        <table class="grid tight">
+          <thead><tr>
+            <th style="width:48px">#</th><th style="width:76px">Source</th>
+            <th style="width:104px">Theatre</th><th style="width:60px">Seed</th>
+            <th style="width:88px">Control</th><th style="width:98px">Telement.</th>
+            <th style="width:88px">Casualties</th>
+            <!-- These three are the survivable cohort, which is the figure the
+                 scoreboard and THE DIFFERENCE carry. Named, because "ANGEL"
+                 over a bare number is not a label. -->
+            <th style="width:96px">ANGEL<br><span class="thSub">dead, survivable</span></th>
+            <th style="width:100px">CL VIII<br><span class="thSub">dead, survivable</span></th>
+            <th style="width:64px">Δ</th><th style="width:84px">Reduction</th>
+            <th style="width:96px">Sorties</th><th style="width:104px">Sorties wasted</th>
+            <th style="width:112px">Blood units lost</th><th style="width:92px">HVA saved</th>
+          </tr></thead>
+          <tbody id="runsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================= CASUALTY FLOW ========================= -->
+  <!-- Rendered entirely by js/charts.js: a Sankey of the cohort from triage
+       category to outcome, six synchronised time series over the mission
+       clock, a Kaplan-Meier survival curve with the Golden Hour marked, and
+       physiological deadline against the minute help arrived. The onerror
+       removes the pane and its navigation entry if the module is absent, as
+       in a single-file build with no js/ folder. -->
+  <section class="viewport" data-pane="FLOW">
+    <div id="flowBody"></div>
+    <script type="module" src="js/charts.js" onerror="document.querySelectorAll('[data-view=\'FLOW\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'FLOW\']');if(s)s.remove()"></script>
+  </section>
+
+  <!-- ========================== CONFIDENCE ========================== -->
+  <!-- Rendered entirely by js/montecarlo.js: the same simulation run a few
+       hundred times on different seeds across Web Workers, reported as a
+       paired difference distribution with a confidence interval, an effect
+       size, and a one-parameter sensitivity sweep. js/audio.js is loaded
+       here too — it has no pane of its own, only a control in the command
+       bar, and this is the one section this module owns. Both onerror
+       handlers remove only what they added. -->
+  <section class="viewport" data-pane="CONFIDENCE">
+    <div id="mcBody"></div>
+    <script type="module" src="js/audio.js" onerror="var e=document.getElementById('audCtl');if(e)e.remove()"></script>
+    <script type="module" src="js/montecarlo.js" onerror="document.querySelectorAll('[data-view=\'CONFIDENCE\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'CONFIDENCE\']');if(s)s.remove()"></script>
+  </section>
+
+  <!-- =========================== DATA / SQL =========================== -->
+  <!-- This pane used to be a second, complete SQL console: schema browser,
+       saved queries, editor, run button and result grid, over an in-page
+       SQLite. The analytical console two entries above it is the same product
+       over DuckDB, and it is the better demonstration — ASOF joins, PIVOT,
+       QUALIFY, real timings and the air-gap banner. Together the two were
+       1,348 visible elements and three and a half screens of scroll, 17% of
+       the whole application, serving one person.
+
+       So the console here is gone and what is left is the one thing it did
+       that the other cannot: write a real SQLite file the operator can take
+       away and open in any client. The engine that writes that file is still
+       loaded, because it is what produces the export. -->
+  <section class="viewport" data-pane="DATA">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Take the mission away as a file</h2>
+          <!-- The tiles below state the file: tables, casualty rows, audit
+               entries. A paragraph restating them is the definition of noise. -->
+          <p class="lede">A real SQLite database of this run, handed to you as a file.</p></div>
+        <div class="phTools">
+          <button class="btn ok" id="btnDbExport">Export .sqlite</button>
+        </div>
+      </div>
+
+      <div class="uavStatus ok" id="dbEngine"></div>
+      <div id="dbExportNote" class="card exportNote"></div>
+    </div>
+  </section>
+
+  <!-- ==================== ANALYTICAL CONSOLE (DuckDB) ====================
+       The pane is empty on purpose: js/data2.js builds it on first view and
+       leaves it alone if the engine could not start, so a machine without
+       Web Workers or WebAssembly simply never sees a console rather than
+       seeing one that throws. The stylesheet and module are declared here
+       rather than in the document head because this section is the only part
+       of the template this subsystem owns. -->
+  <section class="viewport" data-pane="QUERY">
+    <script type="module" src="js/data2.js"></script>
+  </section>
+
+  <!-- ==================== ROLE-PURPOSED PANES ===================== -->
+  <!-- Two destinations that exist only inside a role profile. Neither has a
+       renderer here. Each carries a header the shell owns and one mount
+       element whose id is fixed by ROLE_CONTRACT.md, so the module that
+       fills it can be written, dropped in, and fail, without any of the
+       three ever costing this application a blank screen: if the module
+       never registers ANGEL.views.DECIDE the placeholder line below is what
+       stays on screen, and if the module deletes this section on its own
+       load failure the role engine drops the destination and re-resolves the
+       role to its next view. -->
+
+  <section class="viewport" data-pane="DECIDE">
+    <div class="pane">
+      <div class="paneHead"><div class="ph1"><h2>What to decide</h2>
+        <p class="lede">The commander's decision surface: which operation needs the capability,
+          what is thin, and the one button that sends it.</p></div></div>
+      <div id="decideBody" class="roleMount">
+        <p class="lede">Not built yet — this pane is a mount point with no content in it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="viewport" data-pane="COST" data-placeholder>
+    <div class="pane">
+      <div class="paneHead"><div class="ph1"><h2>What it costs</h2>
+        <p class="lede">Blood not destroyed, evacuation not created, flying not done, and the
+          coverage gap that names what to buy.</p></div></div>
+      <div id="costBody" class="roleMount">
+        <p class="lede">Not built yet — this pane is a mount point with no content in it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== SETTINGS ========================== -->
+  <section class="viewport" data-pane="SETTINGS">
+    <div class="pane">
+      <div class="paneHead">
+        <div class="ph1"><h2>Settings</h2>
+          <p>Everything that changes the run. Each control restarts it, so both arms stay paired.</p></div>
+      </div>
+      <div class="setGrid">
+        <div class="card set">
+          <div class="cardHead">Autonomy policy</div>
+          <div class="setRow"><label>Human-in-the-loop</label><span class="chip" id="hitlToggle">Enabled</span></div>
+          <p>The system proposes, an operator disposes. Off is fully autonomous; the audit log records it.</p>
+          <div class="setRow"><label>Auto-dispatch above expected gain</label>
+            <input id="autoThresh" type="range" min="0" max="100" value="10">
+            <b class="mono"><span id="autoThreshVal">10</span></b></div>
+          <p>Modelled increase in this casualty's chance of survival, ×100.</p>
+          <details class="disc" data-nofold>
+            <summary><b>the bar</b><b class="q">what launches on its own</b></summary>
+            <p>Clear-cut sorties above the bar launch immediately — a human bottleneck on the obvious
+               costs lives. Marginal ones below it, typically a scarce blood unit spent on a low-yield
+               case or a route through a threat envelope, wait for a person. Raise the bar and more
+               decisions land in the queue.</p>
+          </details>
+        </div>
+
+        <div class="card set">
+          <div class="cardHead">Comparison</div>
+          <div class="setRow"><label>Control arm</label>
+            <div class="seg"><span class="chip" data-mode="fair">Fair</span><span class="chip" data-mode="realistic">Realistic</span></div></div>
+          <!-- Two published figures. Kept in the open and marked data-nofold:
+               a citation folded away is a citation withdrawn. -->
+          <p data-nofold>Fair gives the control perfect triage — a baseline no real unit achieves.
+             Realistic applies START's published 57.8% sensitivity and 26% over-triage.</p>
+          <div class="setRow"><label>Random seed</label><input id="seedInput" class="mono num" type="number" value="42" min="1"></div>
+          <p>Same seeded stream and outcome draws in both arms, so the difference is the tasking decision.</p>
+        </div>
+
+        <div class="card set">
+          <div class="cardHead">Clinical policy</div>
+          <div class="setRow"><label>Telementoring</label><span class="chip" id="tmToggle">Enabled</span></div>
+          <p>Modelled policy proposal — not a fielded capability.</p>
+          <details class="disc" data-nofold>
+            <summary><b>82%</b><b class="q">of a Tier 3 combat medic</b></summary>
+            <p>The aircraft relays augmented-reality guidance so a Combat Lifesaver can administer
+               freeze-dried plasma and TXA under remote medic supervision, at 82% of the efficacy of a
+               Tier 3 combat medic. Switch it off to see the result without it — this is the single
+               largest lever in the model, and it is a training-and-authority decision, not a
+               technology one.</p>
+          </details>
+        </div>
+
+        <div class="card set">
+          <div class="cardHead">Mission parameters — high-value assets</div>
+          <p>Designate the roles the mission cannot replace. Every casualty holding one is flagged.</p>
+          <details class="disc" data-nofold>
+            <summary><b>at equal clinical benefit</b><b class="q">the weighting rule</b></summary>
+            <p>Under METT-TC a commander decides, before contact, which capabilities the mission cannot
+               replace inside the fight. ANGEL SWARM serves those casualties ahead of queue order
+               <b>at equal clinical benefit</b> — the weighting is applied after the break-even test,
+               so a designation changes who is served first and never manufactures a sortie that was
+               not worth flying. Current triage and proximity sequences by triage category and nearest
+               airframe, and has nowhere to put this.</p>
+          </details>
+          <div id="roleGrid" class="roleGrid"></div>
+          <div class="setRow"><label>Priority weight</label>
+            <input id="hvaWeight" type="range" min="100" max="300" value="160">
+            <b class="mono"><span id="hvaWeightVal">1.60×</span></b></div>
+          <div class="setRow"><label>Currently flagged</label>
+            <b class="mono warn"><span id="hvaLive">0</span> casualties</b>
+            <button class="mini" id="btnClearHva">Clear all</button></div>
+          <p>Also designable one at a time. Every designation and revocation is written to the audit log.</p>
+        </div>
+
+        <div class="card set">
+          <div class="cardHead">Display</div>
+          <div class="setRow"><label>Combatant command</label>
+            <div class="seg"><span class="chip" data-theaterpick="PACOM">PACOM</span><span class="chip" data-theaterpick="EUCOM">EUCOM</span></div></div>
+          <div class="setRow"><label>Map</label>
+            <div class="seg"><span class="chip" data-mapview="COP">Single</span><span class="chip" data-mapview="COMPARE">Side by side</span></div></div>
+          <details class="disc" data-nofold>
+            <summary><b>Keyboard</b><b class="q">and the map</b></summary>
+            <p><b>Space</b> run/pause · <b>R</b> reset · <b>Esc</b> close · <b>1–8</b> switch module ·
+               <b>+ / −</b> zoom the map · <b>0</b> fit. On the map: scroll to zoom, drag to pan,
+               double-click to zoom in.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- --------------------------- DRAWER --------------------------- -->
+  <aside id="drawer"></aside>
+
+  <!-- ---------------------- RIGHT ICON RAIL (36px) ---------------------- -->
+  <!-- The outer edge on the right carries the instruments for the object on
+       screen, the way the left edge carries the places you can go. Every
+       entry here drives a control that already existed — the map legend, the
+       zoom, the layout switch, the renderer switch, the approvals queue — so
+       there is no new capability in this rail and nothing in it can be
+       clicked into a state the application does not have.
+       `data-act` is read by js/app.js, which clicks the real control. -->
+  <nav id="railR" aria-label="Map and object tools">
+    <button class="ri" data-act="legend" title="Map layers — show or hide the layer panel (available on The fight)"><svg class="ic"><use href="#i-layers"/></svg><em>Map layers</em></button>
+    <button class="ri" data-act="layersAll" title="Draw every layer, or none (available on The fight)"><svg class="ic"><use href="#i-filter"/></svg><em>Draw every layer</em></button>
+    <button class="ri" data-act="fit" title="Fit the area of operations (available on The fight)"><svg class="ic"><use href="#i-target"/></svg><em>Fit the area of operations</em></button>
+    <button class="ri" data-act="zoomIn" title="Zoom in (available on The fight)"><svg class="ic"><use href="#i-plus"/></svg><em>Zoom in</em></button>
+    <button class="ri" data-act="zoomOut" title="Zoom out (available on The fight)"><svg class="ic"><use href="#i-minus"/></svg><em>Zoom out</em></button>
+    <span class="rline"></span>
+    <button class="ri" data-act="sideBySide" title="Both arms side by side, or one map (available on the tactical map)"><svg class="ic"><use href="#i-grid"/></svg><em>Both arms, side by side</em></button>
+    <span class="rline"></span>
+    <!-- THE SAME THREE MAP VIEWS THE TOOL ROW OFFERS. This rail used to carry
+         one button that toggled 2D against 3D, which was the whole of the map
+         switching before v3.2 and became a stale half of it the moment the
+         theatre picture joined the other two on one control. A person who
+         reaches for the rail rather than the tool row must find the same
+         three choices, in the same order, showing the same state. -->
+    <button class="ri" data-scope="THEATRE" title="Theatre — the combatant command and every operation in it"><svg class="ic"><use href="#i-radar"/></svg><em>Theatre map</em></button>
+    <button class="ri" data-scope="2D" title="Tactical — the fight itself, drawn flat"><svg class="ic"><use href="#i-map"/></svg><em>Tactical map</em></button>
+    <button class="ri" data-scope="3D" title="Tactical 3D — the fight on the GPU, pitched and rotatable"><svg class="ic"><use href="#i-north"/></svg><em>Tactical map, 3D</em></button>
+    <span class="rline"></span>
+    <!-- Not a duplicate destination for its own sake: the awaiting-approval
+         count is the one number in this application that is an instruction to
+         a human, and the reference console puts exactly that on the right
+         edge. It carries the same badge the rail entry does. -->
+    <button class="ri" data-act="approvals" title="Approvals awaiting a human"><svg class="ic"><use href="#i-alert"/></svg><b id="railBadge">0</b><em>Approvals awaiting a human</em></button>
+    <span class="railSpacer"></span>
+    <button class="ri" data-act="keys" title="Keyboard shortcuts (?)"><svg class="ic"><use href="#i-expired"/></svg><em>Keyboard shortcuts (?)</em></button>
+  </nav>
+</div>
+
+<!-- ========================= FOOT RIBBON (26px) ========================= -->
+<!-- Readouts, not a status bar of prose. Each cell is a quantity the operator
+     would otherwise have to open a pane to read, and every one of them comes
+     from the live run — js/app.js fills them in syncFoot() on the same tick
+     that draws the map. The last cell is the standing line, and it does not
+     move. -->
+<footer id="foot">
+  <span class="rb"><svg class="ic14"><use href="#i-pin"/></svg><b id="ftGrid">—</b></span>
+  <span class="rb"><b id="ftCas">0</b>&nbsp;WOUNDED</span>
+  <span class="rb"><b id="ftOpen" class="amb">0</b>&nbsp;ON THE GROUND</span>
+  <!-- An airframe count with no owner reads as a pool. It is not one: every
+       aircraft belongs to a launch point and every launch point to one JOA. -->
+  <span class="rb"><b id="ftAir">0</b>&nbsp;AIRCRAFT&nbsp;·&nbsp;<b id="ftLp">0</b>&nbsp;LAUNCH POINTS&nbsp;·&nbsp;<em id="ftOwner">—</em></span>
+  <span class="rb"><svg class="ic14"><use href="#i-clock"/></svg><b id="ftClock">T+00:00</b>&nbsp;<em id="ftState">PAUSED</em></span>
+  <span class="rb" id="ftAutoWrap"><b id="ftAuth" class="cyan">0</b>&nbsp;STANDING AUTH&nbsp;·&nbsp;<b id="ftWait" class="amb">0</b>&nbsp;AWAITING&nbsp;·&nbsp;<b id="ftExp" class="red">0</b>&nbsp;EXPIRED</span>
+  <span class="rb"><b id="ftSeed">SEED 42</b></span>
+  <span class="rb last">DEATHS COUNTED, NEVER SCORED</span>
+</footer>
+
+<div id="tip"></div>
+<div id="toasts"></div>
+
+<!-- The operation picker's list. A direct child of <body> and positioned
+     against the viewport: the command bar is a wrapping flex row and a panel
+     laid out inside it either clipped against the bar's own bounds or
+     reflowed the bar the moment it opened. Filled by buildOpMenu(). -->
+<div id="opMenu" class="opMenu" role="listbox" aria-label="Operations" hidden></div>
+
+<!-- ========================== WELCOME ============================ -->
+<div id="welcome" class="show">
+  <div class="wcCard">
+    <div class="wcHead">
+      <span class="wcMark">◈</span>
+      <div><h2>ANGEL SWARM</h2>
+        <p>Replacing the Golden Hour with a deadline you can measure, and a plan you can compute.</p></div>
+    </div>
+
+    <div class="wcSteps">
+      <div class="wcStep">
+        <span class="wcN">1</span>
+        <b>Everything in military medicine is planned against one number.</b>
+        <p>Sixty minutes from wounding to surgical care. Where the surgeons sit, what a medic carries,
+           how many air ambulances a division holds — all of it is built on the Golden Hour. It was a
+           promise the helicopters kept in Iraq and Afghanistan, in skies nobody contested.</p>
+      </div>
+      <div class="wcStep">
+        <span class="wcN">2</span>
+        <b>In the next fight it cannot be kept — and it was the wrong number anyway.</b>
+        <p>Strategic evacuation can absorb three to four per cent of the casualties a peer war produces.
+           And measured against real physiology, <em>58% of casualties stop compensating before the hour is
+           up, while 42% could have waited longer</em>. Sixty minutes was never a measurement. It was an
+           average, made into a standard because nothing better could be measured.</p>
+      </div>
+      <div class="wcStep">
+        <span class="wcN">3</span>
+        <b>Now it can. One clock each — and a plan you can compute.</b>
+        <p>A wearable reading the pulse waveform gives every casualty their own deadline, 16 to 25 minutes
+           of warning. Once each person has a number, getting help to them stops being a transport problem
+           and becomes a scheduling problem with a right answer. This runs the same battle twice to prove
+           the standard is achievable — then tells you what a given force will lose, and what to buy.</p>
+      </div>
+    </div>
+
+    <div class="wcFoot">
+      <button class="btn ok big" id="wcStart">Show me why the Golden Hour is gone →</button>
+      <button class="btn" id="wcSkip">Explore on my own</button>
+      <span class="dim">Everything here is simulated. No real people, no real data.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== DEPLOY MODAL ========================= -->
+<div id="deployModal" data-phase="READY">
+  <div class="modalCard deployCard">
+    <div class="modalHead">
+      <div style="flex:1">
+        <h2 id="dpTitle">Deploy ANGEL SWARM</h2>
+        <p>Into <b id="dpJoa">—</b> <span class="pill info" id="dpMode">EXERCISE</span></p>
+      </div>
+      <button id="dpCancel">Cancel</button>
+    </div>
+
+    <!-- phase 1: what is ready -->
+    <div class="dpReady">
+      <div class="dpAlertBox" id="dpAlert" style="display:none"></div>
+      <div class="dpRoll">
+        <div class="dpBig"><b id="dpReadyN">0</b><span>airframes ready</span></div>
+        <div class="dpBig sub"><b id="dpTotalN">0</b><span>at these launch points</span></div>
+        <div class="dpBig sub"><b id="dpLpN">0</b><span>launch points committed</span></div>
+      </div>
+      <p class="dpNote">Deselect a launch point to hold it back. Airframes down for maintenance are shown but
+         cannot be committed. Committing transfers medical tasking authority for this operations area to
+         ANGEL SWARM at the moment the last airframe reports online, and that moment is written to the audit log.</p>
+      <div id="dpLps" class="dpLps"></div>
+    </div>
+
+    <!-- phase 2: coming online -->
+    <div class="dpGoing">
+      <div class="dpProg">
+        <div class="dpProgHead">
+          <b id="dpOnline">0</b><span>of</span><b id="dpOf">0</b><span>airframes online</span>
+          <span class="dpPct mono" id="dpPct">0%</span>
+        </div>
+        <div class="dpTrack"><i id="dpBar"></i></div>
+      </div>
+      <div id="dpFeed" class="dpFeed"></div>
+    </div>
+
+    <div class="runFootBar">
+      <button class="btn ok" id="dpConfirm">Commit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= RUN REPORT ========================== -->
+<div id="runModal">
+  <div class="modalCard runCard">
+    <div class="modalHead">
+      <div style="flex:1">
+        <h2>Mission complete — after-action summary</h2>
+        <p>Both arms fought the same three hours. Here is what separated them.</p>
+      </div>
+      <button id="runClose">Close</button>
+    </div>
+    <div id="runBody"></div>
+    <div class="runFootBar">
+      <button class="btn ok" id="runAnalyse">Save this run and open the full analysis →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ MODAL ============================ -->
+<div id="modal">
+  <div class="modalCard">
+    <div class="modalHead">
+      <div style="flex:1">
+        <h2>Model &amp; Sources</h2>
+        <p>Every parameter traces to published literature or doctrine. Nothing here is invented for effect.</p>
+      </div>
+      <button id="modalClose">Close</button>
+    </div>
+    <div id="modelBody"></div>
+  </div>
+</div>
+
+<!-- Changing operation ends the run in progress. That is a destructive act and it
+     asks first. Built as a sheet rather than window.confirm() because a browser
+     dialogue cannot carry the classification band and reads as a web page. -->
+<div id="confirmModal">
+  <div class="modalCard confirmCard">
+    <div class="modalHead">
+      <div style="flex:1">
+        <h2 id="cfTitle">Confirm</h2>
+        <p id="cfBody"></p>
+      </div>
+    </div>
+    <div class="cfFoot">
+      <button id="cfCancel">Cancel</button>
+      <button id="cfOk" class="btn ok">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div id="acctModal">
+  <div class="modalCard">
+    <div class="modalHead">
+      <div style="flex:1">
+        <h2>Who decides, and who answers for it</h2>
+        <p>The question this system has to survive is not whether it is accurate. It is whether a
+           commander can stand behind a decision it contributed to.</p>
+      </div>
+      <button id="acctClose">Close</button>
+    </div>
+    <div id="acctBody"></div>
+  </div>
+</div>
+
+<script src="js/boot.js"></script>
+<script src="js/sim.js"></script>
+<!-- The theme service. After boot.js (which build.py inserts above sim.js)
+     because it publishes into ANGEL's registry, and before everything that
+     draws, because a canvas module wants ANGEL.need('theme') resolved by the
+     time it takes its first frame. It does NOT apply the theme — the inline
+     block at the top of <body> already did, before first paint. -->
+<script src="js/theme.js"></script>
+<script src="js/optimizer.js"></script>
+<script src="js/basemap.js"></script>
+<script src="js/map.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/theater.js"></script>
+<script src="js/sqlwasm.js"></script>
+<script src="js/db.js"></script>
+<script src="js/film_inline.js"></script>
+<script src="js/app.js"></script>
+<script type="module" src="js/device.js"></script>
+<!-- The cross-cutting layer: command palette, one keyboard guard in front of
+     every global key handler in the application, the shortcut reference, and
+     the first-run orientation strip. A classic script, not a module, for two
+     reasons. It has to see the same global scope as app.js (`APP`, `render`,
+     `SCENARIOS` are `const` declarations no module can reach), and it has to
+     run *before* any other key handler is registered — classic scripts
+     execute during parsing, deferred modules only afterwards, so this file
+     is in place before app.js binds anything on DOMContentLoaded. -->
+<!-- The surgeon profile: overrides CASUALTIES and the casualty record drawer
+     for that role alone and reduces the seven panes it shares with the
+     others. Classic script, and first of the three role files because it
+     wraps the render globals the other two also wrap — wrapping innermost
+     costs nothing and keeps each composition in rail order. -->
+<script src="js/role-surgeon.js"></script>
+<!-- The logistician profile: overrides DASHBOARD for that role alone and
+     reduces the five panes it shares with the others. Classic script, and
+     ahead of role-commander because it wraps COST's entry in ANGEL.views if
+     that module has registered one and re-checks on boot if it has not. -->
+<script src="js/role-logistician.js"></script>
+<script src="js/role-commander.js"></script>
+<script src="js/telemetry.js"></script>
+<script src="js/palette.js"></script>
+<!-- The left inspector. Classic script, after the role files, so the
+     data-roles it writes are filtered by an engine that is already running and
+     so the render() it wraps is the composed one rather than the native. -->
+<script src="js/detail.js"></script>
+<script src="js/page-launchpoints.js"></script>
+<script src="js/page-grouped.js"></script>
+<script src="js/page-kpi.js"></script>
+<script src="js/page-afteraction.js"></script>
+<script src="js/inspector.js"></script>
+<script src="js/shell.js"></script>
+<script src="js/page-dash.js"></script>
+<script src="js/page-tty.js"></script>
+<script src="js/page-ops.js"></script>
+<script src="js/page-ev.js"></script>
+<script src="js/page-chat.js"></script>
+<script src="js/page-cas.js"></script>
+<script src="js/page-dec.js"></script>
+<script src="js/page-feed.js"></script>
+<script src="js/page-map.js"></script>
+</body>
+</html>

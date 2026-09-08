@@ -1,0 +1,86 @@
+# ANGEL SWARM — Rail button verification, v3.5
+
+UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
+
+Machine-generated output from the v3.5 sweep of the right-hand tool rail: every control on the rail was pressed in every destination and on all three maps, and the application state each press actually changed was recorded. It is reproduced verbatim from `RAIL-BUTTON-VERIFICATION-v3.5.txt`, which remains the authoritative copy.
+
+The sweep exists because a rail button that silently does nothing is indistinguishable, to the operator, from a broken application. Four presses of the sixty-nine did nothing, and all four are the no-op cases — pressing `scope:2D` while already on the tactical 2D map, `scope:3D` while already on 3D, `scope:THEATRE` while already on the theatre map, and `approvals` while already on the Approvals destination.
+
+```text
+3D available: true
+
+VIEW            BUTTON        STATE CHANGED
+------------------------------------------------------------------------------
+Overview        scope:THEATRE view
+Overview        scope:2D      view
+Overview        scope:3D      view,mapMode,z3,g3Panel
+Overview        approvals     view
+Overview        keys          keysheet
+Casualties      scope:THEATRE view
+Casualties      scope:2D      view,mapMode
+Casualties      scope:3D      view,mapMode
+Casualties      approvals     view
+Casualties      keys          keysheet
+Launch points   scope:THEATRE view
+Launch points   scope:2D      view,mapMode
+Launch points   scope:3D      view,mapMode
+Launch points   approvals     view
+Launch points   keys          keysheet
+Aircraft        scope:THEATRE view
+Aircraft        scope:2D      view,mapMode
+Aircraft        scope:3D      view,mapMode
+Aircraft        approvals     view
+Aircraft        keys          keysheet
+Supplies        scope:THEATRE view
+Supplies        scope:2D      view,mapMode
+Supplies        scope:3D      view,mapMode
+Supplies        approvals     view
+Supplies        keys          keysheet
+Approvals       scope:THEATRE view
+Approvals       scope:2D      view,mapMode
+Approvals       scope:3D      view,mapMode
+Approvals       approvals     NOTHING
+Approvals       keys          keysheet
+Scenarios       scope:THEATRE view
+Scenarios       scope:2D      view,mapMode
+Scenarios       scope:3D      view,mapMode
+Scenarios       approvals     view
+Scenarios       keys          keysheet
+After-action    scope:THEATRE view
+After-action    scope:2D      view,mapMode
+After-action    scope:3D      view,mapMode
+After-action    approvals     view
+After-action    keys          keysheet
+Theatre map     fit           th
+Theatre map     zoomIn        th
+Theatre map     zoomOut       th
+Theatre map     scope:THEATRE NOTHING
+Theatre map     scope:2D      view,mapMode
+Theatre map     scope:3D      view,mapMode
+Theatre map     approvals     view
+Theatre map     keys          keysheet
+Tactical 2D     legend        legendOpen
+Tactical 2D     layersAll     layers2
+Tactical 2D     fit           z2
+Tactical 2D     zoomIn        z2
+Tactical 2D     zoomOut       z2
+Tactical 2D     sideBySide    mapView
+Tactical 2D     scope:THEATRE view
+Tactical 2D     scope:2D      NOTHING
+Tactical 2D     scope:3D      mapMode
+Tactical 2D     approvals     view
+Tactical 2D     keys          keysheet
+Tactical 3D     legend        g3Panel
+Tactical 3D     layersAll     layers3
+Tactical 3D     fit           z3
+Tactical 3D     zoomIn        z3
+Tactical 3D     zoomOut       z3
+Tactical 3D     scope:THEATRE view
+Tactical 3D     scope:2D      mapMode
+Tactical 3D     scope:3D      NOTHING
+Tactical 3D     approvals     view
+Tactical 3D     keys          keysheet
+------------------------------------------------------------------------------
+69 button presses tested, 4 did nothing
+page errors: none
+```

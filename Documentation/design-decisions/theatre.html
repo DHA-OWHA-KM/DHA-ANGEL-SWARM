@@ -1,0 +1,107 @@
+<!doctype html><meta charset="utf-8"><title>THEATRE — diagnosis</title>
+<link rel="stylesheet" href="_font.css">
+<script src="../app/js/geo.js"></script>
+<style>
+ :root{--pg:oklch(0.155 0.008 250);--bd:oklch(0.3 0.012 250);--fg:oklch(0.96 0.005 250);
+       --dim:oklch(0.63 0.008 250);--faint:oklch(0.5 0.008 250)}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--pg);color:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif;padding:32px 38px 46px}
+ h1{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:0 0 4px}
+ .sub{font-size:12.5px;color:var(--dim);margin:0 0 22px;max-width:1020px;line-height:1.6}
+ .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+ .col{display:flex;flex-direction:column;gap:8px}
+ .colK{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.13em;padding:4px 9px;border-radius:4px;align-self:flex-start}
+ .kNow{background:oklch(0.26 0.05 25);color:oklch(0.85 0.09 25);border:1px solid oklch(0.42 0.1 25)}
+ .kFix{background:oklch(0.24 0.05 165);color:oklch(0.85 0.08 165);border:1px solid oklch(0.4 0.08 165)}
+ .frame{border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:oklch(0.11 0.008 250);line-height:0;position:relative}
+ .frame img,.frame canvas{width:100%;display:block}
+ .cap{font-size:11.5px;color:var(--dim);line-height:1.6;margin:2px 0 0}
+ .bad{padding-left:10px;border-left:2px solid oklch(0.5 0.12 25);color:oklch(0.82 0.08 25)}
+ .good{padding-left:10px;border-left:2px solid oklch(0.5 0.1 165);color:oklch(0.84 0.07 165)}
+ h2{font-size:15.5px;font-weight:600;margin:32px 0 10px}
+ table{border-collapse:collapse;font-size:12px;width:100%;max-width:1020px}
+ th{font:700 8.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--faint);text-align:left;padding:0 16px 8px 0;border-bottom:1px solid var(--bd)}
+ td{padding:9px 16px 9px 0;border-bottom:1px solid oklch(0.25 0.01 250);color:oklch(0.86 0.006 250);vertical-align:top}
+ .n{font:700 11px 'IBM Plex Mono',monospace;color:oklch(0.82 0.09 25);white-space:nowrap}
+</style>
+<h1>Your theatre map, diagnosed</h1>
+<p class="sub">Left is the live THEATRE scale from v6.2. Right is the <b>same 243 coastline runs and 31 international-boundary runs already in <span style="font-family:'IBM Plex Mono',monospace">app/js/geo.js</span></b> — real GSHHS shoreline and CIA WDB-II boundaries — redrawn with four things changed. No new data, no library, no network.</p>
+
+<div class="pair">
+  <div class="col"><span class="colK kNow">NOW — v6.2</span>
+    <div class="frame"><img src="theatre_crop.png" alt=""></div>
+    <p class="cap bad">Skewed into an oblique parallelogram, land and sea nearly the same value, borders almost invisible, and not one country named.</p></div>
+  <div class="col"><span class="colK kFix">SAME DATA, REDRAWN</span>
+    <div class="frame"><canvas id="cv" width="1600" height="1180"></canvas></div>
+    <p class="cap good">Flat and north-up, land lifted clear of the sea, boundaries legible, countries and seas labelled.</p></div>
+</div>
+
+<h2>The four defects, and what each one costs to fix</h2>
+<table>
+ <tr><th>Defect</th><th>Why it reads badly</th><th>Fix</th><th>Effort</th></tr>
+ <tr><td><b>Oblique projection</b></td><td>The whole picture is drawn as a tilted parallelogram. Japan and the Philippines are sheared, so the shapes your eye knows do not match the shapes on screen. This is the single biggest cause of "hard to make out".</td><td>Draw north-up. Keep the tilt as an option if you like it for the hero shot.</td><td class="n">2–3 h</td></tr>
+ <tr><td><b>Land / sea contrast</b></td><td>Muddy olive land on near-black sea, with relief shading adding noise on top. Coastline is the most important line on a theatre map and it is the faintest.</td><td>Lift land, deepen sea, draw a crisp coast stroke over both.</td><td class="n">1–2 h</td></tr>
+ <tr><td><b>Invisible borders</b></td><td>The boundary data is loaded and drawn — at a contrast you cannot see. You genuinely cannot tell China from Vietnam.</td><td>Raise the stroke; dash it so it reads as political, not physical.</td><td class="n">30 min</td></tr>
+ <tr><td><b>No labels</b></td><td>Not one country or sea is named anywhere on the picture. This is why it does not feel like a map.</td><td>~15 labels per theatre, placed by lon/lat, scaled with zoom.</td><td class="n">2 h</td></tr>
+</table>
+<p class="cap" style="margin-top:14px;max-width:1020px">Total <b>6–8 hours</b>, all inside <span style="font-family:'IBM Plex Mono',monospace">theater.js</span>, and none of it touches the tactical 2D or 3D renderers.</p>
+
+<script>
+const C=document.getElementById('cv'),x=C.getContext('2d'),W=C.width,H=C.height;
+const G=GEO.PACOM;
+// Plate Carrée with a cos(lat) correction at the standard parallel — a theatre map, north up.
+const L0=95,L1=160,B0=-32,B1=52, k=Math.cos(12*Math.PI/180);
+const sx=W/((L1-L0)*k), sy=H/(B1-B0), s=Math.min(sx,sy);
+const ox=(W-(L1-L0)*k*s)/2, oy=(H-(B1-B0)*s)/2;
+const PX=(lon,lat)=>[ox+(lon-L0)*k*s, oy+(B1-lat)*s];
+// sea
+x.fillStyle='#0b1a24'; x.fillRect(0,0,W,H);
+// graticule
+x.strokeStyle='rgba(120,160,185,.10)'; x.lineWidth=1;
+for(let l=L0;l<=L1;l+=10){const a=PX(l,B1),b=PX(l,B0);x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();}
+for(let b=B0;b<=B1;b+=10){const a=PX(L0,b),c=PX(L1,b);x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(c[0],c[1]);x.stroke();}
+// land — fill then a crisp coast stroke
+const path=(run)=>{x.beginPath();for(let i=0;i<run.length;i+=2){const p=PX(run[i],run[i+1]);i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]);}};
+for(const run of G.coast){ if(run.length<8) continue; path(run); x.closePath();
+  x.fillStyle='#2c3b33'; x.fill(); }
+for(const run of G.coast){ if(run.length<8) continue; path(run);
+  x.strokeStyle='rgba(150,196,214,.62)'; x.lineWidth=1.15; x.stroke(); }
+// international boundaries — dashed, so they read as political
+x.save(); x.setLineDash([7,5]); x.strokeStyle='rgba(196,176,140,.55)'; x.lineWidth=1.15;
+for(const run of G.border){ if(run.length<4) continue; path(run); x.stroke(); }
+x.restore();
+// labels
+const LAND=[[105,34,'CHINA'],[138,37,'JAPAN'],[127.6,36.6,'KOREA'],[122,12,'PHILIPPINES'],
+ [117,-2.5,'INDONESIA'],[134,-25,'AUSTRALIA'],[106,16,'VIETNAM'],[121,23.7,'TAIWAN'],
+ [145,-6,'PAPUA NEW GUINEA'],[101.5,14,'THAILAND'],[113,4,'MALAYSIA'],[96,20,'MYANMAR']];
+const SEA=[[130,19,'PHILIPPINE SEA'],[114,13,'SOUTH CHINA SEA'],[153,-17,'CORAL SEA'],
+ [131,38,'SEA OF JAPAN'],[125,-6,'BANDA SEA'],[147,25,'W E S T E R N   P A C I F I C']];
+x.textAlign='center'; x.textBaseline='middle';
+for(const [lo,la,n] of LAND){const p=PX(lo,la);
+  x.font='700 15px "IBM Plex Mono", monospace'; x.fillStyle='rgba(232,242,248,.80)';
+  x.letterSpacing='2.5px'; x.fillText(n,p[0],p[1]);}
+for(const [lo,la,n] of SEA){const p=PX(lo,la);
+  x.font='italic 400 14px "IBM Plex Sans", sans-serif'; x.fillStyle='rgba(150,196,224,.46)';
+  x.letterSpacing='1.5px'; x.fillText(n,p[0],p[1]);}
+x.letterSpacing='0px';
+// the four operations, as ANGEL plots them
+const OPS=[[124.5,21.6,'JOA CORAL','#f07a7a',1],[127.4,34.2,'JOA BASALT','#f07a7a',1],
+ [145.2,14.6,'JOA MARINER','#e8b45c',0],[133.0,-4.2,'JOA TIMBER','#e8b45c',0]];
+for(const [lo,la,n,c,live] of OPS){const p=PX(lo,la);
+  for(const r of [46,30,17]){x.beginPath();x.arc(p[0],p[1],r,0,7);x.fillStyle=c.replace(')',',.10)').replace('#','rgba(').length?`rgba(240,122,122,${r===17?.20:r===30?.11:.06})`:'';x.fill();}
+  x.beginPath();x.moveTo(p[0],p[1]-13);x.lineTo(p[0]+11,p[1]+8);x.lineTo(p[0]-11,p[1]+8);x.closePath();
+  x.fillStyle=c;x.fill();
+  x.font='700 13px "IBM Plex Mono", monospace';x.fillStyle='rgba(240,248,252,.94)';
+  x.letterSpacing='1.5px';x.fillText(n,p[0],p[1]+30);x.letterSpacing='0px';
+  if(live){x.font='700 10px "IBM Plex Mono", monospace';x.fillStyle='#7ee0b0';x.fillText('LIVE',p[0],p[1]+47);}}
+// furniture
+x.font='700 12px "IBM Plex Mono", monospace';x.textAlign='right';x.fillStyle='rgba(190,215,230,.62)';
+x.fillText('COAST + BORDERS · GSHHS / WDB-II · SHIPPED IN BUILD', W-24, H-52);
+x.fillText('NO TILE SERVER · NO NETWORK', W-24, H-30);
+x.textAlign='left';
+x.strokeStyle='rgba(200,222,236,.7)';x.lineWidth=2;
+const [a1]=[PX(97,-28)],[a2]=[PX(107,-28)];
+x.beginPath();x.moveTo(a1[0],a1[1]);x.lineTo(a2[0],a2[1]);x.stroke();
+x.font='700 12px "IBM Plex Mono", monospace';x.fillStyle='rgba(200,222,236,.75)';
+x.fillText('1 000 KM', a1[0], a1[1]-12);
+</script>

@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ANGEL SWARM — Engine Self-Test</title>
+<link rel="stylesheet" href="./css/fonts.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;1.6 1.04 20.8 20.8&quot;%3E%3Crect x=&quot;1.6&quot; y=&quot;1.04&quot; width=&quot;20.8&quot; height=&quot;20.8&quot; rx=&quot;4.4&quot; fill=&quot;%230b1119&quot;/%3E%3Cg fill=&quot;%23f05653&quot;%3E%3Cpath d=&quot;M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z&quot;/%3E%3Cpath d=&quot;M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z&quot;/%3E%3Cpath d=&quot;M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z&quot;/%3E%3C/g%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:oklch(0.14 0.008 250);
+    --panel:oklch(0.2 0.012 250);
+    --panelHi:oklch(0.225 0.014 250);
+    --line:oklch(0.3 0.012 250);
+    --hair:oklch(0.25 0.01 250);
+    --ink:oklch(0.93 0.005 250);
+    --dim:oklch(0.66 0.008 250);
+    --dimmer:oklch(0.56 0.008 250);
+    --cyan:oklch(0.78 0.07 195);
+    --teal:oklch(0.8 0.11 165);
+    --tealDim:oklch(0.3 0.06 165);
+    --red:oklch(0.78 0.16 25);
+    --redDim:oklch(0.3 0.08 25);
+    --violet:oklch(0.82 0.09 300);
+    --amber:oklch(0.84 0.1 75);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:oklch(0.17 0.01 250);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:13px}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .banner{background:var(--panel);color:var(--dim);font:600 9px 'IBM Plex Mono',monospace;letter-spacing:.15em;
+    padding:7px 18px;display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid oklch(0.29 0.01 250)}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 20px 60px}
+  h1{font:700 20px 'IBM Plex Mono',monospace;letter-spacing:.05em;color:oklch(0.96 0.005 250);margin:18px 0 6px}
+  .sub{font-size:12px;line-height:1.65;color:var(--dim);max-width:860px;margin:0 0 4px}
+  .sub b{color:oklch(0.88 0.006 250);font-weight:600}
+  code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:oklch(0.84 0.05 195)}
+
+  .bar{position:sticky;top:0;z-index:5;margin:18px 0 16px;border-radius:6px;background:var(--panel);
+    border:1px solid var(--line);display:flex;align-items:stretch;flex-wrap:wrap;overflow:hidden}
+  .stat{padding:12px 18px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--hair);min-width:104px}
+  .stat .k{font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--dimmer)}
+  .stat .v{font:600 21px 'IBM Plex Mono',monospace;letter-spacing:-.01em;color:var(--ink)}
+  .stat .v.pass{color:var(--teal)}
+  .stat .v.fail{color:var(--red)}
+  .barPill{align-self:center;margin-left:18px;font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.11em;
+    padding:8px 14px;border-radius:4px}
+  .barPill.ok{background:var(--tealDim);color:var(--teal);border:1px solid oklch(0.44 0.09 165)}
+  .barPill.bad{background:var(--redDim);color:var(--red);border:1px solid oklch(0.46 0.12 25)}
+  .barPill.run{background:oklch(0.26 0.05 300);color:var(--violet);border:1px solid oklch(0.42 0.08 300)}
+  .spacer{flex:1}
+  .btn{align-self:center;margin:0 8px;font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.08em;
+    padding:9px 14px;border-radius:4px;cursor:pointer;background:oklch(0.26 0.012 250);
+    border:1px solid oklch(0.36 0.012 250);color:oklch(0.88 0.006 250);white-space:nowrap}
+  .btn:hover{background:oklch(0.3 0.014 250)}
+  .btn.prim{background:oklch(0.3 0.06 165);border-color:oklch(0.44 0.09 165);color:oklch(0.95 0.04 165)}
+
+  .grp{border-radius:6px;background:var(--panel);border:1px solid var(--line);overflow:hidden;margin-bottom:12px}
+  .grpHead{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 15px;
+    border-bottom:1px solid oklch(0.28 0.01 250);background:var(--panelHi)}
+  .grpTitle{font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--cyan)}
+  .grpSub{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+  .grpCount{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.08em;padding:4px 9px;border-radius:3px;flex:none}
+  .grpCount.ok{background:var(--tealDim);color:var(--teal)}
+  .grpCount.bad{background:var(--redDim);color:var(--red)}
+
+  .row{display:grid;grid-template-columns:64px 1fr auto;gap:4px 14px;align-items:center;
+    padding:9px 15px;border-bottom:1px solid var(--hair)}
+  .row:last-child{border-bottom:none}
+  .row.f{background:oklch(0.185 0.024 25)}
+  .chip{font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.1em;padding:4px 0;border-radius:3px;text-align:center}
+  .chip.p{background:var(--tealDim);color:var(--teal)}
+  .chip.f{background:var(--redDim);color:var(--red)}
+  .nm{font-size:11.5px;line-height:1.5;color:oklch(0.9 0.005 250)}
+  .ms{font:400 9px 'IBM Plex Mono',monospace;color:var(--dimmer);text-align:right;white-space:nowrap}
+  .detail{grid-column:2 / -1;margin-top:5px;border-left:2px solid oklch(0.46 0.12 25);padding:7px 0 7px 11px;
+    font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;line-height:1.6;color:oklch(0.86 0.03 25);
+    white-space:pre-wrap;word-break:break-word}
+  .detail .lab{color:oklch(0.62 0.04 25);letter-spacing:.08em}
+
+  .note{border-radius:6px;background:oklch(0.21 0.03 300);border:1px solid oklch(0.36 0.07 300);
+    padding:13px 15px;display:flex;flex-direction:column;gap:6px;margin:16px 0}
+  .note .h{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--violet)}
+  .note .b{font-size:11.5px;line-height:1.65;color:oklch(0.9 0.02 300)}
+  .foot{font:400 9.5px/1.7 'IBM Plex Mono',monospace;color:var(--dimmer);margin-top:18px}
+  .foot a{color:oklch(0.74 0.1 210);text-decoration:none}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:oklch(0.33 0.012 250);border-radius:5px}
+  ::-webkit-scrollbar-track{background:oklch(0.18 0.01 250)}
+</style>
+</head>
+<body>
+<div class="banner"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">ENGINE SELF-TEST</span></div>
+
+<div class="wrap">
+  <h1>ANGEL SWARM — ENGINE SELF-TEST</h1>
+  <p class="sub">This page runs assertions directly against the shipped simulation engine — <code>js/sim.js</code>,
+  <code>js/optimizer.js</code>, <code>js/mc.worker.js</code> and the adapter <code>angel-engine.js</code> — loaded as plain
+  scripts, with no part of the application's interface in the way. It builds real runs, folds real ledgers and recomputes
+  the real audit chain. <b>Nothing here is stubbed and nothing is mocked.</b> Everything runs in this browser tab, offline,
+  against synthetic data.</p>
+  <p class="sub">A failing row is a real disagreement between what this engine does and what this build claims it does.
+  The reference result — <b>seed 42, JOA CORAL, capability deployed: 23 / 34 / 35 survivable deaths on 20 / 38 / 0
+  sorties</b> — is asserted here rather than asserted in a slide.</p>
+
+  <div class="bar" id="bar">
+    <div class="stat"><span class="k">PASSED</span><span class="v pass" id="nPass">—</span></div>
+    <div class="stat"><span class="k">FAILED</span><span class="v" id="nFail">—</span></div>
+    <div class="stat"><span class="k">TOTAL</span><span class="v" id="nTot">—</span></div>
+    <div class="stat"><span class="k">ELAPSED</span><span class="v" id="nMs">—</span></div>
+    <span class="barPill run" id="pill">RUNNING…</span>
+    <span class="spacer"></span>
+    <span class="btn" id="copy">COPY RESULTS</span>
+    <span class="btn prim" id="rerun">RE-RUN</span>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="note">
+    <span class="h">WHAT THIS PAGE IS NOT</span>
+    <span class="b">It is not a clinical validation and not an accreditation artefact. It asserts that this engine is
+    internally consistent, deterministic and reproducible, and that its published figures are the figures it actually
+    computes. It says nothing about whether the underlying physiological parameters are right — those carry their own
+    citations on the Data Sources screen — and nothing about performance against a real adversary or a real casualty
+    stream. No patient data has ever been near this system.</span>
+  </div>
+
+  <div class="foot" id="foot">—</div>
+</div>
+
+<!-- The engine, loaded exactly as the application and the Monte Carlo worker load it.
+     CALLSIGN is optimizer.js's one free global (it lives in js/map.js, a renderer that
+     has no business on this page), restated here as the worker restates it. -->
+<script>window.CALLSIGN = { HEAVY: 'TRV', LIGHT: 'M25', LONG: 'FVR' };</script>
+<script src="./js/sim.js"></script>
+<script src="./js/optimizer.js"></script>
+<!-- The Monte Carlo worker source, loaded in the page so applyLever() and replicate()
+     can be called directly. Its importScripts() call throws here and is caught by its
+     own try/catch; sim.js and optimizer.js are already present above, which is what it
+     would have loaded. A real Worker is also spawned below, separately, to prove the
+     worker path itself still loads the shipped engine. -->
+<script src="./js/mc.worker.js"></script>
+
+<script type="module">
+window.onmessage = null;   /* mc.worker.js installs a worker handler; not wanted on a page */
+
+const E = await import('./angel-engine.js');
+
+/* ------------------------------------------------------------------ harness */
+const GROUPS = [];
+let CUR = null;
+function group(name, sub) { CUR = { name, sub, tests: [] }; GROUPS.push(CUR); }
+function test(name, fn) { CUR.tests.push({ name, fn }); }
+
+class Failed extends Error {
+  constructor(msg, exp, act) { super(msg); this.exp = exp; this.act = act; }
+}
+const show = v => typeof v === 'string' ? v : JSON.stringify(v);
+function eq(actual, expected, what) {
+  if (actual !== expected) throw new Failed(what || 'values differ', show(expected), show(actual));
+}
+function ok(cond, what, exp, act) {
+  if (!cond) throw new Failed(what || 'assertion false', exp === undefined ? 'true' : show(exp), act === undefined ? 'false' : show(act));
+}
+function near(actual, expected, tol, what) {
+  if (!(Math.abs(actual - expected) <= tol)) {
+    throw new Failed(what || 'outside tolerance', expected + ' ±' + tol, String(actual));
+  }
+}
+function lt(a, b, what) { if (!(a < b)) throw new Failed(what || 'not less than', '< ' + b, String(a)); }
+function gt(a, b, what) { if (!(a > b)) throw new Failed(what || 'not greater than', '> ' + b, String(a)); }
+
+/* ------------------------------------------------------------- run fixtures */
+const DTM = 0.25;
+const SCEN = ['PACOM_CORAL', 'PACOM_BASALT', 'PACOM_MARINER', 'PACOM_TIMBER',
+              'EUCOM_GRANITE', 'EUCOM_AMBER', 'EUCOM_FJORD'];
+
+/* A full headless run of both arms, exactly as angel-engine.js runEngine() does it,
+   plus the per-step observations no ledger records. */
+function rawRun(scenario, seed, deployed, watch) {
+  const world = createWorld(scenario, seed);
+  const A = createArm(world, 'A', deployed ? 'ANGEL' : 'CURRENT', 'fair');
+  A.telementor = !!deployed; A.hitl = !!deployed; A.autoApproveAbove = 0.10; A.hvaWeight = 1.6;
+  const B = createArm(world, 'B', 'CURRENT', 'fair');
+  B.telementor = false;
+  const rA = makeRNG(seed * 3 + 1), rB = makeRNG(seed * 3 + 2);
+  const steps = Math.round(world.scn.durationMin / DTM);
+  const routesA = new Map(), routesB = new Map();
+  const capture = (arm, store) => {
+    for (const d of arm.drones) {
+      if (d.sortieId == null || store.has(d.sortieId) || !d.route || !d.route.length) continue;
+      store.set(d.sortieId, d.route.map(l => ({ casId: l.casId, payload: l.payloadKey, eta: l.eta })));
+    }
+  };
+  const obs = { maxAirborne: 0, doubleBooked: 0, illegalState: 0 };
+  for (let i = 0; i <= steps; i++) {
+    const t = i * DTM;
+    stepArm(A, world, t, DTM, rA);
+    stepArm(B, world, t, DTM, rB);
+    capture(A, routesA); capture(B, routesB);
+    if (watch) {
+      let air = 0;
+      for (const d of A.drones) {
+        if (d.state === 'OUTBOUND' || d.state === 'RETURNING') air++;
+        if (['IDLE', 'OUTBOUND', 'RETURNING', 'LOST'].indexOf(d.state) < 0) obs.illegalState++;
+      }
+      if (air > obs.maxAirborne) obs.maxAirborne = air;
+      const open = {};
+      for (const s of A.sortieLog) {
+        if (s.tLaunch <= t && (s.tReturn == null || s.tReturn > t)) open[s.droneId] = (open[s.droneId] || 0) + 1;
+      }
+      for (const k in open) if (open[k] > 1) obs.doubleBooked++;
+    }
+  }
+  finalize(A, world.scn.durationMin);
+  finalize(B, world.scn.durationMin);
+  /* Arm C: the untreated outcome of the same stream, by the same two engine
+     functions the deadline sweep and finalize() use. */
+  const C = { died: 0, survivableDeaths: 0, survivableTotal: 0, saved: 0, sorties: 0, n: 0 };
+  for (const c of world.stream) {
+    const r = makeRNG(c.id * 6151);
+    const outcome = r() < survivalIfUntreated(c) ? 'SAVED' : 'DIED';
+    const sv = (c.cls === 'IMMEDIATE' || c.cls === 'DELAYED');
+    C.n++; if (sv) C.survivableTotal++;
+    if (outcome === 'DIED') { C.died++; if (sv) C.survivableDeaths++; } else C.saved++;
+  }
+  return { world, A, B, C, routesA, routesB, obs };
+}
+
+const streamPrint = w => w.stream.map(c =>
+  c.id + ':' + c.tInjury.toFixed(6) + ':' + c.cls + ':' + c.injury + ':' +
+  c.deadlineMin.toFixed(6) + ':' + c.responder + ':' + c.x.toFixed(6) + ':' + c.y.toFixed(6)).join('|');
+const armPrint = arm => arm.casualties.map(c =>
+  c.id + ':' + c.tInjury.toFixed(6) + ':' + c.cls + ':' + c.deadlineMin.toFixed(6)).join('|');
+
+const T_FIX0 = performance.now();
+const REF = rawRun('PACOM_CORAL', 42, true, true);
+const REF2 = rawRun('PACOM_CORAL', 42, true, false);
+const OTHER = rawRun('PACOM_CORAL', 7, true, false);
+const BUILT = E.buildRun({ seed: 42, scenario: 'PACOM_CORAL', deployed: true });
+const BYSCEN = {};
+for (const s of SCEN) BYSCEN[s] = rawRun(s, 42, true, false);
+
+const statPrint = a => JSON.stringify(a.stats);
+/* Eleven complete 180-minute two-arm runs are built before the first assertion
+   is evaluated. That cost belongs in the report, so it is measured here. */
+let FIXTURE_MS = Math.round(performance.now() - T_FIX0);
+
+/* ========================================================================== */
+group('DETERMINISM AND COMMON RANDOM NUMBERS',
+      'The same seed must produce the same battle, and all three arms must fight it.');
+
+test('the casualty stream for seed 42 / JOA CORAL is bit-identical across two independent builds', () => {
+  eq(streamPrint(createWorld('PACOM_CORAL', 42)), streamPrint(createWorld('PACOM_CORAL', 42)),
+     'two createWorld() calls on one seed disagree');
+});
+test('a different seed produces a different casualty stream', () => {
+  ok(streamPrint(createWorld('PACOM_CORAL', 42)) !== streamPrint(createWorld('PACOM_CORAL', 43)),
+     'seed 42 and seed 43 produced identical streams');
+});
+test('two independent 180-minute runs of ARM A produce identical statistics', () => {
+  eq(statPrint(REF2.A), statPrint(rawRun('PACOM_CORAL', 42, true, false).A), 'ARM A is not reproducible');
+});
+test('two independent 180-minute runs of ARM B produce identical statistics', () => {
+  eq(statPrint(REF2.B), statPrint(rawRun('PACOM_CORAL', 42, true, false).B), 'ARM B is not reproducible');
+});
+test('both arms are handed the same number of casualties as the world stream', () => {
+  eq(REF.A.casualties.length + '/' + REF.B.casualties.length,
+     REF.world.stream.length + '/' + REF.world.stream.length, 'arm cohorts differ from the stream');
+});
+test('both arms see identical casualty ids, injury times, classes and deadlines', () => {
+  eq(armPrint(REF.A), armPrint(REF.B), 'the two arms are not fighting the same battle');
+});
+test('ARM C is folded from that same stream, casualty for casualty', () => {
+  eq(REF.C.n, REF.world.stream.length, 'ARM C cohort size differs from the stream');
+});
+test('the responder tier drawn for a casualty is reproducible from its own stored uniform', () => {
+  const w = createWorld('PACOM_CORAL', 42);
+  const bad = w.stream.filter(c => weightedAt(c.uResponder, TIER_MIX) !== c.responder).length;
+  eq(bad, 0, 'casualties whose stored uniform does not reproduce their tier');
+});
+
+/* ========================================================================== */
+group('THE REFERENCE RESULT',
+      'seed 42 · JOA CORAL · capability deployed. The figure every document and every film quotes.');
+
+test('the reference battle produces 125 casualties', () => eq(REF.world.stream.length, 125));
+test('ARM A — ANGEL SWARM: 23 survivable deaths', () => eq(REF.A.stats.survivableDeaths, 23));
+test('ARM B — CURRENT (TRIAGE & PROXIMITY): 34 survivable deaths', () => eq(REF.B.stats.survivableDeaths, 34));
+test('ARM C — NO FORWARD DELIVERY: 35 survivable deaths', () => eq(REF.C.survivableDeaths, 35));
+test('ARM A flew 20 sorties', () => eq(REF.A.stats.sorties, 20));
+test('ARM B flew 38 sorties', () => eq(REF.B.stats.sorties, 38));
+test('ARM C flew 0 sorties', () => eq(REF.C.sorties, 0));
+test('47 of the 125 casualties had survivable wounds', () => eq(REF.A.stats.survivableTotal, 47));
+test('the engine adapter reports the same three figures as the raw engine', () => {
+  eq([BUILT.A.stats.survivableDeaths, BUILT.B.stats.survivableDeaths, BUILT.C.stats.survivableDeaths].join('/'),
+     [REF.A.stats.survivableDeaths, REF.B.stats.survivableDeaths, REF.C.survivableDeaths].join('/'),
+     'angel-engine.js disagrees with sim.js + optimizer.js');
+});
+test('the engine adapter reports the same sortie counts as the raw engine', () => {
+  eq([BUILT.A.stats.sorties, BUILT.B.stats.sorties, BUILT.C.stats.sorties].join('/'),
+     [REF.A.stats.sorties, REF.B.stats.sorties, 0].join('/'), 'adapter sortie counts disagree');
+});
+
+/* ========================================================================== */
+group('CONSERVATION AND PHYSICAL INVARIANTS',
+      'Nobody is counted twice, nobody vanishes, and no aircraft is in two places at once.');
+
+test('ARM A: saved + died equals the whole cohort', () =>
+  eq(REF.A.stats.saved + REF.A.stats.died, REF.A.casualties.length));
+test('ARM B: saved + died equals the whole cohort', () =>
+  eq(REF.B.stats.saved + REF.B.stats.died, REF.B.casualties.length));
+test('ARM C: saved + died equals the whole cohort', () => eq(REF.C.saved + REF.C.died, REF.C.n));
+test('ARM A: survivable saved + survivable deaths equals the survivable cohort', () =>
+  eq(REF.A.stats.survivableSaved + REF.A.stats.survivableDeaths, REF.A.stats.survivableTotal));
+test('ARM B: survivable saved + survivable deaths equals the survivable cohort', () =>
+  eq(REF.B.stats.survivableSaved + REF.B.stats.survivableDeaths, REF.B.stats.survivableTotal));
+test('every casualty in both arms carries a resolved outcome at the end of the run', () => {
+  const open = REF.A.casualties.filter(c => c.outcome === null).length +
+               REF.B.casualties.filter(c => c.outcome === null).length;
+  eq(open, 0, 'casualties left unresolved');
+});
+test('no casualty is recorded as treated without a time of administration', () => {
+  const bad = REF.A.casualties.concat(REF.B.casualties).filter(c => c.treated && c.tTreated == null).length;
+  eq(bad, 0);
+});
+test('the sum of per-aircraft sortie counts equals the fleet sortie total', () => {
+  eq(REF.A.drones.reduce((a, d) => a + d.sorties, 0), REF.A.stats.sorties);
+});
+test('the sortie ledger holds exactly one row per sortie flown', () =>
+  eq(REF.A.sortieLog.length, REF.A.stats.sorties));
+test('no aircraft ever holds two open sorties at once (checked at all 721 steps)', () =>
+  eq(REF.obs.doubleBooked, 0, 'steps at which an aircraft was double-booked'));
+test('the number of aircraft airborne never exceeds the fleet', () =>
+  ok(REF.obs.maxAirborne <= REF.A.drones.length, 'more aircraft airborne than exist',
+     '<= ' + REF.A.drones.length, String(REF.obs.maxAirborne)));
+test('every aircraft is in one of the four legal states at every step', () =>
+  eq(REF.obs.illegalState, 0, 'observations of an illegal aircraft state'));
+test('no delivery is recorded before the sortie that carried it launched', () => {
+  const byId = new Map(REF.A.sortieLog.map(s => [s.id, s]));
+  const bad = REF.A.deliveryLog.filter(r => { const s = byId.get(r.sortieId); return !s || r.t < s.tLaunch - 1e-9; }).length;
+  eq(bad, 0, 'deliveries preceding their launch');
+});
+test('ARM C flies zero sorties on every one of the seven joint operating areas', () => {
+  const bad = SCEN.filter(s => BYSCEN[s].C.sorties !== 0);
+  eq(bad.length, 0, 'scenarios in which the no-delivery arm flew: ' + bad.join(','));
+});
+test('the escalation queue never exceeds the engine cap of 400 entries', () =>
+  ok(REF.A.queue.length <= 400, 'proposal queue overran its cap', '<= 400', String(REF.A.queue.length)));
+
+/* ========================================================================== */
+group('THE PHYSIOLOGICAL DEADLINE',
+      'A delivery inside the deadline is a save; a delivery past it is a sortie.');
+
+const DCAS = (() => {
+  const w = createWorld('PACOM_CORAL', 42);
+  return { c: w.stream.find(k => k.cls === 'IMMEDIATE' && k.injury === 'TRUNCAL_HEM'), w };
+})();
+
+test('treating at the instant of wounding returns the class baseline survival', () =>
+  near(survivalIfTreatedAt(DCAS.c, DCAS.c.tInjury, 'BLOOD'), DCAS.c.p0, 0.001));
+test('treating at the instant of wounding is far better than not treating at all', () =>
+  gt(survivalIfTreatedAt(DCAS.c, DCAS.c.tInjury, 'BLOOD') - survivalIfUntreated(DCAS.c), 0.5,
+     'benefit of instant treatment'));
+test('a delivery arriving 40 minutes past the deadline is worth no more than no delivery', () =>
+  near(survivalIfTreatedAt(DCAS.c, DCAS.c.tInjury + DCAS.c.deadlineMin + 40, 'BLOOD'),
+       survivalIfUntreated(DCAS.c), 0.01));
+test('a delivery arriving exactly on the deadline still carries most of the benefit', () =>
+  gt(survivalIfTreatedAt(DCAS.c, DCAS.c.tInjury + DCAS.c.deadlineMin, 'BLOOD'),
+     survivalIfUntreated(DCAS.c) + 0.5, 'benefit at the deadline'));
+test('survival is monotonically non-increasing in the delay to treatment', () => {
+  let prev = Infinity, bad = 0;
+  for (let d = 0; d <= 90; d += 0.5) {
+    const p = survivalIfTreatedAt(DCAS.c, DCAS.c.tInjury + d, 'BLOOD');
+    if (p > prev + 1e-12) bad++;
+    prev = p;
+  }
+  eq(bad, 0, 'delays at which survival went UP');
+});
+test('an item the casualty does not need confers exactly the untreated probability', () =>
+  eq(survivalIfTreatedAt(DCAS.c, DCAS.c.tInjury, 'CHEST_SEAL'), survivalIfUntreated(DCAS.c)));
+test('deaths past the deadline are a subset of all deaths', () =>
+  ok(REF.A.stats.missedDeadline <= REF.A.stats.died, 'more missed deadlines than deaths',
+     '<= ' + REF.A.stats.died, String(REF.A.stats.missedDeadline)));
+test('the untreated survival function depends on triage class alone', () => {
+  const w = createWorld('PACOM_CORAL', 42);
+  const seen = {};
+  for (const c of w.stream) {
+    const p = survivalIfUntreated(c);
+    if (seen[c.cls] === undefined) seen[c.cls] = p;
+    else if (seen[c.cls] !== p) throw new Failed('class ' + c.cls + ' gave two values', seen[c.cls], p);
+  }
+  eq(seen.IMMEDIATE + '/' + seen.DELAYED + '/' + seen.MINIMAL + '/' + seen.EXPECTANT,
+     '0.06/0.42/0.995/0.02');
+});
+
+/* ========================================================================== */
+group('PAYLOAD RULES, COLD CHAIN AND THE RECEIVER',
+      'A unit of blood nobody on scene can hang is a unit destroyed, and the engine has to say so.');
+
+test('whole blood is Class VIIIB, cold-chain, tier 3, 1.45 kg', () =>
+  eq([PAYLOADS.BLOOD.cls8, PAYLOADS.BLOOD.coldChain, PAYLOADS.BLOOD.tier, PAYLOADS.BLOOD.kg].join('|'),
+     'VIIIB|true|T3|1.45'));
+test('freeze-dried plasma is Class VIIIB and needs no cold chain', () =>
+  eq([PAYLOADS.PLASMA.cls8, PAYLOADS.PLASMA.coldChain].join('|'), 'VIIIB|false'));
+test('a buddy (tier 1) cannot administer blood; a combat medic (tier 3) can', () =>
+  eq([TIERS.T1.can.indexOf('BLOOD') >= 0, TIERS.T3.can.indexOf('BLOOD') >= 0].join('|'), 'false|true'));
+test('telementoring unlocks plasma and TXA for a combat lifesaver and nothing else', () => {
+  const c = { responder: 'T2' };
+  const off = capabilitiesAt(c, false).slice().sort().join(',');
+  const on = capabilitiesAt(c, true).slice().sort().join(',');
+  eq(off + ' -> ' + on, 'CHEST_SEAL,TQ_KIT -> CHEST_SEAL,PLASMA,TQ_KIT,TXA');
+});
+test('without telementoring a combat lifesaver has no usable payload for a truncal haemorrhage', () =>
+  eq(usablePayloads({ responder: 'T2', needs: ['BLOOD', 'PLASMA', 'TXA'] }, false).length, 0));
+test('a blood container starts at 3.0 C', () => near(coldTempAfter(0, 31, 'LIGHT'), 3.0, 1e-9));
+test('container temperature rises monotonically toward ambient', () => {
+  let prev = -Infinity, bad = 0;
+  for (let m = 0; m <= 240; m += 2) { const v = coldTempAfter(m, 33, 'LIGHT'); if (v < prev - 1e-12) bad++; prev = v; }
+  eq(bad, 0, 'intervals at which the container got colder on its own');
+});
+test('the light platform breaks the 1-10 C transfusable band inside a 30-minute hold in PACOM ambient', () =>
+  gt(coldTempAfter(30, ambientAt(31, 60), 'LIGHT'), PARAMS.COLD_MAX_C, 'C on arrival'));
+test('the heavy platform holds the band better than the light platform at the same time', () =>
+  lt(coldTempAfter(30, ambientAt(31, 60), 'HEAVY'), coldTempAfter(30, ambientAt(31, 60), 'LIGHT'),
+     'heavy container temperature'));
+test('no successful blood delivery in the reference run arrived above 10 C', () => {
+  const bad = REF.A.deliveryLog.filter(r => r.payload === 'BLOOD' && r.ok && r.coldC != null &&
+                                            r.coldC > PARAMS.COLD_MAX_C).length;
+  eq(bad, 0, 'transfusions of out-of-band blood');
+});
+test('the blood ledger closes: units issued = units transfused + units destroyed', () => {
+  let drawn = 0, returned = 0;
+  for (const e of REF.A.stockLog) {
+    if (e.item !== 'BLOOD') continue;
+    if (e.reason === 'ISSUE') drawn++; else if (e.reason === 'RETURN') returned += e.d;
+  }
+  eq(drawn - returned, REF.A.stats.bloodUsed + REF.A.stats.bloodWasted, 'the blood ledger does not close');
+});
+test('TXA delivered past its 3-hour window scores strictly worse than no treatment at all', () => {
+  const w = createWorld('PACOM_CORAL', 42);
+  const c = w.stream.find(k => k.needs.indexOf('TXA') >= 0);
+  lt(survivalIfTreatedAt(c, c.tInjury + PARAMS.TXA_WINDOW_MIN + 20, 'TXA'), survivalIfUntreated(c),
+     'late TXA survival');
+});
+test('no stock line ever goes negative in either arm', () => {
+  let bad = 0;
+  for (const arm of [REF.A, REF.B]) for (const b of arm.bases)
+    for (const k in b.stock) if (b.stock[k] < 0) bad++;
+  eq(bad, 0, 'negative stock lines');
+});
+
+/* ========================================================================== */
+group('RANGE GATING',
+      'Combat radius is quoted at full payload. What can actually be reached is a function of the load carried.');
+
+test('effective radius at zero load is the platform ferry radius', () =>
+  near(effectiveRadiusKm(PLATFORMS.LIGHT, 0), PLATFORMS.LIGHT.maxRadiusKm, 1e-9));
+test('effective radius at full payload is the quoted combat radius', () =>
+  near(effectiveRadiusKm(PLATFORMS.LIGHT, PLATFORMS.LIGHT.payloadKg), PLATFORMS.LIGHT.radiusKm, 1e-9));
+test('effective radius decreases monotonically with load', () => {
+  let prev = Infinity, bad = 0;
+  for (let kg = 0; kg <= 30; kg += 0.1) { const r = effectiveRadiusKm(PLATFORMS.HEAVY, kg); if (r > prev + 1e-12) bad++; prev = r; }
+  eq(bad, 0, 'loads at which range went UP');
+});
+test('inRange admits a casualty inside the usable radius and refuses one outside it', () => {
+  const d = makeDrone('LIGHT', { name: 'T', x: 0, y: 0, _idx: 0 }, null);
+  eq([inRange(d, 3, 4, 2), inRange(d, 18, 24, 2)].join('|'), 'true|false');
+});
+test('no casualty was ever routed beyond its aircraft\'s maximum radius, in either arm', () => {
+  let bad = 0;
+  for (const [arm, routes] of [[REF.A, REF.routesA], [REF.B, REF.routesB]]) {
+    const dById = new Map(arm.drones.map(d => [d.id, d]));
+    const cById = new Map(arm.casualties.map(c => [c.id, c]));
+    for (const s of arm.sortieLog) {
+      const d = dById.get(s.droneId), legs = routes.get(s.id) || [];
+      for (const l of legs) {
+        const c = cById.get(l.casId);
+        if (d && c && dist(d.baseX, d.baseY, c.x, c.y) > d.plat.maxRadiusKm + 1e-9) bad++;
+      }
+    }
+  }
+  eq(bad, 0, 'legs flown beyond the platform maximum radius');
+});
+test('coverage scoring counts only the aircraft whose launch point can actually reach', () => {
+  const c = REF.A.casualties[0];
+  const able = REF.A.drones.filter(d => dist(d.baseX, d.baseY, c.x, c.y) <= effectiveRadiusKm(d.plat, 1.45)).length;
+  eq(c.reachN, able, 'reachN disagrees with a direct recount');
+});
+
+/* ========================================================================== */
+group('TRIAGE PRECEDENCE IN THE CONTROL ARM',
+      'ARM B sorts by triage category. These assertions drive allocateCurrentMethod() directly.');
+
+test('the triage ranking orders IMMEDIATE < DELAYED < MINIMAL < EXPECTANT', () =>
+  eq([TRIAGE_RANK.IMMEDIATE, TRIAGE_RANK.DELAYED, TRIAGE_RANK.MINIMAL, TRIAGE_RANK.EXPECTANT].join(','), '0,1,2,3'));
+test('in FAIR mode the control arm perceives every casualty\'s true category', () => {
+  const w = createWorld('PACOM_CORAL', 42);
+  const arm = createArm(w, 'F', 'CURRENT', 'fair');
+  const bad = w.stream.filter(c => { const k = cloneCasualty(c); return perceivedClass(arm, k) !== k.cls; }).length;
+  eq(bad, 0, 'misclassifications in fair mode');
+});
+test('in REALISTIC mode the control arm misclassifies a non-zero minority, inside START\'s published envelope', () => {
+  const w = createWorld('PACOM_CORAL', 42);
+  const arm = createArm(w, 'R', 'CURRENT', 'realistic');
+  const mis = w.stream.filter(c => { const k = cloneCasualty(c); return perceivedClass(arm, k) !== k.cls; }).length;
+  ok(mis > 0 && mis < w.stream.length * 0.30, 'realistic misclassification rate out of band',
+     '0 < n < ' + Math.round(w.stream.length * 0.30), String(mis));
+});
+
+/* Three dispatches against one launch point, differing only in triage category. */
+function dispatchCase(clsA, clsB) {
+  const world = createWorld('PACOM_CORAL', 42);
+  const mk = (id, cls, x, y) => {
+    const c = cloneCasualty(world.stream[0]);
+    c.id = id; c.cls = cls; c.x = x; c.y = y; c.tInjury = 0;
+    c.needs = ['TQ_KIT']; c.responder = 'T3'; c.injury = 'EXTREMITY_HEM';
+    c.deadlineMin = cls === 'MINIMAL' ? 9999 : 30; c.p0 = 0.9; c.penetrating = false;
+    c.treated = false; c.outcome = null; c.assignedTo = null;
+    return c;
+  };
+  const arm = createArm(world, 'T', 'CURRENT', 'fair');
+  arm.telementor = false;
+  arm.nextIdx = world.stream.length;                 // admit nobody else
+  arm.casualties = [mk(9001, clsA, 27.4, 25.4), mk(9002, clsB, 28.4, 26.4)];
+  allocateCurrentMethod(arm, world, 5);
+  return arm.drones.filter(d => d.state === 'OUTBOUND').map(d => d.route.map(l => l.casId).join('+'));
+}
+
+test('a MINIMAL casualty is not chained onto an IMMEDIATE casualty\'s sortie', () =>
+  eq(dispatchCase('IMMEDIATE', 'MINIMAL').join(' , '), '9001 , 9002',
+     'the triage gate let a MINIMAL ride with an IMMEDIATE'));
+test('two MINIMAL casualties in the same place do share one sortie (control for the gate)', () =>
+  eq(dispatchCase('MINIMAL', 'MINIMAL').join(' , '), '9001+9002',
+     'nearest-neighbour chaining did not happen'));
+test('a DELAYED casualty — one rank below — is chained onto an IMMEDIATE sortie', () =>
+  eq(dispatchCase('IMMEDIATE', 'DELAYED').join(' , '), '9001+9002',
+     'the gate is not the documented lead-rank + 1'));
+
+/* ========================================================================== */
+group('THE AUDIT CHAIN — SHA-256 (FIPS 180-4)',
+      'The chain is only worth something if an investigating officer can recompute it and catch an alteration.');
+
+test('FIPS 180-4 vector: the empty string', () =>
+  eq(sha256Hex(''), 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'));
+test('FIPS 180-4 vector: "abc"', () =>
+  eq(sha256Hex('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'));
+test('FIPS 180-4 vector: the 448-bit two-block message', () =>
+  eq(sha256Hex('abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq'),
+     '248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1'));
+test('the synchronous implementation agrees with WebCrypto on a 1,000-character message', async () => {
+  const s = 'ANGEL SWARM '.repeat(84).slice(0, 1000);
+  eq(sha256Hex(s), await webSha(s), 'sha256Hex disagrees with crypto.subtle');
+});
+test('the synchronous implementation agrees with WebCrypto on non-BMP UTF-8 (surrogate pairs)', async () => {
+  const s = 'CAS-042 \u{1F691} \u{1F1FA}\u{1F1F8} é中文';
+  eq(sha256Hex(s), await webSha(s), 'surrogate-pair folding is wrong');
+});
+test('the load-time self-test in optimizer.js reports a healthy hash', () =>
+  eq(AUDIT_HASH_SELFTEST, true, 'optimizer.js declared its own SHA-256 broken'));
+test('the first link in a chain hashes against GENESIS', () => {
+  const arm = { audit: [] };
+  const e = audit(arm, 1, 'SYSTEM', 'TEST', 'first');
+  eq(e.prev + '|' + e.hash, 'GENESIS|' + sha256Hex('GENESIS|' + ['1.00', 'SYSTEM', 'TEST', 'first'].join('|')));
+});
+test('every link in the reference run\'s chain verifies', () => {
+  const v = verifyAudit(REF.A);
+  eq(v.ok + ':' + v.n, 'true:' + REF.A.audit.length, 'chain verification failed');
+});
+test('altering one entry\'s detail makes verification fail at exactly that sequence number', () => {
+  const copy = { audit: REF.A.audit.map(e => Object.assign({}, e)) };
+  const i = Math.floor(copy.audit.length / 2);
+  copy.audit[i].detail = copy.audit[i].detail + ' (altered)';
+  const v = verifyAudit(copy);
+  eq(v.ok + '@' + v.at, 'false@' + copy.audit[i].seq, 'a tampered entry verified clean');
+});
+test('altering one entry changes the head of the chain', () => {
+  const rows = REF.A.audit.map(e => Object.assign({}, e));
+  const rebuild = (list) => { let p = 'GENESIS';
+    for (const e of list) p = auditHash(p, [e.t.toFixed(2), e.actor, e.action, e.detail].join('|'));
+    return p; };
+  const before = rebuild(rows);
+  rows[3].detail += '.';
+  ok(rebuild(rows) !== before, 'the chain head survived an alteration', 'a different head', 'the same head');
+});
+test('two identical runs produce identical chain heads', () => {
+  const head = arm => arm.audit.length ? arm.audit[arm.audit.length - 1].hash : 'GENESIS';
+  eq(head(REF2.A), head(rawRun('PACOM_CORAL', 42, true, false).A), 'chain heads diverged between identical runs');
+});
+test('two different runs produce different chain heads', () => {
+  const head = arm => arm.audit.length ? arm.audit[arm.audit.length - 1].hash : 'GENESIS';
+  ok(head(REF.A) !== head(OTHER.A), 'seed 42 and seed 7 share a chain head', 'different heads', 'the same head');
+});
+test('the printed link is a 12-character prefix of the digest, marked as a prefix', () => {
+  const h = sha256Hex('abc');
+  eq(auditHashShort(h) + ' / ' + auditHashShort(null), h.slice(0, 12) + '… / —');
+});
+test('the chain is append-only: every entry\'s prev is its predecessor\'s hash', () => {
+  let bad = 0, prev = 'GENESIS';
+  for (const e of REF.A.audit) { if (e.prev !== prev) bad++; prev = e.hash; }
+  eq(bad, 0, 'broken links');
+});
+
+/* ========================================================================== */
+group('THE SEEKABLE SNAPSHOT',
+      'snapshot(run, t) is a pure fold of the run\'s ledgers. It must never walk backwards.');
+
+const FRAMES = [];
+for (let t = 0; t <= 180; t += 5) FRAMES.push(E.snapshot(BUILT, t));
+
+test('the admitted-casualty count never decreases as the clock advances', () => {
+  let prev = -1, bad = 0;
+  for (const f of FRAMES) { if (f.admitted < prev) bad++; prev = f.admitted; }
+  eq(bad, 0, 'minutes at which admitted casualties went DOWN');
+});
+test('ARM A survivable deaths never decrease as the clock advances', () => {
+  let prev = -1, bad = 0;
+  for (const f of FRAMES) { if (f.dA < prev) bad++; prev = f.dA; }
+  eq(bad, 0, 'minutes at which the ARM A death count went DOWN');
+});
+test('ARM B survivable deaths never decrease as the clock advances', () => {
+  let prev = -1, bad = 0;
+  for (const f of FRAMES) { if (f.dB < prev) bad++; prev = f.dB; }
+  eq(bad, 0);
+});
+test('ARM C survivable deaths never decrease as the clock advances', () => {
+  let prev = -1, bad = 0;
+  for (const f of FRAMES) { if (f.dC < prev) bad++; prev = f.dC; }
+  eq(bad, 0);
+});
+test('sorties flown never decrease as the clock advances', () => {
+  let prev = -1, bad = 0;
+  for (const f of FRAMES) { if (f.sortiesFlown < prev) bad++; prev = f.sortiesFlown; }
+  eq(bad, 0);
+});
+test('the snapshot at T+0 has flown nothing and lost nobody', () => {
+  const f = E.snapshot(BUILT, 0);
+  eq([f.sortiesFlown, f.dA, f.dB, f.dC].join('/'), '0/0/0/0');
+});
+test('the snapshot at T+180 reports the run\'s own three totals', () => {
+  const f = E.snapshot(BUILT, 180);
+  eq([f.dA, f.dB, f.dC].join('/'), '23/34/35');
+});
+test('the snapshot at T+180 reports the run\'s own sortie total', () =>
+  eq(E.snapshot(BUILT, 180).sortiesFlown, REF.A.stats.sorties));
+test('the same t always returns the same frame', () => {
+  const a = E.snapshot(BUILT, 97.5), b = E.snapshot(BUILT, 97.5);
+  eq([a.admitted, a.dA, a.dB, a.sortiesFlown].join('/'), [b.admitted, b.dA, b.dB, b.sortiesFlown].join('/'));
+});
+test('the datalink outage the scenario schedules is reported by the fold at the right minute', () => {
+  eq([E.snapshot(BUILT, 92).commsDown, E.snapshot(BUILT, 60).commsDown].join('|'), 'true|false');
+});
+
+/* ========================================================================== */
+group('ALL SEVEN JOINT OPERATING AREAS',
+      'The engine has always carried seven. Each one must build and produce a non-degenerate result.');
+
+for (const s of SCEN) {
+  test(s + ' builds and produces a non-degenerate, fully resolved result', () => {
+    const r = BYSCEN[s];
+    const open = r.A.casualties.filter(c => c.outcome === null).length;
+    ok(r.world.stream.length > 20 && r.A.stats.survivableTotal > 0 && r.A.stats.sorties > 0 &&
+       r.B.stats.sorties > 0 && open === 0,
+       'degenerate scenario result',
+       'casualties>20, survivable>0, sorties>0 in both arms, 0 unresolved',
+       'n=' + r.world.stream.length + ' surv=' + r.A.stats.survivableTotal +
+       ' sA=' + r.A.stats.sorties + ' sB=' + r.B.stats.sorties + ' unresolved=' + open);
+  });
+}
+test('forward delivery is never worse than no forward delivery, on any of the seven', () => {
+  const bad = SCEN.filter(s => BYSCEN[s].A.stats.survivableDeaths > BYSCEN[s].C.survivableDeaths ||
+                               BYSCEN[s].B.stats.survivableDeaths > BYSCEN[s].C.survivableDeaths);
+  eq(bad.length, 0, 'joint operating areas where flying nothing beat flying something: ' + bad.join(','));
+});
+
+/* ========================================================================== */
+group('COMMANDER\'S LEVERS AND THE MONTE CARLO PATH',
+      'applyLever() mutates the force after the casualty stream is fixed, so a sweep measures the lever and not its own noise.');
+
+const MCBASE = { scenario: 'PACOM_CORAL', seed: 42, mode: 'fair', telementor: true, crn: true, lever: 'none', value: null };
+const rep = cfg => replicate(Object.assign({}, MCBASE, cfg));
+const MC0 = rep({});
+const MCF = rep({ lever: 'fleet', value: 3 });
+const MCL = rep({ lever: 'launch', value: 1 });
+const MCM_LO = rep({ lever: 'medic', value: 0.02 });
+const MCM_HI = rep({ lever: 'medic', value: 0.60 });
+const MCC = rep({ lever: 'comms', value: 4 });
+const MCT = rep({ lever: 'triage', value: 3 });
+FIXTURE_MS = Math.round(performance.now() - T_FIX0);
+
+test('the Monte Carlo replication reproduces the engine\'s own ARM A figure for the reference seed', () =>
+  eq(MC0.a, REF.A.stats.survivableDeaths, 'the Monte Carlo path disagrees with the live engine'));
+test('the Monte Carlo replication draws the reference battle\'s 125 casualties', () =>
+  eq(MC0.casualties, 125));
+test('the fleet lever moves the outcome', () =>
+  ok(MCF.a !== MC0.a || MCF.b !== MC0.b, 'tripling the fleet changed nothing',
+     'a change', 'a=' + MCF.a + ' b=' + MCF.b + ' vs baseline a=' + MC0.a + ' b=' + MC0.b));
+test('the launch-point lever moves the outcome', () =>
+  ok(MCL.a !== MC0.a || MCL.b !== MC0.b, 'collapsing to one launch point changed nothing',
+     'a change', 'a=' + MCL.a + ' b=' + MCL.b));
+test('cutting to one launch point makes ANGEL SWARM materially worse', () =>
+  gt(MCL.a, MC0.a, 'survivable deaths with one launch point'));
+test('the comms lever moves the outcome', () =>
+  ok(MCC.a !== MC0.a || MCC.b !== MC0.b, 'quadrupling the jamming window changed nothing',
+     'a change', 'a=' + MCC.a + ' b=' + MCC.b));
+test('the triage-accuracy lever moves the control arm', () =>
+  ok(MCT.b !== MC0.b, 'tripling START error changed nothing in the arm that uses triage',
+     'a change', 'b=' + MCT.b + ' vs baseline b=' + MC0.b));
+test('the medic lever moves BOTH arms', () =>
+  ok(MCM_HI.a !== MCM_LO.a && MCM_HI.b !== MCM_LO.b, 'the responder mix did not reach both arms',
+     'both arms move', 'a ' + MCM_LO.a + '->' + MCM_HI.a + ', b ' + MCM_LO.b + '->' + MCM_HI.b));
+test('more combat medics on the ground reduces survivable deaths in BOTH arms', () =>
+  ok(MCM_HI.a < MCM_LO.a && MCM_HI.b < MCM_LO.b, 'more medics did not help',
+     'a and b both fall', 'a ' + MCM_LO.a + '->' + MCM_HI.a + ', b ' + MCM_LO.b + '->' + MCM_HI.b));
+test('more combat medics widens the ANGEL-versus-CURRENT gap', () =>
+  gt(MCM_HI.b - MCM_HI.a, MCM_LO.b - MCM_LO.a, 'gap at a 60% medic fraction'));
+test('the medic lever changes who is kneeling beside the casualty and nothing else', () => {
+  const w = createWorld('PACOM_CORAL', 42);
+  const before = w.stream.map(c => c.id + ':' + c.tInjury.toFixed(6) + ':' + c.cls + ':' +
+                                   c.deadlineMin.toFixed(6) + ':' + c.x.toFixed(6)).join('|');
+  applyLever(w, 'medic', 0.60);
+  const after = w.stream.map(c => c.id + ':' + c.tInjury.toFixed(6) + ':' + c.cls + ':' +
+                                  c.deadlineMin.toFixed(6) + ':' + c.x.toFixed(6)).join('|');
+  const moved = w.stream.filter(c => c.responder === 'T3').length;
+  ok(before === after && moved > 0, 'the medic lever disturbed the casualty stream',
+     'stream unchanged, tiers moved', 'streamChanged=' + (before !== after) + ' T3count=' + moved);
+});
+test('the medic lever at the force\'s own 10% reproduces an unlevered run exactly', () => {
+  const r = rep({ lever: 'medic', value: 0.10 });
+  eq([r.a, r.b, r.sortiesA, r.sortiesB].join('/'), [MC0.a, MC0.b, MC0.sortiesA, MC0.sortiesB].join('/'),
+     'the identity point of the medic sweep is not an identity');
+});
+test('the triage lever restores PARAMS after each replication', () =>
+  eq([PARAMS.START_SENSITIVITY, PARAMS.START_OVERTRIAGE].join('/'), '0.9/0.14'));
+test('a real Monte Carlo worker loads the shipped engine off disk', async () => {
+  const w = new Worker('./js/mc.worker.js');
+  try {
+    const hello = await new Promise((res, rej) => {
+      const to = setTimeout(() => rej(new Error('worker did not answer in 8 s')), 8000);
+      w.onmessage = ev => { clearTimeout(to); res(ev.data); };
+      w.onerror = e => { clearTimeout(to); rej(new Error(e.message || 'worker error')); };
+      w.postMessage({ type: 'hello' });
+    });
+    eq(hello.ok + '/' + hello.engine, 'true/true', 'the worker could not load sim.js + optimizer.js');
+  } finally { w.terminate(); }
+});
+
+/* ========================================================================== */
+group('DIRECTIONAL SANITY',
+      'The claims this prototype makes out loud, asserted against the run rather than against a slide.');
+
+test('ANGEL SWARM beats the current method on the reference seed', () =>
+  lt(REF.A.stats.survivableDeaths, REF.B.stats.survivableDeaths, 'ARM A survivable deaths'));
+test('no forward delivery is the worst of the three arms', () =>
+  gt(REF.C.survivableDeaths, REF.B.stats.survivableDeaths, 'ARM C survivable deaths'));
+test('ANGEL SWARM reaches that result on fewer sorties than the current method', () =>
+  lt(REF.A.stats.sorties, REF.B.stats.sorties, 'ARM A sorties'));
+test('ANGEL SWARM wastes fewer deliveries than the current method', () =>
+  lt(REF.A.stats.wastedSorties, REF.B.stats.wastedSorties, 'ARM A wasted deliveries'));
+test('the receiver-capability constraint is what wastes the control arm\'s deliveries', () => {
+  const noRx = REF.B.deliveryLog.filter(r => !r.ok && /cannot administer/.test(r.wasteReason || '')).length;
+  gt(noRx, 0, 'control-arm deliveries nobody on scene could administer');
+});
+test('the two arms differ in outcome only because they allocate differently', () => {
+  ok(armPrint(REF.A) === armPrint(REF.B) && REF.A.stats.survivableDeaths !== REF.B.stats.survivableDeaths,
+     'the arms either fought different battles or produced the same answer',
+     'same battle, different answer',
+     'sameBattle=' + (armPrint(REF.A) === armPrint(REF.B)) +
+     ' A=' + REF.A.stats.survivableDeaths + ' B=' + REF.B.stats.survivableDeaths);
+});
+
+/* ------------------------------------------------------------------ webcrypto */
+async function webSha(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => ('0' + b.toString(16)).slice(-2)).join('');
+}
+
+/* ------------------------------------------------------------------- runner */
+const out = document.getElementById('out');
+let PASS = 0, FAIL = 0, LINES = [];
+
+async function runAll() {
+  const t0 = performance.now();
+  out.innerHTML = '';
+  PASS = 0; FAIL = 0; LINES = [];
+  for (const g of GROUPS) {
+    const box = document.createElement('div');
+    box.className = 'grp';
+    const head = document.createElement('div');
+    head.className = 'grpHead';
+    head.innerHTML = '<div><div class="grpTitle"></div><div class="grpSub"></div></div>' +
+                     '<span class="grpCount"></span>';
+    head.querySelector('.grpTitle').textContent = g.name;
+    head.querySelector('.grpSub').textContent = g.sub;
+    box.appendChild(head);
+    out.appendChild(box);
+    LINES.push('', '== ' + g.name + ' ' + '='.repeat(Math.max(0, 62 - g.name.length)));
+
+    let gp = 0, gf = 0;
+    for (const tst of g.tests) {
+      const s0 = performance.now();
+      let err = null;
+      try { await tst.fn(); } catch (e) { err = e; }
+      const ms = performance.now() - s0;
+      const row = document.createElement('div');
+      row.className = 'row' + (err ? ' f' : '');
+      const chip = document.createElement('span');
+      chip.className = 'chip ' + (err ? 'f' : 'p');
+      chip.textContent = err ? 'FAIL' : 'PASS';
+      const nm = document.createElement('span');
+      nm.className = 'nm';
+      nm.textContent = tst.name;
+      const el = document.createElement('span');
+      el.className = 'ms';
+      el.textContent = ms < 1 ? '<1 ms' : Math.round(ms) + ' ms';
+      row.appendChild(chip); row.appendChild(nm); row.appendChild(el);
+      if (err) {
+        const d = document.createElement('div');
+        d.className = 'detail';
+        const exp = err instanceof Failed ? err.exp : '(no exception)';
+        const act = err instanceof Failed ? err.act : String(err && err.stack || err);
+        d.innerHTML = '<span class="lab">WHY  </span>' + escapeHtml(err.message) +
+                      '\n<span class="lab">EXPECTED  </span>' + escapeHtml(String(exp)) +
+                      '\n<span class="lab">ACTUAL    </span>' + escapeHtml(String(act));
+        row.appendChild(d);
+        FAIL++; gf++;
+        LINES.push('FAIL  ' + tst.name, '        why      ' + err.message,
+                   '        expected ' + exp, '        actual   ' + act);
+      } else {
+        PASS++; gp++;
+        LINES.push('pass  ' + tst.name);
+      }
+      box.appendChild(row);
+      paint(t0);
+      await new Promise(r => setTimeout(r, 0));
+    }
+    const cnt = head.querySelector('.grpCount');
+    cnt.className = 'grpCount ' + (gf ? 'bad' : 'ok');
+    cnt.textContent = gf ? (gf + ' FAILED · ' + gp + ' PASSED') : (gp + ' PASSED');
+  }
+  paint(t0, true);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function paint(t0, done) {
+  const ms = Math.round(performance.now() - t0);
+  document.getElementById('nPass').textContent = PASS;
+  const nf = document.getElementById('nFail');
+  nf.textContent = FAIL;
+  nf.className = 'v ' + (FAIL ? 'fail' : 'pass');
+  document.getElementById('nTot').textContent = PASS + FAIL;
+  document.getElementById('nMs').textContent = ms + ' ms';
+  const pill = document.getElementById('pill');
+  if (!done) { pill.className = 'barPill run'; pill.textContent = 'RUNNING…'; return; }
+  pill.className = 'barPill ' + (FAIL ? 'bad' : 'ok');
+  pill.textContent = FAIL ? FAIL + ' ASSERTION' + (FAIL === 1 ? '' : 'S') + ' FAILED' : 'ALL ASSERTIONS PASSED';
+  document.getElementById('foot').textContent =
+    'ANGEL SWARM engine self-test · ' + (PASS + FAIL) + ' assertions · ' + ms + ' ms · ' +
+    new Date().toISOString().replace('T', ' ').slice(0, 19) + 'Z · ' +
+    'js/sim.js, js/optimizer.js, js/mc.worker.js, angel-engine.js · offline, this tab only. ' +
+    'A further ' + FIXTURE_MS + ' ms was spent before the first assertion building the runs these ' +
+    'assertions read: eleven complete 180-minute two-arm runs and seven Monte Carlo replications.';
+  window.__SELFTEST__ = { pass: PASS, fail: FAIL, total: PASS + FAIL, ms, report: reportText(ms) };
+}
+
+function reportText(ms) {
+  return ['ANGEL SWARM — ENGINE SELF-TEST',
+    'UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY',
+    new Date().toISOString(),
+    '',
+    'RESULT   ' + (FAIL ? FAIL + ' FAILED' : 'ALL PASSED'),
+    'PASSED   ' + PASS,
+    'FAILED   ' + FAIL,
+    'TOTAL    ' + (PASS + FAIL),
+    'ELAPSED  ' + ms + ' ms (assertions) + ' + FIXTURE_MS + ' ms (building the runs under test)',
+    'UNDER TEST  app/js/sim.js, app/js/optimizer.js, app/js/mc.worker.js, app/angel-engine.js'
+  ].concat(LINES).join('\n');
+}
+
+document.getElementById('rerun').onclick = () => { runAll(); };
+document.getElementById('copy').onclick = async () => {
+  const btn = document.getElementById('copy');
+  const txt = reportText(0);
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e2) { /* nothing more to try offline */ }
+    ta.remove();
+  }
+  btn.textContent = 'COPIED';
+  setTimeout(() => { btn.textContent = 'COPY RESULTS'; }, 1600);
+};
+
+await runAll();
+</script>
+</body>
+</html>

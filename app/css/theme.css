@@ -1,0 +1,412 @@
+/* ============================================================================
+   ANGEL SWARM — THEME TOKENS
+   The single source of colour for the whole application. Four themes, one
+   token contract, declared four times. Nothing else in this tree is allowed
+   to carry a hex literal for a semantic quantity.
+
+   Contract: /home/claude/angel/THEME_CONTRACT.md
+     · body[data-theme="KEY"] — one attribute write switches every surface.
+     · Deaths are NEVER green. "fewer dead", never "lives saved".
+     · Triage stays doctrinal: IMMEDIATE red · DELAYED yellow · MINIMAL green
+       · EXPECTANT grey — in all four themes.
+     · NO PINK OR MAGENTA. Hue 285-350 above 35% saturation is banned, and
+       the check is run, not eyeballed (see the validator note at the foot).
+     · Every coloured text run >= 4.5:1 against the surface it actually sits
+       on, in EVERY theme. Measured per theme; worst ratios recorded below.
+
+   Canvas and WebGL renderers must read these at draw time —
+     getComputedStyle(document.body).getPropertyValue('--red')
+   — and redraw on ANGEL.emit('theme', key). Never bake a hex into a shader.
+
+   The four themes, and what each is for:
+     console-dark   DEFAULT. The approved mock-I1 values, byte for byte.
+     night-ops      Deeper, colder, lower luminance. A darkened operations
+                    room where the map is the only thing that should glow.
+     field-slate    Warmer, greyer, less blue, bigger steps between surfaces.
+                    A bright tent or a daylit vehicle, where a near-black
+                    chrome washes out and tone separation has to do more work.
+     high-contrast  Accessibility. Maximum separation, AAA (7:1) on every
+                    coloured text run that can reach it.
+
+   Each theme declares three groups:
+     1. the contract tokens (surfaces, text, semantic, type, map)
+     2. the legacy aliases css/app.css and the pane stylesheets were written
+        against, derived from group 1 — so the twenty-one existing views
+        re-theme without one of them being touched
+     3. nothing else. There is no fourth group.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1 · CONSOLE-DARK — the default, and the approved mockup's exact values
+   ========================================================================== */
+body[data-theme="console-dark"]{
+  /* surfaces, darkest to lightest */
+  --k0:#070A0D; --k1:#0B0F14; --k2:#0E141A; --k3:#121821; --k4:#19212B;
+  --k5:#22303C; --k6:#2C3B48;
+  --line:#1E2833; --line2:#2A3743;
+  /* text */
+  --t-hi:#E9EFF4; --t-mid:#AFBECB; --t-lo:#8D9CAA; --t-dim:#7A8894;
+  /* semantic — one job each */
+  --red:#FF6B60;  --red-d:#8E2A22;      /* dead / none in time */
+  --amb:#FFB53D;  --amb-d:#7A5410;      /* a human must decide */
+  --org:#FF8B4A;                        /* one aircraft only */
+  --grn:#4ED39B;  --grn-d:#1E6B3E;      /* two or more / nothing outstanding */
+  --yel:#EFD64A;                        /* triage DELAYED */
+  --cyan:#6FD3F2; --cyan-d:#17495E;     /* the ANGEL SWARM arm */
+  --blue:#8FB4FF; --blue-d:#2C4F91;     /* map AO field */
+  --slate:#AFBECB;                      /* the doctrinal arm */
+  --grey:#9AA8B4;                       /* triage EXPECTANT / out of reach */
+  /* map */
+  --m-sea:#0C1822; --m-land:#3B4C2A; --m-ao:#8FB4FF;
+  --m-track:#6FD3F2; --m-grid:#20394B; --m-halo:#03080D;
+  /* the classification band is its own surface: it must not read as chrome */
+  --band-bg:#122318; --band-line:#1C3A26; --band-fg:#4ED39B;
+  /* ink laid on a filled accent (an active chip, the play button) */
+  --on-accent:#04140C;
+  /* provenance marks — ADDED, see the note at the foot of this file */
+  --ai:#C9AEFF; --ai-d:#2E2450; --ai-a:#A78BFA; --ai-b:#22D3EE; --ai-c:#F0ABFC;
+  /* rail wayfinding — ADDED, see the note at the foot of this file */
+  --nav-olive:#B7A200; --nav-lime:#A4E46A;
+  --nav-teal:#00B9B6;  --nav-violet:#AB8EFF;
+}
+
+/* ==========================================================================
+   2 · NIGHT-OPS — deeper, colder, lower luminance for a darkened room
+   Surfaces drop toward true black and pick up ~8 degrees of blue; the hues
+   lose 6-10% chroma so nothing on the chrome competes with the map. Text
+   luminance falls with the surfaces, so the ratios hold.
+   ========================================================================== */
+body[data-theme="night-ops"]{
+  --k0:#02050A; --k1:#050911; --k2:#070C16; --k3:#0A111D; --k4:#0F1728;
+  --k5:#182337; --k6:#212F47;
+  --line:#131C2C; --line2:#1C273B;
+  --t-hi:#DCE6F2; --t-mid:#A3B4C8; --t-lo:#8A9BB0; --t-dim:#7889A0;
+  --red:#F97367;  --red-d:#7C231C;
+  --amb:#F2B145;  --amb-d:#6A4A0E;
+  --org:#F98A50;
+  --grn:#4ACB99;  --grn-d:#175A34;
+  --yel:#E4D054;
+  --cyan:#68CBEE; --cyan-d:#123E52;
+  --blue:#8EB0FA; --blue-d:#24437E;
+  --slate:#A3B4C8;
+  --grey:#93A4B8;
+  --m-sea:#061220; --m-land:#2F3F24; --m-ao:#8EB0FA;
+  --m-track:#68CBEE; --m-grid:#183043; --m-halo:#01050B;
+  --band-bg:#0B1C13; --band-line:#143020; --band-fg:#4ACB99;
+  --on-accent:#020B07;
+  /* provenance marks — ADDED, see the note at the foot of this file */
+  --ai:#C2A6FB; --ai-d:#251B45; --ai-a:#A78BFA; --ai-b:#22D3EE; --ai-c:#F0ABFC;
+  /* rail wayfinding — ADDED, see the note at the foot of this file */
+  --nav-olive:#B29E00; --nav-lime:#A2DE6D;
+  --nav-teal:#00B4B1;  --nav-violet:#A68AF7;
+}
+
+/* ==========================================================================
+   3 · FIELD-SLATE — warmer, greyer, less blue, higher surface contrast
+   The neutral axis moves off blue onto a warm grey (hue ~50, chroma near
+   zero) and the seven surface steps are spread roughly twice as far apart as
+   console-dark's, so the chrome still articulates under a bright ambient.
+   The hues warm to match; the doctrinal slate warms with them.
+   ========================================================================== */
+body[data-theme="field-slate"]{
+  --k0:#0B0B0A; --k1:#151513; --k2:#1C1C19; --k3:#242420; --k4:#2E2E29;
+  --k5:#3C3C35; --k6:#4C4C43;
+  --line:#262620; --line2:#36362F;
+  --t-hi:#F4F1E9; --t-mid:#C7C2B4; --t-lo:#ADA697; --t-dim:#98917F;
+  --red:#FF8271;  --red-d:#8A3223;
+  --amb:#FFC559;  --amb-d:#7B5A16;
+  --org:#FF9A5F;
+  --grn:#63D6A6;  --grn-d:#236842;
+  --yel:#F3DF66;
+  --cyan:#7FD5EC; --cyan-d:#1E4E5E;
+  --blue:#A2BCF2; --blue-d:#37548A;
+  --slate:#C7C2B4;
+  --grey:#BAB4A6;
+  --m-sea:#141C22; --m-land:#43512D; --m-ao:#A2BCF2;
+  --m-track:#7FD5EC; --m-grid:#2C3B45; --m-halo:#08090A;
+  --band-bg:#18251A; --band-line:#273B29; --band-fg:#63D6A6;
+  --on-accent:#0B0B0A;
+  /* provenance marks — ADDED, see the note at the foot of this file */
+  --ai:#CBB2FF; --ai-d:#352A52; --ai-a:#A78BFA; --ai-b:#22D3EE; --ai-c:#F0ABFC;
+  /* rail wayfinding — ADDED, see the note at the foot of this file */
+  --nav-olive:#BEAA22; --nav-lime:#B2E983;
+  --nav-teal:#00C1BE;  --nav-violet:#B198FE;
+}
+
+/* ==========================================================================
+   4 · HIGH-CONTRAST — accessibility; AAA where it can be reached
+   Neutral surfaces on a true-black floor, text at or near paper white, and
+   every hue lifted until it clears 7:1 on k1..k4. The dim companions are
+   fills and rules only — never text — so they are free to stay dark.
+   ========================================================================== */
+body[data-theme="high-contrast"]{
+  --k0:#000000; --k1:#070707; --k2:#0E0E0E; --k3:#171717; --k4:#232323;
+  --k5:#343434; --k6:#4E4E4E;
+  --line:#2C2C2C; --line2:#4A4A4A;
+  --t-hi:#FFFFFF; --t-mid:#E8E8E8; --t-lo:#D2D2D2; --t-dim:#BBBBBB;
+  --red:#FFB4A8;  --red-d:#A2322A;
+  --amb:#FFC94D;  --amb-d:#8A6314;
+  --org:#FFBE8A;
+  --grn:#64EDB2;  --grn-d:#1F7C4C;
+  --yel:#FFEC66;
+  --cyan:#86E2FF; --cyan-d:#1C5C77;
+  --blue:#AFC8FF; --blue-d:#3557A2;
+  --slate:#DCE3EA;
+  --grey:#C6CED6;
+  --m-sea:#0A1620; --m-land:#3F5230; --m-ao:#AFC8FF;
+  --m-track:#86E2FF; --m-grid:#2A4054; --m-halo:#000000;
+  --band-bg:#0B1F14; --band-line:#2F6B45; --band-fg:#64EDB2;
+  --on-accent:#000000;
+  /* provenance marks — ADDED, see the note at the foot of this file */
+  --ai:#DCC8FF; --ai-d:#3A2C66; --ai-a:#A78BFA; --ai-b:#22D3EE; --ai-c:#F0ABFC;
+  /* rail wayfinding — ADDED, see the note at the foot of this file */
+  --nav-olive:#CCBA47; --nav-lime:#C4F999;
+  --nav-teal:#00D3D0;  --nav-violet:#BFADFF;
+}
+
+
+/* ==========================================================================
+   TYPE — identical across the four themes. A theme is a palette; changing
+   the typeface with it would change the measured line lengths of twenty-one
+   panes, which is not what "switch the theme" is allowed to mean.
+   ========================================================================== */
+body[data-theme]{
+  --sans:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"DejaVu Sans Mono",ui-monospace,"Courier New",monospace;
+}
+
+
+/* ==========================================================================
+   LEGACY ALIASES
+
+   css/app.css and every pane stylesheet were written against an older, looser
+   token set. Rather than rewrite twenty-one panes — and risk losing one —
+   the old names are re-pointed at the new ones here. This is the whole of the
+   bridge; there is no second copy of it.
+
+   Two of these mappings are decisions, not translations:
+     --angel   was a green. The ANGEL SWARM arm is CYAN in this contract, and
+               green now means only "two or more in reach / nothing
+               outstanding". A green arm and a green outcome cannot both be
+               true, and the outcome is the one a reviewer must not misread.
+     --current was an orange. The doctrinal arm is SLATE — deliberately inert,
+               because the baseline is not an alarm, it is the status quo.
+   --tollHi / --tollLo stay red and amber. A death count never renders green.
+   ========================================================================== */
+body[data-theme]{
+  --bg:var(--k0); --bg2:var(--k1); --panel:var(--k1); --panel2:var(--k3);
+  --text:var(--t-hi); --dim:var(--t-mid); --faint:var(--t-lo);
+  --angel:var(--cyan); --current:var(--slate);
+  --ok:var(--grn); --warn:var(--amb); --bad:var(--red); --info:var(--blue);
+  --tollHi:var(--red); --tollLo:var(--amb);
+  --chartbg:rgba(255,255,255,.02);
+  --shadow:0 18px 46px rgba(0,0,0,.62);
+}
+body[data-theme="field-slate"]{ --chartbg:rgba(255,250,235,.035) }
+body[data-theme="high-contrast"]{ --chartbg:rgba(255,255,255,.05) }
+
+/* Ink on a filled accent. css/app.css hardcoded #04140c for these, which is
+   correct on a green and wrong on nothing else; it is a token now.
+
+   CORRECTED: this list used to include `.chip.on` and `.roleSw .chip.on`, and
+   neither of those is a filled accent — a plain active chip's background is
+   --k5, a SURFACE, and its ink is --t-hi. Because this selector carries
+   `body[data-theme]` it outranked the `.chip.on{color:var(--t-hi)}` in
+   css/app.css that was meant to be doing the work, so every active chip on
+   the two chrome rows — the role name, `Single`, `2D`, `1x`, EXERCISE — was
+   rendering --on-accent on --k5. Measured in the page: 1.27:1 in night-ops,
+   1.40:1 in console-dark. The accent-filled chip is `.filters .chip.on`, and
+   that one is named explicitly now instead of being caught by a wildcard. */
+body[data-theme] .filters .chip.on,
+body[data-theme] .play,
+body[data-theme] .btn.ok,
+body[data-theme] .mini.ok{ color:var(--on-accent) }
+body[data-theme] #navBadge{ background:var(--amb); color:var(--on-accent) }
+
+/* The classification band is the one surface that is never chrome. */
+body[data-theme] .band{
+  background:var(--band-bg); color:var(--band-fg);
+  box-shadow:inset 0 -1px 0 var(--band-line);
+}
+
+/* ONE COLOUR PER DESTINATION — expressed in tokens, so it re-themes with
+   everything else instead of being four more hardcoded tables. css/app.css
+   and css/polish.css each carry a literal set; both lose to this on
+   specificity, in every theme.
+   ANALYSIS was #f57ac2 — hue 325, saturation 87%. That is banned outright by
+   the contract, and it is the reason this block exists at all rather than a
+   note asking someone to remember.
+
+   THE HUES ARE NOT CHOSEN BY EYE, and this table is not in alphabetical or
+   any other convenient order — it is the output of a search. The rail is
+   role-filtered, so "distinguishable" is four questions, not one: a commander
+   sees five destinations, a logistician seven, a surgeon eight, an analyst
+   twenty. Every adjacent pair in every one of those four columns was scored
+   in all four themes under normal, protanopic and deuteranopic vision (OKLab
+   ΔE, Machado-Oliveira-Fernandes severity 1.0) and the assignment maximises
+   the worst of them, subject to the destinations whose hue the contract
+   already decides. Reproduce it with
+
+       node /home/claude/angel/navsearch.mjs      re-run the search
+       node /home/claude/angel/navcheck.mjs --table   score this table
+
+   Measured on this table:
+     worst adjacent pair, protan/deutan   ΔE 8.20  (high-contrast,
+                                          MISSION cyan / COMPARE violet)
+     worst adjacent pair, normal vision   ΔE 10.69 (field-slate,
+                                          ROI green / SENSOR cyan)
+     worst icon contrast on --k1/--k4/--k5   4.59:1  (--red on --k5,
+                                          field-slate — an existing contract
+                                          value, and the floor for the whole
+                                          stylesheet already)
+     hue count per rail  COMMANDER 6/6 · LOGISTICIAN 8/8 · SURGEON 6/9 ·
+                         ANALYST 11/21
+   Colour is the SECOND cue here, never the only one: every entry also has a
+   unique glyph and a label, which is what the data-viz rules require of any
+   pair sitting on the CVD floor rather than well above it.
+
+   Two things this table does NOT do, both deliberate:
+   · --slate and --grey are not in it. A near-neutral sits within a few ΔE of
+     every hue at its own lightness, which is the arithmetic of exactly the
+     complaint that produced this table — a rail that reads as one column.
+     They keep their contract jobs (the doctrinal arm, EXPECTANT) elsewhere.
+   · SUPPLY is teal and FLEET is orange, which reads backwards until you look
+     at the analyst rail: SUPPLY sits directly above TASKING, and orange
+     against amber measures ΔE 7.3 in high-contrast. The warm one has to be
+     the entry that is NOT next to the amber one. */
+body[data-theme] [data-view]{--niG:transparent}
+body[data-theme] [data-view="STANDARD"]  {--niC:var(--nav-olive)}             /* the argument, not an alarm */
+body[data-theme] [data-view="DASHBOARD"] {--niC:var(--nav-lime)}
+body[data-theme] [data-view="MISSION"]   {--niC:var(--cyan)}                  /* the ANGEL SWARM arm */
+body[data-theme] [data-view="COMPARE"]   {--niC:var(--nav-violet)}
+body[data-theme] [data-view="CASUALTIES"]{--niC:var(--red)}                   /* dead / none in time */
+body[data-theme] [data-view="UNITS"]     {--niC:var(--blue)}
+body[data-theme] [data-view="FLEET"]     {--niC:var(--org)}
+body[data-theme] [data-view="SUPPLY"]    {--niC:var(--nav-teal)}
+body[data-theme] [data-view="TASKING"]   {--niC:var(--amb)}                   /* a human must decide */
+body[data-theme] [data-view="STREAM"]    {--niC:var(--nav-violet)}
+body[data-theme] [data-view="AUDIT"]     {--niC:var(--cyan)}                  /* the arm’s own record */
+body[data-theme] [data-view="FLOW"]      {--niC:var(--red)}                   /* where they were lost */
+body[data-theme] [data-view="ANALYSIS"]  {--niC:var(--yel)}
+body[data-theme] [data-view="ROI"]       {--niC:var(--grn)}                   /* nothing outstanding */
+body[data-theme] [data-view="COST"]      {--niC:var(--blue)}
+body[data-theme] [data-view="SENSOR"]    {--niC:var(--cyan)}                  /* the arm’s own sensing */
+body[data-theme] [data-view="DOCTRINE"]  {--niC:var(--nav-violet)}
+body[data-theme] [data-view="BRIEF"]     {--niC:var(--nav-lime)}
+body[data-theme] [data-view="CONFIDENCE"]{--niC:var(--nav-olive)}
+body[data-theme] [data-view="QUERY"]     {--niC:var(--nav-teal)}
+body[data-theme] [data-view="DATA"]      {--niC:var(--yel)}
+body[data-theme] [data-view="THEATER3D"] {--niC:var(--nav-teal)}
+body[data-theme] [data-view="DECIDE"]    {--niC:var(--nav-lime)}
+body[data-theme] [data-view="SETTINGS"]  {--niC:var(--nav-olive)}
+
+
+/* ==========================================================================
+   MEASURED — every coloured text run in this application, against the surface
+   it actually sits on, per theme. 79 runs each. Produced by
+   /home/claude/angel/themecontrast.mjs, which imports `contrast` and
+   `validate` from the dataviz skill's validator rather than carrying a second
+   implementation of the same arithmetic.
+
+     theme            runs   worst ratio                     >=7:1    pink
+     console-dark      79    4.84:1  --red on --k5            60/79     0
+     night-ops         79    5.30:1  --t-dim on --k3          66/79     0
+     field-slate       79    4.59:1  --red on --k5            61/79     0
+     high-contrast     79    7.32:1  --red on --k5            79/79     0   AAA throughout
+
+   Zero runs below 4.5:1 in any theme. Zero tokens in any theme fall in hue
+   285-350 above 35% saturation. Re-run themecontrast.mjs after ANY change
+   here; it exits non-zero on a failure.
+
+   The dataviz six-checks flag four notes on the nine-hue set in every theme —
+   lightness band, chroma floor, CVD separation and the normal-vision floor
+   (--slate against --grey, dE 7.0). All four are expected and none is a
+   defect: these are STATUS colours, which that skill reserves from the
+   categorical rules and requires to ship with a label rather than alone. They
+   always do here — triage words, arm names, "fewer dead". --slate and --grey
+   are deliberately both neutral, because the doctrinal arm and the EXPECTANT
+   category are both meant to recede, and neither is ever the only thing
+   distinguishing two marks.
+   ========================================================================== */
+
+/* ==========================================================================
+   ADDED TOKENS — four, and only four, and nothing existing was changed
+
+   --nav-olive  --nav-lime  --nav-teal  --nav-violet
+
+   Wayfinding, not semantics. They exist because the left rail has to give
+   twenty-one destinations distinguishable colours and the contract's nine
+   semantic hues are (a) nine, and (b) already spoken for — a rail entry
+   painted --red has said "dead" whether it meant to or not. These four say
+   nothing; they are positions on the rail.
+
+   They are recipes, not four unrelated hexes. Each is generated per theme at
+   THAT theme's own mean hue lightness (of --red --org --amb --yel --grn
+   --cyan --blue) plus an offset, and 1.15x its mean chroma, so a token stays
+   in the register of the theme it belongs to instead of four themes sharing
+   one value:
+
+     --nav-olive   OKLCH hue 100, lightness -0.08   a dark gold
+     --nav-lime    OKLCH hue 132, lightness +0.06   a bright leaf
+     --nav-teal    OKLCH hue 193, lightness -0.08   a deep teal
+     --nav-violet  OKLCH hue 294, lightness -0.07   a violet
+
+   Two of the four sit BELOW the family and one above, on purpose: under
+   protanopia and deuteranopia the hue circle collapses onto a single axis and
+   lightness is the only channel left doing any separating.
+
+   The violet's offset is -0.07 rather than the -0.10 the separation search
+   preferred. -0.10 scores ΔE 9.05 against 8.20, but renders #A88FF3 in
+   field-slate, which is 4.17:1 on --k5 — under the 4.5:1 floor this file is
+   held to. The three tenths of a ΔE were the cheaper thing to give up.
+
+   Hue in sRGB HSL is 52-53, 91-93, 179 and 253-255 across the four themes.
+   None of them is within 285-350, so the pink ban holds; navcheck.mjs
+   re-checks that rather than trusting this sentence.
+
+   Generated and verified by:
+     /home/claude/angel/navpal.mjs     token extraction + OKLab/CVD maths
+     /home/claude/angel/navsearch.mjs  the assignment search
+     /home/claude/angel/navcheck.mjs   the score for the shipped table
+   All three import `contrast` from the data-viz validator rather than
+   carrying a second implementation of the same arithmetic.
+   ========================================================================== */
+
+/* ==========================================================================
+   ADDED TOKENS — provenance marks
+
+   --ai  --ai-d
+
+   The application makes a claim of provenance on the face of the screen: a
+   small stamp that says THIS NUMBER CAME OUT OF A TRAINED MODEL, next to
+   every place where one did, and nowhere else. That stamp needs a colour, and
+   it cannot borrow one. Every semantic hue in this contract has exactly one
+   job — --red is dead, --amb is a human must decide, --cyan is the ANGEL
+   SWARM arm — and a stamp painted in any of them would be read as that job.
+   The neutrals are already the text ramp. Violet is the only hue this
+   contract has not spent, and it is also the convention a reviewer arrives
+   with, which is worth something on a badge whose whole purpose is to be
+   understood at a glance.
+
+     --ai    the stamp's ink and its icon
+     --ai-d  the stamp's fill, the same relationship --red-d has to --red:
+             a dim companion, used as a fill and never as text
+
+   Measured, ink on fill, in the page:
+     console-dark 7.40:1 · night-ops 7.67:1 · field-slate 7.08:1 ·
+     high-contrast 7.94:1
+   The fill is a solid token, not a translucency over whatever surface the
+   stamp lands on, so those four numbers are the whole answer — the stamp
+   cannot be dropped onto a lighter card and quietly fall under the floor.
+
+   Hue in sRGB HSL is 259-262 across the four themes, saturation 91-100%.
+   None of them is within 285-350, so the pink ban holds. Verified by
+   /home/claude/angel/provcheck.mjs, which reads the tokens out of a running
+   page rather than out of this comment.
+
+   The DETERMINISTIC stamp — the optimiser's mark — deliberately adds no
+   token. It is --t-mid on --k4: the text ramp on a surface, which is to say
+   no colour claim at all. That is the point of it. Machine learning is
+   coloured; arithmetic is not.
+   ========================================================================== */

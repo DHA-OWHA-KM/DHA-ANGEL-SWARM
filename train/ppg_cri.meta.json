@@ -1,0 +1,71 @@
+{
+  "name": "ANGEL SWARM CRI-Net",
+  "task": "compensatory reserve index from photoplethysmogram",
+  "input": {
+    "shape": [
+      1,
+      1,
+      500
+    ],
+    "rate_hz": 100,
+    "window_s": 5.0,
+    "normalisation": "per-window zero mean unit variance"
+  },
+  "output": {
+    "cri": "estimate in [0,1]",
+    "logvar": "log predictive variance"
+  },
+  "parameters": 104162,
+  "onnx_bytes": 419797,
+  "opset": 13,
+  "trained": {
+    "subjects": 240,
+    "windows": 62400,
+    "epochs": 14,
+    "seconds": 632.6
+  },
+  "heldout": {
+    "subjects": 70,
+    "windows": 10500,
+    "split": "by subject \u2014 no person appears in both sets"
+  },
+  "metrics": {
+    "mae": 0.0694,
+    "mae_clean": 0.0641,
+    "mae_degraded": 0.0879,
+    "mae_heart_rate_only": 0.1588,
+    "mae_most_confident_half": 0.0529,
+    "uncertainty_error_corr": 0.351,
+    "coverage_95": 0.9616,
+    "alarm_sensitivity_cri_lt_030": 0.8319,
+    "alarm_precision_cri_lt_030": 0.854
+  },
+  "provenance": "Synthetic cohort. Waveform morphology follows the published response of the peripheral pulse to central volume loss; it is not patient data and no patient data was used. The fielded analogue is CipherOx CRM, FDA 510(k) K173929.",
+  "trust": {
+    "act_below": 0.4689,
+    "refuse_above": 0.5911,
+    "clean": {
+      "median_width": 0.3648,
+      "p75": 0.4689,
+      "p97": 0.5911,
+      "share_act": 0.75,
+      "share_caution": 0.22,
+      "share_refuse": 0.03
+    },
+    "degraded": {
+      "median_width": 0.4252,
+      "share_act": 0.621,
+      "share_caution": 0.2463,
+      "share_refuse": 0.1327
+    },
+    "mae_when_actionable": 0.063,
+    "mae_when_refused": 0.1148,
+    "mae_degraded_overall": 0.0952,
+    "mae_degraded_when_actionable": 0.0773,
+    "cohort": {
+      "clean": 5000,
+      "degraded": 3000,
+      "subjects": 120
+    }
+  }
+}

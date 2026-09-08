@@ -1,0 +1,152 @@
+<!doctype html><meta charset="utf-8"><title>ANGEL SWARM — colour options</title>
+<link rel="stylesheet" href="_font.css">
+<style>
+  :root{
+    --pg:oklch(0.155 0.008 250); --card:oklch(0.2 0.012 250); --bd:oklch(0.3 0.012 250);
+    --fg:oklch(0.96 0.005 250); --dim:oklch(0.63 0.008 250); --faint:oklch(0.5 0.008 250);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--pg);color:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif;padding:34px 40px 46px}
+  h1{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:0 0 4px}
+  .sub{font-size:12.5px;color:var(--dim);margin:0 0 26px;max-width:900px;line-height:1.6}
+  .opt{margin:0 0 30px;border:1px solid var(--bd);border-radius:9px;overflow:hidden;background:oklch(0.175 0.01 250)}
+  .optHead{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .tag{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.13em;padding:4px 9px;border-radius:4px}
+  .tagRec{background:oklch(0.28 0.06 195);color:oklch(0.88 0.1 195);border:1px solid oklch(0.44 0.1 195)}
+  .tagAlt{background:oklch(0.24 0.012 250);color:oklch(0.7 0.008 250);border:1px solid oklch(0.34 0.012 250)}
+  .optName{font-size:15.5px;font-weight:600}
+  .optWhy{font-size:11.5px;color:var(--dim);flex:1 1 320px;line-height:1.55}
+  .body{padding:18px}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;font-family:'IBM Plex Mono',monospace}
+  .kpi{padding:15px 16px;border-radius:7px;background:var(--card);border:1px solid var(--bd);display:flex;flex-direction:column;gap:7px}
+  .kpiL{display:flex;flex-direction:column;gap:3px;min-height:26px}
+  .lab{font-size:9px;font-weight:700;letter-spacing:.12em;color:oklch(0.6 0.008 250)}
+  .arm{font-size:9px;font-weight:700;letter-spacing:.12em}
+  .num{font-size:42px;font-weight:700;line-height:1;letter-spacing:-.02em}
+  .cap{font-size:10px;color:oklch(0.66 0.006 250);line-height:1.45}
+  .strip{margin-top:13px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace}
+  .pill{display:inline-flex;align-items:center;gap:7px;font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.07em;padding:8px 13px;border-radius:4px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .btn{font:700 10.5px 'IBM Plex Mono',monospace;letter-spacing:.07em;padding:10px 17px;border-radius:4px}
+  .note{margin-top:13px;font-size:11px;color:var(--faint);line-height:1.6;font-family:'IBM Plex Sans',sans-serif}
+  .swatches{display:flex;gap:0;margin-top:14px;border-radius:5px;overflow:hidden;border:1px solid var(--bd)}
+  .sw{flex:1;padding:9px 8px 8px;display:flex;flex-direction:column;gap:3px;align-items:center}
+  .swK{font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.2 0.01 250)}
+  .swV{font:400 7.5px 'IBM Plex Mono',monospace;color:oklch(0.25 0.01 250)}
+  .cross{font-size:11.5px;color:oklch(0.78 0.09 25);font-family:'IBM Plex Sans',sans-serif;line-height:1.55;margin-top:12px;padding-left:11px;border-left:2px solid oklch(0.5 0.12 25)}
+</style>
+<h1>Colour — three options</h1>
+<p class="sub">Same four cards, same real figures, three palettes. The problem being solved: <b>teal currently means four different things</b> — ANGEL SWARM's identity, "good", "confirmed", and every primary button — so it has no signalling power left. And <b>red means both "the dead" and "look here"</b>.</p>
+
+<!-- ============ NOW ============ -->
+<div class="opt">
+  <div class="optHead"><span class="tag tagAlt">TODAY</span><span class="optName">What ships now</span>
+    <span class="optWhy">ARM A teal at chroma 0.13 against ARM B orange at 0.15. The alert and the death count are the same red.</span></div>
+  <div class="body">
+    <div class="row">
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.72 0.13 165)">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.80 0.09 165)">ANGEL SWARM</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">23</span>
+        <span class="cap">tasked against each casualty's physiological deadline</span></div>
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.70 0.15 50)">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.80 0.11 50)">CURRENT — TRIAGE &amp; PROXIMITY</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">34</span>
+        <span class="cap">sorted by triage category, nearest airframe</span></div>
+      <div class="kpi"><div class="kpiL"><span class="lab">FEWER DEAD</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">11</span>
+        <span class="cap">the difference the tasking made</span></div>
+      <div class="kpi"><div class="kpiL"><span class="lab">RESOLVED</span></div>
+        <span class="num" style="color:oklch(0.94 0.005 250)">125</span>
+        <span class="cap">20 sorties · 3 escalated, 3 lapsed</span></div>
+    </div>
+    <div class="strip">
+      <span class="pill" style="background:oklch(0.32 0.11 25);border:1px solid oklch(0.55 0.17 25);color:oklch(0.92 0.12 25)"><span class="dot" style="background:oklch(0.68 0.2 25)"></span>MISSION IN PROGRESS</span>
+      <span class="pill" style="background:oklch(0.32 0.11 25);border:1px solid oklch(0.55 0.17 25);color:oklch(0.92 0.12 25)">1 DECISION REQUIRES YOU</span>
+      <span class="btn" style="background:oklch(0.72 0.14 165);color:oklch(0.17 0.03 165)">OPEN THE ANALYSIS →</span>
+      <span class="btn" style="background:oklch(0.3 0.07 75);color:oklch(0.9 0.06 75)">FPCON BRAVO</span>
+    </div>
+    <p class="cross">Look at the strip: the alert and the death count are the same red, and the button is the same teal as ANGEL SWARM's arm mark. Nothing tells you which of those is a result, which is a demand, and which is an identity.</p>
+  </div>
+</div>
+
+<!-- ============ A ============ -->
+<div class="opt" style="border-color:oklch(0.44 0.1 195)">
+  <div class="optHead" style="border-color:oklch(0.36 0.07 195);background:oklch(0.2 0.03 195)"><span class="tag tagRec">OPTION A · RECOMMENDED</span><span class="optName">Give the arms equal weight</span>
+    <span class="optWhy">Four tokens. Arms equalised, button moved to cyan, alert moved to amber. ~30 minutes, revertible in one commit.</span></div>
+  <div class="body">
+    <div class="row">
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.74 0.15 165)">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.82 0.11 165)">ANGEL SWARM</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">23</span>
+        <span class="cap">tasked against each casualty's physiological deadline</span></div>
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.74 0.15 50)">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.82 0.11 50)">CURRENT — TRIAGE &amp; PROXIMITY</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">34</span>
+        <span class="cap">sorted by triage category, nearest airframe</span></div>
+      <div class="kpi"><div class="kpiL"><span class="lab">FEWER DEAD</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">11</span>
+        <span class="cap">the difference the tasking made</span></div>
+      <div class="kpi"><div class="kpiL"><span class="lab">RESOLVED</span></div>
+        <span class="num" style="color:oklch(0.94 0.005 250)">125</span>
+        <span class="cap">20 sorties · 3 escalated, 3 lapsed</span></div>
+    </div>
+    <div class="strip">
+      <span class="pill" style="background:oklch(0.30 0.08 75);border:1px solid oklch(0.52 0.13 75);color:oklch(0.93 0.09 75)"><span class="dot" style="background:oklch(0.80 0.15 75)"></span>MISSION IN PROGRESS</span>
+      <span class="pill" style="background:oklch(0.30 0.08 75);border:1px solid oklch(0.52 0.13 75);color:oklch(0.93 0.09 75)">1 DECISION REQUIRES YOU</span>
+      <span class="btn" style="background:oklch(0.70 0.13 195);color:oklch(0.16 0.03 195)">OPEN THE ANALYSIS →</span>
+      <span class="btn" style="background:oklch(0.3 0.07 75);color:oklch(0.9 0.06 75)">FPCON BRAVO</span>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:oklch(0.74 0.15 165)"><span class="swK">ARM A</span><span class="swV">0.74 0.15 165</span></div>
+      <div class="sw" style="background:oklch(0.74 0.15 50)"><span class="swK">ARM B</span><span class="swV">0.74 0.15 50</span></div>
+      <div class="sw" style="background:oklch(0.70 0.13 195)"><span class="swK">BUTTON</span><span class="swV">0.70 0.13 195</span></div>
+      <div class="sw" style="background:oklch(0.80 0.15 75)"><span class="swK">DEMAND</span><span class="swV">0.80 0.15 75</span></div>
+      <div class="sw" style="background:oklch(0.82 0.15 25)"><span class="swK">THE DEAD</span><span class="swV">0.82 0.15 25</span></div>
+    </div>
+    <p class="note">Now a teal thing means ANGEL SWARM and nothing else. A red <i>number</i> is a death; an <i>amber</i> banner is a demand on you. The two arms read as peers rather than as subject and footnote.</p>
+  </div>
+</div>
+
+<!-- ============ B ============ -->
+<div class="opt">
+  <div class="optHead"><span class="tag tagAlt">OPTION B</span><span class="optName">Everything in A, and make red mean one thing only</span>
+    <span class="optWhy">In A, red still appears on the arm-B card edge and on bar fills. B strips red back to the figures alone — bars go neutral, edges go to the arm hue. ~2 hours.</span></div>
+  <div class="body">
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.74 0.15 165);border-color:oklch(0.40 0.07 165)">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.82 0.11 165)">ANGEL SWARM</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">23</span>
+        <div style="height:9px;border-radius:2px;background:oklch(0.26 0.01 250);overflow:hidden;margin-top:2px"><div style="height:100%;width:68%;background:oklch(0.55 0.03 250)"></div></div>
+        <span class="cap">tasked against each casualty's physiological deadline</span></div>
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.74 0.15 50);border-color:oklch(0.42 0.09 50)">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.82 0.11 50)">CURRENT — TRIAGE &amp; PROXIMITY</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25)">34</span>
+        <div style="height:9px;border-radius:2px;background:oklch(0.26 0.01 250);overflow:hidden;margin-top:2px"><div style="height:100%;width:100%;background:oklch(0.55 0.03 250)"></div></div>
+        <span class="cap">sorted by triage category, nearest airframe</span></div>
+    </div>
+    <p class="note">The only red left anywhere is a number that counts dead soldiers. Bars carry length, not alarm; card edges carry the arm. <b>The cost:</b> the bars lose some of their punch on the wall display, and I would have to re-check every red in the build — there are 40-odd uses. This is the purist option and it is the two-hour one.</p>
+  </div>
+</div>
+
+<!-- ============ C ============ -->
+<div class="opt">
+  <div class="optHead"><span class="tag tagAlt">OPTION C</span><span class="optName">Don't touch colour — fix hierarchy only</span>
+    <span class="optWhy">Same palette. Findability fixed with size, weight and space alone.</span></div>
+  <div class="body">
+    <div class="row" style="grid-template-columns:1.35fr 1.35fr 1fr 1fr">
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.72 0.13 165);padding:20px 18px">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.80 0.09 165)">ANGEL SWARM</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25);font-size:58px">23</span>
+        <span class="cap">tasked against each casualty's physiological deadline</span></div>
+      <div class="kpi" style="box-shadow:inset 3px 0 0 oklch(0.70 0.15 50);padding:20px 18px">
+        <div class="kpiL"><span class="lab">DEAD OF SURVIVABLE WOUNDS</span><span class="arm" style="color:oklch(0.80 0.11 50)">CURRENT — TRIAGE &amp; PROXIMITY</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25);font-size:58px">34</span>
+        <span class="cap">sorted by triage category, nearest airframe</span></div>
+      <div class="kpi" style="opacity:.72"><div class="kpiL"><span class="lab">FEWER DEAD</span></div>
+        <span class="num" style="color:oklch(0.82 0.15 25);font-size:31px">11</span><span class="cap">the difference</span></div>
+      <div class="kpi" style="opacity:.72"><div class="kpiL"><span class="lab">RESOLVED</span></div>
+        <span class="num" style="color:oklch(0.94 0.005 250);font-size:31px">125</span><span class="cap">20 sorties</span></div>
+    </div>
+    <p class="note">Zero palette risk days before you present, and the two arms genuinely do dominate now. <b>But</b> it does not fix teal-meaning-four-things, which is the actual cause of "hard to locate" — it just makes one screen louder than the others.</p>
+  </div>
+</div>

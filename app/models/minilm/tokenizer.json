@@ -1,0 +1,14 @@
+{
+ "lowercase": true,
+ "stripAccents": true,
+ "handleChineseChars": true,
+ "continuingSubwordPrefix": "##",
+ "maxInputCharsPerWord": 100,
+ "unkToken": "[UNK]",
+ "clsToken": "[CLS]",
+ "sepToken": "[SEP]",
+ "padToken": "[PAD]",
+ "maxLen": 256,
+ "vocabSize": 30522,
+ "hidden": 384
+}

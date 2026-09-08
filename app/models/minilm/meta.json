@@ -1,0 +1,81 @@
+{
+ "model": "all-MiniLM-L6-v2",
+ "licence": "Apache-2.0",
+ "source": "npm @lat.md/embed-minilm-fp16 (fp16 safetensors + tokenizer); huggingface.co is unreachable from the build sandbox",
+ "parameters": 22565376,
+ "opset": 14,
+ "dim": 384,
+ "onnx_fp32_bytes": 90398862,
+ "onnx_int8_bytes": 22898176,
+ "vocab_bytes": 231507,
+ "corpus_bytes": 448266,
+ "passages": 161,
+ "sentences": 499,
+ "quality": {
+  "torch_vs_onnx_fp32_min_cos": 0.9999995231628418,
+  "onnx_fp32_vs_int8_min_cos": 0.9686230421066284,
+  "onnx_fp32_vs_int8_mean_cos": 0.980159342288971,
+  "pair_similarity_max_abs_delta": 0.030839115381240845,
+  "pair_similarity_mean_abs_delta": 0.01298176683485508,
+  "passage_quant_min_cos": 0.999940037727356,
+  "sentence_quant_min_cos": 0.9999462366104126,
+  "eval_n": 23,
+  "eval_top1": 15,
+  "eval_top5": 22,
+  "eval_top1_fp32_model": 16,
+  "eval_top5_fp32_model": 22,
+  "eval_top1_int8_model_fp32_vectors": 15,
+  "eval_top5_int8_model_fp32_vectors": 22,
+  "eval_misses": [
+   {
+    "q": "What goes on line 3 of the 9-line?",
+    "rank": 2,
+    "wanted": "A4-012",
+    "got": "A4-009"
+   },
+   {
+    "q": "How long can whole blood be kept before it expires?",
+    "rank": 2,
+    "wanted": "BP-002",
+    "got": "BP-001"
+   },
+   {
+    "q": "Difference between Class VIIIa and Class VIIIb?",
+    "rank": 3,
+    "wanted": "F4-003",
+    "got": "F4-001"
+   },
+   {
+    "q": "How do I stop bleeding from the groin where a tourniquet will not fit?",
+    "rank": 3,
+    "wanted": "TG-009",
+    "got": "TG-006"
+   },
+   {
+    "q": "What blood pressure should I resuscitate a head injury to?",
+    "rank": 4,
+    "wanted": "JC-004",
+    "got": "JC-003"
+   },
+   {
+    "q": "What is the difference between MEDEVAC and CASEVAC?",
+    "rank": 40,
+    "wanted": "A4-001",
+    "got": "J4-015"
+   },
+   {
+    "q": "How long does a blood transport container hold temperature?",
+    "rank": 3,
+    "wanted": "BP-009",
+    "got": "BP-008"
+   },
+   {
+    "q": "What is the Golden Hour policy?",
+    "rank": 2,
+    "wanted": "GH-001",
+    "got": "GH-002"
+   }
+  ]
+ },
+ "disclaimer": "Paraphrased reference text written for demonstration. Not an extract of the publication. Consult the authoritative publication before acting."
+}

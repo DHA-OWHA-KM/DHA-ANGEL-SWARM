@@ -1,0 +1,125 @@
+/* ==========================================================================
+   ANGEL SWARM — THEATER MAP
+   ==========================================================================
+   Geometry only. Every colour, type size and radius below is a token out of
+   design.css; this file declares none of its own.
+
+   The page mounts a real renderer through DPB's dock, which positions
+   <main id="views"> over an empty slot. Two of the three renderers were
+   written as absolutely-positioned, self-scrolling boxes that fill a
+   viewport, so the rules at the bottom of this file give the docked pane a
+   real box to fill. Without them #stage is `position:absolute; inset:0`
+   against a dock of zero height and every tactical map comes up 0x0 — a
+   canvas that is present and blank, which is this destination's one
+   characteristic failure.
+   ========================================================================== */
+
+/* ---- the control strip ------------------------------------------------- */
+.m-bar{ display:flex; align-items:center; justify-content:space-between;
+  gap:14px; padding:12px 22px 0; flex-wrap:wrap }
+.m-bar .d-seg{ flex-wrap:wrap }
+
+.m-tools{ display:flex; gap:6px; flex-wrap:wrap }
+.m-tool{ font:600 10px var(--d-mono); letter-spacing:.06em;
+  padding:6px 11px; border-radius:var(--d-r-btn); cursor:pointer;
+  background:transparent; color:oklch(0.85 0.006 250);
+  border:1px solid oklch(0.34 0.012 250); font-family:var(--d-mono) }
+.m-tool:hover{ border-color:oklch(0.44 0.02 250); color:var(--d-t1) }
+.m-tool.on{ background:var(--d-teal-sel); border-color:var(--d-teal-line);
+  color:var(--d-teal-nav-t) }
+
+/* ---- what this renderer is -------------------------------------------- */
+.m-note{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  padding:10px 22px 0; font-size:12px; color:var(--d-t6); max-width:1180px }
+.m-note > span:first-child{ flex:1 1 420px; line-height:1.55 }
+.m-note .m-can{ font:400 9px var(--d-mono); letter-spacing:.1em; color:var(--d-t7);
+  white-space:nowrap }
+.m-note .m-wait{ font:400 9.5px var(--d-mono); letter-spacing:.06em;
+  color:var(--d-amb); white-space:nowrap }
+
+/* ---- the slot the dock is positioned over ------------------------------ */
+.m-stage{ padding:14px 22px 0 }
+.m-stage > .b-slot{ min-height:520px }
+
+/* ---- the figures ------------------------------------------------------- */
+.m-stage + .d-tiles{ padding:18px 22px 26px }
+
+/* ==========================================================================
+   GIVING EACH RENDERER A BOX
+   ==========================================================================
+   pages-b.css flattens every docked viewport to `position:static; height:auto`
+   so a pane written for a viewport can flow inside a page that scrolls as a
+   whole. That is right for a terminal and wrong for a map: the tactical pane
+   has no intermediate .pane element at all, and #stage — with the 2D
+   canvases, the GPU host, the layer panel and both arm tags inside it — is
+   `position:absolute; inset:0`. Against a static parent of auto height it
+   resolves to nothing. These rules are more specific than that flattening
+   and only apply while this destination owns the dock.
+   ========================================================================== */
+body.d-map-focus #dDock #views > .viewport[data-pane="MISSION"]{
+  position:relative !important;
+  height:560px !important;
+  border-radius:var(--d-r-lift);
+  overflow:hidden;
+  border:1px solid var(--d-line-hard);
+}
+body.d-map-focus #dDock #views > .viewport[data-pane="MISSION"] #stage{
+  position:absolute !important; inset:0 !important;
+}
+
+/* The theatre picture is already a grid panel of its own on the DASHBOARD
+   pane — map beside the operations list — so it needs height, not a box. */
+body.d-map-focus #dDock #views > .viewport[data-pane="DASHBOARD"] #theaterStage{
+  height:560px !important;
+}
+/* ...and the rest of that pane is the old Operations screen: its tables, its
+   threshold settings, its status bars. On this destination the map is the
+   destination. Hidden by an allow-list of one, so nothing can leak back in. */
+body.d-map-focus #dDock #views > .viewport[data-pane="DASHBOARD"] > .pane > *:not(#theaterStage){
+  display:none !important;
+}
+body.d-map-focus #dDock #views > .viewport[data-pane="DASHBOARD"] .pane{
+  min-height:0 !important;
+}
+
+/* ==========================================================================
+   ONE CONTROL, ONE PLACE
+   ==========================================================================
+   The theatre stage carries its own floating zoom pad and its own four-figure
+   stats card, both written for the old Operations screen. Here the same three
+   controls are in the tool row and the same four figures are in the tile row
+   below the map, and a second copy of each is not a convenience — the stats
+   card and the tiles are sampled a moment apart on a running simulation, so
+   two different figures for "still down" would be on screen at once. The
+   duplicates stand down; the title, the note and the interaction hint stay.
+   ========================================================================== */
+body.d-map-focus #dDock #theaterStage .thZoom,
+body.d-map-focus #dDock #theaterStage .thStats{ display:none !important }
+
+/* ==========================================================================
+   THE LAYER PANEL HAS TO BE ON SCREEN FOR THE LAYER CONTROL TO MEAN ANYTHING
+   ==========================================================================
+   role-commander.js thins the tactical map for the commander profile — which
+   is the default — by hiding the HUD and the layer panel until that role's
+   own panel is open:
+
+     body[data-role-profile="COMMANDER"] [data-pane="MISSION"]:not(.cqOpen)
+       #legend { display:none !important }
+
+   That is a sensible default on the mission screen, where the commander
+   wants the ground and not the furniture. It is the wrong default on the
+   destination whose entire subject is the map, because the LAYER PANEL
+   control would then toggle a class on an element nobody can see — visible,
+   pressable, and with nothing to show for it, which is the failure this page
+   is built to avoid. Only #legend is restored, only while this destination
+   owns the dock, and only on the flat tactical map; the role's treatment of
+   the mission screen itself is untouched.
+   ========================================================================== */
+body.d-map-focus #dDock #views > .viewport[data-pane="MISSION"] #legend{
+  display:block !important;
+}
+/* ...except where the GPU map is drawing, which has a layer panel of its own
+   and takes the flat map's furniture off the stage entirely. */
+body.d-map-focus.map3d #dDock #views > .viewport[data-pane="MISSION"] #legend{
+  display:none !important;
+}

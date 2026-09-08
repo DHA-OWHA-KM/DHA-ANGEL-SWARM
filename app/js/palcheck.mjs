@@ -1,0 +1,28 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args:['--no-sandbox','--use-gl=swiftshader'] });
+const p = await b.newPage({viewport:{width:1920,height:1080}});
+const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
+await p.goto('http://127.0.0.1:8899/',{waitUntil:'networkidle'});
+await p.evaluate(()=>document.getElementById('welcome')?.classList.remove('show'));
+await p.waitForTimeout(900);
+await p.evaluate(()=>{ APP.running=false; for(let t=0;t<60;t+=0.25){ stepArm(APP.armA,APP.world,t,0.25,APP.rngA);} APP.t=APP.tView=60; APP.view='MISSION'; APP._paneForce=true; render(); });
+await p.waitForTimeout(500);
+const r = await p.evaluate(async ()=>{
+  APP.sel=null; render();
+  document.getElementById('btnPalette').click();
+  await new Promise(x=>setTimeout(x,400));
+  const inp=document.getElementById('ckInput');
+  inp.focus(); inp.value='CAS-0'; inp.dispatchEvent(new Event('input',{bubbles:true}));
+  await new Promise(x=>setTimeout(x,400));
+  const rows=[...document.querySelectorAll('#ckList .ckRow')];
+  const cas=rows.find(r=>/CAS-/.test(r.innerText));
+  if(!cas) return {ok:false, rows:rows.slice(0,4).map(r=>r.innerText.slice(0,40))};
+  const label=cas.innerText.replace(/\n/g,' ').slice(0,50);
+  cas.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
+  cas.click();
+  await new Promise(x=>setTimeout(x,600));
+  return {ok:true, label, sel:APP.sel, head:document.getElementById('insp').innerText.split('\n').slice(0,2)};
+});
+console.log(JSON.stringify(r,null,1));
+console.log('ERRS',errs);
+await b.close();

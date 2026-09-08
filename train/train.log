@@ -1,0 +1,33 @@
+generating cohort ...
+  train 62,400 windows / 240 subjects
+  test  10,500 windows /  70 subjects (disjoint people)
+  parameters 104,162
+  epoch  1/14  nll -1.2994   test MAE 0.0935
+  epoch  2/14  nll -1.6493   test MAE 0.0937
+  epoch  3/14  nll -1.6894   test MAE 0.0792
+  epoch  4/14  nll -1.7199   test MAE 0.0744
+  epoch  5/14  nll -1.7501   test MAE 0.0752
+  epoch  6/14  nll -1.7702   test MAE 0.1030
+  epoch  7/14  nll -1.7816   test MAE 0.0799
+  epoch  8/14  nll -1.7973   test MAE 0.0734
+  epoch  9/14  nll -1.8280   test MAE 0.0712
+  epoch 10/14  nll -1.8460   test MAE 0.0709
+  epoch 11/14  nll -1.8721   test MAE 0.0721
+  epoch 12/14  nll -1.8906   test MAE 0.0696
+  epoch 13/14  nll -1.9109   test MAE 0.0694
+  epoch 14/14  nll -1.9233   test MAE 0.0694
+
+  ---- held-out performance, subjects never seen in training ----
+  MAE overall                0.0694 CRI
+  MAE clean signal           0.0641
+  MAE degraded signal        0.0879
+  MAE, heart rate alone      0.1588   <- the waveform is doing the work
+  MAE, most-confident half   0.0529
+  uncertainty/error corr     +0.351
+  inside 95% interval        96.2%
+  CRI<0.30 alarm sensitivity 83.2%  precision 85.4%
+/home/claude/angel/train/ppg_cri.py:356: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(
+
+  wrote ppg_cri.onnx  419,797 bytes
+  total 632.6s

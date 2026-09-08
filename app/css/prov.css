@@ -1,0 +1,116 @@
+.pMark.aiAttr.pmC > .aiMark{ width:12px !important; height:12px !important; flex:0 0 12px }
+.pMark.aiAttr.pmC > .aiLabel{ font-size:9px !important; margin-left:-2px !important }
+/* ------------------------------- where the marks land inside a group ---- */
+/* Tiles are a stacked <b> over a label <span>; the mark goes in the label so
+   it can never sit on top of the number. The label is display:block, so the
+   mark needs to be allowed to sit beside its text rather than under it. */
+.kpi > span, .dtile > .dk{ display:block }
+.kpi > span > .pMark, .dtile > .dk > .pMark{ margin-left:7px !important; vertical-align:middle }
+.kpi > .pMark, .dtile > .pMark{ margin:6px 0 0 0 !important }
+.gpCounts > .pMark{ margin-left:10px !important; align-self:center }
+.hudHead .hh > .pMark, .thStats > .pMark, .joaStats > .pMark{ margin-left:8px !important }
+.ustat > .pMark{ margin-left:6px !important }
+th > .pMark{ margin-left:6px !important; vertical-align:middle }
+.uhead > .pMark{ margin-left:8px !important }
+.cqFig > .pMark, .cqCount > .pMark{ margin-left:0 !important; margin-top:6px !important }
+.mcGrid > .pMark, .roiBox > .pMark, .reqBox > .pMark,
+.sweepBox > .pMark, .aarBox > .pMark, .strTiles > .pMark,
+.cqLine > .pMark, .cqFind > .pMark, .cqAuth > .pMark,
+.mcProg > .pMark, .mcCaveat > .pMark, .cqLpH > .pMark, .cmpCause > .pMark,
+#missCompare > .pMark, .verify > .pMark{ margin-left:8px !important }
+/* A group that is a flex row must not stretch the mark to its own height. */
+.gpCounts, .thStats, .joaStats, .hudHead .hh{ align-items:center }
+/* =========================================================================
+   THE HOVER CARD
+   A positioned popover on <body>, not a browser tooltip. It answers, under
+   labels, what produced the number, how, and how anyone knows it works. It
+   is inert — pointer-events:none, nothing inside it focusable — which is why
+   focus can never be trapped in it and never has to be restored.
+   ========================================================================= */
+div#provTip{
+  position:fixed; z-index:1400; display:none;
+  width:max-content; max-width:min(420px, calc(100vw - 24px));
+  padding:12px 14px 11px; border-radius:8px;
+  background:var(--panel2, var(--k4)); color:var(--t-mid);
+  box-shadow:inset 0 0 0 1px var(--line2), var(--shadow);
+  font:400 11.5px/1.6 var(--sans); pointer-events:none;
+  overflow:auto; overscroll-behavior:contain;
+}
+div#provTip.show{ display:block }
+div#provTip > h4{
+  margin:0 0 7px; padding:0 0 7px;
+  border-bottom:1px solid var(--line2);
+  font:700 8.5px/1.2 var(--mono); letter-spacing:.18em; text-transform:uppercase;
+}
+div#provTip.ai > h4{ color:var(--ai-b, var(--ai)) }
+div#provTip.det > h4{ color:var(--t-lo) }
+div#provTip > .provLead{
+  margin:0 0 9px; font:600 12px/1.5 var(--sans); color:var(--text);
+}
+div#provTip > .provDl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 12px }
+div#provTip > .provDl > dt{
+  margin:0; font:700 8px/1.7 var(--mono); letter-spacing:.14em; text-transform:uppercase;
+  color:var(--t-dim, var(--t-lo)); white-space:nowrap;
+}
+div#provTip > .provDl > dd{ margin:0; color:var(--t-mid); max-width:44ch }
+div#provTip > .provDl > dd.provName{ font:600 11px/1.5 var(--mono); color:var(--text) }
+div#provTip > .provMore{
+  margin:10px 0 0; padding-top:8px; border-top:1px solid var(--line2);
+  font:600 9px/1.5 var(--mono); letter-spacing:.06em; color:var(--t-lo);
+}
+@media (max-width:760px){
+  div#provTip{ max-width:calc(100vw - 20px) }
+div#provTip > .provDl{ grid-template-columns:1fr; gap:2px }
+div#provTip > .provDl > dd{ margin:0 0 7px; max-width:none }
+}
+@media (prefers-reduced-motion:reduce){
+  div#provTip{ transition:none }
+}
+/* The inspector's own chrome. Its key rows are 8.5px mono in a 330px column,
+   so the mark rides the compact size there and the key is allowed to wrap
+   under it rather than pushing the column wider. */
+#insp .nsp-hk > .pMark, #insp .nsp-v > .pMark{ margin-left:6px !important }
+#insp .nsp-hk{ display:flex; align-items:center; flex-wrap:wrap }
+#insp .nsp-v > .pMark{ max-width:100%; flex:0 1 auto }
+
+
+/* ================================================================
+   THE MARK, FROM ai-marks-v2 — VERBATIM CONTRACT
+   ================================================================
+   .ai-attr        one inline unit, carries the colourway
+   .ai-mark        the glyph, 1em, baseline -0.125em
+   .ai-attr-label  real text, 0.7em, clipped gradient
+   The glow is a drop-shadow on the WRAPPER: a filter on the SVG
+   alone leaves the label unlit.
+   Raised one specificity level throughout — this stylesheet enters
+   ties it would otherwise lose. */
+#main .ai-attr, .viewport .ai-attr, .pane .ai-attr, td .ai-attr, th .ai-attr{
+  white-space:nowrap; display:inline-flex; align-items:center;
+  vertical-align:baseline; margin-left:.4em;
+}
+#main .ai-attr > .ai-mark, .viewport .ai-attr > .ai-mark,
+.pane .ai-attr > .ai-mark, td .ai-attr > .ai-mark, th .ai-attr > .ai-mark{
+  width:1em; height:1em; vertical-align:-.125em; flex:none;
+}
+#main .ai-attr > .ai-attr-label, .viewport .ai-attr > .ai-attr-label,
+.pane .ai-attr > .ai-attr-label, td .ai-attr > .ai-attr-label,
+th .ai-attr > .ai-attr-label{
+  margin-left:.3em; font-size:.7em; font-weight:600; letter-spacing:.015em;
+  background:linear-gradient(100deg, var(--ai-a, var(--m1)), var(--ai-b, var(--m2)));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+@supports not ((-webkit-background-clip:text) or (background-clip:text)){
+  .ai-attr > .ai-attr-label{ background:none; color:var(--ai-a, var(--m1)) }
+}
+/* The sheet's optional glow, on the wrapper. Kept subtle: at 13px a
+   drop-shadow is the difference between "marked" and "smeared". */
+#main .ai-attr:hover, .viewport .ai-attr:hover,
+#main .ai-attr:focus-visible, .viewport .ai-attr:focus-visible{
+  filter:drop-shadow(0 0 .28em color-mix(in srgb, var(--ai-a, var(--m1)) 50%, transparent));
+  outline:none;
+}
+/* The sheet notes gradients read flat below ~20px — the silhouette carries
+   the mark at console sizes, so the glyph never goes under 12px. */
+#main .ai-attr.pmC > .ai-mark, .viewport .ai-attr.pmC > .ai-mark{
+  width:12px; height:12px; flex:0 0 12px;
+}

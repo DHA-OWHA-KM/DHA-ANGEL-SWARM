@@ -1,0 +1,127 @@
+<!doctype html><meta charset="utf-8"><title>ANGEL SWARM — ported from the teammate's map</title>
+<link rel="stylesheet" href="_font.css">
+<style>
+ :root{--pg:oklch(0.155 0.008 250);--card:oklch(0.2 0.012 250);--bd:oklch(0.3 0.012 250);
+       --fg:oklch(0.96 0.005 250);--dim:oklch(0.63 0.008 250);--faint:oklch(0.5 0.008 250);
+       --a:oklch(0.72 0.13 165);--aL:oklch(0.80 0.09 165);--b:oklch(0.70 0.15 50);--bL:oklch(0.80 0.11 50);
+       --red:oklch(0.82 0.15 25);--amb:oklch(0.80 0.09 75);--cy:oklch(0.72 0.1 210)}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--pg);color:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif;padding:32px 38px 48px}
+ h1{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:0 0 4px}
+ .sub{font-size:12.5px;color:var(--dim);margin:0 0 8px;max-width:1000px;line-height:1.6}
+ h2{font-size:15.5px;font-weight:600;margin:34px 0 3px}
+ .h2s{font-size:11.5px;color:var(--dim);margin:0 0 14px;max-width:940px;line-height:1.6}
+ /* --------- the composite --------- */
+ .stage{position:relative;width:1680px;max-width:100%;border:1px solid var(--bd);border-radius:8px;overflow:hidden;line-height:0}
+ .stage img{width:1680px;display:block}
+ .ov{position:absolute;font-family:'IBM Plex Mono',monospace;line-height:1.3}
+ .call{position:absolute;border:1.5px dashed oklch(0.62 0.11 210);border-radius:9px;pointer-events:none}
+ .callL{position:absolute;font:700 9.5px 'IBM Plex Mono',monospace;letter-spacing:.11em;color:oklch(0.16 0.03 210);
+        background:oklch(0.72 0.1 210);padding:4px 9px;border-radius:4px;white-space:nowrap}
+ /* --------- the route strip --------- */
+ .rs{border-radius:7px;border:1px solid oklch(0.34 0.012 250);background:oklch(0.1 0.008 250 / .82);
+     backdrop-filter:blur(13px);box-shadow:0 10px 30px oklch(0.05 0 0 / .5);padding:9px 13px 11px;
+     display:flex;flex-direction:column;gap:8px}
+ .rsH{display:flex;justify-content:space-between;align-items:center;gap:14px}
+ .rsK{font:700 8.5px 'IBM Plex Mono',monospace;letter-spacing:.11em;color:oklch(0.62 0.008 250)}
+ .rsT{font:700 8.5px 'IBM Plex Mono',monospace;letter-spacing:.09em;color:var(--aL)}
+ .legs{display:flex;align-items:flex-start;gap:0}
+ .leg{display:flex;flex-direction:column;gap:4px;align-items:center;flex:none;width:124px;text-align:center}
+ .glyph{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+        font:700 10px 'IBM Plex Mono',monospace;border:1.5px solid}
+ .gL{background:oklch(0.26 0.05 210);border-color:oklch(0.55 0.1 210);color:oklch(0.88 0.09 210)}
+ .gC{background:oklch(0.26 0.06 25);border-color:oklch(0.55 0.14 25);color:oklch(0.9 0.12 25)}
+ .gR{background:oklch(0.24 0.03 250);border-color:oklch(0.44 0.02 250);color:oklch(0.8 0.008 250)}
+ .lK{font:700 7.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:oklch(0.56 0.008 250)}
+ .lN{font:700 10px 'IBM Plex Mono',monospace;color:oklch(0.93 0.005 250)}
+ .lP{font:400 8px 'IBM Plex Mono',monospace;color:var(--aL)}
+ .lT{font:400 8px 'IBM Plex Mono',monospace;color:oklch(0.6 0.008 250)}
+ .lS{font:700 8px 'IBM Plex Mono',monospace}
+ .arrow{flex:1;height:1.5px;background:linear-gradient(90deg,oklch(0.42 0.05 210),oklch(0.42 0.05 210));
+        margin-top:11px;position:relative;min-width:16px}
+ .arrow:after{content:'';position:absolute;right:-1px;top:-3px;border-left:6px solid oklch(0.5 0.06 210);
+              border-top:4px solid transparent;border-bottom:4px solid transparent}
+ /* --------- the provenance chip --------- */
+ .prov{display:inline-flex;align-items:center;gap:7px;border-radius:5px;border:1px solid oklch(0.4 0.06 165);
+       background:oklch(0.1 0.008 250 / .84);backdrop-filter:blur(11px);padding:6px 11px;
+       font:700 8.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:oklch(0.84 0.07 165);white-space:nowrap}
+ .provDot{width:7px;height:7px;border-radius:50%;background:oklch(0.72 0.13 165);flex:none}
+ /* --------- detail blocks --------- */
+ .det{border:1px solid var(--bd);border-radius:8px;background:oklch(0.175 0.01 250);padding:20px 22px;margin-bottom:12px}
+ .detH{font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--faint);margin-bottom:13px}
+ .note{font-size:11.5px;color:var(--dim);line-height:1.65;margin:15px 0 0;max-width:900px}
+ .win{padding-left:11px;border-left:2px solid oklch(0.5 0.1 165);color:oklch(0.84 0.07 165)}
+ .warn{padding-left:11px;border-left:2px solid oklch(0.5 0.12 25);color:oklch(0.82 0.08 25)}
+ table{border-collapse:collapse;font-size:11.5px;margin-top:12px}
+ td,th{padding:6px 16px 6px 0;text-align:left;vertical-align:top}
+ th{font:700 8.5px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--faint);border-bottom:1px solid var(--bd);padding-bottom:7px}
+ td{color:oklch(0.86 0.006 250);border-bottom:1px solid oklch(0.25 0.01 250)}
+</style>
+
+<h1>Two things ported from your teammate's map</h1>
+<p class="sub">Composited onto a <b>real ANGEL SWARM screenshot</b> — JOA CORAL, T+96, tactical 2D, captured from the running v6.2 build. The two new elements are drawn in the position and at the size they would actually occupy. Everything else in the picture is the live application.</p>
+
+<div class="stage">
+  <img src="map_real.png" alt="">
+
+  <!-- ROUTE-STAGE STRIP — floating, bottom of the map, between the panel columns -->
+  <div class="ov rs" style="left:546px;top:836px;width:560px">
+    <div class="rsH"><span class="rsK">SORTIE FVR-05 · TASKED T+63 · 2 STOPS</span><span class="rsT">ANGEL SWARM</span></div>
+    <div class="legs">
+      <div class="leg"><span class="glyph gL">L</span><span class="lK">LAUNCH</span><span class="lN">LHA BOXER</span><span class="lT">T+63</span></div>
+      <span class="arrow"></span>
+      <div class="leg"><span class="glyph gC">1</span><span class="lK">DELIVER</span><span class="lN">CAS-041</span><span class="lP">LTOWB 2u</span><span class="lS" style="color:oklch(0.8 0.1 165)">T+71 · +4 MIN</span></div>
+      <span class="arrow"></span>
+      <div class="leg"><span class="glyph gC">2</span><span class="lK">DELIVER</span><span class="lN">CAS-052</span><span class="lP">FDP + TXA</span><span class="lS" style="color:var(--amb)">T+78 · +1 MIN</span></div>
+      <span class="arrow"></span>
+      <div class="leg"><span class="glyph gR">R</span><span class="lK">RECOVER</span><span class="lN">LHA BOXER</span><span class="lT">T+91</span></div>
+    </div>
+  </div>
+  <div class="call" style="left:538px;top:828px;width:576px;height:116px"></div>
+  <div class="callL" style="left:538px;top:800px">1 · ROUTE-STAGE STRIP — APPEARS WHEN A SORTIE IS SELECTED</div>
+
+  <!-- PROVENANCE CHIP — above the AREA OF OPERATIONS block -->
+  <div class="ov prov" style="left:1128px;top:862px"><span class="provDot"></span>PROCEDURAL RELIEF · NO TILE SERVER · NO NETWORK</div>
+  <div class="call" style="left:1120px;top:854px;width:344px;height:38px"></div>
+  <div class="callL" style="left:1120px;top:826px">2 · PROVENANCE CHIP</div>
+</div>
+
+<h2>1 · The route-stage strip, at full size</h2>
+<p class="h2s">Theirs is four fixed stages — source, pickup, casualty, return. Yours are <b>multi-stop</b>, so the strip carries what a chained sortie actually did: every casualty on the run, what each one received, and how much margin was left against their deadline. That last column is something their version has no equivalent for.</p>
+<div class="det">
+  <div class="detH">SELECTED SORTIE · SHOWN AT 1:1</div>
+  <div class="rs" style="width:640px">
+    <div class="rsH"><span class="rsK">SORTIE FVR-05 · TASKED T+63 · 2 STOPS</span><span class="rsT">ANGEL SWARM</span></div>
+    <div class="legs">
+      <div class="leg" style="width:132px"><span class="glyph gL">L</span><span class="lK">LAUNCH</span><span class="lN">LHA BOXER</span><span class="lT">T+63</span></div>
+      <span class="arrow"></span>
+      <div class="leg" style="width:132px"><span class="glyph gC">1</span><span class="lK">DELIVER</span><span class="lN">CAS-041</span><span class="lP">LTOWB 2u</span><span class="lS" style="color:oklch(0.8 0.1 165)">T+71 · 4 MIN SLACK</span></div>
+      <span class="arrow"></span>
+      <div class="leg" style="width:132px"><span class="glyph gC">2</span><span class="lK">DELIVER</span><span class="lN">CAS-052</span><span class="lP">FDP + TXA</span><span class="lS" style="color:var(--amb)">T+78 · 1 MIN SLACK</span></div>
+      <span class="arrow"></span>
+      <div class="leg" style="width:132px"><span class="glyph gR">R</span><span class="lK">RECOVER</span><span class="lN">LHA BOXER</span><span class="lT">T+91</span></div>
+    </div>
+  </div>
+  <p class="note win">Why it earns its place: a route line on a map shows you <i>where</i> an aircraft went. This shows you <b>what it was for</b> — and the slack column is the whole argument of ANGEL SWARM in four characters. Green means it beat the deadline; amber means it only just did.</p>
+  <p class="note">The glyphs are the same shapes as the map pins, so the strip and the map teach each other — that is the part of their design worth copying, not the styling.</p>
+</div>
+
+<h2>2 · The provenance chip, at full size</h2>
+<p class="h2s">They badge their basemap <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px">MAPBOX · SATELLITE + 3D TERRAIN</span>. Same idea, but yours states something theirs cannot.</p>
+<div class="det">
+  <div class="detH">MAP CORNER · SHOWN AT 1:1</div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+    <span class="prov"><span class="provDot"></span>PROCEDURAL RELIEF · NO TILE SERVER · NO NETWORK</span>
+    <span class="prov" style="border-color:oklch(0.4 0.06 165)"><span class="provDot"></span>SYNTHETIC TERRAIN · 25 M CONTOURS · GENERATED IN BUILD</span>
+  </div>
+  <p class="note warn">Their equivalent chip is an admission — it names a dependency on <span style="font-family:'IBM Plex Mono',monospace">api.mapbox.com</span> and a paid token. Pull their network cable and their map degrades to markers floating on a blank cyan grid, captioned <i>"OFFLINE OPERATIONAL PLOT · NETWORK BASEMAP UNAVAILABLE"</i>. That is in their code, not my inference.</p>
+  <p class="note win">Yours is a claim. The terrain under that map — hypsometric tints, hillshade, 25&nbsp;m contours, bathymetry, coastline, drainage traced by steepest descent — is computed from the scenario's own elevation field in <span style="font-family:'IBM Plex Mono',monospace">basemap.js</span>. Zero bytes fetched. A judge who pulls the cable sees the identical picture, and this chip is what invites them to try.</p>
+</div>
+
+<h2>What each costs</h2>
+<table>
+  <tr><th>Item</th><th>Where it lives</th><th>Touches a renderer?</th><th>Effort</th></tr>
+  <tr><td>Route-stage strip</td><td>Design template, floating panel layer</td><td>No</td><td>2–3 h</td></tr>
+  <tr><td>Provenance chip</td><td>Design template, map corner</td><td>No</td><td>30–60 min</td></tr>
+</table>
+<p class="note">Neither goes near <span style="font-family:'IBM Plex Mono',monospace">map.js</span>, <span style="font-family:'IBM Plex Mono',monospace">geo3d.js</span>, <span style="font-family:'IBM Plex Mono',monospace">theater3d.js</span>, <span style="font-family:'IBM Plex Mono',monospace">angel-map.js</span> or <span style="font-family:'IBM Plex Mono',monospace">theater.js</span> — the files carrying this week's WebGL context-loss, panel-inset and responsive fixes. That is deliberate and it is why these two are the only things I would take.</p>

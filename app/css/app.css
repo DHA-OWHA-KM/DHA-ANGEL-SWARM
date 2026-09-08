@@ -1,0 +1,2208 @@
+/* ============================================================================
+   ANGEL SWARM — APPLICATION SHELL
+   Two themes: dark tactical (default) and a light operations-centre theme.
+   Everything is driven from the custom properties in :root / body.light.
+   ========================================================================== */
+
+:root{
+  --bg:#070b10; --bg2:#0b1119; --panel:#0d141d; --panel2:#111a25;
+  --line:#1e2b3a; --line2:#26364a;
+  --text:#dfe8f2; --dim:#8ea3b8; --faint:#63768a;
+  --angel:#31d68a; --current:#f0813f;
+  --ok:#31d68a; --warn:#ffb340; --bad:#ff4257; --info:#5bb4ff;
+  /* Death counts never render green. Deep red is the worse figure, muted
+     amber the lower one. Fewer deaths is still deaths. */
+  --tollHi:#ff4257; --tollLo:#e0a94a;
+  --chartbg:rgba(255,255,255,0.02);
+  /* Console-shell geometry. mock-I1: 18 band · 30 app row · 32 tool row
+     · 36 icon rails on both edges · 26 foot ribbon. --barH is the two
+     chrome rows together, because #shell and the welcome overlay have
+     always positioned against it and still should. */
+  /* --appH was 30px through mock-I1 and the first live build. The app row is
+     now a MASTHEAD: 46px, taller than anything under it, because ANGEL SWARM
+     is the product's title and was reading as a label. Every other number
+     here is unchanged. --barH is only a first guess — js/app.js measures the
+     two rows and publishes the real one. */
+  --railW:36px; --appH:46px; --toolH:32px; --barH:78px; --bandH:18px; --footH:26px;
+  --shadow:0 18px 46px rgba(0,0,0,.55);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+body.light{
+  --bg:#eef2f6; --bg2:#f6f8fa; --panel:#ffffff; --panel2:#f3f6f9;
+  --line:#d7dee6; --line2:#c3cdd8;
+  --text:#12202e; --dim:#5b6b7c; --faint:#8496a7;
+  --angel:#0f9b62; --current:#c85c14;
+  --ok:#0f9b62; --warn:#b57200; --bad:#d61f38; --info:#1668c4;
+  --tollHi:#c11530; --tollLo:#9a6b0a;
+  --chartbg:rgba(15,35,60,0.035);
+  --shadow:0 14px 34px rgba(20,40,70,.13);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-size:13px; overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+h1,h2,h3{margin:0}
+button,input{font-family:inherit; color:inherit}
+
+/* ------------------------------------------------- classification band -- */
+.band{
+  height:var(--bandH); line-height:var(--bandH);
+  background:var(--band-bg,#122318); color:var(--band-fg,#4ED39B);
+  font:700 10px/18px var(--mono); letter-spacing:.22em; text-align:center;
+  position:relative; user-select:none; box-shadow:inset 0 -1px 0 var(--band-line,#1C3A26);
+}
+.bandRight{position:absolute; right:12px; top:0; opacity:.72; letter-spacing:.10em}
+
+/* -------------------------------------------------------- command bar -- */
+#cmdbar{
+  height:var(--appH); flex:0 0 var(--appH); display:flex; align-items:center;
+  gap:8px; padding:0 8px 0 8px; background:var(--k1); box-shadow:inset 0 -1px 0 var(--line);
+  white-space:nowrap; overflow:hidden;
+}
+/* THE WORDMARK. 12.5px/700/.15em read as a caption sitting next to a chip;
+   at 20px/800/.24em it reads as the title of the thing, which is what it is.
+   The vic mark scales with it — 26px against a 20px cap height — and the
+   version drops to a superscript so it annotates the name instead of
+   competing with it. Nothing here is a colour decision: --cyan on the mark
+   and --t-hi on the word are the values that were already there. */
+.brand{display:flex; align-items:baseline; gap:12px; flex:none}
+.brand .mark{color:var(--cyan); display:flex; align-items:center; align-self:center}
+.brand .mark svg{width:26px; height:26px}
+.brand h1{
+  font:800 20px/1 var(--sans); letter-spacing:.24em; color:var(--t-hi);
+  /* letter-spacing pays a trailing space after the last M; take it back so
+     the gap to the operation crumb is the 10px it says it is */
+  margin-right:-.24em;
+}
+.brand .ver{font:400 9px/1 var(--mono); color:var(--t-lo); letter-spacing:.06em;
+  align-self:flex-start; margin-top:2px}
+.ic{width:20px;height:20px;display:block;flex:none}
+.ic16{width:16px;height:16px;display:block;flex:none}
+.ic14{width:14px;height:14px;display:block;flex:none}
+
+/* Segmented controls in the console register: no radius to speak of, no
+   border, one inset hairline-equivalent, tone doing the separating. */
+.seg{display:inline-flex; align-items:center; height:18px; background:var(--k2);
+  border-radius:2px; box-shadow:inset 0 0 0 1px var(--line2); overflow:hidden; flex:none}
+.chip{
+  display:inline-flex; align-items:center; justify-content:center; height:18px;
+  padding:0 8px; cursor:pointer; user-select:none;
+  font:600 9.5px/1 var(--mono); letter-spacing:.09em; color:var(--t-dim);
+  transition:background .1s,color .1s; white-space:nowrap;
+}
+.chip:hover{color:var(--t-hi); background:var(--k4)}
+.chip.on{background:var(--k5); color:var(--t-hi)}
+.seg.small .chip{padding:0 8px}
+
+.transport{display:flex; align-items:center; gap:4px; flex:none}
+.icon,.play{
+  background:transparent; color:var(--t-lo); border-radius:2px; cursor:pointer;
+  height:22px; min-width:24px; font-size:11px; display:inline-flex;
+  align-items:center; justify-content:center;
+}
+.play{background:var(--k5); color:var(--t-hi); font-weight:700; min-width:26px}
+.icon:hover,.play:hover{background:var(--k4); color:var(--t-hi)}
+
+.scrubwrap{display:flex; align-items:center; gap:8px; flex:1 1 110px; min-width:96px; max-width:340px}
+#clock{font:600 11px/1 var(--mono); color:var(--t-hi); letter-spacing:.02em; flex:none}
+#scrub{flex:1; height:3px; border-radius:2px; background:var(--k5); position:relative; cursor:pointer}
+#scrubFill{position:absolute; left:0; top:0; bottom:0; background:var(--cyan-d); border-radius:2px}
+#scrubHead{position:absolute; top:-3px; width:3px; height:9px; background:var(--cyan); border-radius:1px; transform:translateX(-1px)}
+/* THE TRANSPORT'S LIVE / PAUSED / COMPLETE BADGE, AND ONLY THAT BADGE.
+   This was written as a bare `.live`, and `live` is not a rare word. Three
+   other places in this application use it as a MODIFIER on something that is
+   already a component — `.joaCard.live` for the operation the fight is
+   actually in, `table.grid tr.live` for an approval still waiting on a human,
+   `.dbar.live` for a drone in the air — and every one of them was being
+   handed `display:inline-flex; height:16px; flex:none` by this rule.
+
+   On the operation list that was catastrophic and visible: the live card
+   collapsed from 200px to 24px and laid its six stacked rows out as a
+   centred single row, so the name, the force, the posture and the numbers
+   printed on top of each other and overflowed upward out of the card. On the
+   approvals table it was the same class of defect as `td.act{display:flex}` —
+   an inline-flex `<tr>` is not a table row, so the row rules stop applying.
+
+   Scoped to the id. The badge is one element and has always been one element;
+   the rule should have said so. */
+#liveBadge{font:700 9.5px/1 var(--mono); letter-spacing:.12em; padding:0 8px; height:16px;
+  display:inline-flex; align-items:center; border-radius:2px; flex:none}
+#liveBadge.on{color:var(--red); background:var(--red-d); box-shadow:inset 0 0 0 1px var(--red-d)}
+#liveBadge.idle{color:var(--t-dim); box-shadow:inset 0 0 0 1px var(--line2)}
+#liveBadge.done{color:var(--grn); background:var(--grn-d); box-shadow:inset 0 0 0 1px var(--grn-d)}
+.spacer{flex:1}
+.ghost{
+  border:0; background:transparent; color:var(--t-mid); border-radius:2px;
+  padding:0 8px; height:18px; cursor:pointer; font:600 10px/1 var(--mono); letter-spacing:.09em;
+  display:inline-flex; align-items:center;
+}
+.ghost:hover{color:var(--t-hi); background:var(--k4)}
+.ghost b{color:var(--t-hi); font-weight:600}
+
+/* -------------------------------------------------------------- shell -- */
+#shell{position:absolute; top:calc(var(--bandH) + var(--barH)); left:0; right:0;
+  bottom:var(--footH); display:flex}
+
+/* THE LEFT ICON RAIL. Same markup, same twenty-one destinations, same
+   data-roles allow-lists, same flexbox `order` from the role engine — 36px
+   wide and icon-only, with the label that used to sit beside the glyph now
+   arriving on hover as a tooltip. See the tooltip block in css/polish.css. */
+#rail{
+  width:var(--railW); flex:0 0 var(--railW); background:var(--k1);
+  box-shadow:inset -1px 0 0 var(--line); padding:8px 0; display:flex;
+  flex-direction:column; align-items:center; gap:2px; overflow:visible;
+}
+.navItem{
+  width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
+  border-radius:3px; cursor:pointer; user-select:none; color:var(--t-dim); position:relative;
+}
+.navItem:hover{background:var(--k4); color:var(--t-hi)}
+.navItem.on{background:var(--k5); color:var(--t-hi)}
+.navItem .ni{width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  color:var(--niC,var(--t-dim))}
+.navItem.on .ni{color:var(--niC,var(--cyan))}
+
+/* Each destination keeps one colour everywhere it appears, so the eye learns
+   the rail by hue rather than by reading every label. The table itself has
+   moved to css/theme.css and is written in tokens, because it has to be right
+   in four themes rather than two — and because one of the entries here was a
+   magenta the contract bans outright. This block is the floor for a document
+   that has somehow lost its data-theme attribute. */
+.navItem[data-view]{--niC:var(--t-mid); --niG:transparent}
+.navItem em{font-style:normal; font:600 12px/1 var(--sans)}
+.navItem u{text-decoration:none; font:600 9px/1 var(--mono); color:var(--t-lo)}
+#navBadge,#railBadge{
+  position:absolute; top:1px; right:0; font:700 8px/1 var(--mono);
+  background:var(--amb); color:var(--on-accent,#241600);
+  border-radius:7px; padding:4px 4px; display:none; pointer-events:none;
+}
+.railSpacer{flex:1}
+
+
+/* The mini variant. For headings that are already carrying a counter strip
+   and have no room for the model's name — the glyph and the word AI still
+   answer "did a model produce what is in this box", and the name is one hover
+   away exactly as it is everywhere else. */
+.pMark.mini{ height:15px; min-height:15px; padding:0 4px 0 4px !important; gap:4px;
+  margin-left:8px !important; border-radius:2px; flex:0 0 auto }
+.pMark.mini > svg.pIc{ width:9px !important; height:9px !important; flex:0 0 9px }
+.pMark.mini > b{ font-size:8px !important; letter-spacing:.09em !important }
+.pMark.mini > i{ display:none !important }
+
+/* ------------------------------------------- the rail's AI delineation --
+   The rail is 36 px of icon and no words, so "which destinations are machine
+   learning" cannot be answered with a badge — there is no room for one. It is
+   answered with a corner glyph instead: the same filled network mark as the
+   badge, 9 px, in the violet, on a solid chip so it survives against the busy
+   icons it sits over. It appears on four of the twenty-two destinations and
+   on nothing else, which is the whole point of drawing it.
+
+   Bottom-right rather than top-right, because #navBadge already owns the top
+   right corner on Approvals and two marks in one corner is a smudge. The chip
+   is solid rather than translucent for the same reason the badge is: the
+   contrast is then one measured pair per theme rather than a matrix. */
+.navAi{
+  position:absolute; right:-2px; bottom:-2px; z-index:2;
+  width:11px; height:11px; display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+  /* Two shadows doing two jobs: the halo the sheet specifies, and a tight
+     dark ring so an 11px glyph still separates from the destination icon it
+     is sitting on top of. */
+  filter:drop-shadow(0 0 3px color-mix(in srgb, var(--ai-a) 60%, transparent))
+         drop-shadow(0 0 1.5px var(--k1));
+}
+.navAi svg{ width:11px; height:11px; display:block; overflow:visible }
+
+/* The heading stamp. A pane title is 17 px and the mark is 18 px, so left as
+   inline-flex the two sit on a common centre line and the mark reads as part
+   of the title rather than as a chip that has drifted into it. Nothing to set
+   beyond the margin, which h2 .pMark already carries — this rule exists to
+   keep the stamp off the heading's own baseline shift in the two themes whose
+   heading weight differs. */
+h2 > .pMark{ position:relative; top:-1px }
+
+
+#views{flex:1; position:relative; overflow:hidden; background:var(--k0); min-width:0}
+.viewport{position:absolute; inset:0; display:none}
+.viewport.active{display:block}
+
+/* ====================================================== MISSION / COP === */
+#stage{position:absolute; inset:0; background:#05131f}
+/* A canvas is a replaced element: left+right will NOT stretch it, so both
+   axes are sized explicitly. */
+#mapA,#mapB{position:absolute; top:0; height:100%; display:block}
+#mapA{left:0; width:100%}
+#mapB{left:50%; width:50%; display:none}
+body.compare #mapA{width:50%}
+body.compare #mapB{display:block; border-left:1px solid rgba(150,190,225,.25)}
+body.compare #hudInset{display:none}
+
+/* ---- pane identity: unmistakable which half you are looking at -------- */
+.paneTag{
+  position:absolute; top:10px; display:flex; align-items:center; gap:8px;
+  border-radius:9px; padding:8px 12px 8px 12px; pointer-events:none;
+  backdrop-filter:blur(4px); border:1px solid transparent;
+}
+.paneTag b{font:800 15px/1 var(--sans); letter-spacing:.14em}
+.paneTag em{font:500 9.5px/1.3 var(--sans); font-style:normal; letter-spacing:.01em; opacity:.72; max-width:250px}
+.paneTag i{width:5px; height:26px; border-radius:3px; display:inline-block}
+.paneTag.a{left:12px; background:rgba(6,32,22,.90); border-color:rgba(49,214,138,.55); color:#8effc4}
+.paneTag.a i{background:var(--angel); box-shadow:0 0 14px rgba(49,214,138,.8)}
+.paneTag.b{left:calc(50% + 12px); display:none; background:rgba(38,18,6,.90);
+           border-color:rgba(240,129,63,.55); color:#ffc79a}
+.paneTag.b i{background:var(--current); box-shadow:0 0 14px rgba(240,129,63,.8)}
+body.compare .paneTag.b{display:flex}
+body.standby .paneTag.a{background:rgba(34,26,6,.90); border-color:rgba(255,179,64,.55); color:#ffd89a}
+body.standby .paneTag.a i{background:var(--warn); box-shadow:0 0 14px rgba(255,179,64,.8)}
+/* a coloured hairline down each half so the split is never ambiguous */
+body.compare #stage::before,body.compare #stage::after{
+  content:''; position:absolute; top:0; bottom:0; width:3px; z-index:3; pointer-events:none;
+}
+body.compare #stage::before{left:0; background:var(--angel); box-shadow:0 0 20px rgba(49,214,138,.55)}
+body.compare #stage::after{right:0; background:var(--current); box-shadow:0 0 20px rgba(240,129,63,.55)}
+
+/* ------------------------------------------------------- scoreboard --- */
+#scoreboard{
+  position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:4;
+  background:rgba(6,12,19,.93); border:1px solid rgba(150,190,225,.22);
+  border-radius:12px; padding:8px 24px 8px; backdrop-filter:blur(7px);
+  box-shadow:0 16px 40px rgba(0,0,0,.5); pointer-events:none; text-align:center; min-width:430px;
+}
+body.compare #scoreboard{top:auto; bottom:14px}
+.sbTitle{font:700 9px/1 var(--mono); letter-spacing:.22em; color:#7f95ab}
+.sbRow{display:flex; align-items:center; justify-content:center; gap:24px; margin-top:8px}
+.sbSide{display:flex; flex-direction:column; align-items:center; min-width:118px}
+.sbSide b{font:800 46px/0.92 var(--mono); letter-spacing:-.02em}
+.sbSide span{margin-top:4px; font:700 8.5px/1 var(--mono); letter-spacing:.13em; color:#8ea3b8}
+.sbSide.a b{color:var(--tollLo)} .sbSide.b b{color:var(--tollHi)}
+body.standby .sbSide.a b{color:var(--tollHi)}
+.sbMid{display:flex; flex-direction:column; align-items:center; padding:0 8px;
+       border-left:1px solid rgba(150,190,225,.16); border-right:1px solid rgba(150,190,225,.16); min-width:112px}
+.sbDelta{font:800 20px/1 var(--mono); letter-spacing:.04em; color:#8ea3b8}
+.sbDelta.good{color:var(--tollLo)} .sbDelta.bad{color:var(--tollHi)}
+.sbMid span{margin-top:4px; font:700 12px/1 var(--mono); color:#8ea3b8}
+.sbFoot{display:flex; justify-content:center; gap:16px; margin-top:8px; padding-top:8px;
+        border-top:1px solid rgba(150,190,225,.12)}
+.sbFoot span{font:500 9.5px/1 var(--sans); color:#8ea3b8; display:flex; align-items:center; gap:4px}
+.sbFoot b{font:700 12px/1 var(--mono); color:#dfe8f2}
+body.light #scoreboard{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+body.light .sbTitle,body.light .sbSide span,body.light .sbFoot span{color:var(--dim)}
+body.light .sbFoot b{color:var(--text)}
+body.light .paneTag.a{background:rgba(255,255,255,.95); color:#0b6b45}
+body.light .paneTag.b{background:rgba(255,255,255,.95); color:#9a4408}
+
+.mapTools{position:absolute; top:10px; right:356px; display:flex; gap:8px; z-index:5}
+body.compare .mapTools{right:12px}
+.mapTools .seg{background:rgba(6,12,19,.90); border-color:rgba(150,190,225,.18)}
+.zoomer .zl{color:#dfe8f2; pointer-events:none; min-width:44px; font-weight:700}
+body.light .mapTools .seg{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+body.light .zoomer .zl{color:var(--text)}
+#mapA,#mapB{cursor:grab}
+#mapA.grabbing,#mapB.grabbing{cursor:grabbing}
+#dock{top:96px}
+body.compare #legend{bottom:88px}
+
+#dock{
+  position:absolute; top:48px; right:12px; bottom:12px; width:330px;
+  display:flex; flex-direction:column; gap:8px; pointer-events:auto; overflow:hidden;
+}
+body.compare #dock{display:none}
+.hud{
+  background:rgba(8,14,21,.90); border:1px solid rgba(150,190,225,.16);
+  border-radius:10px; overflow:hidden; backdrop-filter:blur(6px); box-shadow:var(--shadow);
+  display:flex; flex-direction:column;
+}
+.hud.grow{flex:1 1 0; min-height:80px}
+.hudHead{
+  padding:8px 12px; font:700 9.5px/1 var(--mono); letter-spacing:.14em;
+  color:#9db3c8; background:rgba(255,255,255,.03); border-bottom:1px solid rgba(150,190,225,.12);
+}
+.hudBody{padding:12px 12px; overflow:auto; flex:1; color:#dfe8f2}
+
+.outrow{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:center}
+.odn{font:800 30px/1 var(--mono)}
+.odn.a{color:var(--angel)} .odn.b{color:var(--current)}
+.odn.good{color:var(--angel)} .odn.bad{color:var(--bad)}
+.obl{font:600 8.5px/1.3 var(--mono); letter-spacing:.09em; color:#8ea3b8; margin-top:4px}
+.ocap{text-align:center; font:500 10px/1 var(--sans); color:#8ea3b8; margin:8px 0 4px}
+.statHdr,.statRow{display:grid; grid-template-columns:1fr 58px 58px; gap:4px; align-items:center}
+.statHdr{font:700 8.5px/1 var(--mono); letter-spacing:.1em; color:#63768a; padding:4px 0 4px; border-bottom:1px solid rgba(150,190,225,.12); text-align:right}
+.statHdr span:first-child{text-align:left}
+.statRow{padding:4px 0; border-bottom:1px solid rgba(150,190,225,.06); font:500 11px/1 var(--sans)}
+.statRow .sl{color:#9db3c8}
+.statRow .va,.statRow .vb{font-family:var(--mono); text-align:right; font-size:11.5px}
+.statRow .va{color:#dfe8f2} .statRow .va.win{color:var(--angel); font-weight:700}
+.statRow .vb{color:#8ea3b8}
+
+.stockrow{display:grid; grid-template-columns:64px 1fr 26px 1fr 26px; gap:4px; align-items:center; padding:4px 0}
+.stockrow .sk{font:600 8.5px/1 var(--mono); letter-spacing:.06em; color:#8ea3b8}
+.stockrow .bar{height:6px; background:rgba(255,255,255,.07); border-radius:3px; overflow:hidden}
+.stockrow .bar i{display:block; height:100%; border-radius:3px}
+.stockrow b{font:600 10px/1 var(--mono); color:#c9d8e6; text-align:right}
+
+#logBody{font:500 10.5px/1.45 var(--mono)}
+.logline{display:grid; grid-template-columns:52px 62px 1fr; gap:8px; padding:2px 0; border-bottom:1px solid rgba(150,190,225,.05)}
+.logline .lt{color:#5b7189}
+.logline .lk{font-weight:700; font-size:8.5px; letter-spacing:.06em; padding-top:2px}
+.logline .lx{color:#b9cadb}
+.k-TASK .lk{color:var(--angel)} .k-DELIVER .lk{color:#7ce8bb}
+.k-WASTE .lk,.k-LOST .lk{color:var(--bad)} .k-DEATH .lk{color:#ff8496}
+.k-INFO .lk{color:#8ea3b8} .k-SUPPLY .lk{color:var(--info)}
+
+#hudInset{flex:0 0 auto}
+#hudInset .hudBody{padding:0; flex:0 0 156px; height:156px}
+#mapInset{width:100%; height:100%; display:block; cursor:pointer}
+
+#legend{
+  position:absolute; left:12px; bottom:12px; display:flex; gap:16px; flex-wrap:wrap;
+  background:rgba(8,14,21,.88); border:1px solid rgba(150,190,225,.16); border-radius:9px;
+  padding:8px 12px; backdrop-filter:blur(5px); pointer-events:none; max-width:calc(100% - 372px);
+}
+body.compare #legend{max-width:calc(100% - 24px)}
+.lg{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.lg b{font:700 8.5px/1 var(--mono); letter-spacing:.12em; color:#63768a}
+.li{display:inline-flex; align-items:center; gap:4px; font:500 9.5px/1 var(--sans); color:#9db3c8}
+.scnTag{
+  position:absolute; left:12px; top:10px; display:none;
+}
+
+/* ================================================== GENERIC DATA PANES == */
+.pane{position:absolute; inset:0; display:flex; flex-direction:column; padding:16px 16px; overflow:auto; gap:12px}
+.paneHead{display:flex; align-items:flex-start; gap:16px}
+.ph1{flex:1; min-width:0}
+.ph1 h2{font:700 17px/1.2 var(--sans); letter-spacing:.01em}
+.ph1 p{margin:4px 0 0; font:400 11.5px/1.55 var(--sans); color:var(--dim); max-width:80ch}
+.phTools{display:flex; align-items:center; gap:8px; flex-shrink:0}
+.search{
+  background:var(--panel); border:1px solid var(--line); border-radius:7px;
+  padding:8px 12px; width:280px; font-size:11.5px; outline:none;
+}
+.search:focus{border-color:var(--angel)}
+.btn{
+  border:1px solid var(--line); background:var(--panel); border-radius:7px;
+  padding:8px 12px; cursor:pointer; font:600 11px/1 var(--sans); color:var(--text);
+}
+.btn:hover{border-color:var(--line2); background:var(--panel2)}
+.btn.ok{background:var(--angel); color:#04140c; border-color:transparent}
+body.light .btn.ok{color:#fff}
+.mini{
+  border:1px solid var(--line); background:var(--panel2); border-radius:5px;
+  padding:4px 8px; cursor:pointer; font:600 10px/1 var(--sans); color:var(--text);
+}
+.mini:hover{border-color:var(--line2)}
+.mini.ok{background:var(--angel); color:#04140c; border-color:transparent}
+body.light .mini.ok{color:#fff}
+
+.filters{display:flex; align-items:center; gap:8px}
+.filters .chip{border:1px solid var(--line); background:var(--panel)}
+.filters .chip.on{background:var(--angel); color:#04140c; border-color:transparent}
+body.light .filters .chip.on{color:#fff}
+.filters .cnt{margin-left:8px; font:500 11px/1 var(--sans); color:var(--dim)}
+.filters .cnt b{font-family:var(--mono); color:var(--text)}
+
+.tableWrap{
+  flex:1; min-height:180px; overflow:auto; background:var(--panel);
+  border:1px solid var(--line); border-radius:10px;
+}
+table.grid{width:100%; border-collapse:collapse; font-size:11.5px}
+/* The header wraps. A `width` on a `<th>` under `table-layout:auto` is a
+   preferred width the browser may compress; `white-space:nowrap` made the
+   whole heading string the column's minimum instead, so the px widths became
+   floors that had to sum correctly and a longer heading could only push the
+   table past its container. Wrapping costs nothing at the design width and
+   is what lets these tables survive the next edit to a column name. See
+   polish.css §7 for the rest of that pass. */
+table.grid th{
+  position:sticky; top:0; z-index:2; text-align:left; padding:12px 12px;
+  background:var(--panel2); border-bottom:1px solid var(--line);
+  font:700 9px/1.25 var(--mono); letter-spacing:.11em; color:var(--faint);
+  white-space:normal; overflow-wrap:break-word;
+}
+table.grid th[data-sort]{cursor:pointer}
+table.grid th[data-sort]:hover{color:var(--text)}
+table.grid td{padding:8px 12px; border-bottom:1px solid var(--line); vertical-align:middle}
+table.grid.tight td,table.grid.tight th{padding:4px 8px}
+table.grid tbody tr{cursor:pointer}
+table.grid tbody tr:hover{background:rgba(125,165,205,.07)}
+table.grid tr.sel{background:rgba(49,214,138,.10); box-shadow:inset 2px 0 0 var(--angel)}
+table.grid tr.dimrow{opacity:.5}
+table.grid tr.live td{background:rgba(255,179,64,.05)}
+td.empty,.empty{padding:24px; text-align:center; color:var(--faint); font-size:11.5px}
+/* An action cell is a cell. `display:flex` here made it one of the few boxes
+   in the document that is a child of a `<tr>` and is not a table-cell: the
+   browser wraps it in an anonymous cell, and under `border-collapse:collapse`
+   the row's rules and background are painted for cells, so the anonymous box
+   got neither. The buttons read as a detached strip outside the table's right
+   border on DASHBOARD, TASKING and the commander's operations table. The gap
+   the flex box provided is a margin between adjacent controls. */
+td.act{white-space:nowrap; display:table-cell; vertical-align:middle; padding-top:8px}
+td.act > *{vertical-align:middle}
+td.act > * + *{margin-left:4px}
+.hash{color:var(--faint); font-size:10px}
+
+.pill{
+  display:inline-block; padding:4px 8px; border-radius:4px; font:700 9px/1.25 var(--mono);
+  letter-spacing:.07em; background:rgba(125,165,205,.13); color:var(--dim);
+}
+.pill.ok{background:rgba(49,214,138,.16); color:var(--ok)}
+.pill.warn{background:rgba(255,179,64,.16); color:var(--warn)}
+.pill.bad{background:rgba(255,66,87,.16); color:var(--bad)}
+.pill.info{background:rgba(91,180,255,.16); color:var(--info)}
+
+.meter{display:inline-block; width:78px; height:6px; border-radius:3px; background:rgba(125,165,205,.16); overflow:hidden; vertical-align:middle; margin-right:8px}
+.meter.sm{width:46px}
+.meter i{display:block; height:100%; border-radius:3px; background:var(--ok)}
+.meter i.warn{background:var(--warn)} .meter i.bad{background:var(--bad)} .meter i.ok{background:var(--ok)}
+
+.verify{font:700 9.5px/1 var(--mono); letter-spacing:.11em; padding:8px 12px; border-radius:6px}
+.verify.ok{background:rgba(49,214,138,.14); color:var(--ok); border:1px solid rgba(49,214,138,.35)}
+.verify.bad{background:rgba(255,66,87,.14); color:var(--bad); border:1px solid rgba(255,66,87,.4)}
+
+/* -------------------------------------------------------------- cards -- */
+.split{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.split.grow{flex:1; min-height:210px}
+.split.grow .card{display:flex; flex-direction:column}
+.split.grow .chart{flex:1; height:auto; min-height:150px}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.cardHead{
+  display:flex; align-items:center; gap:8px; padding:8px 12px;
+  background:var(--panel2); border-bottom:1px solid var(--line);
+  font:700 9.5px/1 var(--mono); letter-spacing:.12em; color:var(--dim);
+}
+.dotA,.dotB{width:8px; height:8px; border-radius:2px}
+.dotA{background:var(--angel)} .dotB{background:var(--current)}
+.cardHead .proj{margin-left:auto; font:500 9.5px/1 var(--sans); letter-spacing:0; color:var(--faint); text-transform:none}
+.cardHead .proj b{font-family:var(--mono); color:var(--text)}
+.chart{width:100%; height:150px; display:block}
+
+.kpis{display:flex; gap:12px}
+.kpis.inline{gap:16px}
+.kpi{
+  background:var(--panel); border:1px solid var(--line); border-radius:9px;
+  padding:12px 16px; min-width:104px;
+}
+.kpis.inline .kpi{background:transparent; border:none; padding:0; min-width:0; text-align:right}
+.kpi b{display:block; font:700 20px/1 var(--mono)}
+.kpi span{display:block; margin-top:4px; font:600 8.5px/1 var(--mono); letter-spacing:.1em; color:var(--faint)}
+
+.sweepBox{padding:16px}
+.sweepBox .kpis{margin-bottom:12px}
+.hist{display:flex; align-items:flex-end; gap:12px; height:118px; padding:0 2px;
+      border-bottom:1px solid var(--line)}
+.hbar{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%}
+.hbar i{display:block; width:100%; max-width:52px;
+        background:linear-gradient(180deg,var(--angel),color-mix(in srgb, var(--angel) 30%, transparent));
+        border-radius:3px 3px 0 0; min-height:2px}
+.hbar span{margin-top:4px; font:600 8.5px/1 var(--mono); color:var(--faint)}
+.note{margin:12px 0 0; font:400 11px/1.6 var(--sans); color:var(--dim); max-width:86ch}
+
+/* ----------------------------------------------------------- settings -- */
+.setGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:start}
+.card.set{padding:0 16px 16px}
+.card.set .cardHead{margin:0 -12px 12px}
+.setRow{display:flex; align-items:center; gap:12px; margin:12px 0}
+.setRow label{font:600 11px/1 var(--sans); color:var(--text); min-width:180px}
+.setRow input[type=range]{flex:1; accent-color:var(--angel)}
+.card.set p{margin:0 0 4px; font:400 11px/1.6 var(--sans); color:var(--dim)}
+.num{background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:8px 8px; width:100px; outline:none}
+.num:focus{border-color:var(--angel)}
+
+/* ------------------------------------------------------------- drawer -- */
+/* THE FULL RECORD, as a slide-over rather than a third column.
+
+   It used to be a flex child of #shell, so opening it took 352 px off the
+   map permanently — and once the 336 px left inspector arrived, a selected
+   casualty cost the map 688 px and appeared in two columns at once. Closed,
+   it is still a zero-width flex child and occupies nothing. OPEN, it leaves
+   the flow: #shell is position:absolute and is therefore its containing
+   block, so `right:var(--railW)` parks it flush inside the right icon rail,
+   over the map, and the map keeps every pixel of its width. Nothing else
+   about the element changes — same id, same innerHTML contract, same
+   MutationObserver surface for js/doctrine.js and js/role-surgeon.js. */
+#drawer{
+  width:0; flex:0 0 0; background:var(--panel);
+  overflow:auto;
+}
+#drawer.open{
+  position:absolute; top:0; bottom:0; right:var(--railW); z-index:40;
+  width:352px; flex:0 0 auto; padding:16px 16px;
+  /* Separation by tone plus a cast shadow, not a decorative hairline —
+     THEME_CONTRACT. The shadow is what says "over the map, not beside it". */
+  box-shadow:inset 1px 0 0 var(--line2), -20px 0 44px -16px rgba(0,0,0,.72);
+  animation:dwSlideIn .16s ease-out;
+}
+@keyframes dwSlideIn{from{transform:translateX(16px); opacity:.35} to{transform:none; opacity:1}}
+@media (prefers-reduced-motion:reduce){#drawer.open{animation:none}}
+.dwHead{display:flex; align-items:flex-start; gap:12px; margin-bottom:12px}
+.dwHead h3{font:700 14px/1.2 var(--mono); letter-spacing:.06em}
+.dwSub{display:block; margin-top:4px; font:500 10.5px/1.4 var(--sans); color:var(--dim)}
+.dwGrid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.dwCell{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:8px 8px}
+.dwCell.wide{grid-column:1/-1}
+.dwCell span{display:block; font:600 8.5px/1 var(--mono); letter-spacing:.1em; color:var(--faint)}
+.dwCell b{display:block; margin-top:4px; font:600 12px/1.3 var(--sans)}
+.dwSect{margin:16px 0 8px; font:700 9px/1 var(--mono); letter-spacing:.13em; color:var(--faint)}
+.dwChart{width:100%; height:88px; display:block; background:var(--chartbg); border:1px solid var(--line); border-radius:8px}
+.dwLog{font:500 10.5px/1.7 var(--mono); color:var(--dim)}
+.dwLog .mono{color:var(--faint)}
+.dwActions{margin-top:12px; display:flex; gap:8px}
+.dwNote{margin:0; font:400 11px/1.6 var(--sans); color:var(--dim)}
+
+/* ------------------------------------------------------------ tooltip -- */
+#tip{
+  position:fixed; display:none; z-index:60; pointer-events:none;
+  background:rgba(8,14,21,.96); border:1px solid rgba(150,190,225,.24); border-radius:8px;
+  padding:12px 12px; min-width:186px; box-shadow:var(--shadow); color:#dfe8f2;
+}
+#tip b{font:700 11px/1 var(--mono); letter-spacing:.06em}
+#tip .tg{float:right; font:700 8.5px/1 var(--mono); letter-spacing:.08em; color:#8ea3b8}
+#tip .tr{display:flex; justify-content:space-between; gap:16px; margin-top:4px; font:500 10.5px/1 var(--sans); color:#9db3c8}
+#tip .tr b{font-size:10.5px; color:#dfe8f2}
+#tip .tn{margin-top:8px; font:400 9.5px/1 var(--sans); color:#63768a}
+
+/* ------------------------------------------------------------- toasts -- */
+#toasts{position:fixed; right:16px; bottom:16px; z-index:70; display:flex; flex-direction:column; gap:8px; align-items:flex-end}
+.toast{
+  background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--info);
+  border-radius:9px; padding:12px 16px; box-shadow:var(--shadow); min-width:240px;
+  animation:tin .18s ease;
+}
+.toast.ok{border-left-color:var(--ok)} .toast.warn{border-left-color:var(--warn)}
+.toast b{display:block; font:700 11.5px/1 var(--sans)}
+.toast span{display:block; margin-top:4px; font:400 11px/1.4 var(--sans); color:var(--dim)}
+@keyframes tin{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+
+/* -------------------------------------------------------------- modal -- */
+#modal{
+  position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center;
+  background:rgba(2,5,9,.72); padding:32px; backdrop-filter:blur(3px);
+}
+#modal.show{display:flex}
+.modalCard{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  max-width:1020px; width:100%; max-height:100%; overflow:auto; box-shadow:var(--shadow);
+}
+.modalHead{display:flex; gap:16px; padding:24px 24px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel); z-index:2}
+.modalHead h2{font:700 17px/1.2 var(--sans)}
+.modalHead p{margin:8px 0 0; font:400 11.5px/1.5 var(--sans); color:var(--dim)}
+#modalClose,#runClose,#dpCancel{border:1px solid var(--line); background:var(--panel2); color:var(--text);
+  border-radius:7px; padding:8px 16px; cursor:pointer; height:34px; font:600 11px/1 var(--sans)}
+#modalClose:hover,#runClose:hover,#dpCancel:hover{border-color:var(--line2)}
+#modelBody{padding:8px 24px 24px}
+.mrow{display:grid; grid-template-columns:200px 1fr; gap:24px; padding:16px 0; border-bottom:1px solid var(--line)}
+.mk{font:700 10px/1.5 var(--mono); letter-spacing:.1em; color:var(--faint); text-transform:uppercase}
+.mv{font:400 12px/1.65 var(--sans)}
+.mv b{color:var(--text)}
+.msrc{margin-top:8px; font:400 10.5px/1.6 var(--sans); color:var(--dim); padding-left:12px; border-left:2px solid var(--line2)}
+
+/* ------------------------------------------------------------ scrolls -- */
+::-webkit-scrollbar{width:10px; height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2); border-radius:5px; border:2px solid transparent; background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--faint); background-clip:content-box}
+
+@media (max-width:1400px){
+  #dock{width:290px}
+  .mapTools{right:316px}
+  #legend{max-width:calc(100% - 332px)}
+}
+@media (max-width:1180px){
+  /* The rail was already 36px and icon-only before this breakpoint; there is
+     nothing left for it to shed. */
+  .setGrid,.split{grid-template-columns:1fr}
+}
+
+td.why{line-height:1.9}
+td.why .pill{margin-right:4px}
+
+.policyBox{padding:12px 12px 12px}
+.prow{display:grid; grid-template-columns:190px 1fr 44px; gap:12px; align-items:center;
+      padding:8px 0; border-bottom:1px solid var(--line)}
+.prow:last-of-type{border-bottom:none}
+.prow .pk{font:700 9.5px/1.3 var(--mono); letter-spacing:.08em; color:var(--faint)}
+.prow.fired .pk{color:var(--warn)}
+.prow .pw{font:400 11px/1.5 var(--sans); color:var(--dim)}
+.prow .pn{text-align:right; font-size:13px; font-weight:700}
+.policyBox .note{margin-top:12px}
+
+/* ==========================================================================
+   LIGHT THEME — MAP OVERLAY
+   The chart itself stays dark (a relief sheet reads best that way), but every
+   panel floating over it switches to the light operations-centre treatment so
+   the theme does not look half-applied.
+   ========================================================================== */
+body.light .hud{
+  background:rgba(255,255,255,.94); border-color:rgba(30,60,90,.16);
+  box-shadow:0 12px 30px rgba(20,40,70,.22);
+}
+body.light .hudHead{
+  background:rgba(20,45,75,.05); border-bottom-color:rgba(30,60,90,.12); color:#5b6b7c;
+}
+body.light .hudBody{color:var(--text)}
+body.light .statHdr{color:var(--faint); border-bottom-color:rgba(30,60,90,.14)}
+body.light .statRow{border-bottom-color:rgba(30,60,90,.07)}
+body.light .statRow .sl{color:var(--dim)}
+body.light .statRow .va{color:var(--text)}
+body.light .statRow .vb{color:var(--dim)}
+body.light .obl,body.light .ocap{color:var(--dim)}
+body.light .stockrow .sk{color:var(--dim)}
+body.light .stockrow .bar{background:rgba(20,45,75,.10)}
+body.light .stockrow b{color:var(--text)}
+body.light .logline{border-bottom-color:rgba(30,60,90,.07)}
+body.light .logline .lt{color:var(--faint)}
+body.light .logline .lx{color:#33455a}
+body.light .k-INFO .lk{color:var(--dim)}
+
+body.light .maplabel{
+  background:rgba(255,255,255,.94); border-color:rgba(30,60,90,.16); color:#12202e;
+}
+body.light .maplabel em{color:#5b6b7c}
+body.light .mapTools .seg{background:rgba(255,255,255,.94); border-color:rgba(30,60,90,.16)}
+body.light #legend{
+  background:rgba(255,255,255,.94); border-color:rgba(30,60,90,.16);
+}
+body.light #legend .lg b{color:var(--faint)}
+body.light #legend .li{color:#33455a}
+body.light #tip{
+  background:rgba(255,255,255,.97); border-color:rgba(30,60,90,.22); color:#12202e;
+}
+body.light #tip .tg,body.light #tip .tr{color:#5b6b7c}
+body.light #tip .tr b{color:#12202e}
+body.light #tip .tn{color:#8496a7}
+body.light #modal{background:rgba(30,50,75,.42)}
+
+/* ====================================================== MASTER SWITCH === */
+.master{display:flex; align-items:center; gap:8px}
+.mlab{font:700 8px/1 var(--mono); letter-spacing:.18em; color:var(--faint)}
+/* The f(x) glyph beside SYSTEM: the tasking authority is an optimiser, not
+   a model, and this is the mark that says so. Neutral on purpose. */
+.detGlyph{width:11px; height:11px; margin-left:4px; vertical-align:-2px;
+  fill:none; stroke:currentColor; color:var(--t-lo)}
+.chip.act{font-weight:800; letter-spacing:.09em}
+[data-active="off"].on{background:var(--warn); color:#241600}
+body.standby .brand .mark{color:var(--warn)}
+
+/* =========================================================== HVA ======== */
+.hvacell{width:44px; text-align:center}
+.star{
+  background:none; border:none; cursor:pointer; font-size:15px; line-height:1;
+  color:var(--faint); padding:4px 4px; border-radius:4px;
+}
+.star:hover{color:#ffd24a; background:rgba(255,210,74,.12)}
+.star.on{color:#ffd24a}
+table.grid tr.hva td{background:rgba(255,210,74,.055)}
+table.grid tr.hva td:first-child{box-shadow:inset 2px 0 0 #ffd24a}
+.hvaFilter.on{background:#ffd24a !important; color:#2a1e02 !important}
+.hvaTag{font:800 9px/1 var(--mono); letter-spacing:.1em; color:#2a1e02;
+        background:#ffd24a; border-radius:4px; padding:4px 8px; vertical-align:middle; margin-left:8px}
+.hvaNote{background:rgba(255,210,74,.10); border:1px solid rgba(255,210,74,.28);
+         border-radius:8px; padding:12px 12px; margin:12px 0 0}
+.dwActions.top{margin:0 0 12px}
+.roleGrid{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 8px}
+.chip.role{border:1px solid var(--line); background:var(--panel2)}
+.chip.role.on{background:#ffd24a; color:#2a1e02; border-color:transparent}
+
+/* ==================================================== UNITS & C2 ======== */
+.uavStatus{
+  display:flex; align-items:center; gap:16px; padding:12px 16px;
+  background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  border-left:3px solid var(--info); font-size:11.5px; flex-wrap:wrap;
+}
+.uavStatus.busy{border-left-color:var(--warn); background:rgba(255,179,64,.05)}
+.uavStatus b{font:700 12px/1 var(--mono); letter-spacing:.1em}
+.uavStatus .dim{font-size:11px}
+.uavStatus .mono{color:var(--dim); font-size:11px}
+.uavStatus .st{margin-left:auto; font:700 9.5px/1 var(--mono); letter-spacing:.11em; color:var(--info)}
+.uavStatus.busy .st{color:var(--warn)}
+.uavDot{width:9px; height:9px; border-radius:50%; background:var(--info); box-shadow:0 0 0 0 rgba(91,180,255,.6);
+        animation:pulse 2.2s infinite}
+.uavStatus.busy .uavDot{background:var(--warn); animation-duration:.9s}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(91,180,255,.55)}70%{box-shadow:0 0 0 11px rgba(91,180,255,0)}100%{box-shadow:0 0 0 0 rgba(91,180,255,0)}}
+
+.intervalRow{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.intervalRow label{font:600 11px/1 var(--sans)}
+.intervalRow .dim{font-size:10.5px; max-width:60ch; line-height:1.5}
+
+.unitGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(238px,1fr)); gap:12px}
+.ucard{
+  background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  padding:12px 12px; cursor:pointer; border-top:3px solid var(--line2);
+}
+.ucard:hover{border-color:var(--line2)}
+.ucard.sel{box-shadow:0 0 0 1px var(--angel) inset}
+.ucard.ok{border-top-color:var(--ok)} .ucard.warn{border-top-color:var(--warn)} .ucard.bad{border-top-color:var(--bad)}
+.uhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px}
+.uhead b{font:700 13px/1 var(--mono); letter-spacing:.06em}
+.ubar{height:7px; border-radius:4px; background:rgba(125,165,205,.16); overflow:hidden; margin-bottom:8px}
+.ubar i{display:block; height:100%; border-radius:4px; background:var(--ok)}
+.ubar i.warn{background:var(--warn)} .ubar i.bad{background:var(--bad)}
+.ustat{display:flex; justify-content:space-between; align-items:baseline; padding:4px 0;
+       font:500 11px/1.3 var(--sans); color:var(--dim)}
+.ustat b{font-family:var(--mono); font-size:12px; color:var(--text)}
+.mini.ping{width:100%; margin-top:12px; padding:8px}
+
+/* ==================================================== RUN REPORT ======== */
+#runModal{
+  position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center;
+  background:rgba(2,5,9,.76); padding:32px; backdrop-filter:blur(4px);
+}
+#runModal.show{display:flex; animation:rmIn .2s ease}
+@keyframes rmIn{from{opacity:0}to{opacity:1}}
+.runCard{max-width:880px; display:flex; flex-direction:column}
+#runBody{padding:0 24px 8px}
+.rrHero{
+  text-align:center; padding:24px 16px 16px; margin:16px 0 16px;
+  border-radius:12px; background:rgba(224,169,74,.07); border:1px solid rgba(224,169,74,.30);
+}
+.rrHero.bad{background:rgba(255,66,87,.07); border-color:rgba(255,66,87,.28)}
+.rrBig{display:flex; align-items:baseline; justify-content:center; gap:12px}
+.rrBig b{font:800 62px/1 var(--mono); color:var(--tollLo); letter-spacing:-.02em}
+.rrHero.bad .rrBig b{color:var(--tollHi)}
+.rrBig span{font:600 12px/1 var(--mono); letter-spacing:.14em; color:var(--dim)}
+.rrPct{margin-top:8px; font:700 17px/1 var(--sans); color:var(--tollLo)}
+.rrHero.bad .rrPct{color:var(--tollHi)}
+.rrHero p{margin:12px auto 0; max-width:56ch; font:500 13.5px/1.55 var(--sans)}
+.rrMeta{margin-top:12px; font:500 10px/1.5 var(--mono); color:var(--faint); letter-spacing:.03em}
+.rrTable{margin-bottom:24px}
+.rrTable th:not(:first-child),.rrTable td:not(:first-child){text-align:right; width:170px}
+.rrTable tbody tr{cursor:default}
+.rrTable .bold{font-weight:800}
+.rrWhy h3{font:700 10px/1 var(--mono); letter-spacing:.16em; color:var(--faint); margin-bottom:12px}
+.rrW{padding:12px 0; border-bottom:1px solid var(--line)}
+.rrW b{display:block; font:700 12.5px/1.4 var(--sans); color:var(--text)}
+.rrW span{display:block; margin-top:4px; font:400 11.5px/1.6 var(--sans); color:var(--dim)}
+.rrFoot{margin:16px 0 4px; font:400 11px/1.65 var(--sans); color:var(--faint); border-left:2px solid var(--line2); padding-left:12px}
+.runFootBar{
+  position:sticky; bottom:0; display:flex; justify-content:flex-end; gap:8px;
+  padding:16px 24px; background:var(--panel); border-top:1px solid var(--line);
+}
+
+@media (max-width:1500px){
+  #scoreboard{min-width:0; padding:8px 16px 8px}
+  .sbSide b{font-size:38px} .sbSide{min-width:96px}
+}
+
+/* keep the scoreboard, legend and pane tags out of each other's way */
+.paneTag em{white-space:normal; line-height:1.25}
+body.compare .paneTag{padding:8px 12px}
+body.compare .paneTag em{display:none}
+body.compare #legend{max-width:40%; bottom:12px}
+body.compare #scoreboard{bottom:12px; top:auto}
+
+/* The scoreboard owns the top-centre. Map tools drop to a second row in
+   single view, where the dock starts lower down anyway. */
+.mapTools{top:56px}
+body.compare .mapTools{top:10px}
+#scoreboard{z-index:6}
+#toasts{bottom:14px; max-width:320px}
+
+body.compare #legend{max-width:33%}
+
+/* Map tools sit directly under the scoreboard in single view (the scoreboard
+   owns the top-centre), and top-right in compare view where the scoreboard
+   moves to the bottom. */
+.mapTools{top:auto; right:auto; left:50%; transform:translateX(-50%); top:150px; z-index:7}
+body.compare .mapTools{left:auto; right:12px; transform:none; top:10px}
+
+/* ===================================================== SCOREBOARD v2 ==== */
+/* A slim strip rather than a panel: it must not hide the ground. */
+#scoreboard{
+  position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:6;
+  display:flex; align-items:center; gap:16px; padding:8px 8px 8px 16px;
+  background:rgba(6,12,19,.92); border:1px solid rgba(150,190,225,.22);
+  border-radius:10px; backdrop-filter:blur(7px); box-shadow:0 12px 30px rgba(0,0,0,.45);
+  white-space:nowrap;
+}
+body.noscore #scoreboard{display:none}
+#btnShowScore{
+  position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:6; display:none;
+  background:rgba(6,12,19,.92); border:1px solid rgba(150,190,225,.22); color:#8ea3b8;
+  border-radius:8px; padding:8px 12px; cursor:pointer; font:700 9px/1 var(--mono); letter-spacing:.16em;
+}
+body.noscore #btnShowScore{display:block}
+.sbTitle{font:700 8.5px/1.25 var(--mono); letter-spacing:.16em; color:#7f95ab; max-width:78px; white-space:normal}
+.sbSide{display:flex; align-items:baseline; gap:8px}
+.sbSide b{font:800 30px/1 var(--mono); letter-spacing:-.02em}
+.sbSide span{font:700 8.5px/1 var(--mono); letter-spacing:.12em; color:#8ea3b8}
+.sbSide.a b{color:var(--tollLo)} .sbSide.b b{color:var(--tollHi)}
+body.standby .sbSide.a b{color:var(--tollHi)}
+.sbMid{display:flex; align-items:baseline; gap:8px; padding:0 12px;
+       border-left:1px solid rgba(150,190,225,.18); border-right:1px solid rgba(150,190,225,.18)}
+.sbDelta{font:800 15px/1 var(--mono); color:#8ea3b8}
+.sbDelta.good{color:var(--tollLo)} .sbDelta.bad{color:var(--tollHi)}
+.sbMid span{font:700 11px/1 var(--mono); color:#8ea3b8}
+.sbSep{width:1px; height:24px; background:rgba(150,190,225,.18)}
+.sbF{font:500 9.5px/1 var(--sans); color:#8ea3b8; display:flex; align-items:baseline; gap:4px}
+.sbF b{font:700 13px/1 var(--mono); color:#dfe8f2}
+.sbHide{background:none; border:none; color:#63768a; cursor:pointer; font-size:15px; padding:0 4px}
+.sbHide:hover{color:#dfe8f2}
+body.light #scoreboard,body.light #btnShowScore{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+body.light .sbTitle,body.light .sbSide span,body.light .sbF{color:var(--dim)}
+body.light .sbF b{color:var(--text)}
+
+/* ======================================================= LAYERS PANEL === */
+#legend{
+  position:absolute; left:12px; bottom:12px; z-index:5; max-width:none; display:block;
+  background:rgba(8,14,21,.92); border:1px solid rgba(150,190,225,.18); border-radius:10px;
+  padding:0; backdrop-filter:blur(6px); pointer-events:auto; overflow:hidden;
+}
+.lgHead{display:flex; align-items:center; gap:8px; padding:8px 8px; cursor:default}
+.lgHead b{font:700 8.5px/1 var(--mono); letter-spacing:.16em; color:#8ea3b8}
+.lgHint{font:500 9px/1 var(--sans); color:#5b6d80}
+.lgToggle{margin-left:auto; background:none; border:1px solid rgba(150,190,225,.2); color:#8ea3b8;
+          width:20px; height:20px; border-radius:5px; cursor:pointer; line-height:1; font-size:12px}
+.lgToggle:hover{color:#dfe8f2}
+.lgBody{display:none; padding:0 8px 8px; gap:16px; flex-wrap:wrap; max-width:640px}
+#legend.open .lgBody{display:flex}
+#legend.open .lgToggle::after{content:'−'} #legend:not(.open) .lgToggle::after{content:'+'}
+.lgToggle{font-size:0}.lgToggle::after{font-size:12px}
+.li{
+  display:inline-flex; align-items:center; gap:4px; font:500 9.5px/1 var(--sans);
+  color:#5b6d80; cursor:pointer; padding:4px 8px; border-radius:5px;
+  border:1px solid transparent; user-select:none; opacity:.5;
+}
+.li svg{opacity:.45}
+.li.on{color:#c8d8e6; opacity:1; background:rgba(125,165,205,.10); border-color:rgba(150,190,225,.16)}
+.li.on svg{opacity:1}
+.li:hover{border-color:rgba(150,190,225,.35)}
+#lgAll{background:rgba(255,179,64,.16); color:var(--warn); border-color:rgba(255,179,64,.3); opacity:1}
+body.light #legend{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+body.light .li.on{color:#26384a}
+body.compare #legend{max-width:none}
+
+/* ================================================== ANALYSIS WORKBENCH == */
+.cmpGrid{margin-top:8px}
+.cmpRow{display:grid; grid-template-columns:210px 1fr 56px 56px; gap:12px; align-items:center;
+        padding:8px 0; border-bottom:1px solid var(--line)}
+.cmpRow:last-child{border-bottom:none}
+.cmpK{font:500 11.5px/1.3 var(--sans); color:var(--dim)}
+.cmpBars{display:flex; flex-direction:column; gap:4px}
+.cmpBars i{display:block; height:8px; border-radius:3px; min-width:2px}
+.cmpBars i.a{background:var(--angel)} .cmpBars i.b{background:var(--current)}
+.cmpRow.toll .cmpBars i.a{background:var(--tollLo)} .cmpRow.toll .cmpBars i.b{background:var(--tollHi)}
+.tollLo{color:var(--tollLo)} .tollHi{color:var(--tollHi)}
+.cmpBars i.a.win{box-shadow:0 0 10px rgba(49,214,138,.45)}
+.cmpRow b{text-align:right; font-size:12px}
+.cmpKey{display:flex; gap:16px; margin-top:12px; font:500 10px/1 var(--sans); color:var(--dim); align-items:center}
+.cmpKey span{display:flex; align-items:center; gap:4px}
+.cmpKey i{width:10px; height:10px; border-radius:2px}
+.cmpKey i.a{background:var(--angel)} .cmpKey i.b{background:var(--current)}
+.aarBox{padding:8px 16px 16px}
+.aarHead{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; padding:8px 0 4px;
+         border-bottom:1px solid var(--line); margin-bottom:8px}
+.aarHead b{font:700 12px/1 var(--mono); letter-spacing:.05em}
+.aarHead .dim{font-size:10.5px}
+.aarDelta{margin-left:auto; font:700 12px/1 var(--mono)}
+.aarDelta.ok{color:var(--ok)} .aarDelta.bad{color:var(--bad)}
+
+#scoreboard,#btnShowScore{pointer-events:auto}
+
+td.stack{line-height:1.35}
+td.stack .sub{display:block; font:400 9.5px/1.4 var(--sans); color:var(--faint); margin-top:2px}
+
+.paneTag em{display:none}
+.lgBody{max-width:430px}
+#legend{max-width:452px}
+
+/* cards in a flex column must not be squashed to fit */
+.pane > .card,.pane > .split,.pane > .kpis,.pane > .filters,.pane > .uavStatus,.pane > .intervalRow,.pane > .unitGrid{flex:0 0 auto}
+
+/* ======================================================= THEATER VIEW === */
+#theaterStage{position:absolute; inset:0; display:none; background:#04101c}
+body.theater .viewport[data-pane="MISSION"] #theaterStage{display:block}
+body.theater .viewport[data-pane="MISSION"] #stage{display:none}
+#mapTheater{position:absolute; top:0; left:0; width:100%; height:100%; display:block}
+
+.thHead{
+  position:absolute; top:12px; left:12px; z-index:4; max-width:430px;
+  background:rgba(6,14,24,.92); border:1px solid rgba(150,190,225,.20);
+  border-radius:11px; padding:12px 16px; backdrop-filter:blur(6px);
+}
+.thTitle{display:flex; align-items:baseline; gap:12px}
+.thTitle b{font:800 19px/1 var(--sans); letter-spacing:.10em; color:#dff0ff}
+.thTitle span{font:500 11px/1 var(--sans); color:#8ea3b8}
+.thHead p{margin:8px 0 0; font:400 11px/1.6 var(--sans); color:#9db3c8}
+.thStats{display:flex; gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(150,190,225,.14)}
+.thStats span{display:flex; align-items:baseline; gap:4px; font:500 9.5px/1 var(--sans); color:#8ea3b8}
+.thStats b{font:700 16px/1 var(--mono); color:#dfe8f2}
+
+.joaList{
+  position:absolute; top:12px; right:12px; bottom:12px; width:330px; z-index:4;
+  display:flex; flex-direction:column; gap:8px; overflow:auto; padding-right:2px;
+}
+.joaCard{
+  background:rgba(8,16,26,.93); border:1px solid rgba(150,190,225,.18);
+  border-left:3px solid rgba(150,190,225,.3); border-radius:10px; padding:12px 12px;
+  cursor:pointer; backdrop-filter:blur(6px); flex:0 0 auto;
+}
+.joaCard:hover{border-color:rgba(150,190,225,.5)}
+.joaCard.live{border-left-color:var(--angel); background:rgba(8,26,20,.94)}
+.joaCard.amber{border-left-color:var(--warn)} .joaCard.red,.joaCard.black{border-left-color:var(--bad)}
+.joaHead{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px}
+.joaHead b{font:700 13px/1 var(--mono); letter-spacing:.06em; color:#e6f2fb}
+.joaForce{font:500 10.5px/1.3 var(--sans); color:#9db3c8}
+.joaPost{display:flex; align-items:center; gap:8px; margin:8px 0;
+         font:700 8.5px/1 var(--mono); letter-spacing:.12em; color:#63768a}
+.joaStats{display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin:8px 0}
+.joaStats span{display:flex; align-items:baseline; gap:4px; font:500 9.5px/1 var(--sans); color:#8ea3b8}
+.joaStats b{font:700 13px/1 var(--mono); color:#dfe8f2}
+.joaCard p{margin:8px 0 8px; font:400 10px/1.5 var(--sans); color:#7f95ab}
+.joaCard .mini{width:100%}
+.thHint{
+  position:absolute; left:12px; bottom:12px; z-index:4;
+  background:rgba(6,14,24,.9); border:1px solid rgba(150,190,225,.18); border-radius:8px;
+  padding:8px 12px; font:500 10.5px/1 var(--sans); color:#8ea3b8;
+}
+.crumb{display:none; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+body:not(.theaterMode) .crumb{display:inline-block}
+body.theater .viewport[data-pane="MISSION"] #scoreboard,
+body.theater .viewport[data-pane="MISSION"] #btnShowScore,
+body.theater .viewport[data-pane="MISSION"] .mapTools,
+body.theater .viewport[data-pane="MISSION"] #legend{display:none}
+body.light #theaterStage{background:#dfe8f0}
+body.light .thHead,body.light .joaCard,body.light .thHint{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+body.light .thTitle b,body.light .joaHead b,body.light .thStats b,body.light .joaStats b{color:var(--text)}
+body.light .thHead p,body.light .joaForce,body.light .joaCard p{color:var(--dim)}
+
+/* ========================================================= DASHBOARD ==== */
+.dtiles{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+.dtile{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 16px}
+.dtile .dk{display:block; font:600 8.5px/1.3 var(--mono); letter-spacing:.12em; color:var(--faint)}
+.dtile b{display:block; margin:8px 0 4px; font:800 30px/1 var(--mono); letter-spacing:-.02em}
+.dtile .ds{display:block; font:400 10px/1.4 var(--sans); color:var(--dim)}
+.dths{padding:12px 12px 12px}
+.dth{margin-bottom:16px; cursor:pointer}
+.dth:last-of-type{margin-bottom:0}
+.dthHead{display:flex; align-items:baseline; gap:8px; padding-bottom:8px; border-bottom:1px solid var(--line); margin-bottom:8px}
+.dthHead b{font:700 12px/1 var(--mono); letter-spacing:.08em}
+.dthHead .dim{font-size:10.5px}
+.dthN{margin-left:auto; font:700 8.5px/1 var(--mono); color:var(--faint)}
+.dbar{display:grid; grid-template-columns:150px 1fr 44px 52px; gap:12px; align-items:center; padding:4px 0}
+.dbar:hover{background:rgba(125,165,205,.06)}
+.dbn{font:600 10.5px/1 var(--mono); color:var(--dim)}
+.dbar.live .dbn{color:var(--text)}
+.dbn i{font-style:normal; font-size:8px; color:var(--angel); letter-spacing:.1em; margin-left:4px}
+.dbtrack{display:flex; height:11px; border-radius:3px; overflow:hidden; background:rgba(125,165,205,.12)}
+.dbtrack i{display:block; height:100%}
+.dbtrack i.ok{background:var(--ok)} .dbtrack i.warn{background:var(--warn)} .dbtrack i.bad{background:var(--bad)}
+.dbar b{text-align:right; font-size:12px}
+.dbl{font:700 8.5px/1 var(--mono); letter-spacing:.1em; text-align:right}
+.dthKey{display:flex; gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);
+        font:500 10px/1 var(--sans); color:var(--dim)}
+.dthKey span{display:flex; align-items:center; gap:4px}
+.dthKey i{width:10px; height:10px; border-radius:2px}
+.dthKey i.ok{background:var(--ok)} .dthKey i.warn{background:var(--warn)} .dthKey i.bad{background:var(--bad)}
+.dlBox{padding:12px 12px 12px}
+.dlHead{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; padding-bottom:8px;
+        border-bottom:1px solid var(--line); margin-bottom:8px}
+.dlHead b{font:700 13px/1 var(--mono); letter-spacing:.06em}
+.dlDelta{margin-left:auto; font:700 11px/1.3 var(--mono); text-align:right}
+.dlDelta.ok{color:var(--tollLo)} .dlDelta.bad{color:var(--tollHi)}
+.dlRow{display:grid; grid-template-columns:1fr 60px 60px; gap:8px; padding:4px 0;
+       border-bottom:1px solid var(--line); font:500 11.5px/1.3 var(--sans); color:var(--dim)}
+.dlRow b{text-align:right; font-size:12px; color:var(--text)}
+.dlFeed{margin-top:12px; font:500 10px/1.7 var(--mono); color:var(--dim); max-height:190px; overflow:auto}
+.dlFeed div{display:flex; gap:8px; padding:2px 0}
+.dlFeed .mono{color:var(--faint); flex:0 0 46px}
+.dlFeed .lk{flex:0 0 58px; font-size:8.5px; font-weight:700; padding-top:2px}
+@media (max-width:1400px){ .dtiles{grid-template-columns:repeat(2,1fr)} }
+
+/* ======================================================== DEPLOYMENT ==== */
+/* The three rgba() literals that used to be here were the OLD palette's
+   red / green / amber, baked in: they did not move when the theme did, so in
+   field-slate a "NOT DEPLOYED" bar was tinted with console-dark's red. They
+   are tokens now — the tint is mixed from the theme's own hue over the
+   theme's own panel surface, and the rule is the hue's dim companion, which
+   is what --red-d / --grn-d / --amb-d are for. */
+.deployBar{display:flex; align-items:center; gap:8px; padding:4px 4px 4px 12px;
+  border:1px solid var(--line); border-radius:9px; background:var(--panel2)}
+.deployBar.bad{border-color:var(--red-d);  background:color-mix(in oklab, var(--red) 12%, var(--k1))}
+.deployBar.ok{border-color:var(--grn-d);   background:color-mix(in oklab, var(--grn) 12%, var(--k1))}
+.deployBar.warn{border-color:var(--amb-d); background:color-mix(in oklab, var(--amb) 12%, var(--k1))}
+/* The state WORD carries the state, not just the dot beside it. */
+.deployBar.bad  .dbTxt b{color:var(--red)}
+.deployBar.ok   .dbTxt b{color:var(--grn)}
+.deployBar.warn .dbTxt b{color:var(--amb)}
+.dbDot{width:8px; height:8px; border-radius:50%; background:var(--bad)}
+.deployBar.ok .dbDot{background:var(--ok); animation:pulse 2.2s infinite}
+.deployBar.warn .dbDot{background:var(--warn); animation:pulse .9s infinite}
+.dbTxt{display:flex; flex-direction:column; line-height:1.25}
+.dbTxt b{font:700 10px/1 var(--mono); letter-spacing:.1em}
+.dbTxt em{font:400 9px/1 var(--sans); font-style:normal; color:var(--dim); margin-top:4px}
+.deployBar .btn{padding:8px 12px; font-size:10px}
+body:not(.notdeployed) #btnDeployBar{display:none}
+/* LIVE mode. #8a5a08 was a literal, and --band-fg (a green) on it measures
+   about 2.4:1 — the one line on screen that must never be hard to read. The
+   band is now mixed from the theme's own amber, and takes amber ink with it,
+   because LIVE-OPERATION MODE is precisely "a human must decide". */
+body.livemode .band{
+  background:color-mix(in oklab, var(--amb) 24%, var(--k0));
+  color:var(--amb); box-shadow:inset 0 -1px 0 var(--amb-d);
+}
+body.livemode .brand .mark{color:var(--bad)}
+
+#deployModal{position:fixed; inset:0; z-index:95; display:none; align-items:center; justify-content:center;
+  background:rgba(2,5,9,.80); padding:32px; backdrop-filter:blur(5px)}
+#deployModal.show{display:flex}
+.deployCard{max-width:920px; display:flex; flex-direction:column}
+.deployCard .modalHead p{display:flex; align-items:center; gap:8px}
+#deployModal[data-phase="READY"] .dpGoing{display:none}
+#deployModal[data-phase="DEPLOYING"] .dpReady{display:none}
+#deployModal[data-phase="DEPLOYING"] .runFootBar{display:none}
+.dpReady,.dpGoing{padding:16px 24px 8px}
+.dpAlertBox{background:rgba(255,179,64,.10); border:1px solid rgba(255,179,64,.32);
+  border-radius:9px; padding:12px 16px; margin-bottom:16px}
+.dpAlertBox b{display:block; font:700 12.5px/1.3 var(--sans); color:var(--warn)}
+.dpAlertBox span{display:block; margin-top:4px; font:400 11.5px/1.5 var(--sans); color:var(--dim)}
+.dpRoll{display:flex; gap:24px; align-items:baseline; padding-bottom:16px; border-bottom:1px solid var(--line)}
+.dpBig{display:flex; align-items:baseline; gap:8px}
+.dpBig b{font:800 42px/1 var(--mono); color:var(--angel)}
+.dpBig.sub b{font-size:22px; color:var(--text)}
+.dpBig span{font:600 9.5px/1.3 var(--mono); letter-spacing:.1em; color:var(--faint); max-width:88px}
+.dpNote{margin:16px 0 16px; font:400 11px/1.65 var(--sans); color:var(--dim); max-width:88ch}
+.dpLps{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.dpLp{border:1px solid var(--line); border-radius:10px; padding:12px 12px; cursor:pointer; background:var(--panel2)}
+.dpLp.on{border-color:var(--angel); background:rgba(49,214,138,.07)}
+.dpLp.none{opacity:.45; cursor:not-allowed}
+.dpLpHead{display:flex; align-items:center; gap:8px}
+.dpCheck{width:17px; height:17px; border:1.5px solid var(--line2); border-radius:4px;
+  display:flex; align-items:center; justify-content:center; font-size:11px; color:#04140c}
+.dpLp.on .dpCheck{background:var(--angel); border-color:transparent}
+.dpLpHead b{font:700 12px/1 var(--mono); letter-spacing:.05em}
+.dpCount{margin-left:auto; font:500 10px/1 var(--sans); color:var(--dim)}
+.dpCount b{font:700 15px/1 var(--mono); color:var(--text)}
+.dpAir{display:flex; flex-wrap:wrap; gap:4px; margin:8px 0}
+.dpTail{display:flex; flex-direction:column; gap:2px; padding:4px 8px; border-radius:5px;
+  background:rgba(125,165,205,.10); font:700 9px/1 var(--mono)}
+.dpTail em{font:400 8px/1 var(--sans); font-style:normal; color:var(--faint)}
+.dpTail.ok{background:rgba(49,214,138,.13); color:var(--ok)}
+.dpTail.down{background:rgba(255,66,87,.11); color:var(--bad); text-decoration:line-through}
+.dpTail.down em{text-decoration:none}
+.dpStock{display:flex; gap:12px; font:500 9.5px/1 var(--sans); color:var(--dim)}
+.dpStock b{font-family:var(--mono); color:var(--text)}
+.dpProg{margin-bottom:16px}
+.dpProgHead{display:flex; align-items:baseline; gap:8px; font:500 11px/1 var(--sans); color:var(--dim)}
+.dpProgHead b{font:800 24px/1 var(--mono); color:var(--angel)}
+.dpPct{margin-left:auto; font-size:15px; font-weight:700; color:var(--text)}
+.dpTrack{height:9px; border-radius:5px; background:var(--panel2); overflow:hidden; margin-top:12px;
+  border:1px solid var(--line)}
+.dpTrack i{display:block; height:100%; background:linear-gradient(90deg,var(--angel),#7ce8bb);
+  transition:width .22s ease}
+.dpFeed{font:500 10.5px/1 var(--mono); max-height:280px; overflow:auto}
+.dpFeedRow{display:grid; grid-template-columns:88px 150px 1fr 190px; gap:12px; padding:8px 0;
+  border-bottom:1px solid var(--line); animation:tin .2s ease}
+.dpFeedRow .tail{font-weight:700; color:var(--text)}
+
+/* ==================================================== DASHBOARD v2 ====== */
+.sysbar{display:flex; align-items:center; gap:16px; padding:16px 16px; border-radius:11px;
+  border:1px solid var(--line); border-left:4px solid var(--line2); background:var(--panel)}
+.sysbar.ok{border-left-color:var(--ok); background:rgba(49,214,138,.05)}
+.sysbar.bad{border-left-color:var(--bad); background:rgba(255,66,87,.05)}
+.sysbar.warn{border-left-color:var(--warn); background:rgba(255,179,64,.05)}
+.sysDot{width:11px; height:11px; border-radius:50%; background:var(--bad)}
+.sysbar.ok .sysDot{background:var(--ok); animation:pulse 2.2s infinite}
+.sysbar.warn .sysDot{background:var(--warn); animation:pulse .9s infinite}
+.sysMain{flex:1; min-width:0}
+.sysMain b{display:block; font:800 15px/1 var(--sans); letter-spacing:.1em}
+.sysMain span{display:block; margin-top:4px; font:400 11.5px/1.5 var(--sans); color:var(--dim)}
+.sysClock{font-size:14px; font-weight:700}
+.alertBar{display:flex; align-items:center; gap:16px; padding:12px 16px; border-radius:10px;
+  background:rgba(255,179,64,.10); border:1px solid rgba(255,179,64,.34)}
+.alBadge{font:700 8.5px/1 var(--mono); letter-spacing:.14em; color:#241600; background:var(--warn);
+  border-radius:4px; padding:4px 8px}
+.alertBar.cov{background:rgba(91,180,255,.09); border-color:rgba(91,180,255,.32); margin-top:8px}
+.alBadge.cov{background:var(--info); color:#04121f}
+.alertBar div{flex:1}
+.alertBar b{display:block; font:700 12.5px/1.3 var(--sans)}
+.alertBar span{display:block; margin-top:4px; font:400 11.5px/1.5 var(--sans); color:var(--dim)}
+tr.deployedRow td{background:rgba(49,214,138,.06)}
+.trackRow{display:flex; gap:24px; padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:12px}
+.trk{display:flex; flex-direction:column}
+.trk b{font:800 26px/1 var(--mono)}
+.trk span{margin-top:4px; font:600 8.5px/1 var(--mono); letter-spacing:.1em; color:var(--faint)}
+.notDeployed{padding:24px; text-align:center}
+.notDeployed b{display:block; font:700 15px/1 var(--sans)}
+.notDeployed p{margin:8px auto 16px; max-width:60ch; font:400 11.5px/1.6 var(--sans); color:var(--dim)}
+
+/* ================================================= MISSION: OPERATIONAL = */
+/* The scoreboard names its population now — "23 dead of survivable wounds"
+   rather than "23 dead" — and carries the all-categories figure beside it, so
+   it is three phrases longer than it was. Centred on #stage and unable to
+   wrap it grew out over the left edge of the right-hand rail. It is allowed
+   to take a second row and bounded so it cannot reach the rail at all; the
+   items themselves stay `nowrap`, so a phrase never breaks mid-sentence. */
+.missCompare{position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:6;
+  max-width:720px; flex-wrap:wrap; row-gap:8px; justify-content:center;
+  display:flex; align-items:center; gap:12px; padding:8px 16px; white-space:nowrap;
+  background:rgba(6,12,19,.93); border:1px solid rgba(150,190,225,.22); border-radius:10px;
+  backdrop-filter:blur(7px); box-shadow:0 12px 30px rgba(0,0,0,.45); pointer-events:auto}
+.missCompare.bad{border-color:rgba(255,66,87,.5); background:rgba(30,6,10,.93)}
+.missCompare.ok{border-color:rgba(224,169,74,.42)}
+.missCompare b.ok{color:var(--tollLo)} .missCompare b.bad{color:var(--tollHi)}
+.mcK{font:700 9px/1 var(--mono); letter-spacing:.15em; color:#8ea3b8}
+.mcK.bad{color:#ff8496}
+.missCompare b{font:800 30px/1 var(--mono)}
+.mcL{font:500 10.5px/1 var(--sans); color:#9db3c8}
+.mcSep{width:1px; height:22px; background:rgba(150,190,225,.2)}
+.mcS{display:flex; align-items:baseline; gap:4px; font:500 9.5px/1 var(--sans); color:#8ea3b8}
+.mcS b{font-size:14px; color:#dfe8f2}
+body.light .missCompare{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+
+.hudHead{display:flex; align-items:center; gap:12px}
+.hh{margin-left:auto; display:flex; align-items:baseline; gap:4px; font:500 8.5px/1 var(--sans);
+  color:#7f95ab; letter-spacing:0; text-transform:none}
+.hh b{font:700 13px/1 var(--mono); color:#dfe8f2; margin-left:8px}
+.hh b:first-child{margin-left:0}
+.sldList,.drnList{font-size:11px}
+.sld{display:grid; grid-template-columns:74px 46px 1fr 58px 62px; gap:8px; align-items:center;
+  padding:4px 0; border-bottom:1px solid rgba(150,190,225,.07); cursor:pointer}
+.sld:hover{background:rgba(125,165,205,.07)}
+.sld.hva{box-shadow:inset 2px 0 0 #ffd24a}
+.sldId{font:700 9.5px/1 var(--mono); color:#dfe8f2}
+.sldId i{color:#ffd24a; font-style:normal}
+.sldRole{font:600 8.5px/1 var(--mono); color:#7f95ab}
+.sldBar{height:6px; border-radius:3px; background:rgba(255,255,255,.09); overflow:hidden}
+.sldBar i{display:block; height:100%; border-radius:3px; background:var(--ok)}
+.sldBar i.warn{background:var(--warn)} .sldBar i.bad{background:var(--bad)}
+.sldT{font:700 10px/1 var(--mono); text-align:right}
+.sldT.bad{color:var(--bad)} .sldT.warn{color:var(--warn)} .sldT.ok{color:#8ea3b8}
+.sldSt{font:600 8px/1 var(--mono); letter-spacing:.06em; color:#7f95ab; text-align:right}
+.drn{display:grid; grid-template-columns:76px 62px 1fr 96px; gap:8px; align-items:center;
+  padding:4px 0; border-bottom:1px solid rgba(150,190,225,.07); cursor:pointer}
+.drn:hover{background:rgba(125,165,205,.07)}
+.drnId{font:700 9.5px/1 var(--mono); color:#dfe8f2}
+.drnSt{font:700 8px/1 var(--mono); letter-spacing:.08em; color:#7f95ab}
+.drnSt.ok{color:var(--ok)} .drnSt.warn{color:var(--warn)} .drnSt.info{color:var(--info)}
+.drnTask{font:500 10px/1 var(--sans); color:#b9cadb}
+.drnLoad{font:600 9px/1 var(--mono); color:#8ea3b8; text-align:right}
+
+/* ========================================================= DATA / SQL === */
+.sqlGrid{display:grid; grid-template-columns:330px 1fr; gap:12px; flex:1 1 auto; min-height:420px}
+.sqlGrid > .card{display:flex; flex-direction:column; overflow:hidden}
+.savedList{overflow:auto; padding:8px}
+.savedQ{display:block; width:100%; text-align:left; background:none; border:1px solid transparent;
+  border-radius:8px; padding:12px 12px; cursor:pointer; margin-bottom:4px}
+.savedQ:hover{background:rgba(125,165,205,.08); border-color:var(--line)}
+.savedQ.on{background:rgba(49,214,138,.10); border-color:rgba(49,214,138,.35)}
+.savedQ b{display:block; font:700 11.5px/1.3 var(--sans); color:var(--text)}
+.savedQ span{display:block; margin-top:4px; font:400 10px/1.45 var(--sans); color:var(--dim)}
+.sqlPad{display:flex; flex-direction:column; flex:1; padding:12px 12px; overflow:hidden}
+.qQ{margin:0 0 12px; font:400 11.5px/1.5 var(--sans); color:var(--dim)}
+.sqlBox{width:100%; height:132px; resize:vertical; background:var(--panel2); color:var(--text);
+  border:1px solid var(--line); border-radius:8px; padding:12px 12px; font-size:11.5px; line-height:1.6;
+  outline:none; tab-size:2}
+.sqlBox:focus{border-color:var(--angel)}
+.sqlBar{display:flex; align-items:center; gap:12px; margin:12px 0}
+.sqlBar .dim{font-size:10px}
+.qResult{flex:1; overflow:auto; min-height:120px}
+.qMeta{font:600 9.5px/1 var(--mono); letter-spacing:.1em; color:var(--faint); margin-bottom:8px}
+.qw{max-height:none}
+.qErr{background:rgba(255,66,87,.09); border:1px solid rgba(255,66,87,.32); border-radius:8px; padding:12px 12px}
+.qErr b{display:block; font:700 11.5px/1 var(--sans); color:var(--bad)}
+.qErr span{display:block; margin-top:4px; font:500 11px/1.5 var(--mono); color:var(--dim)}
+.schGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(228px,1fr)); gap:12px; padding:12px 12px}
+.schTable{border:1px solid var(--line); border-radius:8px; padding:12px 12px; background:var(--panel2)}
+.schHead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px}
+.schHead b{font:700 11px/1 var(--mono); color:var(--text)}
+.schHead span{font:600 10px/1 var(--mono); color:var(--faint)}
+.schCols{display:flex; flex-wrap:wrap; gap:4px}
+.schCol{display:flex; align-items:baseline; gap:4px; font:500 9px/1 var(--mono); color:var(--dim);
+  background:rgba(125,165,205,.09); border-radius:4px; padding:4px 8px}
+.schCol em{font-style:normal; font-size:8px; color:var(--faint)}
+
+/* =========================================================== COMPARE ==== */
+.cmpWrap{position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; padding:12px 12px; overflow:auto}
+.cmpTop{display:flex; align-items:center; gap:16px; flex:0 0 auto}
+.cmpScore{display:flex; flex-direction:column; gap:8px; background:var(--panel);
+  border:1px solid var(--line); border-radius:11px; padding:12px 24px}
+.cmpTitle{font:700 8.5px/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
+/* The scope of the headline number, on its own line under it. */
+.cmpTitle em{display:block; margin-top:4px; font-style:normal; letter-spacing:.12em; color:var(--dim)}
+/* The sentence reconciling the survivable-cohort headline with the
+   all-categories figure the casualty-flow diagram and the theatre table
+   carry. Printed, not inferred. */
+.cmpBridge{
+  margin:0; flex:0 0 auto; font:400 11.5px/1.6 var(--sans); color:var(--dim);
+  border-left:2px solid var(--line); padding-left:12px; max-width:130ch;
+}
+.cmpBridge:empty{display:none}
+/* Column headers that carry their population under the noun. */
+table.grid th .thSub{
+  display:block; margin-top:2px; font:600 8px/1.2 var(--mono);
+  letter-spacing:.08em; color:var(--faint); text-transform:none;
+}
+.tollNote{margin-top:2px; font:500 10.5px/1.4 var(--sans); color:var(--dim); letter-spacing:0}
+.tollNote b{font:700 10.5px/1.4 var(--sans); color:var(--text)}
+.cmpNums{display:flex; align-items:center; gap:24px}
+.cmpSide{display:flex; align-items:baseline; gap:8px}
+.cmpSide b{font:800 40px/1 var(--mono); letter-spacing:-.02em}
+.cmpSide span{display:flex; flex-direction:column; gap:4px;
+  font:700 8.5px/1 var(--mono); letter-spacing:.12em; color:var(--dim)}
+.cmpSide span i{font:500 8.5px/1 var(--sans); font-style:normal; letter-spacing:0; color:var(--faint)}
+.cmpSide.a b{color:var(--tollLo)} .cmpSide.b b{color:var(--tollHi)}
+.cmpMid{display:flex; align-items:baseline; gap:8px; padding:0 16px;
+  border-left:1px solid var(--line); border-right:1px solid var(--line)}
+.cmpDelta{font:800 18px/1 var(--mono); color:var(--dim)}
+.cmpDelta.ok{color:var(--tollLo)} .cmpDelta.bad{color:var(--tollHi)}
+.cmpMid span{font:700 13px/1 var(--mono); color:var(--dim)}
+.cmpState{display:flex; align-items:center; gap:12px; flex:1; font-size:11.5px}
+.cmpState .dim{font:400 11.5px/1.5 var(--sans); max-width:70ch}
+
+.cmpMaps{display:grid; grid-template-columns:1fr 1fr; gap:12px; flex:1 1 auto; min-height:300px}
+.cmpPane{position:relative; border-radius:11px; overflow:hidden; border:1px solid var(--line)}
+.cmpPane.a{border-color:rgba(49,214,138,.5); box-shadow:inset 0 0 0 1px rgba(49,214,138,.18)}
+.cmpPane.b{border-color:rgba(240,129,63,.5); box-shadow:inset 0 0 0 1px rgba(240,129,63,.18)}
+.cmpPane canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.cmpTag{position:absolute; top:9px; left:9px; z-index:3; display:flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:8px; font:800 13px/1 var(--sans); letter-spacing:.12em; pointer-events:none}
+.cmpTag em{font:500 9px/1.3 var(--sans); font-style:normal; letter-spacing:0; opacity:.75; max-width:210px}
+.cmpTag i{width:4px; height:22px; border-radius:2px}
+.cmpTag.a{background:rgba(6,32,22,.92); color:#8effc4; border:1px solid rgba(49,214,138,.5)}
+.cmpTag.a i{background:var(--angel)}
+.cmpTag.b{background:rgba(38,18,6,.92); color:#ffc79a; border:1px solid rgba(240,129,63,.5)}
+.cmpTag.b i{background:var(--current)}
+
+.cmpBottom{display:grid; grid-template-columns:1.35fr 1fr; gap:12px; flex:0 0 auto}
+.cmpChartCard,.cmpTableCard{display:flex; flex-direction:column}
+.cmpChart{width:100%; height:210px; display:block}
+.cmpNote{margin:0; padding:12px 12px 12px; font:400 10.5px/1.6 var(--sans); color:var(--dim)}
+.cmpRows{padding:12px 16px}
+.cmpKey{display:flex; gap:16px; padding:0 12px 12px; font:500 10px/1 var(--sans); color:var(--dim)}
+.cmpKey span{display:flex; align-items:center; gap:4px}
+.cmpKey i{width:10px; height:10px; border-radius:2px}
+.cmpKey i.a{background:var(--angel)} .cmpKey i.b{background:var(--current)}
+.joaBtns{display:flex; gap:4px}
+.joaBtns .mini{flex:1}
+@media (max-width:1400px){ .cmpBottom{grid-template-columns:1fr} }
+
+/* ================================================ SIMPLIFIED NAV ========
+   What survives of the word rail. The section headings became the tone step
+   between groups, the two-line entries became one icon, and the strapline
+   under each ("the Golden Hour is gone") became the second line of its
+   tooltip. Nothing is display:none'd away for the sake of it — every string
+   here is still in the document and still read by the tooltip, the command
+   palette and the role engine's label table. */
+.navSect{
+  width:18px; height:1px; margin:4px 0; padding:0; overflow:hidden;
+  background:var(--line2); color:transparent; font-size:0; flex:none;
+}
+.navItem.big{align-items:center}
+.nt{display:contents}
+.navItem.big .ni{width:20px; height:20px}
+.navToggle{
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+  background:none; border:none; border-top:1px solid var(--line); margin-top:12px; padding:12px 12px 12px;
+  cursor:pointer; color:var(--faint); font:700 8px/1 var(--mono); letter-spacing:.2em;
+}
+.navToggle:hover{color:var(--text)}
+.navToggle i{font-style:normal; font-size:9px; transition:transform .15s}
+body.navOpen .navToggle i{transform:rotate(90deg)}
+.navGroup{display:none; flex-direction:column; gap:2px}
+body.navOpen .navGroup{display:flex}
+.navGroup .navItem{padding:8px 12px}
+.navGroup .navItem em{font-size:11.5px}
+.lede{font-size:12.5px !important; line-height:1.6 !important; color:var(--dim); max-width:76ch}
+.jarg{color:var(--faint); font-size:11px}
+
+/* =========================================================== WELCOME ==== */
+/* The welcome overlay covers the viewport, and it used to cover the COMMAND BAR
+   with it — inset:0 at z-index 120 with pointer-events on. Every transport
+   control sat underneath it, so on a cold load pressing play, pause, reset or
+   dragging the scrubber did precisely nothing, with no visible reason why.
+   Verified with elementFromPoint: btnPlay, btnReset and scrub all resolved to
+   #welcome. A modal that silently eats the primary controls is worse than no
+   modal, so the bar now sits above it and stays live. Clicking any control
+   dismisses the overlay on the way through (see app.js), which is what someone
+   reaching for play meant to happen anyway. */
+#welcome{position:fixed; top:calc(var(--bandH) + var(--barH)); left:0; right:0; bottom:var(--footH); z-index:120;
+  display:none; align-items:center; justify-content:center;
+  background:rgba(2,6,11,.90); padding:32px; backdrop-filter:blur(7px)}
+#welcome.show{display:flex}
+#cmdbar{position:relative; z-index:130}
+.wcCard{max-width:1000px; width:100%; background:var(--panel); border:1px solid var(--line);
+  border-radius:16px; padding:32px 32px 24px; box-shadow:var(--shadow); max-height:100%; overflow:auto}
+.wcHead{display:flex; align-items:center; gap:16px; padding-bottom:24px; border-bottom:1px solid var(--line)}
+.wcMark{font-size:34px; color:var(--angel); line-height:1}
+.wcHead h2{font:800 25px/1 var(--sans); letter-spacing:.16em}
+.wcHead p{margin:8px 0 0; font:400 13px/1.4 var(--sans); color:var(--dim)}
+.wcSteps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:24px 0}
+.wcStep{position:relative; padding-left:2px}
+.wcN{display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+  background:rgba(49,214,138,.14); color:var(--angel); font:800 12px/1 var(--mono); margin-bottom:12px}
+.wcStep b{display:block; font:700 14.5px/1.4 var(--sans); margin-bottom:8px}
+.wcStep p{margin:0; font:400 12px/1.7 var(--sans); color:var(--dim)}
+.wcStep em{font-style:italic; color:var(--text)}
+.wcFoot{display:flex; align-items:center; gap:12px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap}
+.btn.big{padding:12px 24px; font-size:13px}
+.wcFoot .dim{margin-left:auto; font-size:10.5px}
+@media (max-width:1000px){ .wcSteps{grid-template-columns:1fr} }
+
+/* the theater map is now a panel on the Operations screen, not a full screen */
+.viewport[data-pane="DASHBOARD"] #theaterStage{
+  position:relative; display:block; height:430px; border-radius:11px;
+  border:1px solid var(--line); overflow:hidden; flex:0 0 auto;
+}
+.viewport[data-pane="DASHBOARD"] .thHead{max-width:360px; top:10px; left:10px; padding:12px 12px}
+.viewport[data-pane="DASHBOARD"] .thHead p{display:none}
+.viewport[data-pane="DASHBOARD"] .joaList{width:290px; top:10px; right:10px; bottom:10px}
+.viewport[data-pane="DASHBOARD"] .thHint{left:10px; bottom:10px}
+body.theater .viewport[data-pane="MISSION"] #stage{display:block}
+.viewport[data-pane="MISSION"] #theaterStage{display:none}
+
+/* The operation list floated over the theater map and covered the eastern half
+   of the AOR. On the Operations screen it becomes a column beside the map. */
+.viewport[data-pane="DASHBOARD"] #theaterStage{
+  display:grid; grid-template-columns:1fr 300px; gap:0; height:460px; background:transparent;
+  border:none; border-radius:0;
+}
+.viewport[data-pane="DASHBOARD"] #theaterStage > canvas{
+  position:relative; width:100%; height:100%; border-radius:11px; border:1px solid var(--line);
+}
+.viewport[data-pane="DASHBOARD"] .joaList{
+  position:relative; inset:auto; width:auto; top:auto; right:auto; bottom:auto;
+  padding-left:12px; overflow:auto;
+}
+.viewport[data-pane="DASHBOARD"] .thHead{
+  position:absolute; max-width:330px; top:10px; left:10px;
+}
+.viewport[data-pane="DASHBOARD"] .thHint{position:absolute; left:10px; bottom:10px; right:auto}
+
+/* "Every operation, worst first" was clipped mid-row.
+   `.tableWrap` is `flex:1; min-height:180px; overflow:auto`, which is right
+   for the long registers it was written for — CASUALTIES, STREAM, AUDIT —
+   where an inner scroller keeps the filter chips in view above a thousand
+   rows. On DASHBOARD the same rule met a seven-row table inside a `.pane`
+   that is itself `overflow:auto`: flex had no free space to distribute, the
+   wrap collapsed to its 180px minimum, and the seventh operation was cut
+   through the middle of its glyphs with an inner scrollbar nobody looks for.
+   Seven rows is not a register. Let it be its own height and let the pane
+   scroll, which is what the pane is for. The sticky header goes with it —
+   sticky inside a visible-overflow box resolves against the pane scroller
+   and would float the column titles over the cards below. */
+.viewport[data-pane="DASHBOARD"] .tableWrap{
+  flex:0 0 auto; min-height:0; max-height:none; overflow:visible;
+}
+.viewport[data-pane="DASHBOARD"] .tableWrap table.grid th{position:static}
+/* The reconciliation sentence under that table. */
+.tblNote{margin:-2px 0 0; font-size:11px; color:var(--dim); max-width:110ch}
+
+
+/* ---- death toll never reads as a gain ---------------------------------- */
+.rrZero{margin-top:12px; font:600 11px/1.4 var(--sans); color:var(--dim); letter-spacing:.01em}
+.mcS.zero{font:600 9.5px/1 var(--sans); color:#8ea3b8; opacity:.85}
+.rrPct{font-weight:600}
+.kpi b.toll{color:var(--tollLo)}
+
+/* ------------------------------------------------- device + decision ---- */
+.devBox,.decBox{border:1px solid var(--line); border-radius:10px; padding:12px 12px; background:var(--panel2)}
+.devBox.poor{border-color:rgba(255,66,87,.4); background:rgba(255,66,87,.05)}
+.devHead{display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap}
+/* The device name gets the row to itself once the trust mark joins the signal
+   pill: 352px of drawer will not carry a name, a status chip and a provenance
+   stamp on one line, and the version that tried folded "CRM monitor — PPG
+   waveform, fingertip" into four lines to do it. */
+.devHead b{font:700 11.5px/1.3 var(--sans); flex:1 1 100%}
+.devHead .pMark{margin-left:0 !important}
+.devFeed{margin-top:8px; border-top:1px solid var(--line); padding-top:8px;
+  display:flex; flex-direction:column; gap:4px; font:400 10.5px/1.5 var(--sans); max-height:118px; overflow:auto}
+.devFeed .mono{color:var(--faint); margin-right:8px}
+.devFeed b{margin-right:8px}
+.decLead{margin:0 0 12px; font:400 12px/1.6 var(--sans)}
+.decSub{margin:12px 0 8px; font:700 8.5px/1 var(--mono); letter-spacing:.16em; color:var(--faint)}
+.decTable{font-size:10.5px}
+.decTable td{padding:8px 8px}
+.decTable tr.sel td{background:rgba(49,214,138,.09)}
+
+/* ------------------------------------------------------- ground stream -- */
+.strTiles{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin:12px 0 12px}
+.segRow{display:inline-flex; gap:0; border:1px solid var(--line); border-radius:8px; overflow:hidden}
+.segRow .seg{border:none; border-radius:0; background:transparent; color:var(--dim);
+  font:600 10.5px/1 var(--sans); padding:8px 12px; cursor:pointer}
+.segRow .seg.on{background:var(--angel); color:#04140c}
+
+/* --------------------------------------------------- requirement ladder -- */
+.reqBox{margin-top:12px}
+.reqTable td{vertical-align:middle}
+.reqBar{display:inline-block; width:88px; height:8px; border-radius:3px;
+  background:rgba(150,180,210,.14); margin-right:8px; vertical-align:middle; overflow:hidden}
+.reqBar i{display:block; height:100%; background:var(--tollHi); border-radius:3px}
+.reqWhy{display:flex; flex-wrap:wrap; gap:4px}
+.reqChip{display:inline-flex; align-items:baseline; gap:4px; padding:4px 8px; border-radius:5px;
+  background:var(--panel2); border:1px solid var(--line); font:400 10px/1.3 var(--sans)}
+.reqChip b{font:700 10.5px/1 var(--mono); color:var(--text)}
+tr.reqFloor td{background:rgba(255,66,87,.06); border-top:2px solid rgba(255,66,87,.3)}
+
+/* ------------------------------------------------ cause decomposition --- */
+.czWrap{text-align:left}
+.czHead{font:700 8.5px/1 var(--mono); letter-spacing:.16em; color:var(--faint); margin-bottom:8px}
+.czRow{display:flex; flex-wrap:wrap; gap:8px}
+.cz{display:inline-flex; align-items:baseline; gap:8px; padding:4px 8px; border-radius:6px;
+  background:var(--panel2); border:1px solid var(--line); font:400 10.5px/1.35 var(--sans); color:var(--dim)}
+.cz b{font:800 13px/1 var(--mono); color:var(--tollHi)}
+.czNote{margin:8px 0 0; font:400 11px/1.55 var(--sans); color:var(--dim)}
+.czNote a{color:var(--info); text-decoration:none; font-weight:600; white-space:nowrap}
+.czNote a:hover{text-decoration:underline}
+.cmpCauses{flex:1 1 340px; min-width:300px}
+.cmpCauses:empty{display:none}
+
+/* accountability sheet shares the model-sheet chrome */
+#acctModal{
+  position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center;
+  background:rgba(2,5,9,.72); padding:32px; backdrop-filter:blur(3px);
+}
+#acctModal.show{display:flex}
+#acctModal.show{display:flex}
+.acctFoot{margin-top:16px; padding-top:12px; border-top:1px solid var(--line);
+  font:400 11.5px/1.6 var(--sans); color:var(--dim)}
+.acctFoot b{color:var(--text)}
+
+/* ============================================================= dossier === */
+.dossier{margin-top:8px}
+.dsec{margin:0 0 24px}
+.dsec h4{margin:0 0 4px; font:700 12.5px/1.3 var(--sans); color:var(--text)}
+.dnote{margin:0 0 12px; font:400 11.5px/1.6 var(--sans); color:var(--dim); max-width:104ch}
+.dnote.wide{max-width:none}
+.dkv{display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:8px}
+.dkv > div{border:1px solid var(--line); border-radius:8px; padding:8px 8px; background:var(--panel2)}
+.dkv span{display:block; font:600 8.5px/1 var(--mono); letter-spacing:.12em; color:var(--faint); text-transform:uppercase}
+.dkv b{display:block; margin-top:4px; font:600 11.5px/1.4 var(--sans); color:var(--text)}
+.dtable{font-size:11px}
+.dtable td,.dtable th{padding:8px 8px; vertical-align:middle}
+.dtable tr.dsum td{background:rgba(150,180,210,.05); border-top:1px solid var(--line2)}
+.dscroll{max-height:380px; overflow:auto; border:1px solid var(--line); border-radius:9px}
+.dchip{display:inline-block; padding:2px 8px; margin:2px 2px 2px 0; border-radius:4px;
+  font:600 9.5px/1.4 var(--mono); border:1px solid var(--line)}
+.dchip.ok{color:#8effc4; border-color:rgba(49,214,138,.35); background:rgba(49,214,138,.08)}
+.dchip.bad{color:#ff9aa8; border-color:rgba(255,66,87,.35); background:rgba(255,66,87,.07)}
+.dfunWrap{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.dfun{border:1px solid var(--line); border-radius:10px; padding:12px 12px; background:var(--panel2)}
+.dfunHead{font:700 8.5px/1 var(--mono); letter-spacing:.16em; color:var(--faint); margin-bottom:8px}
+.dfRow{display:grid; grid-template-columns:1fr 92px 34px 34px; gap:8px; align-items:center;
+  padding:4px 0; border-bottom:1px solid rgba(150,180,210,.07)}
+.dfRow:last-child{border-bottom:none}
+.dfK{font:500 11px/1.35 var(--sans)}
+.dfBar{display:block; height:9px; border-radius:3px; background:rgba(150,180,210,.12); overflow:hidden}
+.dfBar i{display:block; height:100%; background:var(--angel); border-radius:3px}
+.dfRow b{font:700 12px/1 var(--mono); text-align:right}
+.dfLost{font:700 10px/1 var(--mono); text-align:right}
+.dfWhy{grid-column:1 / -1; font:400 10px/1.45 var(--sans); color:var(--faint); margin-top:-2px}
+@media (max-width:1240px){ .dfunWrap{grid-template-columns:1fr} }
+
+/* ================================================================ ROI === */
+.roiBox{padding:2px 0 32px}
+.roiHead{display:flex; align-items:center; gap:16px; padding:12px 16px; margin-bottom:16px;
+  border:1px solid var(--line); border-radius:11px; background:var(--panel2)}
+.roiHead > div:first-child b{display:block; font:700 13px/1.3 var(--sans)}
+.roiHead > div:first-child span{display:block; margin-top:4px; font:400 11px/1.4 var(--sans); color:var(--dim)}
+.roiLives{margin-left:auto; display:flex; align-items:baseline; gap:12px; text-align:right}
+.roiLives b{font:800 26px/1 var(--mono)}
+.roiLives span{max-width:34ch; font:400 10.5px/1.45 var(--sans); color:var(--dim)}
+.roiClaim{display:flex; gap:16px; padding:24px 0; border-top:1px solid var(--line)}
+.roiClaim.money{border-top:2px solid var(--line2)}
+.roiN{flex:0 0 40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font:800 17px/1 var(--mono); color:var(--bg); background:var(--angel)}
+.roiClaim.money .roiN{background:var(--info)}
+.roiBody{flex:1; min-width:0}
+.roiBody h3{margin:0 0 8px; font:700 13px/1.3 var(--sans)}
+.roiBig{font:800 25px/1.2 var(--mono); letter-spacing:-.01em; margin-bottom:12px}
+.roiBig.ok{color:var(--angel)} .roiBig.warn{color:var(--warn)}
+.roiP{margin:0 0 12px; font:400 12px/1.7 var(--sans); color:var(--dim); max-width:104ch}
+.roiP b{color:var(--text)}
+.roiRows{margin:0 0 12px; border:1px solid var(--line); border-radius:9px; padding:8px 12px; background:var(--panel2)}
+.roiRow{display:grid; grid-template-columns:1fr 190px 62px 62px 150px; gap:12px; align-items:center;
+  padding:8px 0; border-bottom:1px solid rgba(150,180,210,.07)}
+.roiRow:last-child{border-bottom:none}
+.roiK{font:500 11.5px/1.4 var(--sans)}
+.roiBars{display:flex; flex-direction:column; gap:4px}
+.roiBars i{display:block; height:8px; border-radius:3px; min-width:2px}
+.roiBars i.a{background:var(--angel)} .roiBars i.b{background:var(--current)}
+.roiBars i.a.win{box-shadow:0 0 10px rgba(49,214,138,.45)}
+.roiRow b{font:700 12.5px/1 var(--mono); text-align:right}
+.roiU{font:400 10px/1.3 var(--sans); color:var(--faint)}
+.roiAnchor{margin:12px 0 0; padding:8px 12px; border-radius:8px; border:1px solid rgba(91,180,255,.28);
+  background:rgba(91,180,255,.06); font:400 11px/1.65 var(--sans); color:var(--dim); max-width:104ch}
+.roiAnchor b{color:var(--info)}
+.roiKey{display:flex; align-items:center; gap:16px; margin-top:24px; padding-top:12px;
+  border-top:1px solid var(--line); font:600 10px/1 var(--mono); letter-spacing:.1em; color:var(--dim)}
+.roiKey span{display:inline-flex; align-items:center; gap:8px}
+.roiKey i{width:12px; height:8px; border-radius:2px}
+.roiKey i.a{background:var(--angel)} .roiKey i.b{background:var(--current)}
+.roiKey .dim{letter-spacing:0; font:400 10.5px/1.4 var(--sans); text-transform:none}
+@media (max-width:1200px){ .roiRow{grid-template-columns:1fr 130px 52px 52px 110px} }
+
+/* =========================================================== STANDARD === */
+.stdPane{overflow:auto}
+.stdHero{padding:8px 0 24px; border-bottom:1px solid var(--line)}
+.stdKicker{display:inline-block; font:700 9px/1 var(--mono); letter-spacing:.22em; color:var(--info);
+  padding:4px 8px; border:1px solid rgba(91,180,255,.32); border-radius:5px; background:rgba(91,180,255,.07)}
+.stdHero h2{margin:12px 0 12px; font:700 27px/1.28 var(--sans); letter-spacing:-.015em; max-width:30ch}
+.stdHero > p{margin:0 0 16px; font:400 13.5px/1.75 var(--sans); color:var(--dim); max-width:96ch}
+.stdFacts{display:grid; grid-template-columns:repeat(auto-fit,minmax(216px,1fr)); gap:12px}
+.stdFact{border:1px solid var(--line); border-radius:10px; padding:12px 12px; background:var(--panel2)}
+.stdFact b{display:block; font:800 27px/1 var(--mono); color:var(--warn); letter-spacing:-.02em}
+.stdFact span{display:block; margin-top:8px; font:400 11px/1.55 var(--sans); color:var(--text)}
+.stdFact i{display:block; margin-top:8px; font:400 10px/1.4 var(--sans); font-style:normal; color:var(--faint)}
+.stdSplit{display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:24px 0; border-bottom:1px solid var(--line)}
+.stdCol h3{margin:0 0 12px; font:700 17px/1.35 var(--sans); max-width:26ch}
+.stdCol > p{margin:0 0 12px; font:400 12.5px/1.75 var(--sans); color:var(--dim)}
+.stdReadRow{display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--line)}
+.stdReadRow b{flex:0 0 74px; font:800 25px/1 var(--mono); text-align:right}
+.stdReadRow span{font:400 12px/1.65 var(--sans); color:var(--dim)}
+.stdReadRow span b{display:inline; float:none; font:700 12px/1.65 var(--sans); color:var(--text)}
+.stdSrc{margin:12px 0 0; font:400 10.5px/1.6 var(--sans); color:var(--faint)}
+.stdChartWrap{display:flex; flex-direction:column; border:1px solid var(--line); border-radius:12px;
+  padding:12px 12px; background:var(--panel2); min-height:400px}
+.stdChartHead{font:700 9px/1 var(--mono); letter-spacing:.15em; color:var(--faint); margin-bottom:12px}
+#stdChart{flex:1; width:100%; min-height:300px; display:block}
+.stdChartFoot{margin-top:12px; font:400 11px/1.6 var(--sans); color:var(--dim)}
+.stdChartFoot b{color:var(--text)}
+.stdReplace{padding:24px 0; border-bottom:1px solid var(--line)}
+.stdRepHead h3{margin:12px 0 16px; font:800 30px/1.1 var(--sans); letter-spacing:-.02em; color:var(--angel)}
+.stdSteps{display:grid; grid-template-columns:repeat(auto-fit,minmax(272px,1fr)); gap:16px}
+.stdStep{display:flex; gap:12px; border:1px solid var(--line); border-radius:11px; padding:16px;
+  background:var(--panel2)}
+.stdStepN{flex:0 0 27px; height:27px; border-radius:50%; background:var(--angel); color:#04140c;
+  display:flex; align-items:center; justify-content:center; font:800 13px/1 var(--mono)}
+.stdStep b{display:block; font:700 12.5px/1.3 var(--sans); margin-bottom:8px}
+.stdStep p{margin:0 0 8px; font:400 11.5px/1.65 var(--sans); color:var(--dim)}
+.stdStep i{display:block; font:400 10.5px/1.5 var(--sans); font-style:normal; color:var(--faint);
+  padding-top:8px; border-top:1px solid var(--line)}
+.stdPayoff{padding:24px 0 48px}
+.stdPayoff h3{margin:0 0 8px; font:700 17px/1.35 var(--sans)}
+.stdPayoff > p{margin:0 0 16px; font:400 12.5px/1.75 var(--sans); color:var(--dim); max-width:96ch}
+.stdPayoffRow{display:flex; gap:12px; flex-wrap:wrap}
+@media (max-width:1180px){ .stdSplit{grid-template-columns:1fr} }
+
+/* =====================================================================
+   SPACING PASS. Two systemic faults: content placed directly inside a
+   .card had no padding and sat flush against the border, and long-form
+   copy was constrained to a narrow measure while the cards beside it ran
+   full width, leaving a ragged empty right edge. Fixed at the container
+   level rather than per-component so it stays fixed.
+   ===================================================================== */
+
+/* 1. Anything dropped straight into a card gets the card's gutter. */
+.card > .lede,
+.card > p,
+.card > .dossier,
+.card > .reqBox,
+.card > .criCanvas,
+.card > .senseCtl,
+.card > .criBig,
+.card > .criInt,
+.card > .criTruth,
+.card > .senseStats,
+.card > .senseTrust,
+.card > .dlBox{ padding-left:16px; padding-right:16px }
+/* Tables cannot take the gutter as padding without breaking their own box,
+   so they take it as a margin instead. */
+.card > table.kv{ width:calc(100% - 32px); margin:16px 16px 16px }
+.card > .criCanvas{ width:calc(100% - 32px); box-sizing:border-box; margin-top:12px }
+.card > .senseTrust{ margin:0 16px 16px; padding:12px 12px; width:calc(100% - 32px);
+  box-sizing:border-box }
+.card > .criBig{ margin-top:12px }
+.card > .lede,
+.card > p{ padding-top:12px; margin-bottom:0 }
+.card > .dossier{ padding-top:16px; padding-bottom:8px }
+.card > .reqBox{ padding-bottom:16px }
+.card > .lede + .reqBox{ padding-top:16px }
+
+/* 2. Breathing room at the edges of every pane, and a floor under the
+      last element so content never ends hard against the viewport. */
+.pane{ padding:16px 24px 32px }
+.paneHead{ margin-bottom:2px }
+
+/* 3. Small containers were tight enough that text touched their borders. */
+.dkv > div{ padding:12px 12px }
+.dfun{ padding:16px 16px }
+.roiRows{ padding:12px 16px }
+.stdFact{ padding:16px 16px }
+.devBox,.decBox{ padding:16px 16px }
+.alertBar{ padding:16px 16px }
+
+/* 4. Section rhythm inside the dossier — headings were crowding the block
+      above them. */
+.dsec{ margin:0 0 32px }
+.dsec:last-child{ margin-bottom:8px }
+.dsec h4{ margin:0 0 8px }
+
+/* 5. Long-form copy: a readable measure, but not a narrow column stranded
+      beside full-width cards. */
+.stdHero > p{ max-width:none }
+.roiP{ max-width:none }
+.dnote{ max-width:none }
+.stdPayoff > p{ max-width:none }
+
+/* 6. THE STANDARD hero — headline and evidence side by side so the space
+      is used rather than left ragged. */
+.stdHero{
+  display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:32px; align-items:start; padding:12px 0 24px;
+}
+.stdHeroText h2{ margin:12px 0 12px; max-width:22ch }
+.stdHeroText > p{ margin:0; font:400 13.5px/1.8 var(--sans); color:var(--dim) }
+.stdFacts{ grid-template-columns:1fr 1fr; gap:12px; align-content:start }
+.stdSplit{ padding:24px 0; gap:32px }
+.stdReplace{ padding:24px 0 }
+.stdPayoff{ padding:24px 0 48px }
+.stdCol > p{ max-width:none }
+@media (max-width:1320px){
+  .stdHero{ grid-template-columns:1fr; gap:24px }
+  .stdHeroText h2{ max-width:34ch }
+}
+
+/* Long copy inside a card should run the card's width, not stop at 76ch
+   and strand the rest. The narrow measure is right for a pane header lede,
+   wrong for an explanatory paragraph above a full-width table. */
+.card > .lede{ max-width:none !important }
+.paneHead .lede{ max-width:84ch }
+/* Action column should not butt against the table edge. */
+table.grid td:last-child{ padding-right:16px }
+table.grid td:first-child{ padding-left:16px }
+table.grid th:last-child{ padding-right:16px }
+table.grid th:first-child{ padding-left:16px }
+
+/* Pane headers: let the explanatory line use the width the tools leave it,
+   instead of stopping short and stranding half the row. */
+.paneHead .ph1{ flex:1 1 auto; min-width:0 }
+.paneHead .phTools{ flex:0 0 auto; margin-left:auto }
+.paneHead .lede{ max-width:98ch }
+.paneHead h2{ margin-bottom:4px }
+/* Empty states inside a card should not be a cavern. */
+.card > .empty,td.empty{ padding:32px 24px }
+.card .dossier > .empty{ padding:24px 4px }
+
+/* ------------------------------------------------------------- the film -- */
+.stdFilm{ padding:24px 0; border-top:1px solid var(--line) }
+.stdFilmHead{ display:flex; align-items:flex-end; gap:24px; margin-bottom:16px }
+.stdFilmHead h3{ margin:12px 0 8px; font:700 17px/1.35 var(--sans) }
+.stdFilmHead p{ margin:0; font:400 12.5px/1.7 var(--sans); color:var(--dim); max-width:98ch }
+
+
+/* ================================================== PROVENANCE MARKS === */
+/* Two marks, one component, and the whole honesty argument of this
+   application rests on a reviewer being able to tell them apart at 18 px.
+
+     .pMark.ai    --ai on --ai-d, a filled network glyph. A trained model
+                  produced this number. Four things in the system qualify
+                  and they are listed by name in "Model & sources".
+     .pMark.det   --t-mid on --k4, an f(x) glyph. Deterministic: the tasking
+                  optimiser, or arithmetic over the run's own record. No
+                  colour claim, because there is no model.
+
+   THE FILL IS A SOLID TOKEN, not a translucency over whatever surface the
+   mark happens to land on. That is what makes the contrast a single measured
+   pair per theme instead of a matrix of every surface a badge can reach:
+   ink on fill is 7.40 / 7.67 / 7.08 / 7.94 across console-dark, night-ops,
+   field-slate and high-contrast, and it stays those numbers if somebody drops
+   a badge onto a lighter card tomorrow.
+
+   The mark is dropped into containers that style bare elements —
+   .alertBar span{display:block}, .dkv span, .dwCell span, .cardHead and
+   friends — and those rules flatten it into a vertical stack. Every property
+   it depends on is therefore set here at a specificity those rules cannot
+   beat, and the children are reset rather than merely styled. This is the
+   same lesson the previous badge paid for; it has not changed.
+
+   Restraint is the point. 18 px tall against the 23 px of the badge this
+   replaces, a 3 px radius rather than the 6 px of a status chip, no glow, no
+   drop-shadow. It is a stamp of provenance, not a sticker, and it must not be
+   mistaken for a status pill sitting in the same row. */
+span.pMark, .pMark{
+  display:inline-flex !important; align-items:center !important; justify-content:center;
+  flex-direction:row !important; flex-wrap:nowrap; flex:0 0 auto;
+  gap:4px; vertical-align:middle; box-sizing:border-box;
+  margin:0 0 0 8px !important; padding:0 8px 0 8px !important;
+  height:18px; min-height:18px; width:auto !important; max-width:none;
+  border-radius:3px; line-height:1 !important; white-space:nowrap !important;
+  cursor:help; text-transform:none !important; letter-spacing:0; border:0;
+  background:var(--ai-d); color:var(--ai);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ai) 32%, transparent);
+}
+.pMark > svg.pIc{
+  display:block !important; width:11px !important; height:11px !important;
+  flex:0 0 11px; margin:0 !important; fill:currentColor; color:inherit;
+  stroke:currentColor;
+}
+.pMark > b{
+  display:block !important; margin:0 !important; padding:0 !important;
+  font:700 9.5px/1 var(--mono) !important; letter-spacing:.11em !important;
+  color:inherit !important; text-transform:none !important; white-space:nowrap;
+}
+.pMark > i{
+  display:block !important; margin:0 !important;
+  padding:0 0 0 4px !important;
+  border-left:1px solid color-mix(in srgb, currentColor 34%, transparent);
+  font:600 9px/1 var(--mono) !important; font-style:normal !important;
+  letter-spacing:.07em !important; color:inherit !important;
+  text-transform:none !important; white-space:nowrap;
+}
+/* The deterministic mark. Neutral on a surface — the text ramp, which is to
+   say no claim at all. That contrast with the violet is the message. */
+.pMark.det{
+  background:var(--k4); color:var(--t-mid);
+  box-shadow:inset 0 0 0 1px var(--line2);
+}
+.pMark:focus-visible{ outline:2px solid var(--ai); outline-offset:2px }
+.pMark.det:focus-visible{ outline-color:var(--t-mid) }
+/* An unhovered mark inside a heading should not out-shout the heading. */
+.cardHead .pMark, .dwSect .pMark, h2 .pMark, h3 .pMark{ margin-left:8px !important }
+
+/* Dense chrome: the register's column heads and the inspector's key rows. */
+.thAi .pMark, .dkv span .pMark, #insp .nsp-v .pMark{
+  height:15px; min-height:15px; padding:0 4px 0 4px !important; gap:4px;
+  margin-left:4px !important; border-radius:2px;
+}
+.thAi .pMark > svg.pIc{ width:9px !important; height:9px !important; flex:0 0 9px }
+.thAi .pMark > b, .dkv span .pMark > b, #insp .nsp-v .pMark > b{ font-size:8px !important; letter-spacing:.08em !important }
+.thAi .pMark > i, .dkv span .pMark > i, #insp .nsp-v .pMark > i{ font-size:7.5px !important; padding-left:4px !important }
+#insp .nsp-v .pMark > svg.pIc{ width:9px !important; height:9px !important; flex:0 0 9px }
+
+
+/* -------------------------- "where it is, in the rail", inside the sheet --
+   The sheet already lists every model. What it did not do was answer the
+   navigational form of the same question — which of the twenty-two places I
+   can stand in this application is a model actually running in. This block
+   does, and it is generated from the same table the rail paints itself from,
+   so the two cannot drift apart. */
+.provWhere2{ margin:0 0 16px; padding:12px 12px; border-radius:6px;
+  background:var(--k1); border:1px solid var(--line2) }
+.provWhere2 h4{ margin:0 0 8px; font:700 11px/1.2 var(--mono); letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ai-b) }
+.provWhere2 p{ margin:0 0 12px; font:400 11.5px/1.65 var(--sans); color:var(--dim); max-width:96ch }
+.provList{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px }
+.provList li{ display:grid; grid-template-columns:14px auto auto 1fr; align-items:baseline; gap:8px }
+.provList .pvGlyph{ align-self:center; width:15px; height:15px; display:flex;
+  align-items:center; justify-content:center }
+.provList .pvGlyph svg{ width:15px; height:15px; display:block; overflow:visible }
+.provList b{ font:700 12px/1.4 var(--sans); color:var(--text); white-space:nowrap }
+.provList i{ font:600 8.5px/1.4 var(--mono); font-style:normal; letter-spacing:.11em;
+  color:var(--ai-b); white-space:nowrap }
+.provList span:last-child{ font:400 11px/1.5 var(--sans); color:var(--dim) }
+@media (max-width:1180px){ .provList li{ grid-template-columns:14px auto auto; }
+  .provList span:last-child{ grid-column:2 / -1 } }
+
+/* --------------------------------------------------- the hover panel ---- */
+/* Fixed to the viewport and parented to <body>, because a badge lives inside
+   a pane with overflow set and a tooltip clipped by the card it explains is
+   worse than no tooltip. pointer-events:none so it can never take a click
+   meant for what is underneath it. */
+#provTip{
+  position:fixed; z-index:1200; display:none; max-width:360px;
+  padding:12px 12px 12px; border-radius:7px;
+  background:var(--k4); color:var(--t-mid);
+  box-shadow:inset 0 0 0 1px var(--line2), var(--shadow);
+  font:400 11.5px/1.55 var(--sans); pointer-events:none;
+}
+#provTip.show{ display:block }
+#provTip h4{
+  margin:0 0 8px; font:700 10.5px/1.35 var(--mono);
+  letter-spacing:.05em; color:var(--ai);
+}
+#provTip.det h4{ color:var(--t-hi) }
+#provTip p{ margin:0 0 8px; color:var(--t-mid) }
+#provTip p:last-child{ margin-bottom:0 }
+#provTip .provWhere{ color:var(--t-mid) }
+#provTip .provMore{
+  margin-top:8px; padding-top:8px; border-top:1px solid var(--line2);
+  font:600 9.5px/1.5 var(--mono); letter-spacing:.05em; color:var(--t-lo);
+}
+
+/* ------------------------------------------- the inventory, in the sheet - */
+.provInv{ margin:0 0 8px }
+.provHead h3{
+  margin:0 0 4px; font:700 13px/1.35 var(--sans); letter-spacing:.01em; color:var(--text);
+}
+.provHead{ padding:2px 0 12px }
+.provHead.second{ padding-top:24px; margin-top:16px; border-top:1px solid var(--line2) }
+.provHead p{ margin:0; font:400 11.5px/1.65 var(--sans); color:var(--dim); max-width:104ch }
+.provCard{
+  margin:0 0 12px; padding:12px 12px 12px; border-radius:8px;
+  background:var(--panel2); box-shadow:inset 0 0 0 1px var(--line);
+}
+.provCard.off{ opacity:.72 }
+.provTop{ display:flex; align-items:center; gap:0; margin:0 0 8px }
+.provTop .pMark{ margin:0 12px 0 0 !important }
+.provTop h4{ margin:0; font:700 12.5px/1.3 var(--sans); color:var(--text); flex:1 }
+.provState{
+  font:700 9px/1 var(--mono); letter-spacing:.12em; color:var(--faint);
+  padding:4px 8px; border-radius:3px; background:var(--k4);
+}
+.provCard.off .provState{ color:var(--warn) }
+.provWhat{ font:400 11.5px/1.6 var(--sans); color:var(--dim); margin:0 0 8px }
+.provWhy{ margin-top:8px; padding-left:12px; border-left:2px solid var(--line2);
+  font:400 11px/1.65 var(--sans); color:var(--dim) }
+.provKv{ width:100%; border-collapse:collapse }
+.provKv td{ padding:4px 0; vertical-align:top; border-top:1px solid var(--line) }
+.provKv tr:first-child td{ border-top:0 }
+.provKv td:first-child{
+  width:168px; padding-right:16px; font:700 9.5px/1.6 var(--mono);
+  letter-spacing:.09em; text-transform:uppercase; color:var(--faint);
+}
+.provKv td:last-child{ font:400 11.5px/1.62 var(--sans); color:var(--dim) }
+.provKv td b{ color:var(--text) }
+.provKv .provFile{ font-family:var(--mono); font-size:10.5px }
+.provFlash{ box-shadow:inset 0 0 0 2px var(--ai) }
+.provCard.det .provTop .pMark{ background:var(--k4); color:var(--t-mid) }
+
+/* The live trust line on Sensor & model leads with its mark rather than
+   trailing it: the sentence is the model refusing to be trusted, and the
+   claim of provenance belongs in front of it. */
+.senseTrust .pMark{ margin:0 8px 0 0 !important }
+.senseTrustTx{ display:inline }
+
+.aiRow{margin:0 0 12px}
+
+/* The film note distinguishes the delivered build from the project copy. */
+.filmNote{margin:12px 0 0; font:500 11.5px/1.6 var(--sans); color:var(--faint)}
+.filmNote.missing{padding:16px 16px; border-radius:9px; color:var(--dim);
+  border:1px solid rgba(255,179,64,.34); background:rgba(255,179,64,.08)}
+.filmNote b{color:var(--text)}
+
+.thAi{display:inline-block; margin-left:4px}
+.mcK + .pMark{margin-left:8px !important}
+.acctFoot + *{margin-top:0}
+
+.filmDl{display:inline-block; margin-top:12px; text-decoration:none}
+.filmDiag{display:block; margin-top:8px; font:400 10px/1.5 var(--mono); color:var(--faint);
+  word-break:break-word}
+
+/* ----------------------------------------------------- the film player -- */
+.filmBox{position:relative; border:1px solid var(--line); border-radius:12px; overflow:hidden;
+  background:#04070b; max-width:1180px}
+#filmCv{display:block; width:100%; aspect-ratio:16/9; cursor:pointer; background:#04070b}
+.filmBar{display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--panel2); border-top:1px solid var(--line)}
+.filmPlay,.filmFs{width:32px; height:28px; display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--line2); border-radius:7px; background:var(--panel); color:var(--text);
+  font-size:12px; cursor:pointer; flex:0 0 auto}
+.filmPlay:hover,.filmFs:hover{border-color:var(--angel); color:var(--angel)}
+.filmT{font:600 11px/1 var(--mono); color:var(--text); flex:0 0 auto; min-width:34px}
+.filmT.dim{color:var(--dim)}
+.filmScrub{position:relative; flex:1; height:6px; border-radius:3px;
+  background:rgba(150,180,210,.16); cursor:pointer}
+#filmFill{position:absolute; left:0; top:0; bottom:0; border-radius:3px;
+  background:linear-gradient(90deg,var(--angel),#7ce8bb)}
+#filmHead{position:absolute; top:50%; width:11px; height:11px; margin:-4px 0 0 -4px;
+  border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(49,214,138,.75)}
+.filmBox:fullscreen{max-width:none; border:none; border-radius:0; display:flex;
+  flex-direction:column; justify-content:center; background:#000}
+.filmBox:fullscreen #filmCv{max-height:calc(100vh - 50px)}
+
+/* Expand without the Fullscreen API, for viewers that will not grant it. */
+body.filmExpanded{overflow:hidden}
+.filmBox.expanded{
+  position:fixed; inset:0; z-index:400; max-width:none; border:none; border-radius:0;
+  background:#000; display:flex; flex-direction:column; justify-content:center;
+}
+.filmBox.expanded #filmCv{
+  width:100%; height:auto; max-height:calc(100vh - 52px); object-fit:contain; margin:auto;
+}
+.filmBox.expanded .filmBar{border-top:1px solid rgba(255,255,255,.12); background:rgba(8,12,18,.94)}
+.filmBox.expanded::after{
+  content:'ESC to exit'; position:absolute; top:14px; right:18px;
+  font:600 10px/1 var(--mono); letter-spacing:.14em; color:rgba(220,235,250,.5);
+}
+.filmBox:fullscreen #filmCv{width:100%; height:auto; max-height:calc(100vh - 52px); margin:auto}
+
+/* ===================== SENSOR & MODEL =====================================
+   The pane where the network reads a waveform. Two live cards on top, two
+   reference cards below, because the live behaviour is the argument and the
+   provenance is the evidence for it. */
+.senseGrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);
+  gap:16px;align-items:start}
+.senseGrid > .senseCard{grid-column:span 1}
+@media (max-width:1180px){.senseGrid{grid-template-columns:1fr}}
+
+.criCanvas{width:100%;height:320px;display:block;background:#04070b;
+  border:1px solid var(--line);border-radius:4px}
+.senseCtl{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.senseRow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.senseRow > label{min-width:104px;font:600 10px/1 var(--mono);letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--dim)}
+.senseNote{margin:2px 0 0;color:var(--dim);font-size:12.5px}
+
+.criBig{display:flex;align-items:baseline;gap:16px;margin:4px 0 4px}
+.criBig b{font:800 58px/1 var(--mono);letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.criBig span{font:700 11px/1 var(--mono);letter-spacing:2.4px}
+.criInt{color:var(--dim);font-size:12px;margin-bottom:12px}
+.criInt b{color:var(--ink);font-family:var(--mono);font-variant-numeric:tabular-nums;
+  margin-left:8px}
+.criTruth{border-top:1px solid var(--line);padding-top:8px;color:var(--faint);font-size:11.5px}
+.criTruth b{color:var(--dim);font-family:var(--mono);margin-left:8px;
+  font-variant-numeric:tabular-nums}
+.criTruth em{font-style:normal;margin-left:8px;font-family:var(--mono);font-size:11px}
+
+.senseStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 12px}
+.senseStats > div{background:var(--panel2);border:1px solid var(--line);border-radius:3px;
+  padding:8px 8px}
+.senseStats b{display:block;font:700 17px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.senseStats span{display:block;margin-top:4px;font-size:10px;color:var(--faint);
+  letter-spacing:.4px}
+
+.senseTrust{border-radius:3px;padding:12px 12px;font-size:12px;line-height:1.45;
+  border:1px solid transparent}
+.senseTrust.ok{background:rgba(49,214,138,.09);border-color:rgba(49,214,138,.32);color:#9fe9c4}
+.senseTrust.warn{background:rgba(255,179,64,.09);border-color:rgba(255,179,64,.34);color:#ffd79a}
+.senseTrust.bad{background:rgba(255,66,87,.10);border-color:rgba(255,66,87,.38);color:#ffb0ba}
+
+table.kv{width:100%;border-collapse:collapse;font-size:12.5px}
+table.kv td{padding:4px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.kv td:first-child{color:var(--dim);width:56%}
+table.kv td:last-child{text-align:right;font-family:var(--mono);
+  font-variant-numeric:tabular-nums}
+table.kv tr:last-child td{border-bottom:0}
+table.kv tr.kvHi td{color:var(--amber,#ffb340)}
+table.kv tr.kvHi td:last-child b{color:var(--amber,#ffb340)}
+.senseProv{margin:12px 0 0;color:var(--faint);font-size:11.5px;line-height:1.55}
+.senseProv b{color:var(--dim)}
+
+/* --------------------------------------------------- DATA, as an export ---
+   The pane is one status line and one card of prose now. Without a width
+   bound the sentence runs the full 1,443px of the pane and becomes unreadable
+   for the same reason a newspaper is set in columns. */
+.exportNote{max-width:96ch}
+.exportNote .lede{margin:0 0 12px}
+.exportNote .lede:last-child{margin-bottom:0}
+.exportNote a{color:var(--info); text-decoration:none; border-bottom:1px solid rgba(91,180,255,.4)}
+.exportNote a:hover{border-bottom-color:var(--info)}
+/* The run report leads with the survivable-cohort figure; this is the line
+   that reconciles it with the all-categories figure the casualty-flow
+   diagram and the theatre table carry. */
+.rrBridge{margin-top:8px; font:400 11px/1.6 var(--sans); color:var(--dim)}
+
+/* ------------------------------------------- WHERE AN OVERLAY MAY SIT ---
+   Every one of these was `inset:0` at z-index 80–95, and the command bar is
+   z-index 130. The bar therefore drew straight over the top of the card: the
+   sheet's own heading and its Close button sat underneath the masthead and
+   the Deploy control, unreadable and unclickable, on the four largest panels
+   in the application.
+
+   Raising them above the bar is the wrong fix. This is a defence console and
+   the classification band is the one element that must never be covered by
+   anything, ever. So the overlays are inset to the working area instead —
+   below the band, the app row and the tool row, above the foot ribbon —
+   which is exactly where #shell and the welcome overlay already live, using
+   the same two custom properties app.js measures at runtime. The card then
+   centres in the space it actually has, the classification line stays
+   legible behind it, and the transport stays reachable.
+   ------------------------------------------------------------------------ */
+#modal, #acctModal, #runModal, #deployModal, #confirmModal{
+  inset:calc(var(--bandH) + var(--barH)) 0 var(--footH) 0;
+}
+
+/* ------------------------------------------------------- confirm sheet --
+   One job: stop an irreversible act until a person has read what it does. */
+#confirmModal{
+  position:fixed; z-index:96; display:none; align-items:center; justify-content:center;
+  background:rgba(2,5,9,.72); padding:32px; backdrop-filter:blur(3px);
+}
+#confirmModal.show{display:flex}
+.confirmCard{max-width:560px}
+.confirmCard .modalHead{border-bottom:0; padding-bottom:4px}
+.confirmCard .modalHead p{color:var(--dim); font-size:12px; line-height:1.6}
+.confirmCard .modalHead p b{color:var(--text)}
+.cfFoot{display:flex; justify-content:flex-end; gap:8px; padding:16px 24px 24px}
+#cfCancel{border:1px solid var(--line); background:var(--panel2); color:var(--text);
+  border-radius:7px; padding:8px 16px; cursor:pointer; height:34px; font:600 11px/1 var(--sans)}
+#cfCancel:hover{border-color:var(--line2)}
+#cfOk{height:34px}
+#cfOk.danger{background:var(--amb); color:var(--on-accent)}
+
+/* an operation this commander cannot task: shown, never actionable */
+.oobNote{font:600 9px/1.35 var(--mono); letter-spacing:.09em; color:var(--t-dim); white-space:nowrap}
+tr.otherTheater td{color:var(--t-lo)}
+
+/* --------------------------------------------- reading the mark faster --
+   The complaint this answers: "they are all the same colour, and I have to
+   sit and decipher it." Both halves were true. Every AI mark carried the same
+   glyph and a model NAME — CRI-NET, ENCODER — which is precise and means
+   nothing to somebody seeing it for the first time.
+
+   Three channels now, in the order the eye takes them:
+     1  FILL AND COLOUR   filled violet = a model. Outlined grey = no model.
+                          That is the binary a reviewer must get in half a
+                          second, and it is unchanged.
+     2  SHAPE             hourglass, shield, book, pen, f(x), sigma. Six
+                          silhouettes, learned once from the key.
+     3  WORDS             AI / NOT AI, then what it DID — PREDICTS COLLAPSE,
+                          REFUSES WHEN UNSURE, QUOTES DOCTRINE, DRAFTS THE
+                          BRIEF, SCHEDULING, ARITHMETIC. The model's name
+                          moved to the first line of the hover panel.
+   NOT AI is spelled out rather than implied by the word OPTIMISER, because a
+   reader should not have to know that an optimiser is not a neural network to
+   read this screen correctly. */
+.pMark > b{ font-size:9px !important }
+.pMark.det > b{ opacity:.95 }
+/* No truncation. A mark whose words are cut in half — "AI | PREDICTS CO…" —
+   costs the reader exactly the deciphering this change exists to remove. The
+   sweep checks every mark in every view against horizontal clipping and line
+   wrap instead, which is the constraint that actually matters. */
+.pMark > i{ max-width:none }
+
+/* The tag that heads a card in Model & sources. Not the mark itself — the
+   mark is a bare sparkle and would be lost as a card's title. */
+.provTop > .aiAttr{ margin:0 8px 0 0 !important }
+.provTag{ display:inline-flex; align-items:center; gap:4px; height:17px; padding:0 8px;
+  border-radius:3px; font:700 9px/1 var(--mono); letter-spacing:.12em; flex:0 0 auto }
+.provTag svg{ width:11px; height:11px; fill:currentColor; display:block }
+.provTag.ai{ background:var(--ai-d); color:var(--ai);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ai) 34%,transparent) }
+.provTag.det{ background:var(--k4); color:var(--t-mid); box-shadow:inset 0 0 0 1px var(--line2) }
+.provKeyLede .provTag{ margin-right:8px; vertical-align:middle }
+
+/* The key, inside Model & sources. */
+.provKeyLede{ margin:0 0 12px !important; font:400 11.5px/1.6 var(--sans); color:var(--dim); max-width:92ch }
+.provKeyLede b{ color:var(--text) }
+.provKey{ display:flex; flex-direction:column; gap:8px; margin:0 0 12px }
+/* Each row is its own grid, so `max-content` on the first column sized every
+   row independently and the names came out ragged. A fixed track, wide enough
+   for the longest mark, lines the three columns up down the whole key. */
+.pkRow{ display:grid; grid-template-columns:236px 250px 1fr; align-items:center; gap:16px }
+.pkRow .aiAttr{ margin-left:0 !important; justify-self:start }
+.pkName{ font:600 11.5px/1.35 var(--sans); color:var(--text) }
+.pkSay{ font:400 11px/1.45 var(--sans); color:var(--dim) }
+.provKeyFoot{ margin:0 !important; font:400 11px/1.6 var(--sans); color:var(--dim); max-width:92ch }
+@media (max-width:900px){ .pkRow{ grid-template-columns:1fr; gap:4px } }
+
+/* The hover panel now answers before it explains. */
+#provTip .provName{ margin:2px 0 8px !important; font:600 11px/1.4 var(--mono) !important;
+  letter-spacing:.02em; color:var(--t-mid) !important }
+
+/* ================================= THE AI MARK — 03 SPARKLE TRIO, NEBULA ==
+   The ai-marks-v2 recipe, dropped into a console that styles bare children in
+   a dozen containers. .alertBar span, .dkv span, .dwCell span and .cardHead
+   will otherwise flatten this into a vertical stack, so display and margin
+   are set at a specificity none of them can beat. That is the same lesson the
+   previous versions of this mark each paid for once.
+
+   ONE UNIT, ONE FILTER. The glyph and the wordmark live in the same span and
+   the glow is a drop-shadow on that span, not on the SVG — a filter on the
+   SVG alone leaves the label unlit.
+
+   THE LABEL IS REAL TEXT with a clipped gradient: selectable, searchable, and
+   set in the console's own face. It falls back to a flat --ai-a where
+   background-clip:text is unsupported.
+
+   SIZE IS NOT LEFT TO em. The sheet sets the label at .7em of its host, which
+   is right on 19px body copy and produces 6.6px inside a 9.5px table header.
+   Every context this mark lands in therefore states its own two sizes. */
+span.pMark, .pMark, .aiAttr{
+  display:inline-flex !important; align-items:center !important;
+  flex-direction:row !important; flex-wrap:nowrap !important; flex:0 0 auto;
+  white-space:nowrap !important; vertical-align:middle; box-sizing:border-box;
+  margin:0 0 0 8px !important; padding:0 !important;
+  width:auto !important; height:auto !important; min-height:0;
+  background:none !important; border:0; box-shadow:none !important;
+  border-radius:0; line-height:1 !important; cursor:help;
+  text-transform:none !important; letter-spacing:0;
+}
+.aiAttr > .aiMark{
+  display:block !important; width:15px !important; height:15px !important;
+  flex:0 0 15px; margin:0 !important; overflow:visible;
+}
+.aiAttr > .aiLabel{
+  /* OPTICAL, NOT METRIC. The sheet sets .3em, which is right for a mark
+     floating in body copy. It is wrong here, and the reason is inside the
+     glyph: the trio's lead star occupies roughly x=3..17 of a 24-unit box,
+     and the right third holds only the two satellites at 78% and 50% alpha.
+     That corner reads as empty, so a metrically correct gap looks like a
+     wide one. The label is therefore pulled back INTO the box. It cannot
+     collide with the satellites — they sit at the top and bottom of the box
+     (y 1.7-9.5 and 15.5-21.3) and the label is centred between them. */
+  display:block !important; margin:0 0 0 -4px !important; padding:0 !important;
+  font:600 11px/1.25 var(--sans) !important; letter-spacing:.015em !important;
+  text-transform:none !important; white-space:nowrap;
+  background:linear-gradient(100deg, var(--ai-a), var(--ai-b));
+  -webkit-background-clip:text; background-clip:text; color:transparent !important;
+}
+@supports not ((-webkit-background-clip:text) or (background-clip:text)){
+  .aiAttr > .aiLabel{ background:none; color:var(--ai-a) !important }
+}
+/* THE GLOW, ON EVERY MARKED ASSET, exactly as the sheet specifies:
+
+     .glow .ai-attr{ filter:drop-shadow(0 0 .3em color-mix(in srgb,
+                     var(--ai-a, var(--m1)) 55%, transparent)) }
+
+   It is a filter on the WHOLE span rather than on the SVG, which is the point
+   of the mark being one inline unit — a filter on the SVG alone rasterizes
+   the glyph and leaves the wordmark unlit, and the two then read as separate
+   objects. The blur is in em, so it scales with whatever type the mark is
+   sitting in: about 5px against a 17px heading, about 3px in a table header.
+
+   Always on rather than on hover, because a marked asset should be findable
+   by scanning rather than by pointing at things. Hover lifts it a little
+   further, which is the affordance that says the mark is pressable. */
+.aiAttr{ filter:drop-shadow(0 0 .3em color-mix(in srgb, var(--ai-a) 55%, transparent)) }
+.aiAttr:hover{ filter:drop-shadow(0 0 .42em color-mix(in srgb, var(--ai-a) 72%, transparent)) }
+@media (prefers-reduced-motion:reduce){ .aiAttr{ transition:none } }
+.aiAttr:focus-visible{ outline:2px solid var(--ai-a); outline-offset:3px; border-radius:3px }
+
+/* A heading is 17px; the mark sits on its optical centre, not its baseline. */
+h2 > .aiAttr, h3 > .aiAttr, .cardHead .aiAttr, .dwSect .aiAttr{
+  margin-left:8px !important; position:relative; top:-1px;
+}
+/* Dense chrome: a table's column head, the inspector's key rows. */
+.thAi .aiAttr, th .aiAttr, .dkv span .aiAttr, #insp .nsp-v .aiAttr{ margin-left:8px !important }
+.thAi .aiAttr > .aiMark, th .aiAttr > .aiMark, .dkv span .aiAttr > .aiMark,
+#insp .nsp-v .aiAttr > .aiMark{ width:12px !important; height:12px !important; flex:0 0 12px }
+.thAi .aiAttr > .aiLabel, th .aiAttr > .aiLabel, .dkv span .aiAttr > .aiLabel,
+#insp .nsp-v .aiAttr > .aiLabel{ font-size:9.5px !important; margin-left:-2px !important }
+
+/* The after-action panel when nothing was ever compared. Amber, because this
+   is an instruction to the operator rather than a result — and specifically
+   NOT red, which on this screen means people died who did not have to. */
+.rrBig .rrNoRun{
+  display:block; font:800 26px/1.15 var(--sans); letter-spacing:.01em;
+  color:var(--amb); text-align:center;
+}
+
+/* ==================================================== TELEMETRY INGEST ===
+   The chip in the tool row and the card on Sensor & model. The link state is
+   the only thing on either that changes colour, because the link state is the
+   only thing on either that is an instruction to the operator:
+
+     LIVE     green   readings are arriving
+     STALE    amber   nothing for six seconds — say so before it matters
+     DOWN     red     nothing for fifteen; the tasking layer is now running
+                      on last-known state, which is the behaviour the whole
+                      concept rests on
+     WAITING  neutral listener up, nothing has reported yet
+     OFF      neutral no listener; every reading is simulated and the card
+                      says so in those words
+   ------------------------------------------------------------------------ */
+.ingChip{
+  display:inline-flex; align-items:center; gap:8px; flex:0 0 auto;
+  height:20px; padding:0 8px; margin-left:8px; border-radius:3px;
+  background:var(--k3); box-shadow:inset 0 0 0 1px var(--line2);
+  font:600 9px/1 var(--mono); letter-spacing:.12em; color:var(--t-mid);
+  cursor:help; white-space:nowrap;
+}
+.ingChip i{ width:6px; height:6px; border-radius:50%; background:var(--t-dim); flex:none }
+.ingChip b{ font-weight:700; letter-spacing:.12em }
+.ingChip u{ text-decoration:none; color:var(--t-lo); font-weight:600; letter-spacing:.06em;
+  padding-left:8px; border-left:1px solid var(--line2) }
+.ingChip[data-state="LIVE"]{ color:var(--grn); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--grn) 40%,transparent) }
+.ingChip[data-state="LIVE"] i{ background:var(--grn); box-shadow:0 0 0 3px color-mix(in srgb,var(--grn) 26%,transparent) }
+.ingChip[data-state="STALE"]{ color:var(--amb); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--amb) 40%,transparent) }
+.ingChip[data-state="STALE"] i{ background:var(--amb) }
+.ingChip[data-state="DOWN"]{ color:var(--red); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--red) 44%,transparent) }
+.ingChip[data-state="DOWN"] i{ background:var(--red) }
+
+.ingCard{ margin:0 0 12px }
+.ingTbl{ width:100%; border-collapse:collapse; margin:2px 0 0 }
+.ingTbl td{ padding:4px 0; border-bottom:1px solid var(--line);
+  font:400 11.5px/1.5 var(--sans); color:var(--text); vertical-align:top }
+.ingTbl td:first-child{ width:190px; font:700 9px/1.6 var(--mono); letter-spacing:.12em;
+  color:var(--t-dim); text-transform:uppercase }
+.ingNote{ margin:8px 0 0 !important; font:400 11px/1.6 var(--sans); color:var(--dim); max-width:96ch }
+.ingNote b{ color:var(--text) }
+.ingNote code{ font:600 10.5px/1 var(--mono); color:var(--cyan) }

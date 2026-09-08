@@ -1,0 +1,174 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ANGEL SWARM — .gitignore
+#
+# The working tree is ~2.7 GB. Almost none of that is source. This file keeps
+# the repository to the application, the launcher source, the reproduction
+# harnesses and the documents, and excludes four categories: things that are
+# rebuilt from what is here, things that are large and derived, things that
+# belong to somebody else, and scratch.
+#
+# Non-obvious entries carry a reason inline. Read those before deleting a line.
+#
+# REVISED 5 September 2026 for publication as DHA-OWHA-KM/DHA-ANGEL-SWARM-DEV.
+# Two changes from the v6.5 package copy, both marked REVISED below and both
+# made so that a plain ZIP download of this repository is a working program:
+# the eight prebuilt launcher binaries are now TRACKED, and train/train.log is
+# re-admitted. Several ignore blocks below name directories (OUT/, TEAMMATE/,
+# BACKUP/, DECK/, shots*/) that are not present in this repository at all; they
+# are kept so that re-importing the full working tree cannot re-admit them by
+# accident. Nothing else was altered.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Dependencies ─────────────────────────────────────────────────────────────
+# 1.4 GB. app/vendor/ holds the handful of files the application actually
+# loads at runtime and those ARE tracked; node_modules is only the source they
+# were vendored from. package.json + package-lock.json restore it.
+node_modules/
+
+# ── Compiled launcher binaries — TRACKED, deliberately ───────────────────────
+# REVISED 5 September 2026 for repository publication. The v6.5 package ignored
+# these on the reasoning that the source is the artefact and `go build` on
+# go 1.24 reproduces them within 1% with no module downloads. That reasoning is
+# still correct, and it is still the wrong trade HERE: this repository's first
+# requirement is that "Download ZIP -> unzip -> run" works for a reviewer who
+# has no Go toolchain. Eight binaries, ~33 MB, none near GitHub's 50 MB warning
+# threshold. They are tracked on purpose. Build them yourself if you would
+# rather not trust them — see the Quick start in README.md.
+#
+# GitHub's ZIP export does not preserve the Unix execute bit. macOS and Linux
+# users need one `chmod +x` after unzipping. Windows is unaffected.
+/ANGEL-SWARM
+
+# ── Someone else's repository ────────────────────────────────────────────────
+# TEAMMATE/ contains a full clone of another person's project, provided for
+# review. Publishing it here would be republishing their code under this
+# repository's name and licence. It is excluded on purpose. Do not remove this
+# line without that person's written permission. (See RESEARCH/GITHUB-PREP.md,
+# decision 3.)
+TEAMMATE/
+
+# ── Release archives and backups ─────────────────────────────────────────────
+# 599 MB of packaged release zips and 240 MB of dated tarball snapshots of a
+# tree that git is about to version properly. Several BACKUP tarballs are
+# ~61 MB, which trips GitHub's 50 MB per-file warning. Publish releases as
+# GitHub Releases, not as tracked files.
+BACKUP/
+OUT/*.zip
+*.tar.gz
+*.zip
+
+# ── Generated document formats ───────────────────────────────────────────────
+# Every OUT/*.docx is generated from the OUT/*.md beside it. Track the source.
+OUT/*.docx
+
+# ── Large derived media ──────────────────────────────────────────────────────
+# 113 MB of renders. The four films the application itself plays live in
+# app/video/ and ARE tracked, because the film pane loads them by relative
+# path and the app breaks without them. These are the master and superseded
+# cuts that nothing loads.
+OUT/*.mp4
+OUT/video/
+
+# ── Screenshots, visual-regression output, design exploration ────────────────
+# ~258 MB of PNG across the tree, all of it produced by the Playwright probe
+# scripts to check a layout on a given day. None of it is an input to anything.
+/*.png
+shots/
+shots3/
+shots_dp/
+shots_sha/
+OUT/adapter-shots/
+OUT/design-proof/
+OUT/mapfix/
+OUT/prov/
+OUT/sec/
+prov/
+pal/
+ref/
+final-draft/
+MOCKUPS/
+mock/
+MOCK/
+mock-*.html
+mock-*.png
+spike/
+spike-maplibre.html
+# app/spike and app/spike-maplibre.html are symlinks into spike/ above; tracking
+# them would commit links that dangle for every person who clones.
+app/spike
+app/spike-maplibre.html
+
+# ── Presentation deck build ──────────────────────────────────────────────────
+# DECK/ also contains jefferson.pptx — an unrelated internal work presentation
+# ("API/KM Introduction and Recommendation") and its extracted contents under
+# DECK/jx/, plus a DoD seal image. None of that is ANGEL SWARM and none of it
+# should be published from this repository. (GITHUB-PREP.md, decision 6.)
+# REVISED 8 September 2026: anchored to the repository root. Git on Windows
+# sets core.ignorecase=true, which made the unanchored `DECK/` also match
+# app/vendor/deck/ (deck.min.js, loaded at runtime by app/js/geo3d.js — the
+# 3D map fails without it) and Documentation/deck/ (the ANGEL SWARM pitch
+# decks). Neither was ever the target. The top-level DECK/ build directory
+# still is, and is still not present in this repository.
+/DECK/
+.deckbuild/
+.dtwork/
+
+# ── One-off probe, measurement and packaging scripts ─────────────────────────
+# ~250 single-purpose Playwright/node scripts written to answer one question on
+# one day. The harnesses the documents actually cite are re-admitted below:
+# winprob.mjs (the win table), _sbom_gen.mjs / _sbom_validate.mjs (the SBOM) and
+# _sec_verify.mjs (the security measurements). app/selftest.html is inside app/
+# and was never ignored.
+/_*.mjs
+/_*.js
+!/_sbom_gen.mjs
+!/_sbom_validate.mjs
+!/_sec_verify.mjs
+!/_sec_regress.mjs
+/v3_*.mjs
+/v5*.mjs
+/v6*.mjs
+/v7*.mjs
+/v8_*.mjs
+/dp_*.mjs
+/sha_*.mjs
+/thx_*.mjs
+/fleetsweep_*.mjs
+/fleetsweep_*.json
+/wg_*.mjs
+/wg_*.txt
+/shot*.mjs
+/verify*.mjs
+/measure*.mjs
+/audit*.mjs
+/probe*.mjs
+/base[0-9].mjs
+/z[0-9].mjs
+/za.mjs
+/t[12]*.mjs
+/dp_out/
+/dp_out2/
+/dp_cold/
+/_cw/
+/_chrome/
+/_mapagent/
+/_mapagent*/
+
+# ── Scratch and OS ───────────────────────────────────────────────────────────
+# REVISED: `*.log` is narrowed so it does not swallow train/train.log, which is
+# the record of the CRI-Net training run and ships as evidence.
+*.log
+!train/train.log
+*.pre-*
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.venv/
+venv/
+
+# ── Fetched at runtime, never committed ──────────────────────────────────────
+# get-model.sh / get-model.ps1 download the optional Qwen2.5-0.5B GGUF here.
+# ~400 MB, Apache-2.0, and deliberately not redistributed in this repository.
+app/models/llm.gguf
+app/models/*.part

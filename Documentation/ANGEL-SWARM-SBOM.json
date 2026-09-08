@@ -1,0 +1,2822 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:ad5fac77-ad58-45c8-b6f1-e3ed7aa14853",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-05T06:17:20Z",
+    "lifecycles": [
+      {
+        "phase": "build"
+      }
+    ],
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "ANGEL SWARM SBOM generator (_sbom_gen.mjs)",
+          "version": "1.0.0"
+        },
+        {
+          "type": "application",
+          "name": "Go toolchain",
+          "version": "go1.24.7"
+        },
+        {
+          "type": "application",
+          "name": "esbuild",
+          "version": "0.25.10"
+        },
+        {
+          "type": "application",
+          "name": "Node.js",
+          "version": "22.22.2"
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "angel-swarm",
+      "name": "ANGEL SWARM",
+      "version": "6.5",
+      "description": "Autonomous medical resupply tasking against physiological deadlines. Fully offline single-page application served on 127.0.0.1 by a static Go binary. Synthetic data only; no PHI has ever been processed.",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:classification",
+          "value": "UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY"
+        },
+        {
+          "name": "angel:networkPosture",
+          "value": "no outbound request originates in the application; measured at zero off-origin requests across a full navigation of every screen"
+        },
+        {
+          "name": "angel:bind",
+          "value": "127.0.0.1 only; non-loopback peers rejected by the handler"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "angel:sbomScope",
+        "value": "Everything under app/vendor, app/models, app/fonts, app/data, the first-party engine and shell, the Go module and the four launcher binaries. Third-party npm packages declared but not vendored are listed with scope \"excluded\"."
+      },
+      {
+        "name": "angel:versionMethod",
+        "value": "Versions come from package-lock.json except where the vendored artefact itself declares a different version, which is recorded per component in angel:versionSource."
+      },
+      {
+        "name": "angel:licenceMethod",
+        "value": "Licences are read from the shipped package.json \"license\" field corroborated by a LICENSE file in the package. Where neither exists the licence is NOASSERTION. No licence has been inferred from reputation."
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:react@18.3.1",
+      "name": "react",
+      "version": "18.3.1",
+      "description": "React UMD production build. Loaded before support.js so the canvas runtime never requests React from unpkg.com.",
+      "scope": "required",
+      "purl": "pkg:npm/react@18.3.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "the string \"18.3.1\" inside the vendored UMD bundle and app/vendor/react/README.txt"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/react/package.json \"license\"; node_modules/react/LICENSE"
+        },
+        {
+          "name": "angel:discrepancy",
+          "value": "package-lock.json resolves react to 19.2.8. React 19 publishes no UMD build; the file that actually ships here is 18.3.1."
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/react/-/react-19.2.8.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/react/react.production.min.js",
+          "bom-ref": "file:app/vendor/react/react.production.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d949f1c3687aedadcedac85261865f29b17cd273997e7f6b2bfc53b2f9d4c4dd"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "10751"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "UNVERIFIED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "node_modules holds react 19.2.8, which publishes no UMD build, so there is nothing here to compare this file against"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/react/LICENSE",
+          "bom-ref": "file:app/vendor/react/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "1086"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "SUPPORTING"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "licence, notice or provenance text vendored beside the artefact"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/react/README.txt",
+          "bom-ref": "file:app/vendor/react/README.txt",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "95b9918eea5d82506a4979c7dd84e2eede670cde37c6fa23e9588f0e1f14c133"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "337"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "SUPPORTING"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "licence, notice or provenance text vendored beside the artefact"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:react-dom@18.3.1",
+      "name": "react-dom",
+      "version": "18.3.1",
+      "description": "ReactDOM UMD production build.",
+      "scope": "required",
+      "purl": "pkg:npm/react-dom@18.3.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "the string \"18.3.1\" inside the vendored UMD bundle and app/vendor/react/README.txt"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/react-dom/package.json \"license\"; node_modules/react-dom/LICENSE"
+        },
+        {
+          "name": "angel:discrepancy",
+          "value": "package-lock.json resolves react-dom to 19.2.8. Same UMD reason as react."
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.8.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/react/react-dom.production.min.js",
+          "bom-ref": "file:app/vendor/react/react-dom.production.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "35f4f974f4b2bcd44da73963347f8952e341f83909e4498227d4e26b98f66f0d"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "131835"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "UNVERIFIED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "node_modules holds react-dom 19.2.8, which publishes no UMD build, so there is nothing here to compare this file against"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:@duckdb/duckdb-wasm@1.29.0",
+      "name": "@duckdb/duckdb-wasm",
+      "version": "1.29.0",
+      "description": "DuckDB compiled to WebAssembly. The Analyst Terminal runs SQL entirely in the browser; there is no database server anywhere in this system.",
+      "scope": "required",
+      "purl": "pkg:npm/%40duckdb/duckdb-wasm@1.29.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@duckdb/duckdb-wasm/package.json \"license\""
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-8Zq7vafQuIz9gklC/9375KE38UlkaS2n8+yvG+/JK7irm3DjwYNJHL4xfplIj0bSHFIg6we5XhWYFqtE/vO3+Q=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@duckdb/duckdb-wasm/-/duckdb-wasm-1.29.0.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/duckdb/duckdb.mjs",
+          "bom-ref": "file:app/vendor/duckdb/duckdb.mjs",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "edc2f3240dd54e9341be0b5135f04e16e18cbfef9872a44e7d824a4b9715bc01"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "439212"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "REBUNDLED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "differs from node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser.mjs — re-bundled or minified from it"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/duckdb/duckdb-eh.wasm",
+          "bom-ref": "file:app/vendor/duckdb/duckdb-eh.wasm",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "00d45e5e074b7f7e17e45daabacb0fb67248eac8bd638a72cd1b42dad23788e4"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "35659694"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/@duckdb/duckdb-wasm/dist/duckdb-eh.wasm"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/duckdb/duckdb-browser-eh.worker.js",
+          "bom-ref": "file:app/vendor/duckdb/duckdb-browser-eh.worker.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "260b4773d2d78e5ab1106bc163ffd5b0b6eaeddedacf23190e9cafc9cc010d3d"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "760530"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:apache-arrow@21.2.0",
+      "name": "apache-arrow",
+      "version": "21.2.0",
+      "description": "Columnar in-memory format. Not vendored as its own file: it is inlined into app/vendor/duckdb/duckdb.mjs by the re-bundle (upstream duckdb-browser.mjs is 29,927 bytes; the vendored bundle is 439,212 bytes and contains Arrow symbols).",
+      "scope": "required",
+      "purl": "pkg:npm/apache-arrow@21.2.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — inlined into app/vendor/duckdb/duckdb.mjs"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/apache-arrow/package.json \"license\"; node_modules/apache-arrow/LICENSE.txt"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-Hxe6Agq26gQOM954qpzYSllJBPJl+e16U5CkfuMUhLrNba+5nKkttIVlflaovN6oaTratqMGAO8H5u/aNhmHWQ=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/apache-arrow/-/apache-arrow-21.2.0.tgz"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:onnxruntime-web@1.27.0",
+      "name": "onnxruntime-web",
+      "version": "1.27.0",
+      "description": "ONNX Runtime Web. Executes both ONNX graphs on the CPU in the page. No inference endpoint, no API key, no GPU.",
+      "scope": "required",
+      "purl": "pkg:npm/onnxruntime-web@1.27.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/onnxruntime-web/package.json \"license\""
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-ogDLsqIozHZwifPuN37OproAo0byX6t43/bP8GzeZWBWD6MOGExswFAx3up4NS/vvWBOg2u2PXomDt3rMmdQSg=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.27.0.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/ort/ort.wasm.bundle.min.mjs",
+          "bom-ref": "file:app/vendor/ort/ort.wasm.bundle.min.mjs",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "1db5e1c5cd2b860eed85e6eeff23e2aaa7cffcc407f67093bcc888f631b94ba9"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "72799"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/onnxruntime-web/dist/ort.wasm.bundle.min.mjs"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/ort/ort-wasm-simd-threaded.mjs",
+          "bom-ref": "file:app/vendor/ort/ort-wasm-simd-threaded.mjs",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0a1e718d99c41b22c21f2520ff4f9e883a6b5533856e398d21816ee8eb8185d3"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "24180"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/ort/ort-wasm-simd-threaded.wasm",
+          "bom-ref": "file:app/vendor/ort/ort-wasm-simd-threaded.wasm",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d1ab1b94b16a65b29d710d0b587b29e7bed336827577623913479b8afe8113e6"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "13479978"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:@wllama/wllama@3.5.1",
+      "name": "@wllama/wllama",
+      "version": "3.5.1",
+      "description": "llama.cpp compiled to WebAssembly. The runtime ships; NO language-model weights are redistributed in this build, so nothing runs on it unless a user supplies a GGUF.",
+      "scope": "required",
+      "purl": "pkg:npm/%40wllama/wllama@3.5.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@wllama/wllama/package.json \"license\"; node_modules/@wllama/wllama/LICENCE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-m5L0KKtmUTKz5lGvVVa/Y3qRtoobu80Jne51U0CSR6O930aOUURzhMEAolNsN4v0kfQ9u58wi2IdpUicLfaXUw=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@wllama/wllama/-/wllama-3.5.1.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/wllama/wllama.mjs",
+          "bom-ref": "file:app/vendor/wllama/wllama.mjs",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "caaed385c32d3e84516a130749dd4afd9360384e3d152a8b85e3371b493afce1"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "302750"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "REBUNDLED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "differs from node_modules/@wllama/wllama/esm/index.min.js — re-bundled or minified from it"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/wllama/wllama.wasm",
+          "bom-ref": "file:app/vendor/wllama/wllama.wasm",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4197ce6d3dc9240c42ee52b4197dc99638875a06b0083901f8a57767338a0cfa"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "7656521"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/@wllama/wllama/esm/wasm/wllama.wasm"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/wllama/LICENCE",
+          "bom-ref": "file:app/vendor/wllama/LICENCE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "5866e3bd7e3cbd3f7c8bea6efd8a1e7fa7cc8de68c30f428aff7c6584a0fb720"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "1071"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "SUPPORTING"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "licence, notice or provenance text vendored beside the artefact"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:echarts@6.1.0",
+      "name": "echarts",
+      "version": "6.1.0",
+      "description": "Apache ECharts, re-bundled down to the Sankey chart the Class VIII flow diagram uses.",
+      "scope": "required",
+      "purl": "pkg:npm/echarts@6.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/echarts/package.json \"license\"; node_modules/echarts/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/echarts/-/echarts-6.1.0.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/echarts/echarts.sankey.min.mjs",
+          "bom-ref": "file:app/vendor/echarts/echarts.sankey.min.mjs",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "fbacff1011d8a33e83eb66f345a2b43e8b554f3fbd40f1c0284893fe8558cf37"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "497252"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "REBUNDLED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "differs from node_modules/echarts/dist/echarts.esm.min.mjs — re-bundled or minified from it"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/echarts/LICENSE",
+          "bom-ref": "file:app/vendor/echarts/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "634293835b43a6dd2094fa39182a3d9a6b9ca43b7fdb9ac354e8037af2a3093a"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "11990"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "SUPPORTING"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "licence, notice or provenance text vendored beside the artefact"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/echarts/NOTICE",
+          "bom-ref": "file:app/vendor/echarts/NOTICE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d491d358344f842685c1b1585970999db65fe30ecf7ef3867af8814f4016c016"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "168"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "SUPPORTING"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "licence, notice or provenance text vendored beside the artefact"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:deck.gl@9.3.10",
+      "name": "deck.gl",
+      "version": "9.3.10",
+      "description": "deck.gl WebGL layers for the 3D tactical view.",
+      "scope": "required",
+      "purl": "pkg:npm/deck.gl@9.3.10",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/deck.gl/package.json \"license\"; node_modules/deck.gl/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-iy+qGha/xj7isGwzF0eoDnF/VwzHQXyMIBb2pl3TBb8FXqzvheA/h4IKnsd7F4lji1SEeQ0A5kyqPmKnqTMgfQ=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/deck.gl/-/deck.gl-9.3.10.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/deck/deck.min.js",
+          "bom-ref": "file:app/vendor/deck/deck.min.js",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e5f7c30e73f86414535fbadbae781bba823ad7ce5964a50d47c3df04d064ba8f"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "755932"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "REBUNDLED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "differs from node_modules/deck.gl/dist.min.js — re-bundled or minified from it"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:uplot@1.6.32",
+      "name": "uplot",
+      "version": "1.6.32",
+      "description": "µPlot time-series charts (the physiological reserve traces).",
+      "scope": "required",
+      "purl": "pkg:npm/uplot@1.6.32",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — files listed as sub-components"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/uplot/package.json \"license\"; node_modules/uplot/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-KIMVnG68zvu5XXUbC4LQEPnhwOxBuLyW1AHtpm6IKTXImkbLgkMy+jabjLgSLMasNuGGzQm/ep3tOkyTxpiQIw=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/uplot/-/uplot-1.6.32.tgz"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/vendor/uplot/uplot.min.mjs",
+          "bom-ref": "file:app/vendor/uplot/uplot.min.mjs",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "19d450490609919e177eb185db8a901fb7861b194e31f9ba78e9929d8c88958f"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "52010"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "REBUNDLED"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "differs from node_modules/uplot/dist/uPlot.esm.js — re-bundled or minified from it"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/uplot/uPlot.min.css",
+          "bom-ref": "file:app/vendor/uplot/uPlot.min.css",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "df630c6a8d6f8eeaff264b50f73ce5b114f646ffd9a0bb74f049b0a00135fa04"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "1857"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "VERBATIM"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "byte-identical to node_modules/uplot/dist/uPlot.min.css"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/vendor/uplot/LICENSE",
+          "bom-ref": "file:app/vendor/uplot/LICENSE",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8f989229699b4fe2f1a0432d0e9edc338a8a911e250e2d1b01ecd770a5f5b1bd"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "1078"
+            },
+            {
+              "name": "angel:pedigree",
+              "value": "SUPPORTING"
+            },
+            {
+              "name": "angel:pedigreeNote",
+              "value": "licence, notice or provenance text vendored beside the artefact"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:codemirror@6.0.2",
+      "name": "codemirror",
+      "version": "6.0.2",
+      "description": "CodeMirror 6 editor core — the SQL editor on the Analyst Terminal.",
+      "scope": "required",
+      "purl": "pkg:npm/codemirror@6.0.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — bundled into app/vendor/cm/cm.mjs"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/codemirror/package.json \"license\"; node_modules/codemirror/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-VhydHotNW5w1UGK0Qj96BwSk/Zqbp9WbnyK2W/eVMv4QyF41INRGpjUhFJY7/uDNuudSc33a/PKr4iDqRduvHw=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/codemirror/-/codemirror-6.0.2.tgz"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:@codemirror/state@6.7.1",
+      "name": "@codemirror/state",
+      "version": "6.7.1",
+      "description": "CodeMirror editor state.",
+      "scope": "required",
+      "purl": "pkg:npm/%40codemirror/state@6.7.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — bundled into app/vendor/cm/cm.mjs"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@codemirror/state/package.json \"license\"; node_modules/@codemirror/state/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-9QzNDgE4EYDnAHfrTlR2lwiPciiOymLtwKK+8yHQzCc7GXhAP9xdEbEJFy2IWB1j9UGUl9BsgMmTo/ImA02T7A=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@codemirror/state/-/state-6.7.1.tgz"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:@codemirror/view@6.43.8",
+      "name": "@codemirror/view",
+      "version": "6.43.8",
+      "description": "CodeMirror editor view.",
+      "scope": "required",
+      "purl": "pkg:npm/%40codemirror/view@6.43.8",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — bundled into app/vendor/cm/cm.mjs"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@codemirror/view/package.json \"license\"; node_modules/@codemirror/view/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-qtItTDssZ/5GFfi94hrILu9j/VUeFPDPkhovEfmWFj2ipTxnzPB8DdHgfbb8HYTzLTYhrndKmyQxXUz/PDLenw=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@codemirror/view/-/view-6.43.8.tgz"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:@codemirror/lang-sql@6.10.0",
+      "name": "@codemirror/lang-sql",
+      "version": "6.10.0",
+      "description": "CodeMirror SQL language mode.",
+      "scope": "required",
+      "purl": "pkg:npm/%40codemirror/lang-sql@6.10.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — bundled into app/vendor/cm/cm.mjs"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@codemirror/lang-sql/package.json \"license\"; node_modules/@codemirror/lang-sql/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-6ayPkEd/yRw0XKBx5uAiToSgGECo/GY2NoJIHXIIQh1EVwLuKoU8BP/qK0qH5NLXAbtJRLuT73hx7P9X34iO4w=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@codemirror/lang-sql/-/lang-sql-6.10.0.tgz"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:@codemirror/theme-one-dark@6.1.3",
+      "name": "@codemirror/theme-one-dark",
+      "version": "6.1.3",
+      "description": "CodeMirror One Dark theme.",
+      "scope": "required",
+      "purl": "pkg:npm/%40codemirror/theme-one-dark@6.1.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:versionSource",
+          "value": "package-lock.json (resolved)"
+        },
+        {
+          "name": "angel:shipped",
+          "value": "yes — bundled into app/vendor/cm/cm.mjs"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@codemirror/theme-one-dark/package.json \"license\"; node_modules/@codemirror/theme-one-dark/LICENSE"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-NzBdIvEJmx6fjeremiGp3t/okrLPYT0d9orIc7AFun8oZcRk58aejkqhv6spnz4MLAevrKNPMQYXEWMg4s+sKA=="
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@codemirror/theme-one-dark/-/theme-one-dark-6.1.3.tgz"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "file:app/vendor/cm/cm.mjs",
+      "name": "app/vendor/cm/cm.mjs",
+      "description": "esbuild bundle of codemirror, @codemirror/state, @codemirror/view, @codemirror/lang-sql and @codemirror/theme-one-dark. The five packages are listed separately above with their own versions and licences.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8dd32fcd90938f392618b2fa89021b9f8b724a5f04a2a5de2a02140d7f56769d"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "427067"
+        },
+        {
+          "name": "angel:pedigree",
+          "value": "REBUNDLED"
+        }
+      ]
+    },
+    {
+      "type": "machine-learning-model",
+      "bom-ref": "model:cri-net",
+      "name": "CRI-Net (ANGEL SWARM compensatory reserve estimator)",
+      "version": "1.0.0",
+      "description": "One-dimensional CNN estimating compensatory reserve from a 5-second, 100 Hz photoplethysmogram window. 104,162 parameters, ONNX opset 13. Trained in this repository on a synthetic cohort; no patient data was used at any point.",
+      "scope": "required",
+      "supplier": {
+        "name": "ANGEL SWARM prototype (trained in-repo)"
+      },
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c74bf4c69e3ad743453b997a8d2d456c74475f9408d77a2e4ccf7cf0906ec2b5"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "419797"
+        },
+        {
+          "name": "angel:parameters",
+          "value": "104162"
+        },
+        {
+          "name": "angel:opset",
+          "value": "13"
+        },
+        {
+          "name": "angel:provenance",
+          "value": "Synthetic cohort. Waveform morphology follows the published response of the peripheral pulse to central volume loss; it is not patient data and no patient data was used. The fielded analogue is CipherOx CRM, FDA 510(k) K173929."
+        },
+        {
+          "name": "angel:trainingSubjects",
+          "value": "240"
+        },
+        {
+          "name": "angel:heldOutSplit",
+          "value": "by subject — no person appears in both sets"
+        },
+        {
+          "name": "angel:modelCardFile",
+          "value": "app/models/ppg_cri.meta.json"
+        },
+        {
+          "name": "angel:modelCardSha256",
+          "value": "db9b443f98188f11938aec1853f0c8288e06a72c9e20b7da9509d5f5400d22a2"
+        }
+      ],
+      "modelCard": {
+        "bom-ref": "card:cri-net",
+        "modelParameters": {
+          "approach": {
+            "type": "supervised"
+          },
+          "task": "regression — compensatory reserve index in [0,1], with a log predictive variance head",
+          "architectureFamily": "convolutional neural network",
+          "modelArchitecture": "1-D CNN, input 1x1x500 (5 s at 100 Hz), per-window zero-mean unit-variance normalisation",
+          "inputs": [
+            {
+              "format": "float32[1,1,500] photoplethysmogram window"
+            }
+          ],
+          "outputs": [
+            {
+              "format": "float32 cri"
+            },
+            {
+              "format": "float32 logvar"
+            }
+          ]
+        },
+        "quantitativeAnalysis": {
+          "performanceMetrics": [
+            {
+              "type": "MAE",
+              "value": "0.0694",
+              "slice": "held-out subjects (all)"
+            },
+            {
+              "type": "MAE",
+              "value": "0.0641",
+              "slice": "clean signal"
+            },
+            {
+              "type": "MAE",
+              "value": "0.0879",
+              "slice": "degraded signal"
+            },
+            {
+              "type": "95% interval coverage",
+              "value": "0.9616",
+              "slice": "held-out subjects"
+            }
+          ]
+        },
+        "considerations": {
+          "useCases": [
+            "Sort key inside a materiel tasking optimiser. It is not a diagnosis and is not surfaced to a clinician as a finding."
+          ],
+          "technicalLimitations": [
+            "Trained and evaluated entirely on a synthetic cohort. It has never seen a real photoplethysmogram.",
+            "Peripheral vasoconstriction in haemorrhagic shock degrades the very signal the estimate depends on, so quality falls as the casualty deteriorates.",
+            "No clinical validation has been performed. The fielded analogue is the FDA-cleared CipherOx CRM (510(k) K173929); this network is not that device and is not cleared."
+          ]
+        }
+      }
+    },
+    {
+      "type": "machine-learning-model",
+      "bom-ref": "model:all-minilm-l6-v2-int8",
+      "name": "all-MiniLM-L6-v2 (int8)",
+      "version": "1.0.0",
+      "description": "Sentence-embedding encoder, 384 dimensions, ONNX opset 14, dynamically quantised to int8 in this repository. Used only to retrieve doctrine passages for the Ask ANGEL screen.",
+      "scope": "required",
+      "supplier": {
+        "name": "sentence-transformers / Hugging Face community model, obtained through npm"
+      },
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "18b24a03ba4a5c4e4ffa6b091cf6b73e48fc78ee0f74d795fb75f9c9238fab34"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "22898176"
+        },
+        {
+          "name": "angel:parameters",
+          "value": "22565376"
+        },
+        {
+          "name": "angel:opset",
+          "value": "14"
+        },
+        {
+          "name": "angel:embeddingDim",
+          "value": "384"
+        },
+        {
+          "name": "angel:acquisitionRoute",
+          "value": "npm @lat.md/embed-minilm-fp16 (fp16 safetensors + tokenizer); huggingface.co is unreachable from the build sandbox"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "app/models/minilm/meta.json declares Apache-2.0 for all-MiniLM-L6-v2; the upstream sentence-transformers model card carries the same identifier. No LICENSE file ships beside the weights in this repository."
+        },
+        {
+          "name": "angel:quantisationFidelity",
+          "value": "fp32 vs int8 minimum cosine similarity 0.9686230421066284"
+        },
+        {
+          "name": "angel:modelCardFile",
+          "value": "app/models/minilm/meta.json"
+        },
+        {
+          "name": "angel:modelCardSha256",
+          "value": "6c4fb4f62e98673d49b272746c157969c4d36e59ba7ee187d7ab814ddd4dcee2"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/models/minilm/tokenizer.json",
+          "bom-ref": "file:app/models/minilm/tokenizer.json",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6b75fed623624b8f5d085af072d6d365c07dd3c56c372c97585788dba9a66656"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "279"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/models/minilm/vocab.txt",
+          "bom-ref": "file:app/models/minilm/vocab.txt",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0f052197aac305fe42f378b5c61554b7bacb34b8be4af83fec2cfdcdffbc9973"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "231507"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/models/minilm/meta.json",
+          "bom-ref": "file:app/models/minilm/meta.json",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6c4fb4f62e98673d49b272746c157969c4d36e59ba7ee187d7ab814ddd4dcee2"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "2213"
+            }
+          ]
+        }
+      ],
+      "modelCard": {
+        "bom-ref": "card:minilm",
+        "modelParameters": {
+          "approach": {
+            "type": "unsupervised"
+          },
+          "task": "sentence embedding for passage retrieval",
+          "architectureFamily": "transformer",
+          "modelArchitecture": "MiniLM, 6 layers, 384-dimensional output, int8 dynamic quantisation",
+          "inputs": [
+            {
+              "format": "int64 token ids"
+            }
+          ],
+          "outputs": [
+            {
+              "format": "float32[384] sentence embedding"
+            }
+          ]
+        },
+        "considerations": {
+          "technicalLimitations": [
+            "Retrieves over a 161-passage paraphrased demonstration corpus, not over an authoritative publication.",
+            "Measured 15 of 23 evaluation questions correct at rank 1 and 22 of 23 within the top 5."
+          ]
+        }
+      }
+    },
+    {
+      "type": "application",
+      "bom-ref": "go:angelswarm",
+      "name": "angelswarm (Go launcher)",
+      "version": "0.0.0-devel",
+      "description": "Static Go binary. Serves the app/ folder over HTTP on 127.0.0.1, rejects non-loopback peers, and optionally accepts receive-only Cursor on Target telemetry. Standard library only: go.sum is empty, so the module graph has no third-party Go dependency.",
+      "scope": "required",
+      "purl": "pkg:golang/angelswarm@0.0.0-devel",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:goDirective",
+          "value": "1.24"
+        },
+        {
+          "name": "angel:goToolchain",
+          "value": "go1.24.7"
+        },
+        {
+          "name": "angel:goSumEntries",
+          "value": "0"
+        },
+        {
+          "name": "angel:buildFlags",
+          "value": "CGO_ENABLED=0, -trimpath, -ldflags=\"-s -w\", -buildmode=exe, compiler=gc"
+        },
+        {
+          "name": "angel:thirdPartyGoDependencies",
+          "value": "none — go.sum is empty and every import is Go standard library"
+        }
+      ],
+      "components": [
+        {
+          "type": "application",
+          "name": "ANGEL-SWARM-linux-x64",
+          "bom-ref": "bin:ANGEL-SWARM-linux-x64",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "44a60f5983c816923fdbdd7ce9b28c3525dd86d46a8ae912d6043f00e1bb4cdc"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "6164664"
+            }
+          ]
+        },
+        {
+          "type": "application",
+          "name": "ANGEL-SWARM-macos-apple-silicon",
+          "bom-ref": "bin:ANGEL-SWARM-macos-apple-silicon",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6e8c412a1d849430dece2a203d181ec24ed930b1bde160a26d2c2b37c988b0df"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "5917714"
+            }
+          ]
+        },
+        {
+          "type": "application",
+          "name": "ANGEL-SWARM-macos-intel",
+          "bom-ref": "bin:ANGEL-SWARM-macos-intel",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "9d7aa3be00f4e669cae80d6516e40e5c9636523b81ac9d5b7228fbc6fef3a00c"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "6293840"
+            }
+          ]
+        },
+        {
+          "type": "application",
+          "name": "ANGEL-SWARM-windows-x64.exe",
+          "bom-ref": "bin:ANGEL-SWARM-windows-x64.exe",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "53a189e5c1af3cca8fdcfaf2a6f4798697db5be6566e795c9df2fd6af67a70e7"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "6348288"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "tool:go",
+      "name": "Go toolchain",
+      "version": "go1.24.7",
+      "description": "The Go compiler that produced the four launcher binaries. Read back out of the shipped linux/amd64 binary with `go version -m`, not taken from the build host.",
+      "scope": "excluded",
+      "purl": "pkg:generic/go@1.24.7",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://go.dev/dl/"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:role",
+          "value": "build toolchain — not shipped as a component of the application"
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "The Go distribution ships a BSD-3-Clause LICENSE file. That file is not present in this repository; the identifier is taken from the upstream distribution."
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/index.html",
+      "name": "app/index.html",
+      "description": "The shipped single-page application (Claude Design canvas template plus component logic).",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fed55e125de4f1ce6d72b5b628a4f3143551b18eb065da601848ccdad0c41089"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "658929"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/design.html",
+      "name": "app/design.html",
+      "description": "Byte-identical copy of index.html held for the design canvas.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fed55e125de4f1ce6d72b5b628a4f3143551b18eb065da601848ccdad0c41089"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "658929"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/selftest.html",
+      "name": "app/selftest.html",
+      "description": "Standalone engine self-test: 118 assertions against the simulation engine.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "090aaf6e520a2ccc8de78cb64fae9b891053fa2144a86e457ad1495450315bd7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "51055"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/support.js",
+      "name": "app/support.js",
+      "description": "Claude Design canvas runtime (React-based renderer for the x-dc template).",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8fe7df74405f3c55f49b7249c74ea1397e65d07dea2b1bd3b4a489bec2e28cbe"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "69150"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/angel-engine.js",
+      "name": "app/angel-engine.js",
+      "description": "Engine adapter: buildRun({seed, deployed, scenario}) and snapshot(run, t).",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f1e36b5f221544f7989b710e210e2c122a94475ab276baa97b5f595ee4be9fa0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "41243"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/sim.js",
+      "name": "app/js/sim.js",
+      "description": "Simulation engine: world, casualty stream, scenarios, payloads, platforms.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "979ca6b062f7174189f2f47fe02e6dd689fcb57868617102335d102a408859b9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "56334"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/optimizer.js",
+      "name": "app/js/optimizer.js",
+      "description": "Allocators for both arms, plus the SHA-256 (FIPS 180-4) hash-chained audit log.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6aea2ba4b945e54eb70beaca4a8d3525ac340f04915230c946e7a2f7bca65ae7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "62098"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/mc.worker.js",
+      "name": "app/js/mc.worker.js",
+      "description": "Monte Carlo worker: loads sim.js and optimizer.js verbatim off disk.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1bbf2fce4286813fae25fc0f37dfd68129addb60398acea8b748c2f7797669b4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "10490"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/montecarlo.js",
+      "name": "app/js/montecarlo.js",
+      "description": "Monte Carlo pool driver.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fa8fc5401cdaa238e6c3fbc311a0dda87b51e6146be60ecd6b092a6c172016c3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "45777"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/telemetry.js",
+      "name": "app/js/telemetry.js",
+      "description": "Receive-only Cursor on Target ingest client (browser side).",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cd6576ac9bef8b8c5117f41e25e2eb53261d18243b7e79e9be7d80d1df354ca4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "17254"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/dataproducts.js",
+      "name": "app/js/dataproducts.js",
+      "description": "FHIR-shaped exports, decision records, JSON Schemas, data catalogue.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "28bfb449fa50df33c834d94a0936bc24377ee27ea4200a372c75034ef65bc207"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "55758"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/angel-map.js",
+      "name": "app/angel-map.js",
+      "description": "Map host: mounts a renderer into the page, publishes panel insets, owns the scale switch.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b07ceddbc97293ff34ec8496b997babd9251daceb9ecb3c836de4dad0ad16794"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "74103"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/basemap.js",
+      "name": "app/js/basemap.js",
+      "description": "Basemap decoder and the procedural relief field. No tile is fetched from anywhere.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6a981fa9f94e0b87e0f1e2fa9a48afbbca2db7c87f9095c3cf226ab36c1c4645"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "6157"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/map.js",
+      "name": "app/js/map.js",
+      "description": "Flat tactical renderer, both arms, and the map theme tokens every renderer reads.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5d915b67dcaa5e1d5ca615034977062d04cd607de6f07b57211a28ece78c81dc"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "68337"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/geo.js",
+      "name": "app/js/geo.js",
+      "description": "Theatre geography clipped to the two combatant commands, and the place-name gazetteer.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "033bfbae15d07f2733fbea03ef26787ccdabc5e821b49b946304492a8f120924"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "106450"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/geo3d.js",
+      "name": "app/js/geo3d.js",
+      "description": "Tactical GPU renderer (deck.gl) with its own transport bar and comms banner.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9447a1516deb66b16a0588dd6b4bc8afc330b61805d1c604491bd12def8ef56d"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "201238"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/theater.js",
+      "name": "app/js/theater.js",
+      "description": "Canvas theatre renderer — the fallback that takes the picture back on GPU context loss.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "11cafbf75d7feeccad1e6b75a505cdf56965a6f5e774f042efb57ba8328e9023"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "19575"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:app/js/theater3d.js",
+      "name": "app/js/theater3d.js",
+      "description": "GPU theatre renderer, and the canvas-2D globe. Carries the world coastline and international-boundary geometry embedded as integer deltas (Natural Earth 1:50m via world-atlas, generalised offline) — no separate asset and no HTTP resource.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5a925b072180be77c95de5e5f14b95e01fc9ebb557eaaf06104351e74084b889"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "443996"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:cmd/angelswarm/main.go",
+      "name": "cmd/angelswarm/main.go",
+      "description": "Go launcher: serves app/ on 127.0.0.1 and rejects non-loopback peers.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "19b0d398345b22655d833f4fb2887fca55791ad68d383224d3d13c18d4348dac"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "10881"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:cmd/angelswarm/telemetry.go",
+      "name": "cmd/angelswarm/telemetry.go",
+      "description": "Optional receive-only CoT/UDP listener, off unless -cot is passed.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "dff806d385106ac01f1708f0942444ef9a0ca807fd0b792b6cb89b4fc1f9b1b8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "9640"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "src:cmd/cotsim/main.go",
+      "name": "cmd/cotsim/main.go",
+      "description": "CoT device emitter used to exercise the ingest path.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b8a69cf5646e7c0d871828df15ee43ba7d6f48ff26a3fd6dbcc219961a504786"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "4947"
+        },
+        {
+          "name": "angel:origin",
+          "value": "first-party — written for this prototype"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "data:app/data/basemap.json",
+      "name": "app/data/basemap.json",
+      "description": "In-folder basemap. No tile server and no tile CDN anywhere in this system.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "21ffbf3737f13e28e3935d612e2e2dcbe6639d73f8086d990e3a84864c35b2e4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "329624"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "data:app/data/doctrine.json",
+      "name": "app/data/doctrine.json",
+      "description": "Paraphrased doctrine corpus for retrieval. Demonstration text, not an extract of any publication.",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ff1889ab266de03bb465af4b63abd1d84eb0dd152f43b6ff1d765c1abeeca73b"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:sizeBytes",
+          "value": "448266"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "bom-ref": "font:webfonts",
+      "name": "Vendored webfonts (IBM Plex Sans, IBM Plex Mono, Barlow Condensed)",
+      "description": "11 woff2 faces served from app/fonts/ so no paint ever reaches fonts.googleapis.com. Filenames follow the Fontsource naming convention, but no Fontsource package is present in node_modules and no licence file ships beside the faces, so no licence is asserted here.",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:licenceEvidence",
+          "value": "none found in-repo — resolve before any release"
+        }
+      ],
+      "components": [
+        {
+          "type": "file",
+          "name": "app/fonts/barlow-condensed-latin-500-normal.woff2",
+          "bom-ref": "file:app/fonts/barlow-condensed-latin-500-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "460f141ec8f6c9a1516bfd2bd9fe71656246d7a9d04a0955faf53158d8970c4c"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "21424"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/barlow-condensed-latin-600-normal.woff2",
+          "bom-ref": "file:app/fonts/barlow-condensed-latin-600-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "215a93c696f442034a46fbb382958f753fda60e30490683aeea6b235fcbb2b66"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "22308"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/barlow-condensed-latin-700-normal.woff2",
+          "bom-ref": "file:app/fonts/barlow-condensed-latin-700-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "3787a5a419171630e6890cfa47c4da067474d005cd0ff8dc11ec090fdc3ee2b8"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "22444"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-mono-latin-400-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-mono-latin-400-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "14708"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-mono-latin-500-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-mono-latin-500-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "01d285447409c8a588692162439a038b8cbd7871309ee20267b0d2d91c6e8e22"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "14888"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-mono-latin-600-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-mono-latin-600-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0d1f0b8d0722224e32e9f28261bdc86c79115be73444ae5eceb73976a1bcdf83"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "15620"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-mono-latin-700-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-mono-latin-700-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "4f84d86cfd060f4ded334358ff8a4c81d4db2ed5addd568359d693f44a87765a"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "14908"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-sans-latin-400-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-sans-latin-400-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "22588"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-sans-latin-500-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-sans-latin-500-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "24184"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-sans-latin-600-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-sans-latin-600-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "24252"
+            }
+          ]
+        },
+        {
+          "type": "file",
+          "name": "app/fonts/ibm-plex-sans-latin-700-normal.woff2",
+          "bom-ref": "file:app/fonts/ibm-plex-sans-latin-700-normal.woff2",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "42e7b0c143c19df9d99fd896e76b48f846edf0902d200bc29796b34d12c33aa7"
+            }
+          ],
+          "properties": [
+            {
+              "name": "angel:sizeBytes",
+              "value": "22832"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "buildonly:esbuild@0.25.10",
+      "name": "esbuild",
+      "version": "0.25.10",
+      "description": "Declared in package.json and resolved in package-lock.json, but NOT vendored into app/ and NOT shipped. Present for build and asset-preparation only.",
+      "scope": "excluded",
+      "purl": "pkg:npm/esbuild@0.25.10",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.10.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:shipped",
+          "value": "no"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-9RiGKvCwaqxO2owP61uQ4BgNborAQskMR6QusfWzQqv7AZOg5oGehdY2pRJMTKuwxd1IDBP4rSbI5lHzU7SMsQ=="
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/esbuild/package.json \"license\"; node_modules/esbuild/LICENSE.md"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "buildonly:maplibre-gl@6.3.0",
+      "name": "maplibre-gl",
+      "version": "6.3.0",
+      "description": "Declared in package.json and resolved in package-lock.json, but NOT vendored into app/ and NOT shipped. Present for build and asset-preparation only.",
+      "scope": "excluded",
+      "purl": "pkg:npm/maplibre-gl@6.3.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/maplibre-gl/-/maplibre-gl-6.3.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:shipped",
+          "value": "no"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-F0Is48MTzn3DvOEidPjh68E0kuSA7hdzY1YIR0ypPtFgcif3WPtzI1oZFgsv9WtHmarQnbwIXfsf+EfQYvM00A=="
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/maplibre-gl/package.json \"license\"; node_modules/maplibre-gl/LICENSE.txt"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "buildonly:pmtiles@4.5.0",
+      "name": "pmtiles",
+      "version": "4.5.0",
+      "description": "Declared in package.json and resolved in package-lock.json, but NOT vendored into app/ and NOT shipped. Present for build and asset-preparation only.",
+      "scope": "excluded",
+      "purl": "pkg:npm/pmtiles@4.5.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/pmtiles/-/pmtiles-4.5.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:shipped",
+          "value": "no"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-CBeD4SoUluFziGdy/8k7FOjQxQy486n+929W/tWophauvMICpkZ26vGBWhDt/6b1FZQWNaf4jFdT/5+q0Wii5w=="
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/pmtiles/package.json \"license\""
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "buildonly:topojson-client@3.1.0",
+      "name": "topojson-client",
+      "version": "3.1.0",
+      "description": "Declared in package.json and resolved in package-lock.json, but NOT vendored into app/ and NOT shipped. Present for build and asset-preparation only.",
+      "scope": "excluded",
+      "purl": "pkg:npm/topojson-client@3.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/topojson-client/-/topojson-client-3.1.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:shipped",
+          "value": "no"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-605uxS6bcYxGXw9qi62XyrV6Q3xwbndjachmNxu8HWTtVPxZfEJN9fd/SZS1Q54Sn2y0TMyMxFj/cJINqGHrKw=="
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/topojson-client/package.json \"license\"; node_modules/topojson-client/LICENSE"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "buildonly:world-atlas@2.0.2",
+      "name": "world-atlas",
+      "version": "2.0.2",
+      "description": "Declared in package.json and resolved in package-lock.json, but NOT vendored into app/ and NOT shipped. Present for build and asset-preparation only.",
+      "scope": "excluded",
+      "purl": "pkg:npm/world-atlas@2.0.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/world-atlas/-/world-atlas-2.0.2.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:shipped",
+          "value": "no"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-IXfV0qwlKXpckz1FhwXVwKRjiIhOnWttOskm5CtxMsjgE/MXAYRHWJqgXOpM8IkcPBoXnyTU5lFHcYa5ChG0LQ=="
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/world-atlas/package.json \"license\"; node_modules/world-atlas/LICENSE"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "buildonly:@huggingface/transformers@4.2.0",
+      "name": "@huggingface/transformers",
+      "version": "4.2.0",
+      "description": "Declared in package.json and resolved in package-lock.json, but NOT vendored into app/ and NOT shipped. Present for build and asset-preparation only.",
+      "scope": "excluded",
+      "purl": "pkg:npm/%40huggingface/transformers@4.2.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@huggingface/transformers/-/transformers-4.2.0.tgz"
+        }
+      ],
+      "properties": [
+        {
+          "name": "angel:shipped",
+          "value": "no"
+        },
+        {
+          "name": "angel:npmIntegrity",
+          "value": "sha512-8BRCoBMH0XsWaEIamuR0LrJGAfftgHAfb2Vrffy0VKlSAE/MnUJ5/h/zTfEP3fDIft+nk7TqB8xXEyABGitBjQ=="
+        },
+        {
+          "name": "angel:licenceEvidence",
+          "value": "node_modules/@huggingface/transformers/package.json \"license\"; node_modules/@huggingface/transformers/LICENSE"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:react@18.3.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:react-dom@18.3.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:@duckdb/duckdb-wasm@1.29.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:apache-arrow@21.2.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:onnxruntime-web@1.27.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:@wllama/wllama@3.5.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:echarts@6.1.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:deck.gl@9.3.10",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:uplot@1.6.32",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:codemirror@6.0.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:@codemirror/state@6.7.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:@codemirror/view@6.43.8",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:@codemirror/lang-sql@6.10.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:@codemirror/theme-one-dark@6.1.3",
+      "dependsOn": []
+    },
+    {
+      "ref": "file:app/vendor/cm/cm.mjs",
+      "dependsOn": [
+        "pkg:codemirror@6.0.2",
+        "pkg:@codemirror/state@6.7.1",
+        "pkg:@codemirror/view@6.43.8",
+        "pkg:@codemirror/lang-sql@6.10.0",
+        "pkg:@codemirror/theme-one-dark@6.1.3"
+      ]
+    },
+    {
+      "ref": "model:cri-net",
+      "dependsOn": [
+        "pkg:onnxruntime-web@1.27.0"
+      ]
+    },
+    {
+      "ref": "model:all-minilm-l6-v2-int8",
+      "dependsOn": [
+        "pkg:onnxruntime-web@1.27.0"
+      ]
+    }
+  ]
+}

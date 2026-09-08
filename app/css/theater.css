@@ -1,0 +1,160 @@
+/* ============================================================================
+   ANGEL SWARM — theater map controls and the operation picker
+
+   Two pieces of chrome that had no styling because neither existed:
+
+   1. The theater map's pan/zoom furniture. The map is drawn by js/theater.js
+      into #mapTheater and it now answers a drag, a wheel and a double-click.
+      Buttons are here for touch, for the keyboard, and because an affordance
+      an operator cannot see is one they do not have.
+
+   2. The operation picker hanging off the JOA crumb in the command bar. The
+      crumb used to be a back button; clicking the name of the operation you
+      were looking at navigated away from it. It opens a list now.
+
+   Loaded after css/app.css and css/polish.css, which is what lets the crumb
+   rules here win without an !important.
+   ========================================================================== */
+
+/* ------------------------------------------------- 1. THEATER STAGE ------ */
+
+/* The stage is `display:grid; grid-template-columns:1fr 300px` at a fixed
+   460px. Its implicit row was `auto`, which resolved nine pixels taller than
+   the box, and the stage clips — so the bottom of the operation list and the
+   last few pixels of its scrollbar were cut off. Pin the row to the box. */
+.viewport[data-pane="DASHBOARD"] #theaterStage{ grid-template-rows:minmax(0,1fr) }
+
+/* A scroll container that gives no sign it scrolls is one nobody scrolls.
+   The list holds four operations in PACOM and three in EUCOM against about
+   two and a half cards of visible height at every window size this ships
+   against, so the overflow is not an edge case — it is the normal state. */
+/* `contain` because reaching the last operation should not then throw the
+   whole Operations screen down the page. */
+.joaList{
+  overscroll-behavior:contain; scrollbar-gutter:stable;
+  scrollbar-width:thin; scrollbar-color:var(--faint) var(--line);
+}
+.joaList::-webkit-scrollbar{ width:10px }
+.joaList::-webkit-scrollbar-track{ background:var(--line); border-radius:5px }
+.joaList::-webkit-scrollbar-thumb{
+  background:var(--faint); border-radius:5px;
+  border:2px solid transparent; background-clip:content-box;
+}
+.joaList:hover::-webkit-scrollbar-thumb{ background:var(--dim); background-clip:content-box }
+.joaList:focus-visible{ outline:2px solid var(--angel); outline-offset:-2px }
+
+/* A second cue, because the first one is not guaranteed. This shell's
+   scrollbars are 10px and dark against a dark column, and a headless
+   Chromium reserves the gutter without painting anything in it — so "there
+   are more operations below" cannot rest on the platform drawing a thumb.
+   The fade over the foot of the column is removed the moment the list is at
+   its end, so it never implies content that is not there.
+   The pseudo-element is absolutely positioned, which keeps it out of the
+   stage's grid rather than making it a third column. */
+.viewport[data-pane="DASHBOARD"] #theaterStage::after{
+  content:''; position:absolute; right:0; bottom:0; width:300px; height:30px;
+  background:linear-gradient(to top, var(--bg2), transparent);
+  /* .joaList carries z-index:4 from the full-screen theater layout, so an
+     auto-layer pseudo-element paints underneath the cards it is meant to be
+     fading. */
+  z-index:6;
+  pointer-events:none; opacity:1; transition:opacity .15s linear;
+}
+.viewport[data-pane="DASHBOARD"] #theaterStage.listEnd::after{ opacity:0 }
+
+/* Grab, not an arrow: the first thing a pointer learns about this map. The
+   JS swaps to `pointer` over a JOA and `grabbing` during a drag. */
+#mapTheater{ cursor:grab; touch-action:none }
+
+/* Top right of the canvas, not bottom right: theater.js draws the 1 000 km
+   scale bar into the bottom right corner and these buttons sat on top of it.
+   The offsets clear the operation list, which is the map's right-hand
+   neighbour in both layouts this stage appears in. */
+.thZoom{
+  position:absolute; right:354px; top:12px; z-index:5;
+  display:flex; gap:4px;
+}
+.viewport[data-pane="DASHBOARD"] .thZoom{ right:312px; top:10px }
+.thZbtn{
+  width:26px; height:26px; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(6,14,24,.92); border:1px solid rgba(150,190,225,.22);
+  border-radius:7px; color:#cfe2f4; cursor:pointer;
+  font:700 14px/1 var(--mono); backdrop-filter:blur(6px);
+}
+.thZbtn.wide{ width:auto; padding:0 8px; font-size:9.5px; letter-spacing:.10em }
+.thZbtn:hover{ border-color:rgba(150,190,225,.55); color:#fff }
+.thZbtn:focus-visible{ outline:2px solid var(--angel); outline-offset:1px }
+body.light .thZbtn{ background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.18); color:var(--text) }
+
+.thHintSub{ display:block; margin-top:4px; color:var(--faint); font-size:9.5px; letter-spacing:.02em }
+body.light .thHintSub{ color:var(--dim) }
+
+/* ------------------------------------------------ 2. OPERATION PICKER ---- */
+
+/* css/app.css hides `.crumb` on the theater overview, on the reasoning that a
+   back button to the screen you are standing on is noise. A picker is not:
+   the operation the application is loaded against is worth naming on every
+   screen, and switching from the overview without first drilling in is worth
+   one click. Only the back arrow hides there. */
+.opPick{ display:inline-flex; align-items:stretch; gap:0 }
+body.theaterMode .opBack{ display:none }
+
+.opBack{
+  padding:0 7px; border-top-right-radius:0; border-bottom-right-radius:0;
+  border-right-width:0; font:600 12px/1 var(--mono);
+}
+.opName{
+  display:inline-flex; align-items:center; gap:6px;
+  max-width:290px; border-top-left-radius:0; border-bottom-left-radius:0;
+}
+body.theaterMode .opName{ border-radius:7px }
+.opName b{
+  max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.opCaret{ font-style:normal; font-size:9px; opacity:.7 }
+body.opPickOpen .opName{ border-color:var(--angel); color:var(--text) }
+body.opPickOpen .opCaret{ transform:rotate(180deg) }
+
+.opMenu{
+  /* Above #cmdbar (130), below the command palette and the shortcut sheet
+     (200). A menu that opens from the bar and is painted under it is a menu
+     whose first row cannot be clicked. */
+  position:fixed; z-index:140; width:392px; overflow:auto;
+  background:var(--panel); border:1px solid var(--line2); border-radius:11px;
+  box-shadow:0 22px 60px rgba(0,0,0,.55);
+  padding:6px; scrollbar-width:thin; scrollbar-color:var(--line2) transparent;
+}
+.opMenu[hidden]{ display:none }
+.opMenu::-webkit-scrollbar{ width:10px }
+.opMenu::-webkit-scrollbar-thumb{
+  background:var(--line2); border-radius:5px;
+  border:2px solid transparent; background-clip:content-box;
+}
+.opGrp{
+  padding:9px 9px 5px; font:700 8.5px/1 var(--mono);
+  letter-spacing:.14em; color:var(--faint);
+}
+.opRow{
+  display:block; padding:8px 9px; border-radius:8px; cursor:pointer;
+  border:1px solid transparent;
+}
+.opRow:hover{ background:var(--panel2, rgba(150,190,225,.07)) }
+.opRow:focus-visible,.opRow:focus{ outline:none; border-color:var(--angel); background:rgba(49,214,138,.09) }
+.opRow.cur{ background:rgba(49,214,138,.10); border-color:rgba(49,214,138,.35) }
+.opAll{ border-bottom:1px solid var(--line); border-radius:8px 8px 0 0; margin-bottom:2px }
+.opR1{ display:flex; align-items:center; gap:7px }
+.opR1 b{ font:700 12px/1.2 var(--mono); letter-spacing:.05em; color:var(--text) }
+.opR2{ margin-top:3px; font:400 10.5px/1.4 var(--sans); color:var(--dim) }
+.opR3{ display:flex; flex-wrap:wrap; gap:3px 14px; margin-top:6px }
+.opR3 span{ display:flex; align-items:baseline; gap:4px;
+            font:500 9px/1 var(--sans); color:var(--faint) }
+.opR3 b{ font:700 12px/1 var(--mono); color:var(--text) }
+.opR3 b.warn{ color:var(--warn) }
+.opR3 b.bad{ color:var(--bad) }
+
+@media (max-width:1360px){
+  .opMenu{ width:340px }
+  .opName{ max-width:210px }
+  .opName b{ max-width:170px }
+}

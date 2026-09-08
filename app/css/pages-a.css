@@ -1,0 +1,199 @@
+/* ==========================================================================
+   PAGES A — LIVE CASUALTIES, DECISION, DECISION FEED
+   ==========================================================================
+   The three destinations that carry the register, the escalation and the
+   record. Shapes are the canvas's (DESIGN/ANGEL_SWARM.dc.html, the isCas,
+   isDec and isFeed blocks); every colour and every type size resolves to a
+   token declared in css/design.css. Nothing here introduces a hue.
+
+   THE DEATH RULE HOLDS HERE TOO. Any figure that counts people who died
+   carries .d-death and takes the red family, whatever else is said about it.
+   The canvas draws the delta against doctrinal push as a teal success tile;
+   on this project it is red, because it is a count of the dead.
+   ========================================================================== */
+
+/* ---- shared page furniture -------------------------------------------- */
+.pa-t3{ grid-template-columns:repeat(3,1fr) }
+.pa-tabs{ padding:16px 22px 0; display:flex; justify-content:space-between;
+  align-items:center; gap:14px; flex-wrap:wrap }
+.pa-grpby{ display:flex; gap:9px; align-items:center }
+.pa-grpby > span{ font:400 9px var(--d-mono); letter-spacing:.1em; color:var(--d-t7) }
+.pa-pad{ padding:16px 22px 24px }
+
+/* ---- the register board ------------------------------------------------ */
+.pa-board{ border-radius:var(--d-r-lift); border:1px solid var(--d-line-hard);
+  background:var(--d-rail); overflow:hidden }
+.pa-ruler{ display:flex; padding:10px 26px 9px 300px; background:var(--d-bar);
+  border-bottom:1px solid var(--d-line-soft);
+  font:400 9px var(--d-mono); letter-spacing:.08em; color:var(--d-t7) }
+.pa-ruler > span{ width:16.66% }
+
+.pa-ghead{ display:flex; justify-content:space-between; align-items:center;
+  gap:14px; padding:9px 26px; background:var(--d-strip);
+  border-bottom:1px solid var(--d-line-soft); font-family:var(--d-mono) }
+.pa-ghead.breach{ background:var(--d-red-row) }
+.pa-ghead .nm{ display:flex; align-items:center; gap:10px; min-width:0 }
+.pa-ghead b{ font-size:11.5px; font-weight:700; letter-spacing:.09em; color:var(--d-t1) }
+.pa-ghead .c{ font-size:10px; color:var(--d-t5) }
+.pa-ghead .v{ font-size:10px; font-weight:600; white-space:nowrap }
+.pa-ghead .v.ok{ color:var(--d-teal-2) }
+.pa-ghead .v.bad{ color:var(--d-red) }
+.pa-ghead .v.esc{ color:var(--d-amb); cursor:pointer }
+.pa-ghead .v.dim{ color:var(--d-t5) }
+
+.pa-row{ display:flex; align-items:center; height:62px;
+  border-bottom:1px solid var(--d-line-soft); font-family:var(--d-mono) }
+.pa-row:hover{ background:oklch(0.19 0.012 250) }
+.pa-row.breach{ background:var(--d-red-row) }
+.pa-id{ width:300px; flex:none; padding:0 16px; display:flex; flex-direction:column;
+  gap:2px; border-left:3px solid var(--d-line-lift) }
+.pa-id.imm{ border-left-color:var(--d-red-mark) }
+.pa-id.del{ border-left-color:var(--d-amb-mark) }
+.pa-id.exp{ border-left-color:var(--d-line-lift) }
+.pa-id .n{ font-size:11.5px; font-weight:600; color:var(--d-t1);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pa-id .s{ font-size:9.5px; color:var(--d-t6);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+
+.pa-track{ flex:1; min-width:0; padding-right:26px; height:100%;
+  display:flex; align-items:center }
+.pa-bar{ height:24px; border-radius:2px; position:relative; display:flex; flex:none;
+  align-items:center; background:var(--d-line-lift); box-sizing:border-box }
+.pa-bar.red{ background:var(--d-red-line); border-right:3px solid var(--d-red-mark) }
+.pa-bar.amb{ background:var(--d-amb-line); border-right:3px solid var(--d-amb-mark) }
+.pa-bar.dim{ background:var(--d-panel-3); border-right:3px solid var(--d-t7) }
+.pa-bar.none{ background:repeating-linear-gradient(45deg,
+    var(--d-panel-2) 0 7px, var(--d-panel) 7px 14px);
+  border:1px dashed var(--d-line-lift) }
+.pa-fill{ height:100%; background:var(--d-teal-line); display:flex; align-items:center;
+  padding-left:8px; overflow:hidden; flex:none; min-width:0; box-sizing:border-box }
+.pa-fill span{ font-size:9px; font-weight:600; letter-spacing:.04em;
+  color:var(--d-teal-nav-t); white-space:nowrap }
+.pa-inbar{ font-size:9px; padding-left:8px; letter-spacing:.03em; flex:1; min-width:0;
+  color:var(--d-t4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pa-inbar.bad{ color:oklch(0.85 0.05 25) }
+.pa-t{ position:absolute; left:calc(100% + 8px); font-size:10.5px; font-weight:700;
+  white-space:nowrap; color:var(--d-t4) }
+.pa-t.bad{ color:var(--d-red) }
+.pa-t.warn{ color:var(--d-amb) }
+.pa-note{ position:absolute; left:calc(100% + 56px); font-size:10px;
+  white-space:nowrap; color:var(--d-teal-2) }
+.pa-note.bad{ color:var(--d-red) }
+.pa-note.dim{ color:var(--d-t6) }
+.pa-more{ padding:9px 26px 10px 316px; border-bottom:1px solid var(--d-line-soft);
+  font:400 10px var(--d-mono); color:var(--d-t6) }
+.pa-foot{ display:flex; justify-content:space-between; align-items:center; gap:14px;
+  padding:12px 26px; border-top:1px solid var(--d-line);
+  background:var(--d-bar); font-family:var(--d-mono) }
+.pa-foot .t{ font-size:10px; color:var(--d-t6) }
+.pa-go{ font:700 10.5px var(--d-mono); letter-spacing:.05em; padding:8px 13px;
+  border-radius:var(--d-r-btn); background:var(--d-teal); color:oklch(0.18 0.03 165);
+  border:0; cursor:pointer }
+
+/* ---- the decision ------------------------------------------------------ */
+.pa-dec{ display:grid; grid-template-columns:1fr 380px; gap:28px; padding:22px 26px 30px }
+@media (max-width:1180px){ .pa-dec{ grid-template-columns:1fr } }
+.pa-chip{ font:700 10px var(--d-mono); letter-spacing:.14em; color:var(--d-amb);
+  padding:5px 10px; border-radius:var(--d-r-btn); background:var(--d-amb-chip) }
+.pa-lede{ font-size:26px; line-height:1.32; font-weight:500; color:var(--d-t1);
+  letter-spacing:-.015em; text-wrap:pretty; margin-top:16px }
+.pa-lede .r{ color:var(--d-red) }
+.pa-lede .a{ color:var(--d-amb) }
+.pa-opts{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px;
+  font-family:var(--d-mono) }
+@media (max-width:840px){ .pa-opts{ grid-template-columns:1fr } }
+.pa-opt{ border-radius:var(--d-r-lift); border:1px solid var(--d-line-lift);
+  background:var(--d-panel); overflow:hidden }
+.pa-opt > h3{ margin:0; padding:12px 16px; border-bottom:1px solid var(--d-line);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font:700 10px var(--d-mono); letter-spacing:.1em; color:var(--d-t2) }
+.pa-opt > div{ padding:16px; display:flex; flex-direction:column; gap:13px }
+.pa-kv{ display:flex; justify-content:space-between; align-items:baseline; gap:12px }
+.pa-kv > span:first-child{ font-size:10.5px; color:var(--d-t5) }
+.pa-kv > span:last-child{ font-size:11px; font-weight:600; color:var(--d-t2) }
+.pa-kv.ok > span:last-child{ color:var(--d-teal-2) }
+.pa-kv.bad > span:last-child{ color:var(--d-red); font-weight:700 }
+.pa-kv.bad > span:first-child{ color:var(--d-red-t) }
+.pa-kv.warn > span:last-child{ color:var(--d-amb) }
+.pa-kv.top{ padding-top:11px; border-top:1px solid var(--d-line-soft) }
+.pa-cap{ font:400 10px/1.55 var(--d-mono); color:var(--d-t6) }
+.pa-why{ margin-top:18px; padding:14px 16px; border-radius:var(--d-r-lift);
+  background:var(--d-panel); border:1px solid var(--d-line-hard);
+  display:flex; gap:14px; align-items:flex-start }
+.pa-why > .k{ font:400 9px var(--d-mono); letter-spacing:.1em; color:var(--d-t7);
+  width:120px; flex:none; padding-top:2px }
+.pa-why > .v{ font-size:12px; line-height:1.6; color:var(--d-t4); text-wrap:pretty }
+.pa-why > .v b{ color:var(--d-t2); font-weight:600 }
+.pa-rec{ margin-top:20px; padding:14px 16px; border-radius:var(--d-r-lift);
+  background:var(--d-teal-bg); border:1px solid var(--d-teal-line);
+  display:flex; justify-content:space-between; align-items:center; gap:14px;
+  font-family:var(--d-mono) }
+.pa-rec .t{ font-size:11.5px; color:oklch(0.9 0.03 165) }
+.pa-rec .h{ font-size:9.5px; color:var(--d-teal-t); white-space:nowrap }
+.pa-acts{ display:flex; gap:12px; margin-top:20px; align-items:center;
+  flex-wrap:wrap; font-family:var(--d-mono) }
+.pa-auth{ font:700 11.5px var(--d-mono); letter-spacing:.05em; padding:12px 22px;
+  border-radius:var(--d-r-card); background:var(--d-teal); color:oklch(0.18 0.03 165);
+  border:0; cursor:pointer }
+.pa-auth.alt{ background:transparent; color:var(--d-t2);
+  border:1px solid oklch(0.42 0.012 250) }
+.pa-link{ font:400 10.5px var(--d-mono); color:var(--d-cyan); background:none;
+  border:0; cursor:pointer; padding:0 }
+.pa-side{ display:flex; flex-direction:column; gap:14px; font-family:var(--d-mono) }
+.pa-panel{ border-radius:var(--d-r-lift); background:var(--d-panel);
+  border:1px solid var(--d-line-hard); overflow:hidden }
+.pa-panel > h3{ margin:0; padding:11px 15px; border-bottom:1px solid var(--d-line);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font:700 10px var(--d-mono); letter-spacing:.1em; color:var(--d-t3) }
+.pa-panel > .p{ padding:15px; display:flex; flex-direction:column; gap:10px }
+.pa-item{ padding:11px 15px; border-bottom:1px solid var(--d-line-soft);
+  display:flex; flex-direction:column; gap:3px }
+.pa-item:last-child{ border-bottom:0 }
+.pa-item .a{ font-size:10.5px; color:var(--d-t2) }
+.pa-item .b{ font-size:9.5px; line-height:1.5; color:var(--d-t6) }
+.pa-toll{ border-radius:var(--d-r-lift); padding:15px;
+  display:flex; flex-direction:column; gap:8px; font-family:var(--d-mono) }
+.pa-toll .k{ font:700 10px var(--d-mono); letter-spacing:.1em }
+.pa-toll .f{ font:600 22px var(--d-mono); line-height:1 }
+.pa-toll .n{ font-size:10px; line-height:1.55; color:var(--d-t5) }
+
+/* ---- the feed ---------------------------------------------------------- */
+.pa-feed{ display:grid; grid-template-columns:1fr 340px }
+@media (max-width:1180px){ .pa-feed{ grid-template-columns:1fr } }
+.pa-feed > .l{ border-right:1px solid var(--d-line); min-width:0 }
+.pa-fhead{ padding:20px 26px 16px; border-bottom:1px solid var(--d-line);
+  display:flex; justify-content:space-between; align-items:flex-end; gap:16px }
+.pa-fhead h1{ font-size:21px; font-weight:600; color:var(--d-t1);
+  letter-spacing:-.015em; margin:0 0 6px }
+.pa-fhead p{ font-size:12px; color:var(--d-t5); margin:0 }
+.pa-entries{ padding:14px 26px 24px; display:flex; flex-direction:column }
+.pa-entry{ display:grid; grid-template-columns:86px 1fr; gap:20px; padding:16px 0;
+  border-bottom:1px solid var(--d-line-soft) }
+.pa-entry:last-child{ border-bottom:0 }
+.pa-when{ display:flex; flex-direction:column; gap:4px; font-family:var(--d-mono) }
+.pa-when .z{ font-size:11px; font-weight:600; color:var(--d-t3) }
+.pa-when .g{ font-size:9px; letter-spacing:.09em; color:var(--d-t5) }
+.pa-body{ display:flex; flex-direction:column; gap:7px; padding-left:18px;
+  border-left:2px solid var(--d-line-lift); min-width:0 }
+.pa-body .h{ font-size:14px; line-height:1.6; color:var(--d-t1); text-wrap:pretty }
+.pa-body .d{ font-size:12px; line-height:1.65; color:var(--d-t5); text-wrap:pretty }
+.pa-prov{ font:400 9.5px/1.5 var(--d-mono); color:var(--d-t7); word-break:break-word }
+.pa-e-esc  .pa-body{ border-left-color:var(--d-amb-mark) }
+.pa-e-esc  .pa-when .g{ color:var(--d-amb) }
+.pa-e-ok   .pa-body{ border-left-color:oklch(0.62 0.1 165) }
+.pa-e-ok   .pa-when .g{ color:var(--d-teal-t) }
+.pa-e-hold .pa-body{ border-left-color:var(--d-line-lift) }
+.pa-e-dead .pa-body{ border-left-color:var(--d-red-mark) }
+.pa-e-dead .pa-when .g{ color:var(--d-red) }
+.pa-open{ font:600 9.5px var(--d-mono); color:var(--d-cyan); background:none;
+  border:0; cursor:pointer; padding:0 }
+
+/* ---- a death panel is red, header and figures both --------------------- */
+/* design.css turns .d-lab inside .d-death to the quiet red used above a
+   tile; a whole panel of death figures needs the figure red, and the
+   numbers in it are .pa-kv values rather than .d-fig, so they are named
+   here. Same specificity, later sheet, so this is the one that lands. */
+.pa-panel.d-death > h3{ background:var(--d-red-bg); border-bottom-color:var(--d-red-line) }
+.pa-panel.d-death > h3 .d-lab{ color:var(--d-red) !important }
+.pa-panel.d-death .pa-kv > span:last-child{ color:var(--d-red) }
+.pa-panel.d-death{ border-color:var(--d-red-line) }

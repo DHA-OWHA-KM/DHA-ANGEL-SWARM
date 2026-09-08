@@ -1,0 +1,15 @@
+# `train/` — the model build scripts
+
+UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
+
+Build-time Python. These three scripts run once, offline, and produce the files the application loads from `app/models/` and `app/data/`. Nothing in this folder ships inside the running application; it is here so the two trained models can be re-derived rather than taken on trust.
+
+| File | What it is |
+|---|---|
+| `ppg_cri.py` | Generates the synthetic cohort and trains CRI-Net: a 1-D convolutional network reading five seconds of photoplethysmogram and emitting an estimate and a predicted variance under a Gaussian negative log-likelihood, then exports it to ONNX. Its own header explains why the task is not a lookup table on heart rate — tachycardia appears late, saturates, and a meaningful fraction of casualties never mount it — so each synthetic subject is given its own chronotropic responsiveness, including non-responders, and the script reports the heart-rate-only comparison so the claim is checkable. Held-out data is split by subject. It mirrors the operating principle of the FDA-cleared CipherOx CRM (K173929) without claiming to be it, and no patient data is used. |
+| `calibrate.py` | Measures the operational trust thresholds rather than choosing them by eye, on the grounds that picking them by hand would make "the model knows when it does not know" an assertion. It reuses the exact generator the network was trained on, runs 5,000 clean and 3,000 degraded windows from 120 unseen subjects through the exported ONNX graph, and writes the resulting act / do-not-act boundary into the model card the interface reads at run time. |
+| `export_minilm.py` | Exports the sentence encoder and embeds the corpus: builds a local `BertModel` from the fp16 safetensors of the npm package `@lat.md/embed-minilm-fp16` — huggingface.co being unreachable from the build sandbox — exports to ONNX with pooling and L2 normalisation **inside the graph**, quantises to int8, and writes `minilm.onnx`, `vocab.txt`, `meta.json` and `doctrine.json`. Pooling in the graph is deliberate: it removes the commonest source of silent mismatch between a Python reference and a JavaScript one, leaving the browser doing tokenisation and nothing else. The file is 2,117 lines because it carries the corpus text itself. |
+| `train.log` | The recorded training run: 62,400 windows over 240 subjects trained, 10,500 over 70 disjoint subjects held out, fourteen epochs in 632.6 s, and the held-out figures the model card quotes. Rendered at [`train.md`](train.md). |
+| `ppg_cri.onnx` | The exported CRI-Net graph, 419,797 bytes. Kept beside the script that produced it; the copy under `app/models/` is what the application loads. |
+| `ppg_cri.meta.json` | The model card written by the training and calibration runs — metrics, input contract and trust thresholds. Identical in purpose to the copy under `app/models/`. |
+| `ppg_traces.json` | Reference waveform traces produced alongside the model. |

@@ -1,0 +1,1643 @@
+/* ============================================================================
+   ANGEL SWARM — POLISH
+
+   The cross-cutting stylesheet. It is loaded last, after css/app.css and
+   before any module's own sheet, and it does three jobs and no others:
+
+     1. fixes layout faults in the shell that only appear at sizes or
+        densities the original design did not reach;
+     2. reconciles the panes contributed by separate authors with the host's
+        `.pane` / `.paneHead` / `.card` idiom, so the application reads as one
+        product rather than seven;
+     3. carries the chrome for the command palette, the shortcut sheet and
+        the first-run strip, all of which are injected by js/palette.js.
+
+   Everything here resolves through the same custom properties as the shell,
+   so both themes are one rule set, not two. There are no colour literals
+   below except where a shadow needs an alpha the palette does not carry.
+   ========================================================================== */
+
+
+/* =========================================================================
+   1. THE NAVIGATION RAIL
+
+   The rail grew from eleven entries to twenty-two. It was a flex column with
+   `overflow: visible` and a `flex: 1` spacer, which is correct only while the
+   content is shorter than the viewport: past that the spacer collapses to
+   zero, the column overflows, and the items at the bottom — Settings, and the
+   sound control below it — are simply painted outside the element and clipped
+   by `#shell`. Measured: at a 1020px-tall window Settings ends at y=1010 and
+   is visible; at 960px it ends at y=991 against a rail that stops at 960, and
+   from there down it is unreachable by any means, because nothing scrolls.
+
+   Two changes, in this order of preference. The rail scrolls, which fixes it
+   at every height. And below 940px the rail also gets denser — the four
+   headline entries drop their second line and the rows tighten — so that in
+   the common case there is nothing to scroll to. The 1680x1020 design case is
+   untouched: at that height the media query does not apply and the scroll
+   container never overflows.
+   ========================================================================= */
+
+#rail{
+  overflow-y:auto; overflow-x:visible;
+  overscroll-behavior:contain;
+  scrollbar-width:none;                 /* 24 icons at 30px fit any window we ship to */
+}
+#rail::-webkit-scrollbar{width:0;height:0}
+
+/* The spacer pushes the two system controls — the palette and Settings — to
+   the foot of the rail, and must be allowed to vanish when the column is
+   full rather than push them off the bottom. */
+.railSpacer{flex:1 1 auto; min-height:6px}
+
+/* Section headings became separators. The text is still in the document —
+   the palette and the role engine read it — it is just not painted, because
+   at 36px there is no room for a word and the tone step says the same thing.
+   `.navSect.sub` inherits the rule from css/app.css; this only removes the
+   padding and border the wide rail gave it. */
+.navSect.sub{padding:0; margin:4px 0; border-top:0}
+.navGroup > .navSect.sub:first-child{margin-top:0}
+
+/* THE DISCLOSURE IS GONE, AND NOTHING IS BEHIND IT.
+   `ALL VIEWS` existed because twenty-one labelled rows did not fit in a
+   column. Twenty-one icons do. The button stays in the document because
+   js/app.js binds it and opens the group by name when a shortcut lands on a
+   view inside it — both of which are now no-ops on an always-open group —
+   and #navGroup is display:contents in every profile so one flexbox `order`
+   spans the whole rail. Nothing is hidden from anybody. */
+.navToggle{display:none}
+#navGroup{display:contents}
+
+/* The palette entry is a <button>; give it the anchor's box. */
+.navItem.navCmd{
+  width:28px; height:28px; padding:0; background:none; border:0; font:inherit;
+  color:var(--t-dim); display:flex; align-items:center; justify-content:center;
+}
+
+/* ------------------------------------------------------- rail tooltips --
+   The label that used to sit beside the glyph. It is the element's own <em>,
+   moved out of flow and revealed on hover or keyboard focus — so the
+   accessible name is unchanged, the role engine's label table still rewrites
+   the same node, and there is no second copy of twenty-one strings to keep in
+   step. `<i>` (the second line, "the Golden Hour is gone") rides along under
+   it, and `<u>` (the keyboard hint) sits at the end.
+   The rail is 36px and the tooltip is 200px, so it MUST escape the rail:
+   #rail is overflow-y:auto, which establishes a clip on the x axis too, so
+   the tooltip is positioned against #shell instead and given a z-index above
+   the map. */
+/* `position:fixed`, not absolute: #rail is a scroll container, which clips on
+   BOTH axes, and the badge on the approvals entry needs the item itself to be
+   the positioned ancestor. A fixed box with `top:auto` is laid out at its
+   static position — beside its own icon — and painted against the viewport,
+   which is the one combination that escapes a 36px scrolling column without
+   giving up the vertical alignment. */
+#rail .navItem, #railR .ri{position:relative}
+#rail .navItem em, #rail .navItem u, #rail .nt i,
+#railR .ri em{
+  position:fixed; left:calc(var(--railW) + 6px); margin-top:-12px;
+  z-index:60; pointer-events:none; opacity:0; transform:translateX(-3px);
+  transition:opacity .1s ease, transform .1s ease;
+  background:var(--k4); color:var(--t-hi); box-shadow:inset 0 0 0 1px var(--line2), var(--shadow);
+  border-radius:2px; padding:4px 8px; white-space:nowrap;
+  font:600 10.5px/1.15 var(--sans); font-style:normal; letter-spacing:.02em;
+  text-decoration:none;
+}
+/* The second line and the keyboard hint are not in the tooltip. They are
+   still in the document, still read by the palette and the role engine; a
+   tooltip that has to be read is not a tooltip. */
+#rail .nt i, #rail .navItem u{display:none}
+#railR .ri em{left:auto; right:calc(var(--railW) + 6px)}
+/* Nothing in the rail may sit above the palette or the classification band. */
+#rail .navItem em, #railR .ri em{z-index:60}
+#rail .navItem:hover em, #rail .navItem:focus-visible em,
+#railR .ri:hover em, #railR .ri:focus-visible em{opacity:1; transform:none}
+
+/* Density reduction for short windows. Twenty-four 30px rows is 720px, which
+   fits a 768px laptop once the chrome is 62px + 18px + 26px; below that the
+   rail scrolls, which it now can. */
+@media (max-height:820px){
+  #rail{gap:0}
+  .navItem, .navItem.navCmd{height:26px}
+}
+}
+
+
+/* =========================================================================
+   2. PANE COHERENCE
+
+   Measured across all twenty-two panes before touching anything. The host
+   idiom is: `.pane` at 18px 22px 34px, a `.paneHead` carrying an `h2` at
+   17px/700 and a `.lede`, then `.card`s. Sixteen panes already matched it
+   exactly, which is why the corrections below are narrow — the fault was not
+   general drift, it was three specific panes that render their whole body
+   from JavaScript and never adopted the header.
+   ========================================================================= */
+
+/* -- 2a. Casualty flow ---------------------------------------------------
+   charts.js owns `[data-pane="FLOW"]` outright and paints an absolutely
+   positioned scroller into it. It was the only analytical pane in the
+   application that opened with no title and no explanation — a judge landing
+   on it from the rail met a Sankey diagram and had to infer the rest. The
+   header is injected by js/palette.js as real `.paneHead` markup; the rules
+   here make room for it above the module's own scroller and bring the
+   module's card metrics into line with `.card` / `.cardHead`. */
+[data-pane="FLOW"] > .paneShim{
+  position:absolute; left:0; right:0; top:0; z-index:2;
+  padding:16px 24px 12px; pointer-events:none;
+}
+[data-pane="FLOW"] > .paneShim *{pointer-events:auto}
+[data-pane="FLOW"] #flowBody{top:var(--flowTop, 96px)}
+.flowWrap{padding:0 24px 32px !important}
+
+/* `.chCard` is charts.js's private card. Same border, same radius, same head
+   type as `.card` / `.cardHead`, so two cards from two authors sitting one
+   above the other look like one system. */
+.chCard{border-radius:10px !important}
+.chHead{
+  padding:8px 16px !important;
+  background:var(--panel2); border-bottom:1px solid var(--line);
+  font:700 9.5px/1 var(--mono) !important; letter-spacing:.12em !important;
+  color:var(--dim) !important; min-height:34px;
+}
+.chHead .chSub{font-size:10px}
+.chNote{padding:12px 12px 12px !important}
+.chKey{padding:12px 16px 4px !important}
+.flowGrid{gap:12px !important}
+
+/* The remaining contributed panes needed nothing here: data2.js,
+   copilot.js, doctrine.js and montecarlo.js all adopted the shell's own
+   `.card` / `.cardHead` — twenty-four uses between them — and measure
+   identically to the host panes. Checked, not assumed. */
+
+/* -- 2b. Long-form copy in contributed panes -----------------------------
+   The host caps a pane lede at 98ch and lets card copy run full width. Two
+   modules set their own narrower measure, which strands the right third of a
+   1680px window. */
+[data-pane="DOCTRINE"] .paneHead .lede,
+[data-pane="BRIEF"] .paneHead .lede,
+[data-pane="QUERY"] .paneHead .lede,
+[data-pane="CONFIDENCE"] .paneHead .lede{max-width:98ch}
+
+
+/* -- 2c. One colour per destination, everywhere it appears ---------------
+   css/app.css assigns each destination a hue, but only on `.navItem`. The
+   palette, the welcome list and the first-run strip name the same
+   destinations, and a judge who has learned the rail by colour should not
+   have to relearn it three more times. The custom property is lifted onto
+   anything carrying `data-view`. */
+[data-view="STANDARD"]  {--niC:#8ea3b8; --niG:rgba(142,163,184,.40)}
+[data-view="DASHBOARD"] {--niC:#5bb4ff; --niG:rgba(91,180,255,.45)}
+[data-view="MISSION"]   {--niC:#31d68a; --niG:rgba(49,214,138,.45)}
+[data-view="COMPARE"]   {--niC:#c58cff; --niG:rgba(197,140,255,.45)}
+[data-view="CASUALTIES"]{--niC:#ff5f70; --niG:rgba(255,95,112,.45)}
+[data-view="UNITS"]     {--niC:#ffb340; --niG:rgba(255,179,64,.45)}
+[data-view="FLEET"]     {--niC:#3fd8d0; --niG:rgba(63,216,208,.45)}
+[data-view="SUPPLY"]    {--niC:#f0813f; --niG:rgba(240,129,63,.45)}
+[data-view="TASKING"]   {--niC:#ffd85c; --niG:rgba(255,216,92,.45)}
+[data-view="AUDIT"]     {--niC:#94a6ff; --niG:rgba(148,166,255,.45)}
+[data-view="ANALYSIS"]  {--niC:#f57ac2; --niG:rgba(245,122,194,.45)}
+[data-view="DATA"]      {--niC:#b6cc4e; --niG:rgba(182,204,78,.45)}
+[data-view="QUERY"]     {--niC:#7fd4a8}
+[data-view="DOCTRINE"]  {--niC:#9fb4ff}
+[data-view="BRIEF"]     {--niC:#d6a8ff}
+[data-view="SENSOR"]    {--niC:#5bb4ff}
+[data-view="THEATER3D"] {--niC:#4fd6c6}
+[data-view="FLOW"]      {--niC:#ffa8b6}
+[data-view="CONFIDENCE"]{--niC:#e0a94a}
+[data-view="STREAM"]    {--niC:#8ea3b8}
+[data-view="ROI"]       {--niC:#31d68a}
+body.light [data-view="DASHBOARD"] {--niC:#1668c4}
+body.light [data-view="MISSION"]   {--niC:#0f9b62}
+body.light [data-view="COMPARE"]   {--niC:#7a3fd0}
+body.light [data-view="CASUALTIES"]{--niC:#c81a30}
+body.light [data-view="UNITS"]     {--niC:#a06a00}
+body.light [data-view="FLEET"]     {--niC:#0d8a86}
+body.light [data-view="SUPPLY"]    {--niC:#c85c14}
+body.light [data-view="TASKING"]   {--niC:#96760a}
+body.light [data-view="AUDIT"]     {--niC:#3f4fc4}
+body.light [data-view="ANALYSIS"]  {--niC:#bf2f89}
+body.light [data-view="DATA"]      {--niC:#6f8210}
+body.light [data-view="QUERY"]     {--niC:#12855c}
+body.light [data-view="DOCTRINE"]  {--niC:#3f4fc4}
+body.light [data-view="BRIEF"]     {--niC:#7a3fd0}
+body.light [data-view="SENSOR"]    {--niC:#1668c4}
+body.light [data-view="THEATER3D"] {--niC:#0d8a86}
+body.light [data-view="FLOW"]      {--niC:#c81a30}
+body.light [data-view="CONFIDENCE"]{--niC:#9a6b0a}
+body.light [data-view="ROI"]       {--niC:#0f9b62}
+body.light [data-view="STANDARD"]  {--niC:#5b6b7c}
+body.light [data-view="STREAM"]    {--niC:#5b6b7c}
+
+
+/* =========================================================================
+   3. COMMAND PALETTE
+
+   Injected by js/palette.js. It is a dialog in the layout sense only — it is
+   a plain element with a backdrop, because `<dialog>`'s top layer sits above
+   the classification band, and nothing in this application is ever allowed to
+   cover the classification band.
+   ========================================================================= */
+
+#cmdk{
+  position:fixed; left:0; right:0; top:var(--bandH); bottom:0; z-index:200;
+  display:none; justify-content:center; align-items:flex-start;
+  background:rgba(2,6,11,.62); backdrop-filter:blur(3px);
+  padding:11vh 24px 24px;
+}
+body.light #cmdk{background:rgba(20,40,70,.28)}
+#cmdk.show{display:flex}
+
+.ckBox{
+  width:100%; max-width:720px; max-height:100%;
+  display:flex; flex-direction:column; overflow:hidden;
+  background:var(--panel); border:1px solid var(--line2);
+  border-radius:13px; box-shadow:var(--shadow);
+}
+
+.ckIn{
+  display:flex; align-items:center; gap:12px;
+  padding:16px 16px; border-bottom:1px solid var(--line);
+  background:var(--panel2); flex:0 0 auto;
+}
+.ckIn .ckGlyph{color:var(--angel); font:900 14px/1 var(--mono)}
+.ckIn input{
+  flex:1; min-width:0; background:transparent; border:0; outline:0;
+  color:var(--text); font:500 15px/1.3 var(--sans);
+}
+.ckIn input::placeholder{color:var(--faint)}
+.ckIn .ckEsc{
+  font:600 9px/1 var(--mono); color:var(--faint); letter-spacing:.08em;
+  border:1px solid var(--line); border-radius:4px; padding:4px 4px;
+}
+
+.ckList{overflow-y:auto; overscroll-behavior:contain; padding:8px; flex:1 1 auto;
+  scrollbar-width:thin; scrollbar-color:var(--line2) transparent}
+.ckList::-webkit-scrollbar{width:9px}
+.ckList::-webkit-scrollbar-thumb{background:var(--line2); border-radius:6px;
+  border:3px solid var(--panel); background-clip:padding-box}
+
+.ckSect{
+  font:700 8px/1 var(--mono); letter-spacing:.2em; color:var(--faint);
+  padding:12px 12px 8px;
+}
+.ckRow{
+  display:flex; align-items:center; gap:12px;
+  padding:8px 12px; border-radius:8px; cursor:pointer;
+  color:var(--dim);
+}
+.ckRow .ckIco{
+  width:19px; flex:0 0 19px; text-align:center;
+  font:900 13px/1 var(--mono); color:var(--niC, var(--faint));
+}
+.ckRow .ckTxt{flex:1 1 auto; min-width:0}
+.ckRow .ckT{
+  display:block; font:600 12.5px/1.35 var(--sans); color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ckRow .ckS{
+  display:block; font:400 10.5px/1.4 var(--sans); color:var(--faint);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;
+}
+.ckRow .ckT mark{background:transparent; color:var(--angel); font-weight:800}
+.ckRow .ckKey{
+  flex:0 0 auto; display:flex; gap:4px;
+}
+.ckRow .ckKey kbd{
+  font:600 9px/1 var(--mono); color:var(--dim); letter-spacing:.04em;
+  border:1px solid var(--line); border-bottom-width:2px; border-radius:4px;
+  padding:4px 4px; background:var(--panel2); white-space:nowrap;
+}
+.ckRow .ckTag{
+  flex:0 0 auto; font:600 8.5px/1 var(--mono); letter-spacing:.12em;
+  color:var(--faint); border:1px solid var(--line); border-radius:4px;
+  padding:4px 4px;
+}
+.ckRow:hover{background:var(--chartbg)}
+.ckRow.sel{background:rgba(49,214,138,.13); box-shadow:inset 2px 0 0 var(--angel)}
+body.light .ckRow.sel{background:rgba(15,155,98,.10)}
+.ckRow.sel .ckT{color:var(--text)}
+.ckRow.sel .ckS{color:var(--dim)}
+
+.ckNone{padding:24px 16px; text-align:center; color:var(--faint);
+  font:400 12px/1.7 var(--sans)}
+
+.ckFoot{
+  flex:0 0 auto; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:8px 16px; border-top:1px solid var(--line); background:var(--panel2);
+  font:500 9.5px/1 var(--mono); letter-spacing:.06em; color:var(--faint);
+}
+.ckFoot b{color:var(--dim); font-weight:700}
+.ckFoot .ckSpacer{flex:1}
+
+
+/* =========================================================================
+   4. THE SHORTCUT SHEET  ("?")
+   ========================================================================= */
+
+#keysheet{
+  position:fixed; left:0; right:0; top:var(--bandH); bottom:0; z-index:200;
+  display:none; align-items:center; justify-content:center;
+  background:rgba(2,6,11,.80); backdrop-filter:blur(4px); padding:32px;
+}
+body.light #keysheet{background:rgba(20,40,70,.42)}
+#keysheet.show{display:flex}
+.ksCard{
+  width:100%; max-width:940px; max-height:100%; overflow:auto;
+  background:var(--panel); border:1px solid var(--line2); border-radius:13px;
+  box-shadow:var(--shadow); padding:24px 24px 24px;
+  scrollbar-width:thin;
+}
+.ksHead{display:flex; align-items:flex-start; gap:16px; margin-bottom:4px}
+.ksHead h2{font:700 17px/1.3 var(--sans); color:var(--text)}
+.ksHead p{margin:4px 0 0; font:400 12px/1.65 var(--sans); color:var(--dim); max-width:82ch}
+.ksHead button{
+  margin-left:auto; flex:0 0 auto;
+  border:1px solid var(--line); background:transparent; color:var(--dim);
+  border-radius:7px; padding:8px 12px; cursor:pointer; font:600 11px/1 var(--sans);
+}
+.ksHead button:hover{color:var(--text); border-color:var(--line2)}
+.ksGrid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(270px, 1fr));
+  gap:12px 24px; margin-top:16px;
+}
+.ksCol h3{
+  font:700 8px/1 var(--mono); letter-spacing:.2em; color:var(--faint);
+  padding:0 0 8px; border-bottom:1px solid var(--line); margin-bottom:8px;
+}
+.ksRow{display:flex; align-items:baseline; gap:12px; padding:4px 0}
+.ksRow .ksK{flex:0 0 92px; display:flex; gap:4px; flex-wrap:wrap}
+.ksRow kbd{
+  font:600 9.5px/1 var(--mono); color:var(--text);
+  border:1px solid var(--line2); border-bottom-width:2px; border-radius:4px;
+  padding:4px 4px; background:var(--panel2);
+}
+.ksRow span{flex:1; font:400 11.5px/1.5 var(--sans); color:var(--dim)}
+.ksNote{
+  margin-top:16px; padding-top:16px; border-top:1px solid var(--line);
+  font:400 11px/1.7 var(--sans); color:var(--faint); max-width:96ch;
+}
+.ksNote b{color:var(--dim)}
+
+
+/* =========================================================================
+   5. WELCOME ORIENTATION
+
+   The welcome overlay carries the argument, and it gets a fourth block
+   listing what is actually in the application.
+
+   The dismissible strip that used to live under the command bar has been
+   removed. Measured, it was seven controls of permanent chrome duplicating
+   the top four rail entries, and it persisted across all twenty-one views —
+   it was not in any useful sense "first-run". Its markup, its behaviour and
+   its stylesheet block are gone rather than hidden; see js/palette.js §10.
+   ========================================================================= */
+
+.wcTour{
+  margin-top:8px; padding-top:16px; border-top:1px solid var(--line);
+}
+.wcTour > b{
+  display:block; font:700 8px/1 var(--mono); letter-spacing:.2em;
+  color:var(--faint); margin-bottom:12px;
+}
+.wcTourRow{display:flex; flex-wrap:wrap; gap:8px}
+.wcTourRow button{
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  background:var(--panel2); border:1px solid var(--line); border-radius:9px;
+  padding:8px 12px; color:var(--dim); text-align:left;
+}
+.wcTourRow button:hover{border-color:var(--line2); color:var(--text)}
+.wcTourRow button .ni{
+  font:900 13px/1 var(--mono); color:var(--niC, var(--angel)); flex:0 0 auto;
+}
+.wcTourRow button i{
+  font-style:normal; display:block; font:400 10px/1.4 var(--sans); color:var(--faint);
+  margin-top:2px;
+}
+.wcTourRow button em{font-style:normal; font:600 11.5px/1.2 var(--sans)}
+
+
+
+
+/* =========================================================================
+   6. ROLE PROFILES
+
+   The visibility contract three other modules code against. It is a
+   stylesheet rule rather than a script for a reason that is worth stating
+   plainly: almost every pane in this application is rebuilt by JavaScript on
+   every tick, several of them at 60 Hz, and a filter that has to be re-run
+   after each render is a filter that will eventually be forgotten by one
+   author on one pane. A rule keyed off an attribute on <body> is applied by
+   the engine to markup that did not exist when the role was chosen, costs
+   nothing per frame, and cannot be got wrong.
+
+   The engine and the full contract are documented in js/app.js (§ROLE
+   PROFILES) and in ROLE_CONTRACT.md.
+   ========================================================================= */
+
+/* THE RULE. `data-roles` is a whitespace-separated allow-list; `~=` is the
+   whitespace-token match that reads it. The attribute absent means every
+   role, so an unmarked element is untouched by any of this.
+
+   !important is here on purpose and is not laziness. The rule has to beat
+   whatever `display` the element's own styling gives it — .seg is
+   inline-flex, .navGroup is flex under body.navOpen, .navItem is flex — and
+   a contract that three separate authors will write against must not be
+   decided by a specificity race none of them can see. */
+body[data-role-profile="COMMANDER"]   [data-roles]:not([data-roles~="COMMANDER"]),
+body[data-role-profile="LOGISTICIAN"] [data-roles]:not([data-roles~="LOGISTICIAN"]),
+body[data-role-profile="SURGEON"]     [data-roles]:not([data-roles~="SURGEON"]),
+body[data-role-profile="ANALYST"]     [data-roles]:not([data-roles~="ANALYST"]),
+.roleOff{ display:none !important }
+
+
+/* ------------------------------------------------- ALL VIEWS means all ---
+   The role rule above is the right default and the wrong absolute. A
+   COMMANDER opening this application sees six destinations out of
+   twenty-two, and nothing on the screen says the other sixteen exist — so
+   the rail reads as broken rather than as filtered. Pressing ALL VIEWS sets
+   body.navAll and this rule releases the group: the operator asked, and the
+   answer is the whole list. The four role chips still choose what the rail
+   offers on arrival, which is the part that was ever worth having.
+
+   Scoped to #navGroup on purpose. It releases destinations, not the
+   role-specific furniture inside the panes. */
+body.navAll .navItem[data-view][data-roles]{ display:flex !important }
+body.navAll .navSect[data-roles]{ display:block !important }
+
+/* ---------------------------------------------------------------------
+   THE SECONDARY GROUP IS CLOSED UNTIL ASKED FOR.
+
+   The rail used to hide its overflow by role: every entry carried a
+   data-roles allow-list and the profile filter did the work. One
+   vocabulary for all four roles removed those attributes, and with them
+   the only thing holding the group shut — twenty-four icons came back
+   down the rail and the ten-destination route was a pile again.
+
+   The gate is now structural rather than a side effect of role filtering,
+   which is what it should always have been: these are secondary
+   destinations, and secondary is a property of the destination, not of
+   who is looking at it.
+   --------------------------------------------------------------------- */
+#navGroup{ display:none }
+body.navAll #navGroup{ display:contents }
+body.navAll .navItem[data-view]{ display:flex !important }
+body.navAll .navSect{ display:block !important }
+/* The control itself, pressed. Same treatment the rail gives a live
+   destination, so "this is on" reads the same way everywhere. */
+#btnNavAll.on{ background:var(--k5); color:var(--t-hi) }
+#btnNavAll.on .ic{ color:var(--cyan) }
+
+/* -------------------------------------------------------- role switcher --
+   The loudest control on the bar, and deliberately so. Flipping COMMANDER →
+   ANALYST in front of a reviewer, mid-sentence, without a reload and without
+   losing the running mission, is the demonstration this whole system exists
+   to make. It carries the accent border no other control on the bar has. */
+.roleSw{
+  display:flex; align-items:center; gap:8px; flex:0 0 auto;
+}
+.roleSw .rlab{
+  font:600 9.5px/1 var(--mono); letter-spacing:.14em; color:var(--t-dim);
+  white-space:nowrap;
+}
+.roleSw .seg{background:var(--k2); box-shadow:inset 0 0 0 1px var(--line2)}
+.roleSw .chip{
+  padding:0 8px; white-space:nowrap; background:var(--k2);
+  font:600 9.5px/1 var(--mono); letter-spacing:.10em; color:var(--t-dim);
+}
+.roleSw .chip:hover{color:var(--t-hi); background:var(--k4)}
+.roleSw .chip.on{background:var(--k5); color:var(--t-hi)}
+.roleSw .chip:focus-visible{outline:1px solid var(--cyan); outline-offset:-1px}
+
+/* ------------------------------------------------------ command-bar fit --
+   Measured before this block, at the 1680px design width: the bar's contents
+   summed to 1681px against 1680px of bar, and flexbox paid for the overrun by
+   crushing four items — the JOA crumb rendered as "◂ JO…", and "Who decides",
+   "Model & sources" and "Theme: Dark" each wrapped onto two and three lines
+   inside a 30px-tall button. The bar was already broken before a switcher was
+   added to it.
+
+   This recovers the room without removing a single one of the eighteen
+   controls the analyst profile is defined by: tighter gutters, tighter chip
+   and button padding, and one nominated shrink victim. The crumb is that
+   victim — it is the only element on the bar whose content is repeated in
+   full, 8px to its left, in the classification band.
+
+   Even after all of it the analyst bar does not fit, and cannot: eighteen
+   controls measure 2,130px of content against 1,680px of bar. Squeezing was
+   the old answer and it produced illegible buttons; clipping would be worse,
+   because a control off the right edge is a control that does not exist. So
+   the bar is allowed to take a second row, and app.js publishes its measured
+   height back into --barH, which is what #shell and the welcome overlay
+   position against. The three role profiles that fit on one row measure 52px
+   and write 52px, so nothing about them changes. */
+/* The app row is ONE row, 30px, and it does not wrap. The eighteen controls
+   the analyst profile is defined by still all exist — they have been dealt
+   across two strips instead of one, which is what the console layout buys:
+   the app row carries identity, scope, tasking authority, deployment, role
+   and theme; the tool row carries the object and its instruments; the foot
+   ribbon carries the readouts that used to crowd the bar's right end. Two
+   controls became icons with tooltips (`Who decides`, `Model & sources`) and
+   one — the light/dark toggle — was retired in favour of the theme picker.
+
+   app.js still measures this and publishes --barH, so #shell and the welcome
+   overlay position against a number nobody has to keep in step by hand. */
+#cmdbar{
+  flex-wrap:wrap; row-gap:0; height:auto; min-height:var(--appH);
+  align-content:center; overflow:visible;
+}
+/* Below the design width the row is allowed to take a second line rather
+   than push a control off the right edge, because a control off the edge is
+   a control that does not exist. app.js measures the result and publishes it
+   as --barH, so #shell, the welcome overlay and every canvas sized from that
+   box follow. At 1680 — the design width, and what the mockup was drawn at —
+   it measures 30px and takes one row; this only ever fires on a smaller
+   window. Two shrinks come first, so that 1366 still fits on one:
+   the role chips tighten, and the deploy bar's subtitle — which is repeated
+   in full in the deployment sheet the button opens — gives up its width. */
+@media (max-width:1520px){
+  #cmdbar{gap:4px}
+  .roleSw .rlab{font-size:8.5px; letter-spacing:.10em}
+  .roleSw .chip{padding:0 4px; letter-spacing:.04em}
+  #cmdbar .deployBar .dbTxt em{max-width:74px}
+  .appic.wide b{display:none}
+}
+/* The analyst profile is the only one carrying BOTH extra segmented pairs
+   (PACOM/EUCOM and EXERCISE/LIVE), and after the masthead grew it is the one
+   profile whose row runs out at a 1440 laptop: measured 1494px of content
+   against 1440 of bar, a 54px overrun that flexbox pays for by wrapping the
+   theme picker and the two trailing icon buttons onto a second line. Two
+   words buy the 54px back, and neither is a control:
+     · the version rides the wordmark and is decoration on a name stated in
+       full beside it (it already goes at 1340 for every profile);
+     · the word ROLE labels a group whose four members each say what they are,
+       and the group keeps its `aria-label="Role profile"` for a screen reader.
+   Below 1366 the row still wraps to two lines, deliberately — it wraps, it
+   does not clip, and no control is lost. */
+@media (max-width:1520px){
+  body[data-role-profile="ANALYST"] .brand .ver{display:none}
+  body[data-role-profile="ANALYST"] .roleSw .rlab{display:none}
+}
+@media (max-width:1340px){
+  #cmdbar .deployBar .dbTxt em{display:none}
+  #cmdbar .master .mlab{display:none}
+}
+#cmdbar .brand{flex:0 0 auto}
+#cmdbar .master{flex:0 0 auto}
+#cmdbar #deployBar{flex:0 0 auto}
+#cmdbar .opPick{flex:0 1 auto; min-width:0}
+#cmdbar #btnOpPick{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* ------------------------------------------------------------ role rail --
+   A role rail is a flat list with no group headings, in an order the role
+   chooses. The sixteen destinations inside #navGroup have to become siblings
+   of the four above it for one `order` to span both, and display:contents is
+   how that is done without moving a node: every click handler, hue rule and
+   palette lookup already bound to those anchors keeps working. */
+body:not([data-role-profile="ANALYST"]) #navGroup{display:none}
+body:not([data-role-profile="ANALYST"]).navAll #navGroup{display:contents}
+
+/* Nothing to reduce. A 36px icon rail is already the densest form of itself,
+   so a role profile changes WHICH icons are on it and in what order, and
+   changes nothing about how they are drawn. That is the whole of the
+   difference between a five-destination rail and a twenty-one-destination
+   one now, and it is why role filtering survived the re-shell untouched:
+   `data-roles` is still on the same anchors, the CSS rule that reads it is
+   unchanged, and the flexbox `order` the role engine writes still applies. */
+
+/* ---------------------------------------------------------- role panes --
+   DECIDE and COST ship as a header and a mount point. The placeholder says
+   so in one line; it does not pretend to be a loading state for something
+   that may never arrive. */
+.roleMount{padding:2px 0 0}
+.roleMount > .lede{color:var(--faint)}
+
+
+/* =========================================================================
+   7. TABLES — FIT, OR SCROLL, BUT NEVER CLIP
+
+   Three faults, one class of defect, reported as "the table is screwy" on
+   DECIDE and on TASKING and "it is like this in a number of places". It was
+   in eight places. All three faults are fixed here, generally, so that the
+   next author who lengthens a column heading does not reopen any of them.
+
+   ---------------------------------------------------------- 7.1 the cell --
+
+   `td.act{display:flex}` in the shell stylesheet is the one the reporter
+   could see. A `display:flex` box is not a table-cell: the browser generates
+   an anonymous cell around it, and under `border-collapse:collapse` the
+   collapsed rules and the row background are painted by the table for its
+   *cells*, so the anonymous box carries neither. The last column of the
+   commander's "Every operation, worst first", of TASKING's approvals and of
+   the analyst's DASHBOARD ranking therefore lost its row separators and its
+   row highlight, and read as a strip of buttons sitting outside the table's
+   right border — which is exactly what was reported. Measured on the
+   commander's table at 1440px: the separators stopped at x=786 against a
+   table that ends at x=936, a 150px column of detached buttons.
+
+   The cell stays a cell. The 5px the flex `gap` provided becomes a margin
+   between adjacent controls, which is what it was for. */
+td.act{
+  display:table-cell; white-space:nowrap; vertical-align:middle;
+  padding-top:8px;
+}
+td.act > *{vertical-align:middle}
+td.act > * + *{margin-left:4px}
+
+/* --------------------------------------------------- 7.2 the header row --
+
+   Every `<th style="width:NNNpx">` in this application is a *preferred*
+   width: under `table-layout:auto` the browser may compress a column to its
+   content's minimum when the container is smaller than the sum. `white-space:
+   nowrap` on the header made that minimum the entire header string, so the
+   widths stopped being hints and became hard floors — and the correctness
+   pass that turned "Died" into "Died of wounds / all categories" pushed four
+   tables past their containers at once.
+
+   Letting a header wrap restores the intended behaviour: at the design width
+   nothing wraps and the px hints hold the layout exactly as drawn; below it
+   the columns give way in proportion instead of the table overflowing. This
+   is the rule that has to survive the next long heading, and it does, because
+   nothing in it depends on any particular string.
+
+   `min-width:0` on the cells stops a long unbroken token (a hash, a callsign)
+   from re-establishing the same floor. */
+table.grid th, table.grid td,
+.cqTable th, .cqTable td,
+.lqTable th, .lqTable td,
+.sgTable th, .sgTable td{min-width:0}
+table.grid th{white-space:normal; overflow-wrap:break-word}
+/* A header that already carries its population on a second line keeps its
+   own line breaks; only the leading text is allowed to reflow. */
+table.grid th .thSub, .cqTable th .thSub{white-space:normal}
+
+/* An identifier does not break. Letting the *header* reflow is what buys the
+   room; letting a callsign reflow spends it badly — "TRV-150C-3 → CAS-11"
+   broken after the second hyphen is a different aircraft and a different
+   casualty to anyone reading quickly. The mono cells are short by
+   construction (a callsign, a clock, a count), so holding them on one line
+   costs a few pixels of column and is measured: with this rule TASKING,
+   CASUALTIES, AUDIT, STREAM, FLEET and UNITS all still fit 1280px without a
+   scrollbar. `.lqTable` and `.sgTable` already hold every cell on one line. */
+table.grid td.mono, .cqTable td.mono{white-space:nowrap}
+
+/* ------------------------------------------------------- 7.3 the clipper --
+
+   `.card` is `overflow:hidden` — it has rounded corners and it must not let
+   content paint over them. That is right for everything in a card except a
+   table, which is the one child that can legitimately be wider than the box
+   it is in. Where it was, the card silently ate the last column: measured at
+   1280px, the logistician's "What is on the shelf, and where" needed 722px
+   inside a 608px card and lost "Blood runs out" entirely, and both SUPPLY
+   stock tables needed 574px inside 492px and lost "Units destroyed", with
+   the heading cut through the middle of the word.
+
+   A card that holds a table scrolls it. The scrollbar is thin, it appears
+   only when it is needed, and a column that will not fit is one gesture away
+   instead of gone. Deliberate scrolling is an acceptable outcome; clipping
+   never is. */
+.card:has(> table){
+  overflow-x:auto; overflow-y:hidden;
+  scrollbar-width:thin; scrollbar-color:var(--line2) transparent;
+}
+.card:has(> table)::-webkit-scrollbar{height:9px}
+.card:has(> table)::-webkit-scrollbar-thumb{background:var(--line2); border-radius:5px}
+.card:has(> table)::-webkit-scrollbar-track{background:transparent}
+
+/* The same guarantee for the DASHBOARD ranking, whose wrapper the shell
+   deliberately switched to `overflow:visible` so that a seven-row table
+   would size to its own height rather than be cut through a glyph by an
+   inner scroller. That fixed the vertical clip and left the horizontal one:
+   with `visible` the overflow escaped into `.pane`, which scrolls the whole
+   pane sideways — cards, tiles and all — to reach one column. Scroll the
+   table, not the screen. `overflow-y` has to be named or it computes to
+   `auto` alongside it, and the wrapper is `flex:0 0 auto` at its natural
+   height so a vertical scroller there would be a second bug. */
+.viewport[data-pane="DASHBOARD"] .tableWrap{
+  overflow-x:auto; overflow-y:hidden;
+  scrollbar-width:thin; scrollbar-color:var(--line2) transparent;
+}
+
+/* ------------------------------------------------------- 7.4 the density --
+
+   The three rules above make a table fit where it can and scroll where it
+   cannot. These last two are the difference between "scrolls at 1280px" and
+   "fits at 1280px" for the two tables that were still a few dozen pixels
+   over, and neither of them is a width that has to sum with anything: a
+   stock meter is decoration around a number, and how much of it is drawn is
+   free to vary with how tight the table is.
+
+   A `.meter` is 78px of incompressible width, and five of them in a
+   `.grid.tight` inside a half-width card are 390px of a 492px box before a
+   single digit is drawn — which is why SUPPLY lost a column and why the
+   logistician's shelf lost one. Where a table is the tight variant, or is a
+   role module's own table, the bar is drawn at 36px. It is a proportion, not
+   a reading: the number beside it is the datum. */
+table.grid.tight .meter, .lqTable .meter{width:36px}
+
+
+/* =========================================================================
+   12. THE CONSOLE SHELL
+
+   The chrome the client asked for, to the approved mock-I1 geometry and the
+   register of the anti-drone console they supplied as reference: near
+   monochrome, no cards, no radius to speak of, separation by tone rather
+   than by rule, and colour reserved for the map and for the four or five
+   quantities that mean something.
+
+     18px  classification band      .band            (css/app.css)
+     30px  app row                  #cmdbar
+     32px  tool row                 #toolbar
+     36px  icon rails, both edges   #rail  #railR
+     26px  foot ribbon              #foot
+
+   Everything in here reads tokens from css/theme.css. There is not one hex
+   literal below this line, which is the property that lets four themes be
+   four blocks of custom properties rather than four stylesheets.
+   ========================================================================= */
+
+/* ------------------------------------------------------------ tool row -- */
+/* THE TOOL ROW CLIPPED ITSELF AND CALLED IT LAYOUT.
+
+   `overflow:hidden` with `white-space:nowrap`, every child `flex:none`, and
+   the ingest chip appended last. Nothing shrank and nothing scrolled, so at
+   1440 the row overflowed by 132px, at 1280 by 292px and at 1152 by 420px —
+   and because the chip is the last child it went first: its entire 93px box
+   was off the page below roughly 1580px, unreachable by pointer or by tab.
+   That is the "goes off the page in a smaller viewport" the user reported.
+
+   A control row that cannot fit must scroll, not amputate. The row scrolls
+   horizontally, the scrollbar is thin rather than absent (an invisible
+   scroller is the same trap in a nicer coat), and the two controls that
+   report whether the thing is live are pinned to the right where the eye
+   already looks for them, so they are the last to move and never the first
+   to disappear. */
+#toolbar{
+  height:var(--toolH); flex:0 0 var(--toolH); display:flex; align-items:center;
+  background:var(--k2); box-shadow:inset 0 -1px 0 var(--line);
+  white-space:nowrap; overflow-x:auto; overflow-y:hidden;
+  /* A SCROLLBAR UNDER THE TOP BAR IS NOT A FEATURE.
+
+     Making the row scroll rather than amputate itself was right; leaving a
+     visible track sitting under the command bar on the main screen was not.
+     It reads as a rendering fault, and it is drawing attention to a
+     mechanism nobody needs to operate — the four controls that matter are
+     pinned to the right and never leave, so nothing is hidden behind that
+     scrollbar. The row still scrolls by trackpad, shift-wheel and keyboard;
+     it just stops announcing it. */
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+#toolbar::-webkit-scrollbar{ height:0; width:0; display:none }
+#toolbar .tool-l{
+  flex:0 0 auto; display:flex; align-items:center; gap:4px;
+  padding:0 8px; height:100%; box-shadow:inset -1px 0 0 var(--line);
+}
+/* SCROLLING ALONE WAS NOT THE FIX.
+
+   Making the row scroll stopped it amputating its own children, but the
+   ingest chip is the LAST child, so at 1440 and below it still started off
+   screen — reachable only by a person who thought to drag a tool row
+   sideways. A status readout you have to go looking for is not a status
+   readout.
+
+   So the row has two zones now. The instruments scroll. The four things
+   that answer "is this live, and which run am I looking at" — link state,
+   ingest, clock, seed — are pinned to the right edge with sticky, sit above
+   the scrolling content, and are painted on the bar's own background so
+   nothing slides underneath them. They are present at every width, and they
+   are the last thing an operator has to hunt for. */
+#toolbar .tool-r{
+  flex:1 0 auto; min-width:0; display:flex; align-items:center; gap:4px;
+  padding:0 8px; padding-right:16px;
+}
+#toolbar .tool-r > #onlineStat{ margin-left:auto }
+#toolbar #onlineStat, #toolbar #ingestChip, #toolbar #wallClock, #toolbar #seedStat{
+  position:sticky; right:0; z-index:4; flex:0 0 auto;
+  background:var(--k2); box-shadow:-8px 0 8px -6px var(--k2);
+}
+#toolbar #ingestChip{ right:0 }
+#toolbar #wallClock{ right:0 }
+#toolbar #seedStat{ right:0 }
+.tbtn{
+  width:24px; height:24px; flex:none; display:flex; align-items:center; justify-content:center;
+  border:0; background:transparent; border-radius:2px; color:var(--t-lo); cursor:pointer;
+}
+.tbtn:hover{background:var(--k4); color:var(--t-hi)}
+.tbtn.on{background:var(--k5); color:var(--t-hi)}
+.tsep{width:1px; height:16px; background:var(--line2); margin:0 4px; flex:none}
+
+/* The object on screen. Its name and its icon are written by syncChrome()
+   from the rail entry that is currently active, so a destination added by
+   another author names itself here with no edit to this file. */
+.objttl{
+  display:flex; align-items:center; gap:8px; flex:none;
+  font:700 11px/1 var(--sans); letter-spacing:.14em; color:var(--t-hi);
+}
+.objttl svg{color:var(--niC,var(--cyan))}
+
+/* Not an input — a button that opens ⌘K, which searches more than a field
+   here could. It looks like a field because that is what an operator reaches
+   for; it says ⌘K on its right so nobody is surprised by what opens. */
+.srch{
+  display:flex; align-items:center; gap:8px; height:22px; flex:1 1 250px;
+  min-width:120px; max-width:290px; padding:0 8px; cursor:pointer; border:0;
+  background:var(--k1); border-radius:2px; box-shadow:inset 0 0 0 1px var(--line2);
+  font:400 10.5px/1 var(--mono); color:var(--t-dim); letter-spacing:.02em;
+  overflow:hidden;
+}
+.srch span{flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis}
+.srch u{text-decoration:none; font:600 9px/1 var(--mono); color:var(--t-lo); letter-spacing:.08em}
+.srch:hover{background:var(--k3); color:var(--t-lo)}
+
+/* ONLINE readout, flush right on the tool row. */
+.stat{
+  margin-left:auto; display:flex; align-items:center; gap:8px; flex:none;
+  font:600 10px/1 var(--mono); letter-spacing:.08em; color:var(--t-lo);
+}
+.stat .ok{color:var(--grn); display:flex; align-items:center; gap:4px}
+.stat .statDot{width:6px; height:6px; border-radius:50%; background:currentColor; display:block}
+.stat .dimStat{color:var(--t-dim)}
+
+/* ------------------------------------------------------- right icon rail -- */
+#railR{
+  width:var(--railW); flex:0 0 var(--railW); background:var(--k1);
+  box-shadow:inset 1px 0 0 var(--line); padding:8px 0; display:flex;
+  flex-direction:column; align-items:center; gap:2px; overflow:visible;
+}
+#railR .ri{
+  width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
+  border:0; background:transparent; border-radius:3px; color:var(--t-dim); cursor:pointer;
+}
+#railR .ri:hover{background:var(--k4); color:var(--t-hi)}
+#railR .ri.on{background:var(--k5); color:var(--cyan)}
+#railR .ri.hot{color:var(--amb)}
+#railR .rline{width:18px; height:1px; background:var(--line2); margin:4px 0; flex:none}
+#railR .railSpacer{flex:1 1 auto; min-height:6px}
+
+/* ---------------------------------------------------------- foot ribbon -- */
+#foot{
+  position:absolute; left:0; right:0; bottom:0; height:var(--footH);
+  display:flex; align-items:center; padding:0 12px; z-index:30;
+  background:var(--k1); box-shadow:inset 0 1px 0 var(--line2);
+  font:400 9.5px/1 var(--mono); letter-spacing:.06em; color:var(--t-lo);
+  white-space:nowrap; overflow:hidden;
+}
+#foot .rb{
+  display:flex; align-items:center; gap:8px; padding:0 12px; height:var(--footH);
+  box-shadow:inset -1px 0 0 var(--line); flex:none;
+}
+#foot .rb:first-child{padding-left:0}
+#foot .rb b{font-weight:400; color:var(--t-hi)}
+#foot .rb em{font-style:normal; color:var(--t-lo)}
+#foot .rb svg{color:var(--t-dim)}
+#foot .rb .red,#foot .rb b.red{color:var(--red)}
+#foot .rb .amb,#foot .rb b.amb{color:var(--amb)}
+#foot .rb .grn,#foot .rb b.grn{color:var(--grn)}
+#foot .rb .cyan,#foot .rb b.cyan{color:var(--cyan)}
+#foot .rb.last{margin-left:auto; box-shadow:none; padding-right:0; color:var(--t-dim); letter-spacing:.12em}
+/* The standing line is the only cell in the ribbon that is not a readout, so
+   it is the only one allowed to go when the window cannot hold them all. No
+   figure is ever dropped. */
+/* Measured overflowing by 86px at 1280, where the old 1240 breakpoint had
+   not yet fired. Hide it before it overruns, not after. */
+@media (max-width:1320px){ #foot .rb.last{display:none} }
+
+/* --------------------------------------------------------- theme picker --
+   Quiet by construction: one icon, one word, and a list that is only on
+   screen while it is being used. Four names in a segmented control would
+   have been four permanent labels for a decision made once a shift.
+   The list is built by js/app.js from ANGEL.get('theme').list(), so this
+   file knows how a row looks and nothing about which rows there are. */
+.themePick{position:relative; flex:0 0 auto; display:flex; align-items:center}
+.appic{
+  height:22px; min-width:22px; padding:0 4px; display:inline-flex; align-items:center;
+  justify-content:center; gap:4px; border:0; background:transparent; cursor:pointer;
+  color:var(--t-dim); border-radius:2px;
+}
+.appic:hover{color:var(--t-mid); background:var(--k4)}
+.appic.on{color:var(--t-hi); background:var(--k5)}
+.appic.wide{padding:0 8px 0 8px}
+.appic.wide b{font:600 9.5px/1 var(--mono); letter-spacing:.09em; color:var(--t-mid)}
+.appic:hover.wide b{color:var(--t-hi)}
+
+/* Fixed, and placed in JS against the button's own box. #cmdbar is
+   overflow:hidden — it has to be, it is a 30px strip that must never grow —
+   and a panel laid out inside it was simply clipped. This is the same answer
+   #opMenu already uses for the same reason. */
+.themeMenu{
+  position:fixed; z-index:300; width:268px;
+  background:var(--k2); box-shadow:inset 0 0 0 1px var(--line2), var(--shadow);
+  border-radius:3px; padding:4px; display:none;
+}
+.themeMenu.show{display:block}
+.themeMenu .tmRow{
+  display:flex; align-items:flex-start; gap:8px; width:100%; padding:8px 8px;
+  border:0; background:transparent; border-radius:2px; cursor:pointer; text-align:left;
+}
+.themeMenu .tmRow:hover{background:var(--k4)}
+.themeMenu .tmRow.on{background:var(--k5)}
+.themeMenu .tmSw{
+  width:26px; height:26px; flex:none; border-radius:2px; margin-top:2px;
+  box-shadow:inset 0 0 0 1px var(--line2);
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; overflow:hidden;
+}
+.themeMenu .tmSw i{display:block}
+.themeMenu .tmTxt{min-width:0}
+.themeMenu .tmTxt b{display:block; font:600 11px/1.2 var(--sans); color:var(--t-hi); letter-spacing:.02em}
+.themeMenu .tmTxt span{display:block; font:400 10px/1.35 var(--sans); color:var(--t-lo); margin-top:2px; white-space:normal}
+.themeMenu .tmRow.on .tmTxt b::after{content:"  ·  ACTIVE"; font:600 8.5px/1 var(--mono); letter-spacing:.14em; color:var(--cyan)}
+
+/* Each swatch is four real surfaces of the theme it names, painted from that
+   theme's own tokens rather than from a screenshot — so a theme edited in
+   css/theme.css cannot end up advertised by a stale square. */
+.tmSw[data-t="console-dark"] i:nth-child(1){background:#0B0F14} .tmSw[data-t="console-dark"] i:nth-child(2){background:#22303C}
+.tmSw[data-t="console-dark"] i:nth-child(3){background:#6FD3F2} .tmSw[data-t="console-dark"] i:nth-child(4){background:#FF6B60}
+.tmSw[data-t="night-ops"] i:nth-child(1){background:#050911} .tmSw[data-t="night-ops"] i:nth-child(2){background:#182337}
+.tmSw[data-t="night-ops"] i:nth-child(3){background:#68CBEE} .tmSw[data-t="night-ops"] i:nth-child(4){background:#F97367}
+.tmSw[data-t="field-slate"] i:nth-child(1){background:#151513} .tmSw[data-t="field-slate"] i:nth-child(2){background:#3C3C35}
+.tmSw[data-t="field-slate"] i:nth-child(3){background:#7FD5EC} .tmSw[data-t="field-slate"] i:nth-child(4){background:#FF8271}
+.tmSw[data-t="high-contrast"] i:nth-child(1){background:#070707} .tmSw[data-t="high-contrast"] i:nth-child(2){background:#343434}
+.tmSw[data-t="high-contrast"] i:nth-child(3){background:#86E2FF} .tmSw[data-t="high-contrast"] i:nth-child(4){background:#FFB4A8}
+
+/* ------------------------------------------------------ deploy + master --
+   Both were 30px-tall pills on a 52px bar. They are 20px readouts on a 30px
+   row now, and they are the only two places on the app row where a colour
+   other than the neutral ramp is allowed — because "not deployed" and "who
+   is driving the live arm" are the two states an operator must never have to
+   go looking for. */
+#cmdbar .deployBar{
+  display:flex; align-items:center; gap:8px; height:20px; padding:0 4px 0 8px;
+  background:var(--k2); border-radius:2px; box-shadow:inset 0 0 0 1px var(--line2);
+}
+#cmdbar .deployBar .dbDot{width:6px; height:6px; border-radius:50%; background:var(--amb); flex:none}
+#cmdbar .deployBar.ok .dbDot{background:var(--grn)}
+#cmdbar .deployBar.bad .dbDot{background:var(--red)}
+#cmdbar .deployBar .dbTxt{display:flex; flex-direction:row; align-items:baseline; gap:4px; min-width:0}
+#cmdbar .deployBar .dbTxt b{font:600 9.5px/1 var(--mono); letter-spacing:.09em; color:var(--t-hi)}
+#cmdbar .deployBar .dbTxt em{font-style:normal; font:400 9px/1 var(--mono); color:var(--t-dim);
+  max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#cmdbar .deployBar .btn{
+  height:16px; padding:0 8px; border:0; border-radius:2px; cursor:pointer;
+  background:var(--cyan); color:var(--on-accent);
+  font:700 9px/1 var(--mono); letter-spacing:.09em;
+}
+#cmdbar .master{display:flex; align-items:center; gap:8px}
+#cmdbar .master .mlab{display:flex; align-items:center; gap:4px;
+  font:600 9px/1 var(--mono); letter-spacing:.13em; color:var(--t-dim)}
+#cmdbar .master .aiGlyph{width:11px; height:11px; fill:var(--cyan)}
+#cmdbar .opPick{display:flex; align-items:center}
+#cmdbar #btnOpPick{display:flex; align-items:center; gap:4px}
+#cmdbar #btnOpPick .opCaret{font-style:normal; font-size:8px; color:var(--t-dim)}
+
+
+/* ---------------------------------------------------- the sound control --
+   js/audio.js inserts its own entry into the rail, above Settings, and it was
+   written for a 196px word rail: a row with an icon, a label, a level meter
+   and a slider underneath. None of that is this file's to rewrite — audio.js
+   belongs to another author and withdraws itself cleanly when the audio
+   context is refused — so it is reconciled here, which is what this
+   stylesheet is for.
+
+   The label becomes the tooltip, on the same rules as every other rail entry.
+   The level slider is NOT dropped: it becomes a flyout that opens beside the
+   rail on hover, so the control keeps both of the things it does. */
+#audCtl{width:28px; flex:none; margin-top:2px; position:relative}
+#audCtl .audBtn{
+  width:28px; height:28px; padding:0; gap:0; border-radius:3px;
+  justify-content:center; color:var(--t-dim); background:transparent;
+}
+#audCtl .audBtn:hover{background:var(--k4); color:var(--t-hi)}
+#audCtl.on .audBtn{color:var(--grn)}
+#audCtl .audIcon{width:20px; font-size:15px}
+#audCtl .audLbl{
+  position:fixed; left:calc(var(--railW) + 6px); margin-top:-12px; z-index:60;
+  pointer-events:none; opacity:0; transform:translateX(-3px);
+  transition:opacity .1s ease, transform .1s ease;
+  background:var(--k4); color:var(--t-hi);
+  box-shadow:inset 0 0 0 1px var(--line2), var(--shadow);
+  border-radius:2px; padding:4px 8px; white-space:nowrap; flex:none;
+  font:600 10.5px/1.15 var(--sans); letter-spacing:.02em;
+}
+#audCtl:hover .audLbl{opacity:1; transform:none}
+/* The meter rides on the icon rather than beside it. */
+#audCtl .audMet{
+  position:absolute; left:5px; right:5px; bottom:2px; width:auto; height:2px;
+  border:0; border-radius:1px; background:var(--line2);
+}
+#audCtl.on .audMet{display:block}
+#audCtl .audTrim{
+  position:fixed; left:calc(var(--railW) + 6px); margin-top:16px; z-index:60;
+  display:none; width:168px; padding:8px 8px; border-radius:2px;
+  background:var(--k4); box-shadow:inset 0 0 0 1px var(--line2), var(--shadow);
+}
+#audCtl.on:hover .audTrim{display:flex}
+#audCtl .audTrim span{color:var(--t-lo)}
+
+
+/* =========================================================================
+   13. THE MASTHEAD, AND COLOUR ON THE CHROME CONTROLS
+
+   Three changes, all presentation. Not one control was added, removed,
+   renamed, re-bound or re-ordered by anything in this section.
+
+   13a  The app row becomes a masthead — 46px against the tool row's 32px,
+        with the wordmark at 20px/800/.24em and the vic mark at 26px (both in
+        css/app.css, which owns .brand). Everything else on that row is
+        re-balanced UP to match, so a 20px title does not sit in a line of
+        18px chips looking like it fell in from another screen.
+
+   13b  The transport, the deploy bar, the SYSTEM master and EXERCISE/LIVE
+        take colour. The brief for this was one sentence from the client:
+        "I could barely find the play button."
+
+   13c  The rail icons take the destination hues from css/theme.css and an
+        active marker that does not depend on hue to be seen.
+
+   Every value below is a token. There is no hex literal in this section.
+   ========================================================================= */
+
+/* ---------------------------------------------------- 13a · the masthead --
+   #cmdbar is flex-wrap:wrap with min-height:var(--appH) (see the command-bar
+   fit block above), so raising --appH raises the row and js/app.js measures
+   the result back into --barH. Nothing here fixes a height. */
+#cmdbar{
+  padding:0 12px 0 12px; gap:12px;
+  /* The masthead is the top of the document, so its edge is the stronger of
+     the two separators, not the hairline-equivalent the tool row gets. */
+  box-shadow:inset 0 -1px 0 var(--line2);
+}
+/* A masthead's furniture is a size up from the tool row's, or the title reads
+   as a mistake rather than as a hierarchy. 18px chips become 22px; the icon
+   buttons follow; the type inside them is untouched. */
+#cmdbar .seg{height:22px}
+#cmdbar .chip{height:22px; padding:0 8px}
+#cmdbar .ghost{height:22px; padding:0 8px; font-size:11px}
+#cmdbar .appic{height:26px}
+#cmdbar .brand + .opPick #btnOpPick{font-size:11px}
+#cmdbar .master .mlab,
+#cmdbar .roleSw .rlab{font-size:10px}
+#cmdbar .deployBar{height:24px; padding:0 4px 0 8px}
+#cmdbar .deployBar .btn{height:20px; padding:0 8px}
+/* THE ANALYST ROW IS THE TIGHT ONE, and it is tight for a reason that is
+   about the role and not about the window: the analyst profile is the one
+   defined by eighteen controls on this row, and it is the only profile that
+   is offered the theatre pair and the EXERCISE/LIVE pair. Measured at the
+   1680 design width after the wordmark grew: 1712px of content against 1680
+   of bar, a 32px overrun, which flexbox pays for by wrapping. So the density
+   step is keyed on the role that needs it rather than on a width that only
+   correlates with it — the other three profiles keep the roomier masthead,
+   and the analyst gets 78px back, which is 46px of slack at 1680. */
+body[data-role-profile="ANALYST"] #cmdbar{gap:8px}
+body[data-role-profile="ANALYST"] #cmdbar .chip{padding:0 8px}
+/* The version rides the wordmark and is the first thing to go when the row
+   gets tight — it is decoration on a name that is stated in full beside it. */
+@media (max-width:1520px){ .brand h1{font-size:18px; letter-spacing:.20em} }
+@media (max-width:1340px){ .brand .ver{display:none} }
+
+/* ------------------------------------------- 13b · colour on the controls --
+
+   Which hue, and why — the contract's semantics, not decoration:
+
+     PLAY    --grn   green is this palette's only "proceed" pole: it is the
+                     ONLINE dot, the classification band and the COMPLETE
+                     badge. It is NOT the deploy button, which is --cyan
+                     because deploying is deploying the ANGEL SWARM arm, and
+                     it never lands on a death count, which is the thing the
+                     contract's green prohibition is actually about.
+     PAUSE   --amb   "a human must decide" is exactly what a held clock is.
+                     Also the loudest possible difference from PLAY: the two
+                     states are on opposite sides of the hue circle and both
+                     are solid fills, so which one you are looking at is
+                     legible at arm's length.
+     RESET   --red   destructive — it throws the run away. Ink and a ring,
+                     never a fill: it must be findable and must not compete
+                     with PLAY, and a filled red next to a filled green would
+                     read as a pair of equals.
+
+   The ink on the two filled buttons is --on-accent, which css/theme.css
+   already declared for exactly this (`body[data-theme] .play`). Measured on
+   the fills it lands on: 9.8:1 to 14.3:1 across the four themes. */
+.transport{gap:4px}
+#toolbar .transport .play{
+  min-width:32px; height:24px; border-radius:2px; font-size:12px;
+  background:var(--grn); color:var(--on-accent); font-weight:700;
+  box-shadow:inset 0 0 0 1px var(--grn-d);
+}
+#toolbar .transport .play:hover{background:var(--grn); filter:brightness(1.12)}
+/* Running: the button now offers PAUSE, so it wears PAUSE's colour. The class
+   is written by syncChrome() beside the glyph it already swapped. */
+#toolbar .transport .play.running{
+  background:var(--amb); color:var(--on-accent); box-shadow:inset 0 0 0 1px var(--amb-d);
+}
+#toolbar .transport .play.running:hover{background:var(--amb); filter:brightness(1.12)}
+#toolbar .transport #btnReset{
+  height:24px; min-width:26px; border-radius:2px;
+  color:var(--red); background:transparent; box-shadow:inset 0 0 0 1px var(--red-d);
+}
+#toolbar .transport #btnReset:hover{background:var(--red-d); color:var(--t-hi)}
+#toolbar .transport .play:focus-visible,
+#toolbar .transport #btnReset:focus-visible{outline:2px solid var(--t-hi); outline-offset:1px}
+/* The scrub head and fill were already cyan and stay cyan — they are the
+   ANGEL SWARM run's own progress, not a transport control. */
+
+/* The SYSTEM master. Which authority is driving the live arm is a two-state
+   fact and it now looks like one: cyan when ANGEL SWARM has it (cyan IS the
+   ANGEL SWARM arm), amber when it is in STANDBY (nobody is tasking, so a
+   human must). The hue is INK on --k5, not a fill: hue-on-k5 measures 4.59:1
+   at worst across the four themes, whereas the same hue on its own dim
+   companion measures 3.0:1, and --red-d/--amb-d are declared fills-and-rules
+   in css/theme.css for that reason. */
+#cmdbar .master .chip[data-active="on"].on{
+  color:var(--cyan); background:var(--k5); box-shadow:inset 0 -2px 0 var(--cyan);
+}
+#cmdbar .master .chip[data-active="off"].on{
+  color:var(--amb); background:var(--k5); box-shadow:inset 0 -2px 0 var(--amb);
+}
+#cmdbar .master .mlab svg{color:var(--cyan)}
+body.standby #cmdbar .master .mlab svg{color:var(--amb)}
+
+/* EXERCISE / LIVE. The classification band states the mode in words a metre
+   wide and changes colour with it; this control agrees with the band instead
+   of being a pair of grey chips beside it. */
+#cmdbar .chip[data-opmode="EXERCISE"].on{
+  color:var(--grn); background:var(--k5); box-shadow:inset 0 -2px 0 var(--grn);
+}
+#cmdbar .chip[data-opmode="LIVE"].on{
+  color:var(--amb); background:var(--k5); box-shadow:inset 0 -2px 0 var(--amb);
+}
+/* PACOM / EUCOM is scope, not state — it keeps the neutral active chip, so
+   the two coloured pairs above stay the only coloured state on the row. */
+
+/* THE DEPLOY BAR. Three states, and until now the only one you could read at
+   a glance was the 6px dot: the bar itself was --k2 in all three and the
+   state WORD was --t-hi in all three. Now the surface is tinted from the
+   state's own hue over the panel surface, the ring is that hue's dim
+   companion — which is what --red-d / --grn-d / --amb-d are declared for —
+   and the word carries the hue.
+
+   css/app.css had these as three rgba() literals from the OLD palette, so a
+   field-slate "NOT DEPLOYED" was tinted with console-dark's red; those are
+   tokens now too, for the deployment sheet, which uses the same classes. The
+   1px border from that file is folded into this ring rather than drawn twice.
+
+   Measured in the page: the state word against the tinted surface it is
+   actually on is 5.4:1 at worst across the four themes, and never the
+   binding case. */
+#cmdbar .deployBar{border-color:transparent}
+#cmdbar .deployBar.bad{
+  background:color-mix(in oklab, var(--red) 12%, var(--k1));
+  box-shadow:inset 0 0 0 1px var(--red-d);
+}
+#cmdbar .deployBar.ok{
+  background:color-mix(in oklab, var(--grn) 12%, var(--k1));
+  box-shadow:inset 0 0 0 1px var(--grn-d);
+}
+#cmdbar .deployBar.warn{
+  background:color-mix(in oklab, var(--amb) 12%, var(--k1));
+  box-shadow:inset 0 0 0 1px var(--amb-d);
+}
+/* The subtitle is --t-dim on --k2 elsewhere on this row and measures 5.10:1
+   there; on the tinted bar the same ink measures 4.66:1, which clears the
+   floor with less headroom than anything else on the row has. One tone step
+   up buys it back without introducing a colour. */
+#cmdbar .deployBar .dbTxt em{color:var(--t-lo)}
+#cmdbar .deployBar.bad  .dbTxt b{color:var(--red)}
+#cmdbar .deployBar.ok   .dbTxt b{color:var(--grn)}
+#cmdbar .deployBar.warn .dbTxt b{color:var(--amb)}
+#cmdbar .deployBar.bad .dbDot{background:var(--red)}
+/* Deploy → stays --cyan (it is .btn.ok, and --angel is cyan): the button
+   deploys the ANGEL SWARM arm and is the only cyan fill on the row. It gets
+   a ring so it reads as a button at 46px rather than as a coloured label. */
+#cmdbar .deployBar .btn.ok{box-shadow:inset 0 0 0 1px var(--cyan-d)}
+
+/* -------------------------------------------------- 13c · the rail icons --
+   The hue per destination is the table in css/theme.css. This is only how it
+   is worn. Two rules matter:
+
+   · At rest the glyph is the FULL hue, not a dimmed one. The complaint was
+     that the column read as one thing; half-strength colour is how it got
+     there.
+   · The active state cannot be carried by the hue, because the hue is what
+     distinguishes the entry from its neighbours and is already at full
+     strength. So active is a shape: the --k5 surface it always had, plus a
+     3px bar in the entry's own hue against the rail's outer edge. That bar
+     is visible whatever the hue is, in all four themes, and it is the only
+     bar in the column. */
+#rail .navItem .ni{color:var(--niC, var(--t-mid))}
+#rail .navItem:hover{background:var(--k4)}
+#rail .navItem:hover .ni{color:var(--niC, var(--t-hi))}
+#rail .navItem.on{background:var(--k5)}
+#rail .navItem.on .ni{color:var(--niC, var(--cyan))}
+#rail .navItem[data-view].on::before{
+  content:''; position:absolute; left:-4px; top:2px; bottom:2px; width:3px;
+  border-radius:0 2px 2px 0; background:var(--niC, var(--cyan));
+}
+/* The command-palette entry has no destination and therefore no hue; it is
+   plainly a utility and stays on the text tone. */
+#rail .navItem.navCmd .ni,
+#rail .navItem.navCmd{color:var(--t-lo)}
+
+/* ======================================================================
+   v3.2 — THE RIGHT RAIL SHOWS STATE, AND SAYS WHEN A TOOL DOES NOT APPLY.
+
+   Two defects, both the same shape: a control that looks live and is not.
+   The map-view buttons mirror the tool row and must read as a radio group,
+   lit on the current view. The layer and zoom tools mean nothing on the
+   theatre picture, which draws no layers and does not zoom — dimmed, and
+   still pressable, because pressing one is a reasonable way to say "take
+   me to the map where this works", which is what it does.
+   ====================================================================== */
+#railR .ri[data-scope].on{ background:var(--k5); color:var(--cyan) }
+#railR .ri[data-scope].on::after{
+  content:''; position:absolute; right:-4px; top:3px; bottom:3px; width:3px;
+  border-radius:2px 0 0 2px; background:var(--cyan);
+}
+#railR .ri.dim{ opacity:.38 }
+#railR .ri.dim:hover{ opacity:.72 }
+
+/* ======================================================================
+   v3.2 — BREATHING ROOM.
+
+   "Everything seems mashed together. IRON VEIN is still way easier to
+   look at." Correct, and measurable: the reference console runs 16px of
+   padding inside every card, 16px between blocks and 10–12px of vertical
+   room in a table row. This console ran 12px, 12px and 7px. Three or four
+   pixels a time, compounded over a pane with six cards and forty rows,
+   is the whole difference between a screen that reads and a screen that
+   has to be decoded.
+
+   Nothing here changes what is on screen. It changes how much air is
+   around it. Every value is raised toward the reference, and the two that
+   matter most — the gap between blocks and the height of a table row —
+   are raised furthest.
+   ====================================================================== */
+
+/* --- the pane itself: a wider gutter, and real space between blocks --- */
+.pane{ padding:24px 24px 48px; gap:16px }
+.paneHead{ margin-bottom:8px; gap:24px }
+.ph1 h2{ margin-bottom:2px }
+.ph1 p, .ph1 .lede{ margin-top:8px; line-height:1.65 }
+
+/* --- cards: the reference's 16px, not 12 --- */
+.card > .lede, .card > p{ padding:16px 16px 0 }
+.cardHead{ padding:12px 16px }
+.split{ gap:16px }
+.kpis{ gap:16px }
+.kpi{ padding:12px 16px }
+
+/* --- tables: the single biggest gain. A 40-row table at 7px of vertical
+       padding is 120px shorter than the same table at 10px and very much
+       harder to track a row across. --- */
+table.grid th{ padding:12px 12px }
+table.grid td{ padding:12px 12px }
+table.grid.tight th, table.grid.tight td{ padding:8px 12px }
+table.grid td:first-child, table.grid th:first-child{ padding-left:16px }
+table.grid td:last-child,  table.grid th:last-child{ padding-right:16px }
+
+/* --- the two new pages inherit the same rhythm ---
+       As a margin between siblings, NOT as a flex column. Imposing
+       `display:flex` on a container whose children were laid out by another
+       author turns every one of them into a shrinkable flex item: the
+       launch-point tab strip, which has no intrinsic height, collapsed to a
+       one-pixel line and the five tabs vanished while still reporting
+       themselves 22px tall in the DOM. Spacing should add air, never take
+       over layout. */
+#lpBody > * + *, .gpBody > * + *, #aarBody > * + *{ margin-top:16px }
+
+/* --- the inspector column was the most crowded surface in the console --- */
+#insp .nsp-sec{ padding:8px 12px 8px }
+#insp .nsp-body{ padding:12px 12px 12px }
+#insp .nsp-kv > div{ padding:8px 0 }
+
+/* --- the decision bar: the numbers were touching their own captions --- */
+.dsSlot{ padding:12px 16px 12px }
+.dsK{ margin-bottom:8px }
+
+/* --- and at 1366 the extra room comes back off, so nothing is pushed
+       off the bottom of a smaller display --- */
+@media (max-width:1400px){
+  .pane{ padding:16px 16px 32px; gap:16px }
+  table.grid th{ padding:12px 12px }
+  table.grid td{ padding:8px 12px }
+  .kpi{ padding:12px 16px }
+}
+
+/* ======================================================================
+   v3.3 — BREATHING ROOM, SECOND PASS: MEASURED, NOT ESTIMATED.
+
+   "Margins are still off everywhere and things are mashed against their
+   boxes." Correct again, and the v3.2 pass above is half the reason why.
+   Two facts came out of walking every destination with a probe that
+   reports any ink sitting closer than 12px to the box it is printed in:
+
+   1 · THIS FILE LOSES TIES. polish.css is the third stylesheet the page
+       links, and fifteen more arrive after it — every module that injects
+       its own <style> at run time (montecarlo, role-commander, charts,
+       page-launchpoints, theater3d …) plus css/data2.css. A rule here at
+       the SAME specificity as one of theirs is simply dead. `.dsSlot` in
+       v3.2 above is exactly that: it asks for 12px 18px and the decision
+       bar has been painting 10px 16px ever since, because
+       js/role-commander.js says `.dsSlot` too and says it later. Every
+       selector below is therefore raised one step — `#decbar .dsSlot`,
+       `#mcBody .pane .mcCtl`, `#views .card > p` — not for emphasis, but
+       because that is the price of admission.
+
+   2 · v3.2 TOOK THE BOTTOM OFF EVERY CARD. `.card > .lede, .card > p`
+       was given `padding:16px 18px 0`, which is one declaration, so it
+       overwrote the padding-bottom that .cmpNote, .lpNote, .senseProv,
+       .ingNote and the export note each set for themselves. That is why
+       a card's closing sentence has been sitting 3px off its own border
+       while the heading above it had a comfortable 16. One rule below
+       gives it back.
+
+   Nothing here changes what is on screen, only how much air is around
+   it. No font size moves, nothing is hidden, nothing is reordered, and
+   no container is given a display it did not already have — spacing is
+   applied as padding, margin and gap, never by turning somebody else's
+   layout into a flex box.
+   ====================================================================== */
+
+/* ---------------------------------------------------------------------
+   13a · THE DECISION BAR — the worst offender per square pixel, because
+   it is on screen on all twenty-four destinations. 16px of side padding
+   reads as nothing here: the bar is full-bleed, so that 16px is measured
+   from the window edge itself while every other object on the display is
+   inset behind the rail. The slot also runs at its max-height already,
+   so the extra vertical room has to be bought or `overflow:hidden` eats
+   the sub-line instead of the padding. */
+#decbar .dsSlot{ padding:16px 24px 16px; min-height:96px; max-height:120px }
+#decbar .dsK{ margin-bottom:8px }
+#decbar .dsSub{ margin-top:8px }
+#decbar .dsCmp{ margin-top:12px }
+#decbar .dsLg{ margin-top:8px }
+#decbar .dsQuiet{ margin-top:8px }
+/* .dsBtn keeps `margin-top:auto` — it is pinned to the bottom of the slot
+   on purpose and now clears the edge on the slot's padding, not its own. */
+#decbar .dsPulse{ right:16px; top:15px }
+
+/* ---------------------------------------------------------------------
+   13b · SCENARIOS (#mcBody). The named complaint, and the plainest case
+   in the console: js/montecarlo.js styles the contents of its cards and
+   never styles the gap between those contents and the card. `.cardHead`
+   is padded because it is the shell's class; everything below it —
+   labels, inputs, progress line, canvas, notes, the caveat — is a direct
+   child of `.card` at zero. Hence a field label in the top-left corner
+   of the Run card and "IDLE · N cores detected" welded to the bottom
+   rule. The module's selectors are `#mcBody .x`, so these carry the pane
+   as well; they are overrides, not edits to montecarlo.js, which another
+   author owns. */
+#mcBody .pane .mcGrid{ gap:16px }
+#mcBody .pane .card > .mcCtl{ padding:16px 16px 8px; gap:16px 16px }
+#mcBody .pane .mcCtl label{ margin-bottom:8px }
+#mcBody .pane .card > .mcProg{ margin:8px 16px 8px }
+#mcBody .pane .card > .mcProgTxt{ padding:0 16px 16px }
+#mcBody .pane .card > .uavStatus{ margin-left:16px; margin-right:16px; margin-bottom:16px }
+#mcBody .pane .card > #mcResult,
+#mcBody .pane .card > #mcSweepBox{ padding:16px 16px 16px }
+/* The histogram is a flex item in a column card. Width is set explicitly
+   rather than left to stretch, so the two 16px margins place it and do
+   not also subtract from it. montecarlo.js reads clientWidth at paint
+   time, so the backing store follows on the next frame by itself. */
+#mcBody .pane .card > .mcCanvas{
+  width:calc(100% - 32px); margin:16px 16px 0;
+}
+#mcBody .pane .card > .mcNote{ margin:0; padding:16px 16px 16px }
+/* The caveat keeps its amber rule; the rule moves in off the border with
+   it, so the quotation reads as an inset block and not as a card edge
+   that has changed colour. */
+#mcBody .pane .card > .mcCaveat{ margin:16px 16px 16px; padding:2px 0 2px 16px }
+
+/* ---------------------------------------------------------------------
+   13c · THE BOTTOM OF EVERY CARD, GIVEN BACK. See note 2 in the header.
+   Scoped to the last child so a card whose closing block is a table or a
+   canvas is untouched — those own their edge deliberately. */
+#views .card > p:last-child,
+#views .card > .lede:last-child{ padding-bottom:16px }
+
+/* ---------------------------------------------------------------------
+   13d · CHARTS THAT ARE CARD CONTENT, NOT CARD BACKGROUND. Five canvases
+   are direct children of a `.card` and every one of them ran the full
+   width of it, so the plot's own axis labels started at the border and
+   the caption underneath had nothing to line up with. The full-bleed
+   surfaces — the map in #stage, the deck.gl overlay in #t3Host, the film
+   strip in .filmBox — are NOT `.card` and are left alone: those are
+   pictures that own their frame. */
+#views .card > canvas{
+  width:calc(100% - 32px); margin-left:16px; margin-right:16px;
+}
+
+/* ---------------------------------------------------------------------
+   13e · TABLE CELLS. The reference runs 10–12px of vertical room in a
+   row; the commander's operations table was still on 7. `.cqTable` is
+   role-commander.js's own table and never got the v3.2 pass, which only
+   reached `table.grid`. First and last cell clear the card edge by 16
+   like every other table in the console. */
+#decideBody .cqTable td{ padding:12px 12px }
+#decideBody .cqTable th{ padding-top:12px; padding-bottom:12px }
+#decideBody .cqTable td:first-child, #decideBody .cqTable th:first-child{ padding-left:16px }
+#decideBody .cqTable td:last-child,  #decideBody .cqTable th:last-child{ padding-right:16px }
+
+/* ---------------------------------------------------------------------
+   13f · THE ANALYTICAL CONSOLE. css/data2.css also loads after this file,
+   so these are raised too. The schema browser was the tightest surface
+   measured anywhere: 5px from the card border to the table name, against
+   16 for the card head directly above it. The editor's run bar and the
+   CodeMirror frame sat 2px off the card's left edge. */
+#views .q2Engine{ padding:12px 16px }
+#views .q2Question{ padding:12px 12px 12px }
+#views .q2Schema{ padding:12px 12px 12px }
+#views .q2Tbl{ margin:0 0 12px }
+#views .q2Bar{ padding:16px 16px 16px }
+#views .q2CM{ margin:2px 16px 0 }
+#views .q2Err{ margin:0 16px 12px }
+#views .q2Out{ margin:12px 16px 16px }
+/* CodeMirror's gutter and first line sit ~5px inside their own frame.
+   That is the editor's metric, shared with every other editor an analyst
+   has used, and it is left as it is. */
+
+/* ---------------------------------------------------------------------
+   13g · THE CASUALTY-FLOW PLOTS. charts.js frames each plot in `.chCard`
+   and then lays the uPlot wrapper and the Sankey canvases out at 6–10px
+   inside it, while polish.css above pads `.chHead` to 14. The plot now
+   starts on the same vertical as the heading over it. charts.js watches
+   its containers with a ResizeObserver, so the narrower box repaints. */
+#views .chSankeys{ padding:0 12px 12px }
+#views .chStack{ padding:0 12px 12px }
+#views .chFoot{ padding:0 16px 16px }
+#views .chNote{ padding:4px 16px 16px }
+.chHead{ padding:12px 16px !important }
+
+/* ---------------------------------------------------------------------
+   13h · THE THEATRE OVERLAYS. These float on the map rather than sitting
+   in the pane, which is why they were missed: they are still bordered
+   boxes with a caption inside them, and the caption was 6–8px off the
+   border. */
+#views .thHead{ padding:16px 16px }
+#views .thHint{ padding:12px 12px 12px }
+#views .joaCard{ padding:16px 16px 16px }
+#t3Host .t3Furn{ padding:12px 12px }
+
+/* ---------------------------------------------------------------------
+   13i · THE REMAINING BORDERED BOXES, one line each. Every one of these
+   held a 30–38px numeral or an 8.5px kicker hard against its own top
+   rule; the fix in each case is two or three pixels, which is the whole
+   argument of this file. */
+#views .missCompare{ padding:12px 16px }
+#views .cmpScore{ padding:12px 24px }
+#views .cqLine{ padding:12px 16px }
+#views .dkv > div{ padding:12px 12px }
+#views .filmBar{ padding:12px 16px }
+#views .cqLp{ padding:12px 12px }
+#views .roiBody > .roiP:last-child{ margin-bottom:0; padding-bottom:16px }
+
+/* ---------------------------------------------------------------------
+   13j · AND AT 1366 IT ALL COMES BACK BY ABOUT A QUARTER. A smaller
+   display cannot spend 16px six times down a column and still show the
+   bottom of the pane; the floor drops to 12, which is still above where
+   any of this started. */
+@media (max-width:1400px){
+  #decbar .dsSlot{ padding:12px 16px 12px; min-height:88px; max-height:110px }
+  #decbar .dsPulse{ right:12px; top:12px }
+  #mcBody .pane .mcGrid{ gap:12px }
+  #mcBody .pane .card > .mcCtl{ padding:12px 12px 4px; gap:12px 16px }
+  #mcBody .pane .card > .mcProg{ margin:8px 12px 8px }
+  #mcBody .pane .card > .mcProgTxt{ padding:0 12px 12px }
+  #mcBody .pane .card > .uavStatus{ margin-left:12px; margin-right:12px; margin-bottom:12px }
+  #mcBody .pane .card > #mcResult,
+  #mcBody .pane .card > #mcSweepBox{ padding:12px 12px 12px }
+  #mcBody .pane .card > .mcCanvas{ width:calc(100% - 24px); margin:12px 12px 0 }
+  #mcBody .pane .card > .mcNote{ padding:12px 12px 12px }
+  #mcBody .pane .card > .mcCaveat{ margin:12px 12px 12px }
+  #views .card > p:last-child,
+  #views .card > .lede:last-child{ padding-bottom:12px }
+  #views .card > canvas{ width:calc(100% - 24px); margin-left:12px; margin-right:12px }
+  #decideBody .cqTable td{ padding:8px 12px }
+  #decideBody .cqTable td:first-child, #decideBody .cqTable th:first-child{ padding-left:12px }
+  #decideBody .cqTable td:last-child,  #decideBody .cqTable th:last-child{ padding-right:12px }
+  #views .q2Schema{ padding:12px 12px 12px }
+  #views .q2Bar{ padding:12px 12px 12px }
+  #views .q2CM{ margin:2px 12px 0 }
+  #views .q2Err{ margin:0 12px 8px }
+  #views .q2Out{ margin:12px 12px 12px }
+  #views .chSankeys{ padding:0 8px 8px }
+  #views .chStack{ padding:0 12px 12px }
+  #views .chFoot{ padding:0 12px 12px }
+  #views .chNote{ padding:4px 12px 12px }
+  #views .joaCard{ padding:12px 12px 12px }
+  #views .thHead{ padding:12px 12px }
+}
+
+/* ---------------------------------------------------------------------
+   13k · THE FOUR THAT DID NOT LAND ON THE FIRST PASS, AND WHY.
+
+   · #t3Host .t3Furn — js/theater3d.js injects `#t3Host .t3Furn` itself and
+     `t3Style` is the LAST stylesheet on the page, so an identical
+     selector here loses the tie. `body` in front is worth one element and
+     that is the whole fix.
+   · .paneShim — palette.js builds the casualty-flow header and drops it
+     somewhere the `>` in rule 12 above does not reach, so that rule has
+     never applied and the page title has been sitting on the section's
+     own border while the plots below it are inset 22. Horizontal only:
+     the shim's vertical box is load-bearing for #flowBody's offset.
+   · .senseCtl — app.css pads its sides and not its bottom, so the live
+     sensor's caption ended flush with the card rule.
+   · a canvas that is the last thing in its card now needs a bottom margin
+     for the same reason the sides needed one. */
+body #t3Host .t3Furn{ padding:8px 12px }
+[data-pane="FLOW"] .paneShim{ padding-left:24px; padding-right:24px }
+#views .card > .senseCtl{ padding-bottom:16px }
+#views .card > canvas:last-child{ margin-bottom:16px }
+/* Two or three pixels short of the floor after the first pass, each for
+   the same reason: a tall numeral's font box overhangs its line box, so
+   an 11px pad reads as 10.5. */
+#views .missCompare{ padding:12px 16px }
+#views .thHint{ padding:12px 12px 12px }
+#views .cqLp{ padding:16px 16px }
+
+@media (max-width:1400px){
+  #views .card > canvas:last-child{ margin-bottom:12px }
+  #views .card > .senseCtl{ padding-bottom:12px }
+  [data-pane="FLOW"] .paneShim{ padding-left:16px; padding-right:16px }
+}
+
+/* ---------------------------------------------------------------------
+   13l · TWO LEFT AFTER THE SECOND PASS.
+
+   · The casualty-flow header still sat on the section's top border once
+     its sides were fixed. palette.js measures the shim with a
+     ResizeObserver and republishes the height as --flowTop, which is what
+     #flowBody offsets by — so vertical padding here is paid for
+     automatically and the plots move down with the title.
+   · The map furniture chip cleared 9px, not 12. It is a caption in a
+     bordered box like any other. */
+[data-pane="FLOW"] .paneShim{ padding-top:24px; padding-bottom:12px }
+body #t3Host .t3Furn{ padding:12px 12px }
+
+@media (max-width:1400px){
+  [data-pane="FLOW"] .paneShim{ padding-top:16px; padding-bottom:12px }
+  body #t3Host .t3Furn{ padding:12px 12px }
+}
+
+
+/* ----------------------------------------------------------------------
+   Sensor & model at 1366: .senseRow wraps a 104px label beside a
+   non-wrapping .seg, and the last chip lands 4px from the card's inner
+   edge. No amount of padding fixes that — padding would push the control
+   into overflow. The control drops onto its own line under its label
+   instead, which is the only move that buys the room.
+   ---------------------------------------------------------------------- */
+@media (max-width:1400px){
+  #views .senseRow{ align-items:flex-start }
+  #views .senseRow > label{ flex:0 0 100%; margin-bottom:8px }
+}
+
+/* ----------------------------------------------------------------------
+   The wordmark became a <button> so it could take you home, and inherited
+   the user agent's button chrome with it — a white box where the brand had
+   been. A button that is a brand must look like the brand and behave like a
+   button: no fill, no border, no UA font, and a real focus ring for the
+   keyboard.
+   ---------------------------------------------------------------------- */
+#cmdbar button.brand{
+  appearance:none; -webkit-appearance:none;
+  background:transparent; border:0; padding:0; margin:0;
+  font:inherit; color:inherit; text-align:left; cursor:pointer;
+  display:flex; align-items:baseline; gap:12px; flex:0 0 auto;
+  border-radius:3px;
+}
+#cmdbar button.brand:hover h1{ color:var(--t-hi) }
+#cmdbar button.brand:hover .mark{ filter:brightness(1.25) }
+#cmdbar button.brand:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px }
+
+
+/* ------------------------------------------------- the ingest landing --- */
+/* Pressing the ingest chip now takes the operator to Sensor & model. On a
+   dense pane, arriving is not the same as finding: mark the card the chip
+   was talking about so the eye lands on it rather than on the first heading.
+   Raised one specificity level because this stylesheet loads third of
+   eighteen and loses every tie it enters at equal weight. */
+#main #ingCard.ingFlash, .viewport #ingCard.ingFlash{
+  outline:2px solid var(--cyan); outline-offset:3px; border-radius:8px;
+  transition:outline-color .5s ease;
+}
+
+/* ------------------------------------------- the SQL editor's palette --- */
+/* CodeMirror ships its own syntax theme and it was leaking through
+   un-themed: keywords rendered rgb(198,120,221), an orchid violet that is
+   the one hue this application is not allowed to draw. It is also simply
+   not ours — a console that themes four ways down to the badge ink should
+   not have one widget painting from a library default.
+
+   Bound to the console's own tokens so it moves with the theme. Raised a
+   specificity level because polish.css loads third of eighteen and loses
+   every tie it enters at equal weight. */
+.q2CM .cm-editor .tok-keyword,
+.q2CM .cm-editor .tok-controlKeyword,
+.q2CM .cm-editor .tok-operatorKeyword,
+.q2CM .cm-editor span[class*="\ͼ"]{ color:var(--cyan) !important }
+.q2CM .cm-editor .tok-string,
+.q2CM .cm-editor .tok-string2{ color:var(--grn) !important }
+.q2CM .cm-editor .tok-number{ color:var(--amb) !important }
+.q2CM .cm-editor .tok-comment{ color:var(--t-dim) !important; font-style:italic }
+.q2CM .cm-editor .tok-variableName,
+.q2CM .cm-editor .tok-propertyName{ color:var(--text) !important }

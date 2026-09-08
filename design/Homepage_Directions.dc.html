@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+body{margin:0;background:oklch(0.16 0.008 250);font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 210)}
+.dv-turn{padding:44px 48px 40px;border-bottom:1px solid oklch(0.28 0.01 250);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px 'IBM Plex Mono',monospace;padding:3px 7px;background:oklch(0.93 0.005 250);color:oklch(0.16 0.01 250);border-radius:3px}
+.dv-tname{font:600 13px/1.3 'IBM Plex Sans',sans-serif;color:oklch(0.92 0.005 250)}
+.dv-tsub{margin:0 0 26px;font:400 12px/1.6 'IBM Plex Sans',sans-serif;color:oklch(0.63 0.008 250);max-width:900px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:44px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:11px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px 'IBM Plex Mono',monospace;padding:3px 7px;background:oklch(0.31 0.012 250);color:oklch(0.93 0.005 250);border-radius:3px;flex:none}
+.dv-olabel{display:flex;align-items:baseline;gap:10px;font:400 11.5px/1.55 'IBM Plex Sans',sans-serif;color:oklch(0.68 0.008 250);max-width:1440px}
+.dv-olabel b{color:oklch(0.93 0.005 250);font-weight:600}
+.dv-card{max-width:100%;border-radius:7px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.5)}
+.dv-opt:target .dv-oid{background:oklch(0.7 0.13 210);color:oklch(0.16 0.02 250)}
+.dv-next{margin:30px 0 0;font:12px/1.7 'IBM Plex Sans',sans-serif;color:oklch(0.6 0.008 250)}
+.m{font-family:'IBM Plex Mono',monospace}
+</style></helmet>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">One homepage, ten design directions</span></div>
+<p class="dv-tsub">Same product, same synthetic scenario, same facts on every screen: 18 open casualties, 6 lift assets, 31U LTOWB forward, reachback degraded, one escalation on the board. What differs is the UX thesis — what the homepage decides to put first, and how a commander reads it. Pick a direction and I build the full solution on it.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a><b>Command console.</b> Conventional ops-centre layout: persistent nav, posture strip, agent brief, live theater map. Familiar to anyone who has used a C2 dashboard — lowest explanation cost, highest information density. The safe direction.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.17 0.01 250);border:1px solid oklch(0.3 0.012 250);font-size:0">
+<div class="m" style="background:oklch(0.2 0.012 250);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.29 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">CTF-76 · INDOPACOM</span></div>
+<div style="display:grid;grid-template-columns:236px 1fr">
+<div style="background:oklch(0.145 0.01 250);border-right:1px solid oklch(0.28 0.01 250);padding:0 0 18px">
+<div style="padding:18px 18px 20px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;gap:11px;align-items:flex-start">
+<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);flex:none;display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:11px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div>
+<div style="display:flex;flex-direction:column;gap:3px"><span class="m" style="font-size:12px;font-weight:700;color:oklch(0.95 0.005 250);letter-spacing:.04em">DHA: IRON HOUR</span><span class="m" style="font-size:8px;line-height:1.45;color:oklch(0.55 0.008 250);letter-spacing:.05em">PHYSIOLOGICAL-DEADLINE BLOOD ALLOCATION</span></div>
+</div>
+<div style="padding:14px 12px 0;display:flex;flex-direction:column;gap:2px">
+<div style="padding:9px 12px;border-radius:4px;background:oklch(0.26 0.03 165);display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;font-weight:600;color:oklch(0.93 0.02 165)">Command Overview</span></div>
+<div style="padding:9px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Deadline Board</span><span class="m" style="font-size:9.5px;padding:1px 5px;border-radius:8px;background:oklch(0.4 0.13 25);color:oklch(0.96 0.02 25);font-weight:600">18</span></div>
+<div style="padding:9px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Lift &amp; Sorties</span><span class="m" style="font-size:9.5px;color:oklch(0.55 0.008 250)">6</span></div>
+<div style="padding:9px 12px"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Blood Posture</span></div>
+<div style="padding:9px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Escalations</span><span class="m" style="font-size:9.5px;padding:1px 5px;border-radius:8px;background:oklch(0.45 0.14 75);color:oklch(0.15 0.02 75);font-weight:700">1</span></div>
+<div style="padding:9px 12px"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Counterfactual</span></div>
+<div style="padding:9px 12px"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Decision Record</span></div>
+<div style="padding:9px 12px"><span style="font-size:12.5px;color:oklch(0.74 0.008 250)">Scenarios</span></div>
+</div>
+<div style="margin:16px 12px 0;padding:14px 0 0;border-top:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:2px">
+<div style="padding:8px 12px"><span style="font-size:12px;color:oklch(0.6 0.008 250)">Authority &amp; Policy</span></div>
+<div style="padding:8px 12px"><span style="font-size:12px;color:oklch(0.6 0.008 250)">Data Sources</span></div>
+<div style="padding:8px 12px"><span style="font-size:12px;color:oklch(0.6 0.008 250)">Settings</span></div>
+</div>
+<div style="margin:20px 12px 0;padding:11px 12px;border-radius:4px;background:oklch(0.21 0.012 250);border:1px solid oklch(0.28 0.01 250);display:flex;flex-direction:column;gap:6px">
+<span class="m" style="font-size:8.5px;letter-spacing:.11em;color:oklch(0.55 0.008 250)">EDGE STATE</span>
+<div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.78 0.14 75);flex:none"></span><span class="m" style="font-size:9.5px;color:oklch(0.86 0.03 75);line-height:1.4">Reachback lost 6m — deciding on local state</span></div>
+</div>
+</div>
+<div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:13px 22px;border-bottom:1px solid oklch(0.28 0.01 250);background:oklch(0.185 0.01 250)">
+<div style="display:flex;gap:12px;align-items:center">
+<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:4px;background:oklch(0.22 0.012 250);border:1px solid oklch(0.31 0.012 250);width:250px"><span class="m" style="font-size:11px;color:oklch(0.5 0.008 250)">Search casualty, asset, site</span></div>
+<span class="m" style="font-size:10px;font-weight:600;letter-spacing:.09em;padding:7px 11px;border-radius:4px;background:oklch(0.3 0.07 75);color:oklch(0.9 0.06 75)">FPCON BRAVO</span>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<span class="m" style="font-size:10px;font-weight:600;letter-spacing:.08em;padding:6px 11px;border-radius:4px;border:1px solid oklch(0.38 0.05 165);color:oklch(0.82 0.06 165)">ALLOCATION AUTHORITY</span>
+<span class="m" style="font-size:12px;color:oklch(0.9 0.005 250);font-weight:600">0412:16Z</span>
+<span class="m" style="font-size:11px;color:oklch(0.58 0.008 250)">24 AUG 2026</span>
+</div></div>
+<div style="padding:20px 22px 0;display:flex;justify-content:space-between;align-items:flex-end">
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Command Overview</span><span style="font-size:12px;color:oklch(0.63 0.008 250)">Every open casualty ranked by time remaining, not by appearance.</span></div>
+<div style="display:flex;gap:9px;align-items:center"><span class="m" style="font-size:10px;color:oklch(0.6 0.008 250)">UPDATED 4s AGO · LOCAL</span><span class="m" style="font-size:10px;font-weight:600;padding:7px 12px;border-radius:4px;border:1px solid oklch(0.34 0.012 250);color:oklch(0.85 0.006 250)">RE-RUN ALLOCATION</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:18px 22px 0">
+<div style="padding:13px 14px;border-radius:5px;background:oklch(0.22 0.035 25);border:1px solid oklch(0.38 0.09 25);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.78 0.06 25)">UNREACHABLE IN TIME</span><div style="display:flex;align-items:baseline;gap:5px"><span class="m" style="font-size:28px;font-weight:600;color:oklch(0.82 0.15 25);line-height:1">2</span><span class="m" style="font-size:10px;color:oklch(0.7 0.05 25)">casualties</span></div></div>
+<div style="padding:13px 14px;border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.58 0.008 250)">TIGHTEST DEADLINE</span><div style="display:flex;align-items:baseline;gap:5px"><span class="m" style="font-size:28px;font-weight:600;color:oklch(0.94 0.005 250);line-height:1">17</span><span class="m" style="font-size:10px;color:oklch(0.6 0.008 250)">min · CAS-114</span></div></div>
+<div style="padding:13px 14px;border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.58 0.008 250)">LTOWB FORWARD</span><div style="display:flex;align-items:baseline;gap:5px"><span class="m" style="font-size:28px;font-weight:600;color:oklch(0.94 0.005 250);line-height:1">31</span><span class="m" style="font-size:10px;color:oklch(0.6 0.008 250)">U · 2 sites</span></div></div>
+<div style="padding:13px 14px;border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.58 0.008 250)">LIFT AVAILABLE</span><div style="display:flex;align-items:baseline;gap:5px"><span class="m" style="font-size:28px;font-weight:600;color:oklch(0.94 0.005 250);line-height:1">4</span><span class="m" style="font-size:10px;color:oklch(0.6 0.008 250)">of 6 · 2 airborne</span></div></div>
+<div style="padding:13px 14px;border-radius:5px;background:oklch(0.21 0.03 165);border:1px solid oklch(0.36 0.06 165);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.76 0.05 165)">VS DOCTRINAL PUSH</span><div style="display:flex;align-items:baseline;gap:5px"><span class="m" style="font-size:28px;font-weight:600;color:oklch(0.85 0.13 165);line-height:1">−12</span><span class="m" style="font-size:10px;color:oklch(0.7 0.04 165)">deaths, same inputs</span></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 400px;gap:14px;padding:16px 22px 22px">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="padding:12px 15px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;font-weight:600;color:oklch(0.93 0.005 250)">Allocation brief</span><span class="m" style="font-size:9.5px;color:oklch(0.56 0.008 250)">GENERATED LOCALLY · 0412:12Z</span></div>
+<div style="padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;gap:11px"><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.72 0.05 25);width:78px;flex:none;padding-top:2px">TOP RISK</span><span style="font-size:12px;line-height:1.55;color:oklch(0.88 0.006 250)">CAS-121 at SITE DELTA needs 4U inside 22 minutes. Nearest lift arrives in 38. No allocation of current assets reaches her in time without missing CAS-118 by 4 minutes.</span></div>
+<div style="display:flex;gap:11px"><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.76 0.05 165);width:78px;flex:none;padding-top:2px">ACTION</span><span style="font-size:12px;line-height:1.55;color:oklch(0.88 0.006 250)">Launch UAS-07 from FLP ALPHA on a two-stop run: CAS-114 then CAS-118. Both inside deadline. Executed under standing authority at 0411:58Z.</span></div>
+<div style="display:flex;gap:11px"><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.6 0.008 250);width:78px;flex:none;padding-top:2px">CHANGE</span><span style="font-size:12px;line-height:1.55;color:oklch(0.78 0.006 250)">SITE ECHO telemetry has been stale 9 minutes. No deadline is asserted for CAS-131 and no sortie is tasked against an estimate.</span></div>
+</div></div>
+<div style="border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="padding:11px 15px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;font-weight:600;color:oklch(0.93 0.005 250)">Deadline queue</span><span class="m" style="font-size:9.5px;color:oklch(0.72 0.1 210)">OPEN FULL BOARD</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:8.5px;letter-spacing:.09em;color:oklch(0.52 0.008 250);padding:9px 15px;border-bottom:1px solid oklch(0.26 0.01 250)"><span>CASUALTY</span><span>SITE · MECHANISM</span><span style="text-align:right">DEADLINE</span><span style="text-align:right">ARRIVAL</span><span style="text-align:right">SLACK</span><span style="text-align:right">TASKING</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:11px;padding:11px 15px;border-bottom:1px solid oklch(0.24 0.01 250);align-items:center;color:oklch(0.9 0.005 250)"><span style="font-weight:600">CAS-114</span><span style="color:oklch(0.66 0.008 250);font-size:10.5px">BRAVO · junctional haem</span><span style="text-align:right">17:00</span><span style="text-align:right">12:00</span><span style="text-align:right;color:oklch(0.8 0.11 165);font-weight:600">+5</span><span style="text-align:right;font-size:10px;color:oklch(0.74 0.05 165)">UAS-07 AUTO</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:11px;padding:11px 15px;border-bottom:1px solid oklch(0.24 0.01 250);align-items:center;color:oklch(0.9 0.005 250);background:oklch(0.21 0.03 25)"><span style="font-weight:600">CAS-121</span><span style="color:oklch(0.66 0.008 250);font-size:10.5px">DELTA · open pelvic · SI 1.7↑</span><span style="text-align:right">22:00</span><span style="text-align:right">38:00</span><span style="text-align:right;color:oklch(0.78 0.16 25);font-weight:700;font-size:12.5px">−16</span><span style="text-align:right;font-size:10px;color:oklch(0.85 0.1 75);font-weight:600">ESCALATED</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:11px;padding:11px 15px;border-bottom:1px solid oklch(0.24 0.01 250);align-items:center;color:oklch(0.9 0.005 250)"><span style="font-weight:600">CAS-118</span><span style="color:oklch(0.66 0.008 250);font-size:10.5px">BRAVO · blast, bilateral LE</span><span style="text-align:right">31:00</span><span style="text-align:right">26:00</span><span style="text-align:right;color:oklch(0.8 0.11 165);font-weight:600">+5</span><span style="text-align:right;font-size:10px;color:oklch(0.74 0.05 165)">UAS-07 STOP 2</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:11px;padding:11px 15px;border-bottom:1px solid oklch(0.24 0.01 250);align-items:center;color:oklch(0.9 0.005 250)"><span style="font-weight:600">CAS-127</span><span style="color:oklch(0.66 0.008 250);font-size:10.5px">KILO · frag, abdominal</span><span style="text-align:right">48:00</span><span style="text-align:right;color:oklch(0.55 0.008 250)">—</span><span style="text-align:right;color:oklch(0.6 0.008 250);font-size:10px">NO ASSET</span><span style="text-align:right;font-size:10px;color:oklch(0.66 0.008 250)">QUEUED T+52</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:11px;padding:11px 15px;border-bottom:1px solid oklch(0.24 0.01 250);align-items:center;color:oklch(0.72 0.005 250)"><span style="font-weight:600">CAS-131</span><span style="color:oklch(0.6 0.008 250);font-size:10.5px">ECHO · GSW thigh · stale 9m</span><span style="text-align:right;color:oklch(0.55 0.008 250)">NOT ASSERTED</span><span style="text-align:right;color:oklch(0.55 0.008 250)">—</span><span style="text-align:right;color:oklch(0.55 0.008 250);font-size:10px">—</span><span style="text-align:right;font-size:10px;color:oklch(0.6 0.008 250)">WITHHELD</span></div>
+<div class="m" style="display:grid;grid-template-columns:96px 1fr 88px 92px 72px 128px;font-size:11px;padding:11px 15px;align-items:center;color:oklch(0.72 0.005 250)"><span style="font-weight:600">CAS-133</span><span style="color:oklch(0.6 0.008 250);font-size:10.5px">DELTA · non-compressible torso</span><span style="text-align:right">09:00</span><span style="text-align:right;color:oklch(0.55 0.008 250)">—</span><span style="text-align:right;color:oklch(0.55 0.008 250);font-size:10px">—</span><span style="text-align:right;font-size:10px;color:oklch(0.6 0.008 250)">SURGICAL · LOGGED</span></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.42 0.1 75);overflow:hidden">
+<div style="padding:11px 14px;background:oklch(0.26 0.06 75);display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.92 0.07 75)">ESCALATION · AWAITING YOU</span><span class="m" style="font-size:10px;color:oklch(0.85 0.05 75)">02:41</span></div>
+<div style="padding:14px;display:flex;flex-direction:column;gap:11px">
+<span style="font-size:12.5px;line-height:1.55;color:oklch(0.9 0.006 250)">Serving CAS-121 requires diverting UAS-07 mid-route. That saves a −16 miss and creates a −4 miss on CAS-118.</span>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;justify-content:space-between;padding:8px 11px;border-radius:4px;background:oklch(0.23 0.012 250);border:1px solid oklch(0.32 0.012 250)"><span class="m" style="font-size:10.5px;color:oklch(0.9 0.005 250)">HOLD ROUTE</span><span class="m" style="font-size:10px;color:oklch(0.66 0.008 250)">CAS-121 missed by 16</span></div>
+<div style="display:flex;justify-content:space-between;padding:8px 11px;border-radius:4px;background:oklch(0.23 0.012 250);border:1px solid oklch(0.32 0.012 250)"><span class="m" style="font-size:10.5px;color:oklch(0.9 0.005 250)">DIVERT UAS-07</span><span class="m" style="font-size:10px;color:oklch(0.66 0.008 250)">CAS-118 missed by 4</span></div>
+</div>
+<span class="m" style="font-size:9.5px;line-height:1.5;color:oklch(0.58 0.008 250)">Grounds for escalation: trade-off between two casualties. Not delegable under standing authority. Failure to decide is recorded with its cost.</span>
+</div></div>
+<div style="border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="padding:10px 14px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:oklch(0.93 0.005 250)">Live theater</span><span class="m" style="font-size:9px;color:oklch(0.56 0.008 250)">PHILIPPINE SEA</span></div>
+<div style="height:214px;position:relative;background:oklch(0.14 0.012 250)">
+<div style="position:absolute;inset:0;background-image:linear-gradient(oklch(0.22 0.01 250) 1px,transparent 1px),linear-gradient(90deg,oklch(0.22 0.01 250) 1px,transparent 1px);background-size:34px 34px"></div>
+<div style="position:absolute;left:52px;top:36px;width:120px;height:78px;border-radius:44% 56% 48% 52%;background:oklch(0.21 0.012 250);border:1px solid oklch(0.28 0.01 250)"></div>
+<div style="position:absolute;left:236px;top:112px;width:96px;height:62px;border-radius:52% 44% 56% 48%;background:oklch(0.21 0.012 250);border:1px solid oklch(0.28 0.01 250)"></div>
+<div style="position:absolute;left:88px;top:130px;display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:oklch(0.85 0.008 250)"></span><span class="m" style="font-size:8.5px;color:oklch(0.8 0.006 250);background:oklch(0.16 0.012 250);padding:1px 4px">FLP ALPHA 22U</span></div>
+<div style="position:absolute;left:274px;top:70px;display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;background:oklch(0.85 0.008 250)"></span><span class="m" style="font-size:8.5px;color:oklch(0.8 0.006 250);background:oklch(0.16 0.012 250);padding:1px 4px">FLP CHARLIE 9U</span></div>
+<div style="position:absolute;left:132px;top:58px;width:30px;height:30px;border-radius:50%;border:2px solid oklch(0.68 0.16 25);background:oklch(0.4 0.1 25 / .35);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9.5px;font-weight:700;color:oklch(0.9 0.1 25)">17</span></div>
+<div style="position:absolute;left:230px;top:44px;width:34px;height:34px;border-radius:50%;border:2px solid oklch(0.68 0.16 25);background:oklch(0.4 0.1 25 / .35);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9.5px;font-weight:700;color:oklch(0.9 0.1 25)">22</span></div>
+<div style="position:absolute;left:174px;top:104px;width:22px;height:22px;border-radius:50%;border:2px solid oklch(0.7 0.13 75);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:8.5px;font-weight:600;color:oklch(0.85 0.1 75)">31</span></div>
+<div style="position:absolute;left:300px;top:150px;width:20px;height:20px;border-radius:50%;border:2px dashed oklch(0.5 0.01 250);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;color:oklch(0.65 0.008 250)">?</span></div>
+<div style="position:absolute;left:96px;top:136px;width:64px;height:1px;background:oklch(0.75 0.1 165);transform:rotate(-46deg);transform-origin:left"></div>
+<div style="position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:3px;background:oklch(0.17 0.012 250 / .9);padding:7px 9px;border:1px solid oklch(0.3 0.012 250)"><span class="m" style="font-size:8px;letter-spacing:.09em;color:oklch(0.58 0.008 250)">RING SIZE = MIN REMAINING</span><span class="m" style="font-size:8px;color:oklch(0.6 0.008 250)">DASHED = DEADLINE NOT ASSERTED</span></div>
+</div></div>
+</div></div></div></div></div></div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a><b>Deadline-first.</b> The homepage <i>is</i> the clock. One horizontal time axis owns the page; casualty bars end at death, sortie blocks sit on them, and a miss is visible as a gap in geometry before anyone reads a number. Nav collapses to a rail.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.15 0.008 250);border:1px solid oklch(0.29 0.01 250);font-size:0">
+<div class="m" style="background:oklch(0.19 0.01 250);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.28 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">IRON HOUR · DEADLINE BOARD · CTF-76</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid oklch(0.28 0.01 250)">
+<div style="display:flex;align-items:center;gap:26px">
+<div style="display:flex;flex-direction:column;gap:3px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;letter-spacing:.04em;color:oklch(0.96 0.005 250);line-height:1">TIME REMAINING</span><span class="m" style="font-size:10px;color:oklch(0.6 0.008 250);letter-spacing:.06em">18 CASUALTIES · ORDERED BY THEIR OWN CLOCK, NOT BY APPEARANCE</span></div>
+<div style="display:flex;gap:10px">
+<div style="padding:8px 13px;border-radius:3px;background:oklch(0.24 0.05 25);border:1px solid oklch(0.42 0.11 25);display:flex;flex-direction:column;gap:2px"><span class="m" style="font-size:8.5px;letter-spacing:.1em;color:oklch(0.78 0.06 25)">MISSED IF NOTHING CHANGES</span><span class="m" style="font-size:17px;font-weight:700;color:oklch(0.84 0.16 25);line-height:1.1">2</span></div>
+<div style="padding:8px 13px;border-radius:3px;background:oklch(0.21 0.03 165);border:1px solid oklch(0.36 0.06 165);display:flex;flex-direction:column;gap:2px"><span class="m" style="font-size:8.5px;letter-spacing:.1em;color:oklch(0.76 0.05 165)">INSIDE DEADLINE</span><span class="m" style="font-size:17px;font-weight:700;color:oklch(0.86 0.13 165);line-height:1.1">14</span></div>
+<div style="padding:8px 13px;border-radius:3px;background:oklch(0.21 0.012 250);border:1px solid oklch(0.31 0.012 250);display:flex;flex-direction:column;gap:2px"><span class="m" style="font-size:8.5px;letter-spacing:.1em;color:oklch(0.58 0.008 250)">NOT ASSERTABLE</span><span class="m" style="font-size:17px;font-weight:700;color:oklch(0.8 0.006 250);line-height:1.1">2</span></div>
+</div></div>
+<div style="display:flex;gap:9px;align-items:center">
+<span class="m" style="font-size:10px;font-weight:600;letter-spacing:.08em;padding:7px 11px;border-radius:3px;border:1px solid oklch(0.38 0.05 165);color:oklch(0.82 0.06 165)">STANDING AUTHORITY ON</span>
+<span class="m" style="font-size:10px;font-weight:600;letter-spacing:.08em;padding:7px 11px;border-radius:3px;background:oklch(0.28 0.05 75);color:oklch(0.88 0.06 75)">REACHBACK LOST 6m</span>
+<span class="m" style="font-size:13px;font-weight:600;color:oklch(0.94 0.005 250);margin-left:6px">0412:16Z</span>
+</div></div>
+<div style="display:grid;grid-template-columns:60px 1fr">
+<div style="border-right:1px solid oklch(0.27 0.01 250);padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:18px;background:oklch(0.135 0.01 250)">
+<div style="width:28px;height:28px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:10px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div>
+<div style="width:34px;height:34px;border-radius:4px;background:oklch(0.28 0.04 165);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;font-weight:700;color:oklch(0.9 0.03 165)">CLK</span></div>
+<div style="width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;color:oklch(0.6 0.008 250)">MAP</span></div>
+<div style="width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;color:oklch(0.6 0.008 250)">LFT</span></div>
+<div style="width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;color:oklch(0.6 0.008 250)">BLD</span></div>
+<div style="width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative"><span class="m" style="font-size:9px;color:oklch(0.6 0.008 250)">ESC</span><span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:oklch(0.78 0.14 75)"></span></div>
+<div style="width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;color:oklch(0.6 0.008 250)">REC</span></div>
+</div>
+<div>
+<div class="m" style="display:flex;padding:12px 26px 9px 300px;border-bottom:1px solid oklch(0.27 0.01 250);background:oklch(0.175 0.01 250);font-size:9px;letter-spacing:.08em;color:oklch(0.55 0.008 250)"><span style="width:14.28%">NOW</span><span style="width:14.28%">+10</span><span style="width:14.28%">+20</span><span style="width:14.28%">+30</span><span style="width:14.28%">+40</span><span style="width:14.28%">+50</span><span style="width:14.28%">+60 MIN</span></div>
+<div style="position:relative">
+<div style="position:absolute;left:300px;right:26px;top:0;bottom:0;display:flex;pointer-events:none"><div style="width:14.28%;border-right:1px solid oklch(0.21 0.01 250)"></div><div style="width:14.28%;border-right:1px solid oklch(0.21 0.01 250)"></div><div style="width:14.28%;border-right:1px solid oklch(0.21 0.01 250)"></div><div style="width:14.28%;border-right:1px solid oklch(0.21 0.01 250)"></div><div style="width:14.28%;border-right:1px solid oklch(0.21 0.01 250)"></div><div style="width:14.28%;border-right:1px solid oklch(0.21 0.01 250)"></div></div>
+<div style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:62px">
+<div style="width:300px;padding:0 16px;display:flex;flex-direction:column;gap:2px;border-left:3px solid oklch(0.65 0.18 25)"><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.95 0.005 250)">CAS-114 · SITE BRAVO</span><span class="m" style="font-size:9.5px;color:oklch(0.62 0.008 250)">junctional haem · SI 1.4 · 2U + TXA</span></div>
+<div style="flex:1;padding-right:26px;position:relative;height:100%;display:flex;align-items:center">
+<div style="width:24.3%;height:24px;border-radius:2px;background:oklch(0.29 0.06 25);border-right:3px solid oklch(0.7 0.18 25);position:relative;display:flex;align-items:center">
+<div style="width:70.6%;height:100%;background:oklch(0.42 0.09 165);display:flex;align-items:center;padding-left:8px"><span class="m" style="font-size:9px;font-weight:600;color:oklch(0.95 0.02 165);letter-spacing:.04em">UAS-07 · 2U LTOWB · ARRIVES 12:00</span></div>
+<span class="m" style="position:absolute;left:calc(100% + 8px);font-size:10.5px;font-weight:700;color:oklch(0.82 0.14 25)">T-17</span>
+<span class="m" style="position:absolute;left:calc(100% + 52px);font-size:10px;color:oklch(0.78 0.1 165);white-space:nowrap">+5 slack · auto</span>
+</div></div></div>
+<div style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:62px;background:oklch(0.19 0.028 25)">
+<div style="width:300px;padding:0 16px;display:flex;flex-direction:column;gap:2px;border-left:3px solid oklch(0.65 0.18 25)"><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.95 0.005 250)">CAS-121 · SITE DELTA</span><span class="m" style="font-size:9.5px;color:oklch(0.62 0.008 250)">open pelvic · SI 1.7 rising · 4U</span></div>
+<div style="flex:1;padding-right:26px;height:100%;display:flex;align-items:center">
+<div style="width:31.4%;height:24px;border-radius:2px;background:oklch(0.29 0.06 25);border-right:3px solid oklch(0.7 0.18 25);position:relative;display:flex;align-items:center"><span class="m" style="font-size:9px;padding-left:8px;color:oklch(0.85 0.05 25);letter-spacing:.03em">NO ASSET REACHES THIS BAR</span><span class="m" style="position:absolute;left:calc(100% + 8px);font-size:10.5px;font-weight:700;color:oklch(0.82 0.14 25)">T-22</span></div>
+<div style="width:22.8%;height:24px;margin-left:56px;border-radius:2px;border:1px dashed oklch(0.6 0.13 25);display:flex;align-items:center;position:relative"><span class="m" style="font-size:9px;padding-left:8px;color:oklch(0.78 0.1 25)">UAS-12 ARRIVES 38:00</span><span class="m" style="position:absolute;left:calc(100% + 8px);font-size:10.5px;font-weight:700;color:oklch(0.84 0.16 25);white-space:nowrap">MISS −16</span></div>
+</div></div>
+<div style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:62px">
+<div style="width:300px;padding:0 16px;display:flex;flex-direction:column;gap:2px;border-left:3px solid oklch(0.75 0.13 75)"><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.95 0.005 250)">CAS-118 · SITE BRAVO</span><span class="m" style="font-size:9.5px;color:oklch(0.62 0.008 250)">blast, bilateral LE · SI 1.0 · TXA + 1U</span></div>
+<div style="flex:1;padding-right:26px;height:100%;display:flex;align-items:center">
+<div style="width:44.3%;height:24px;border-radius:2px;background:oklch(0.28 0.05 75);border-right:3px solid oklch(0.75 0.14 75);position:relative;display:flex;align-items:center">
+<div style="position:absolute;left:41%;width:42%;height:100%;background:oklch(0.42 0.09 165);display:flex;align-items:center;padding-left:8px"><span class="m" style="font-size:9px;font-weight:600;color:oklch(0.95 0.02 165);letter-spacing:.04em">UAS-07 STOP 2 · 26:00</span></div>
+<span class="m" style="position:absolute;left:calc(100% + 8px);font-size:10.5px;font-weight:700;color:oklch(0.85 0.11 75)">T-31</span>
+<span class="m" style="position:absolute;left:calc(100% + 52px);font-size:10px;color:oklch(0.78 0.1 165);white-space:nowrap">+5 slack · auto</span>
+</div></div></div>
+<div style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:62px">
+<div style="width:300px;padding:0 16px;display:flex;flex-direction:column;gap:2px;border-left:3px solid oklch(0.5 0.01 250)"><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.95 0.005 250)">CAS-127 · SITE KILO</span><span class="m" style="font-size:9.5px;color:oklch(0.62 0.008 250)">frag, abdominal · SI 0.9 · 2U + FDP</span></div>
+<div style="flex:1;padding-right:26px;height:100%;display:flex;align-items:center">
+<div style="width:68.6%;height:24px;border-radius:2px;background:oklch(0.25 0.012 250);border-right:3px solid oklch(0.62 0.01 250);position:relative;display:flex;align-items:center"><span class="m" style="font-size:9px;padding-left:8px;color:oklch(0.68 0.008 250)">UNALLOCATED — NO ASSET FREE BEFORE 52:00</span><span class="m" style="position:absolute;left:calc(100% + 8px);font-size:10.5px;font-weight:600;color:oklch(0.8 0.006 250)">T-48</span></div>
+</div></div>
+<div style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:62px">
+<div style="width:300px;padding:0 16px;display:flex;flex-direction:column;gap:2px;border-left:3px solid oklch(0.38 0.01 250)"><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.86 0.005 250)">CAS-131 · SITE ECHO</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">GSW thigh · telemetry stale 9m</span></div>
+<div style="flex:1;padding-right:26px;height:100%;display:flex;align-items:center">
+<div style="width:82%;height:24px;border-radius:2px;background:repeating-linear-gradient(45deg,oklch(0.24 0.01 250) 0 7px,oklch(0.2 0.01 250) 7px 14px);border:1px dashed oklch(0.45 0.01 250);display:flex;align-items:center"><span class="m" style="font-size:9px;padding-left:8px;color:oklch(0.7 0.008 250);letter-spacing:.03em">CONFIDENCE BELOW THRESHOLD — NO DEADLINE ASSERTED, NO SORTIE TASKED</span></div>
+</div></div>
+<div style="display:flex;align-items:center;height:62px">
+<div style="width:300px;padding:0 16px;display:flex;flex-direction:column;gap:2px;border-left:3px solid oklch(0.32 0.01 250)"><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.86 0.005 250)">CAS-133 · SITE DELTA</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">non-compressible torso · surgical</span></div>
+<div style="flex:1;padding-right:26px;height:100%;display:flex;align-items:center">
+<div style="width:12.8%;height:24px;border-radius:2px;background:oklch(0.32 0.012 250);position:relative;display:flex;align-items:center"><span class="m" style="position:absolute;left:calc(100% + 8px);font-size:9.5px;color:oklch(0.68 0.008 250);white-space:nowrap">T-9 · beyond the limit of prehospital medicine · logged, not tasked</span></div>
+</div></div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:13px 26px;border-top:1px solid oklch(0.28 0.01 250);background:oklch(0.175 0.01 250)">
+<div style="display:flex;gap:22px;align-items:center">
+<span class="m" style="font-size:10px;color:oklch(0.62 0.008 250)">12 further casualties · all slack &gt; +20 · <span style="color:oklch(0.74 0.1 210)">SHOW ALL</span></span>
+<span class="m" style="font-size:10px;color:oklch(0.62 0.008 250)">Under doctrinal push on identical inputs: <span style="color:oklch(0.84 0.13 25);font-weight:600">4 missed</span> · this tasking: <span style="color:oklch(0.84 0.12 165);font-weight:600">2 missed</span></span>
+</div>
+<div style="display:flex;gap:9px"><span class="m" style="font-size:10.5px;font-weight:600;padding:8px 13px;border-radius:3px;border:1px solid oklch(0.36 0.012 250);color:oklch(0.86 0.006 250)">RESOLVE ESCALATION</span><span class="m" style="font-size:10.5px;font-weight:600;padding:8px 13px;border-radius:3px;background:oklch(0.75 0.11 165);color:oklch(0.18 0.03 165)">COMMIT 4 SORTIES</span></div>
+</div>
+</div></div></div></div>
+
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a><b>Single decision.</b> The homepage shows one thing: the decision that needs a human right now, at full size, with its cost stated in lives. Everything the system already handled is a one-line receipt below. Zero-inbox tasking — the commander is not a monitor operator.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.155 0.008 250);border:1px solid oklch(0.29 0.01 250);font-size:0">
+<div class="m" style="background:oklch(0.19 0.01 250);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.28 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">IRON HOUR · ALLOCATION AUTHORITY · CTF-76</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 34px;border-bottom:1px solid oklch(0.28 0.01 250)">
+<div style="display:flex;align-items:center;gap:14px">
+<div style="width:30px;height:30px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:10.5px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div>
+<span class="m" style="font-size:12px;font-weight:700;letter-spacing:.07em;color:oklch(0.95 0.005 250)">IRON HOUR</span>
+<div style="display:flex;gap:20px;margin-left:16px">
+<span class="m" style="font-size:11px;color:oklch(0.95 0.005 250);font-weight:600;padding-bottom:2px;border-bottom:2px solid oklch(0.75 0.11 165)">DECIDE</span>
+<span class="m" style="font-size:11px;color:oklch(0.62 0.008 250)">BOARD</span>
+<span class="m" style="font-size:11px;color:oklch(0.62 0.008 250)">THEATER</span>
+<span class="m" style="font-size:11px;color:oklch(0.62 0.008 250)">RECORD</span>
+</div></div>
+<div style="display:flex;gap:12px;align-items:center">
+<span class="m" style="font-size:10px;padding:6px 11px;border-radius:3px;border:1px solid oklch(0.38 0.05 165);color:oklch(0.82 0.06 165);font-weight:600;letter-spacing:.07em">STANDING AUTHORITY ON</span>
+<span class="m" style="font-size:10px;padding:6px 11px;border-radius:3px;background:oklch(0.28 0.05 75);color:oklch(0.88 0.06 75);font-weight:600;letter-spacing:.07em">NO REACHBACK · 6m</span>
+<span class="m" style="font-size:13px;font-weight:600;color:oklch(0.94 0.005 250)">0412:16Z</span>
+</div></div>
+<div style="padding:30px 34px 22px;display:grid;grid-template-columns:1fr 386px;gap:30px">
+<div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.14em;color:oklch(0.85 0.1 75);padding:5px 10px;border-radius:3px;background:oklch(0.28 0.06 75)">1 DECISION REQUIRES YOU</span><span class="m" style="font-size:11px;color:oklch(0.66 0.008 250)">escalated 0409:35Z · 2m 41s elapsed · cost of delay accrues to the record</span></div>
+<div style="font-size:32px;line-height:1.32;font-weight:500;color:oklch(0.96 0.005 250);letter-spacing:-.015em;max-width:930px">Two casualties, one aircraft in range. <span style="color:oklch(0.82 0.14 25)">CAS-121 needs 4 units in 22 minutes</span> and nothing reaches her without breaking the run that saves <span style="color:oklch(0.86 0.1 75)">CAS-118</span>.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px">
+<div style="border-radius:6px;border:1px solid oklch(0.33 0.012 250);background:oklch(0.19 0.012 250);overflow:hidden">
+<div style="padding:12px 16px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.9 0.005 250)">OPTION A · HOLD ROUTE</span><span class="m" style="font-size:10px;color:oklch(0.6 0.008 250)">recommended</span></div>
+<div style="padding:16px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:10.5px;color:oklch(0.68 0.008 250)">CAS-114</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">served 12:00 · +5</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:10.5px;color:oklch(0.68 0.008 250)">CAS-118</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">served 26:00 · +5</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:11px;border-top:1px solid oklch(0.26 0.01 250)"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.06 25)">CAS-121</span><span class="m" style="font-size:11px;color:oklch(0.82 0.15 25);font-weight:700">missed by 16 min</span></div>
+<span class="m" style="font-size:10px;line-height:1.55;color:oklch(0.62 0.008 250)">Expected deaths of survivable wounds in this window: 1</span>
+</div></div>
+<div style="border-radius:6px;border:1px solid oklch(0.33 0.012 250);background:oklch(0.19 0.012 250);overflow:hidden">
+<div style="padding:12px 16px;border-bottom:1px solid oklch(0.28 0.01 250)"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.9 0.005 250)">OPTION B · DIVERT UAS-07</span></div>
+<div style="padding:16px;display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:10.5px;color:oklch(0.68 0.008 250)">CAS-114</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">served 12:00 · +5</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:10.5px;color:oklch(0.68 0.008 250)">CAS-121</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">served 19:00 · +3</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:11px;border-top:1px solid oklch(0.26 0.01 250)"><span class="m" style="font-size:10.5px;color:oklch(0.85 0.09 75)">CAS-118</span><span class="m" style="font-size:11px;color:oklch(0.86 0.13 75);font-weight:700">missed by 4 min</span></div>
+<span class="m" style="font-size:10px;line-height:1.55;color:oklch(0.62 0.008 250)">Expected deaths of survivable wounds in this window: 1</span>
+</div></div>
+</div>
+<div style="margin-top:18px;padding:14px 16px;border-radius:5px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);display:flex;gap:14px;align-items:flex-start">
+<span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.58 0.008 250);width:120px;flex:none;padding-top:2px">WHY YOU AND NOT IT</span>
+<span style="font-size:12px;line-height:1.6;color:oklch(0.82 0.006 250)">The two options carry the same expected loss. The system will not choose between two casualties on grounds it cannot state. Both branches are logged with their reasoning; a decision not taken is recorded with its cost at 22:00.</span>
+</div>
+<div style="display:flex;gap:12px;margin-top:20px;align-items:center">
+<span class="m" style="font-size:11.5px;font-weight:700;padding:12px 22px;border-radius:4px;background:oklch(0.78 0.1 165);color:oklch(0.18 0.03 165);letter-spacing:.05em">AUTHORISE A · HOLD</span>
+<span class="m" style="font-size:11.5px;font-weight:700;padding:12px 22px;border-radius:4px;border:1px solid oklch(0.42 0.012 250);color:oklch(0.9 0.005 250);letter-spacing:.05em">AUTHORISE B · DIVERT</span>
+<span class="m" style="font-size:10.5px;color:oklch(0.72 0.1 210);margin-left:8px">ask for a third option</span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border-radius:6px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="padding:11px 15px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">HANDLED WITHOUT YOU</span><span class="m" style="font-size:9.5px;color:oklch(0.58 0.008 250)">LAST 15 MIN</span></div>
+<div style="padding:11px 15px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:3px"><span class="m" style="font-size:10.5px;color:oklch(0.9 0.005 250)">UAS-07 → CAS-114, CAS-118</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">2U LTOWB + 2g TXA · both inside deadline · 0411:58Z</span></div>
+<div style="padding:11px 15px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:3px"><span class="m" style="font-size:10.5px;color:oklch(0.9 0.005 250)">UAS-04 → CAS-109</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">1U LTOWB · delivered 0407:12Z · +9 slack</span></div>
+<div style="padding:11px 15px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:3px"><span class="m" style="font-size:10.5px;color:oklch(0.9 0.005 250)">CAS-131 · no deadline asserted</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">telemetry stale 9m · withheld rather than estimated</span></div>
+<div style="padding:11px 15px;display:flex;flex-direction:column;gap:3px"><span class="m" style="font-size:10.5px;color:oklch(0.9 0.005 250)">FLP CHARLIE · 9U remaining</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">projected dry 0522Z at current draw · flagged to J4</span></div>
+</div>
+<div style="border-radius:6px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);padding:15px;display:flex;flex-direction:column;gap:11px">
+<span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">THEATER STATE</span>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Open casualties</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">18</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Inside deadline</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">14</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Unreachable in time</span><span class="m" style="font-size:11px;color:oklch(0.82 0.15 25);font-weight:600">2</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Deadline not assertable</span><span class="m" style="font-size:11px;color:oklch(0.9 0.005 250);font-weight:600">2</span></div>
+<div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid oklch(0.26 0.01 250)"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">LTOWB forward</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">31U · 2 sites</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Lift available</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">4 of 6</span></div>
+</div>
+<div style="border-radius:6px;background:oklch(0.2 0.028 165);border:1px solid oklch(0.34 0.055 165);padding:15px;display:flex;flex-direction:column;gap:8px">
+<span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.78 0.05 165)">AGAINST DOCTRINAL PUSH</span>
+<span class="m" style="font-size:22px;font-weight:600;color:oklch(0.86 0.13 165);line-height:1">12 fewer dead</span>
+<span class="m" style="font-size:10px;line-height:1.55;color:oklch(0.74 0.03 165)">Same casualties, same aircraft, same blood. Baseline implemented at its strongest, not as a straw man.</span>
+</div>
+</div></div></div></div>
+
+<div class="dv-opt" id="1d">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a><b>Austere terminal.</b> No chrome, no map, no colour but one accent. Everything is text on a monospaced grid, sorted by slack. Built for the case the document insists on: a degraded link, a low-power terminal forward, a screen that still works when nothing else does.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.12 0.006 250);border:1px solid oklch(0.26 0.01 250);font-size:0">
+<div class="m" style="padding:9px 20px;border-bottom:1px solid oklch(0.24 0.01 250);display:flex;justify-content:space-between;font-size:10px;letter-spacing:.1em;color:oklch(0.6 0.008 250)"><span>IRON HOUR // ALLOC-TTY // UNCLASSIFIED // SYNTHETIC DATA // DEMONSTRATION ONLY</span><span>0412:16Z · CTF-76 · LOCAL DECIDE · NO REACHBACK 6m</span></div>
+<div class="m" style="padding:22px 20px 0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12.5px;color:oklch(0.55 0.008 250)">$ iron-hour status</span>
+<span style="font-size:12.5px;line-height:1.85;color:oklch(0.88 0.006 250)">18 open · 14 inside deadline · <span style="color:oklch(0.78 0.16 25)">2 unreachable</span> · 2 not assertable · lift 4/6 · LTOWB 31U/2 sites · authority STANDING · reachback DOWN 6m · deciding on local state</span>
+</div>
+<div class="m" style="padding:20px 20px 0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12.5px;color:oklch(0.55 0.008 250)">$ iron-hour queue --sort slack</span>
+</div>
+<div class="m" style="padding:10px 20px 0;font-size:12px;line-height:2.05;color:oklch(0.84 0.006 250);white-space:pre">
+<div style="color:oklch(0.5 0.008 250);border-bottom:1px solid oklch(0.24 0.01 250);padding-bottom:5px">ID       SITE    MECHANISM                 SI    DEADLINE  ASSET    ARRIVE  SLACK  BLOOD        AUTHORITY</div>
+<div style="padding-top:5px">CAS-114  BRAVO   junctional haemorrhage    1.4      17:00  UAS-07    12:00  <span style="color:oklch(0.82 0.13 165)">  +05</span>  2U + 2g TXA  auto</div>
+<div style="background:oklch(0.2 0.045 25);color:oklch(0.94 0.02 25)">CAS-121  DELTA   open pelvic fracture     1.7↑     22:00  UAS-12    38:00  <span style="color:oklch(0.8 0.17 25);font-weight:700">  −16</span>  4U           <span style="color:oklch(0.88 0.13 75)">ESCALATED</span></div>
+<div>CAS-118  BRAVO   blast, bilateral LE      1.0      31:00  UAS-07    26:00  <span style="color:oklch(0.82 0.13 165)">  +05</span>  1U + 2g TXA  auto</div>
+<div>CAS-127  KILO    frag, abdominal          0.9      48:00  —             —  <span style="color:oklch(0.62 0.008 250)">   --</span>  2U + FDP     queued T+52</div>
+<div style="color:oklch(0.62 0.008 250)">CAS-131  ECHO    GSW thigh, tourniquet    ---   NOT ASSERTED  —             —     --  1U (est)     withheld · telemetry stale 9m</div>
+<div style="color:oklch(0.62 0.008 250)">CAS-133  DELTA   non-compressible torso   2.1      09:00  —             —     --  surgical     logged · beyond prehospital reach</div>
+<div style="color:oklch(0.55 0.008 250);padding-top:6px">... 12 rows suppressed (slack &gt; +20) — `queue --all`</div>
+</div>
+<div class="m" style="padding:22px 20px 0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12.5px;color:oklch(0.55 0.008 250)">$ iron-hour escalations</span>
+<div style="margin-top:8px;border-left:2px solid oklch(0.7 0.14 75);padding:2px 0 2px 16px;display:flex;flex-direction:column;gap:5px">
+<span style="font-size:12px;line-height:1.7;color:oklch(0.92 0.006 250)">E-0009  CAS-121 vs CAS-118 — one asset in range, two deadlines. Equal expected loss on both branches.</span>
+<span style="font-size:12px;line-height:1.7;color:oklch(0.74 0.008 250)">        A: hold route → CAS-121 −16.   B: divert UAS-07 → CAS-118 −4.</span>
+<span style="font-size:12px;line-height:1.7;color:oklch(0.74 0.008 250)">        grounds: trade-off between casualties · not delegable · elapsed 02:41 · inaction cost accrues at 22:00</span>
+<span style="font-size:12px;line-height:1.7;color:oklch(0.8 0.1 210)">        $ iron-hour authorise E-0009 --option A|B</span>
+</div></div>
+<div class="m" style="padding:22px 20px 0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12.5px;color:oklch(0.55 0.008 250)">$ iron-hour compare --baseline doctrinal-push --same-inputs</span>
+<div style="margin-top:8px;font-size:12px;line-height:1.95;color:oklch(0.84 0.006 250)">
+<div>doctrinal push, strongest implementation ....... <span style="color:oklch(0.8 0.15 25)">41 dead of survivable wounds</span></div>
+<div>deadline allocation, this run ................... <span style="color:oklch(0.84 0.12 165)">29 dead of survivable wounds</span></div>
+<div>fleet ×3.4, doctrinal push ...................... 38  (−3 for 3.9× the sorties)</div>
+<div>fleet ×3.4, deadline allocation ................. 29  (no improvement — not waiting on airframes)</div>
+<div style="color:oklch(0.66 0.008 250);padding-top:6px">the binding lever is forward positioning, not fleet size</div>
+</div></div>
+<div class="m" style="padding:22px 20px 0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12.5px;color:oklch(0.55 0.008 250)">$ iron-hour unprevented --explain</span>
+<div style="margin-top:8px;font-size:12px;line-height:1.95;color:oklch(0.8 0.006 250)">
+<div>11  past the limit of prehospital medicine</div>
+<div>09  needed a qualified pair of hands, not materiel</div>
+<div>09  launch point too distant at time of wounding</div>
+</div></div>
+<div class="m" style="padding:20px;margin-top:20px;border-top:1px solid oklch(0.24 0.01 250);display:flex;justify-content:space-between;font-size:11px;color:oklch(0.58 0.008 250)"><span>every line above is reconstructable and tamper-evident · `record verify --chain`</span><span style="color:oklch(0.84 0.006 250)">$ <span style="border-left:1.5px solid oklch(0.84 0.12 165);padding-left:1px"></span></span></div>
+</div></div>
+
+<div class="dv-opt" id="1e">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a><b>Map-primary.</b> Full-bleed theater, panels floating over it. Geography is the argument — hundreds of kilometres of water, two launch points, contested air. Answers "why can't we reach her" before it answers "what now".</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.13 0.01 250);border:1px solid oklch(0.29 0.01 250);font-size:0;position:relative;height:816px">
+<div style="position:absolute;inset:0;background:oklch(0.155 0.014 250)">
+<div style="position:absolute;inset:0;background-image:linear-gradient(oklch(0.19 0.012 250) 1px,transparent 1px),linear-gradient(90deg,oklch(0.19 0.012 250) 1px,transparent 1px);background-size:56px 56px"></div>
+<div style="position:absolute;left:120px;top:96px;width:300px;height:210px;border-radius:46% 54% 40% 60%;background:oklch(0.21 0.012 250);border:1px solid oklch(0.29 0.012 250)"></div>
+<div style="position:absolute;left:206px;top:376px;width:180px;height:280px;border-radius:52% 48% 46% 54%;background:oklch(0.21 0.012 250);border:1px solid oklch(0.29 0.012 250)"></div>
+<div style="position:absolute;left:640px;top:270px;width:150px;height:104px;border-radius:48% 52% 56% 44%;background:oklch(0.21 0.012 250);border:1px solid oklch(0.29 0.012 250)"></div>
+<div style="position:absolute;left:880px;top:520px;width:230px;height:150px;border-radius:44% 56% 50% 50%;background:oklch(0.21 0.012 250);border:1px solid oklch(0.29 0.012 250)"></div>
+<div style="position:absolute;left:150px;top:130px"><span class="m" style="font-size:10px;letter-spacing:.16em;color:oklch(0.42 0.01 250)">LUZON</span></div>
+<div style="position:absolute;left:660px;top:300px"><span class="m" style="font-size:10px;letter-spacing:.16em;color:oklch(0.42 0.01 250)">PHILIPPINE SEA</span></div>
+<div style="position:absolute;left:470px;top:170px;width:420px;height:260px;border:1px dashed oklch(0.44 0.07 75);border-radius:6px;background:oklch(0.3 0.04 75 / .1)"><span class="m" style="position:absolute;top:8px;left:10px;font-size:9px;letter-spacing:.1em;color:oklch(0.72 0.08 75)">CONTESTED — A2AD RING, ROTARY-WING DENIED</span></div>
+<div style="position:absolute;left:298px;top:432px;display:flex;align-items:center;gap:7px"><span style="width:13px;height:13px;background:oklch(0.9 0.008 250);flex:none"></span><div style="background:oklch(0.16 0.012 250 / .92);padding:4px 8px;border:1px solid oklch(0.32 0.012 250);display:flex;flex-direction:column"><span class="m" style="font-size:10px;font-weight:700;color:oklch(0.95 0.005 250);letter-spacing:.05em">FLP ALPHA</span><span class="m" style="font-size:9px;color:oklch(0.68 0.008 250)">22U LTOWB · 3 UAS · 2 ready</span></div></div>
+<div style="position:absolute;left:706px;top:326px;display:flex;align-items:center;gap:7px"><span style="width:13px;height:13px;background:oklch(0.9 0.008 250);flex:none"></span><div style="background:oklch(0.16 0.012 250 / .92);padding:4px 8px;border:1px solid oklch(0.32 0.012 250);display:flex;flex-direction:column"><span class="m" style="font-size:10px;font-weight:700;color:oklch(0.95 0.005 250);letter-spacing:.05em">FLP CHARLIE</span><span class="m" style="font-size:9px;color:oklch(0.86 0.09 75)">9U · dry 0522Z at current draw</span></div></div>
+<div style="position:absolute;left:344px;top:262px;width:196px;height:1.5px;background:linear-gradient(90deg,oklch(0.8 0.11 165),oklch(0.5 0.08 165));transform:rotate(-41deg);transform-origin:left"></div>
+<div style="position:absolute;left:404px;top:214px;background:oklch(0.16 0.012 250 / .92);padding:3px 7px;border:1px solid oklch(0.4 0.07 165)"><span class="m" style="font-size:9px;color:oklch(0.86 0.1 165);font-weight:600">UAS-07 · 2U + TXA · ETA 12:00</span></div>
+<div style="position:absolute;left:400px;top:250px;width:210px;height:1.5px;border-top:1.5px dashed oklch(0.62 0.15 25);transform:rotate(-19deg);transform-origin:left"></div>
+<div style="position:absolute;left:470px;top:246px;background:oklch(0.16 0.012 250 / .92);padding:3px 7px;border:1px solid oklch(0.5 0.13 25)"><span class="m" style="font-size:9px;color:oklch(0.84 0.15 25);font-weight:600">UAS-12 · ETA 38:00 · ARRIVES 16 MIN LATE</span></div>
+<div style="position:absolute;left:352px;top:186px;display:flex;align-items:center;gap:8px">
+<div style="width:56px;height:56px;border-radius:50%;border:2.5px solid oklch(0.7 0.17 25);background:oklch(0.4 0.1 25 / .28);display:flex;align-items:center;justify-content:center;flex-direction:column"><span class="m" style="font-size:14px;font-weight:700;color:oklch(0.92 0.11 25);line-height:1">17</span><span class="m" style="font-size:7px;color:oklch(0.8 0.07 25);letter-spacing:.06em">MIN</span></div>
+<div style="background:oklch(0.16 0.012 250 / .92);padding:5px 9px;border-left:2px solid oklch(0.7 0.17 25)"><span class="m" style="font-size:10.5px;font-weight:700;color:oklch(0.95 0.005 250);display:block">CAS-114 · BRAVO</span><span class="m" style="font-size:9px;color:oklch(0.7 0.008 250)">junctional haem · 2U + TXA · served</span></div></div>
+<div style="position:absolute;left:610px;top:398px;display:flex;align-items:center;gap:8px">
+<div style="width:64px;height:64px;border-radius:50%;border:2.5px solid oklch(0.7 0.17 25);background:oklch(0.4 0.1 25 / .28);display:flex;align-items:center;justify-content:center;flex-direction:column"><span class="m" style="font-size:15px;font-weight:700;color:oklch(0.92 0.11 25);line-height:1">22</span><span class="m" style="font-size:7px;color:oklch(0.8 0.07 25);letter-spacing:.06em">MIN</span></div>
+<div style="background:oklch(0.16 0.012 250 / .92);padding:5px 9px;border-left:2px solid oklch(0.7 0.17 25)"><span class="m" style="font-size:10.5px;font-weight:700;color:oklch(0.95 0.005 250);display:block">CAS-121 · DELTA</span><span class="m" style="font-size:9px;color:oklch(0.86 0.1 75)">open pelvic · 4U · NO ASSET IN RANGE</span></div></div>
+<div style="position:absolute;left:414px;top:330px;display:flex;align-items:center;gap:8px">
+<div style="width:38px;height:38px;border-radius:50%;border:2px solid oklch(0.72 0.13 75);background:oklch(0.36 0.07 75 / .25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:11px;font-weight:700;color:oklch(0.9 0.09 75)">31</span></div>
+<div style="background:oklch(0.16 0.012 250 / .9);padding:3px 7px"><span class="m" style="font-size:9.5px;color:oklch(0.88 0.006 250)">CAS-118 · BRAVO · served stop 2</span></div></div>
+<div style="position:absolute;left:900px;top:456px;display:flex;align-items:center;gap:8px">
+<div style="width:28px;height:28px;border-radius:50%;border:2px solid oklch(0.55 0.01 250);background:oklch(0.26 0.01 250 / .5);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:10px;font-weight:600;color:oklch(0.82 0.006 250)">48</span></div>
+<div style="background:oklch(0.16 0.012 250 / .9);padding:3px 7px"><span class="m" style="font-size:9.5px;color:oklch(0.8 0.006 250)">CAS-127 · KILO · unallocated</span></div></div>
+<div style="position:absolute;left:786px;top:604px;display:flex;align-items:center;gap:8px">
+<div style="width:28px;height:28px;border-radius:50%;border:2px dashed oklch(0.5 0.01 250);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:11px;color:oklch(0.7 0.008 250)">?</span></div>
+<div style="background:oklch(0.16 0.012 250 / .9);padding:3px 7px"><span class="m" style="font-size:9.5px;color:oklch(0.72 0.008 250)">CAS-131 · ECHO · telemetry stale 9m</span></div></div>
+</div>
+<div class="m" style="position:absolute;top:0;left:0;right:0;background:oklch(0.17 0.01 250 / .95);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.3 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">IRON HOUR · LIVE THEATER · CTF-76 · 0412:16Z</span></div>
+<div style="position:absolute;top:44px;left:20px;display:flex;gap:10px;align-items:center">
+<div style="background:oklch(0.17 0.012 250 / .95);border:1px solid oklch(0.32 0.012 250);border-radius:4px;padding:9px 13px;display:flex;align-items:center;gap:11px"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div><span class="m" style="font-size:11.5px;font-weight:700;letter-spacing:.07em;color:oklch(0.95 0.005 250)">IRON HOUR</span></div>
+<div style="background:oklch(0.17 0.012 250 / .95);border:1px solid oklch(0.32 0.012 250);border-radius:4px;padding:9px 13px;display:flex;gap:16px"><span class="m" style="font-size:10.5px;color:oklch(0.95 0.005 250);font-weight:600">THEATER</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">BOARD</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">LIFT</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">BLOOD</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">RECORD</span></div>
+</div>
+<div style="position:absolute;top:44px;right:20px;display:flex;gap:9px">
+<span class="m" style="font-size:10px;padding:9px 12px;border-radius:4px;background:oklch(0.17 0.012 250 / .95);border:1px solid oklch(0.38 0.05 165);color:oklch(0.82 0.06 165);font-weight:600;letter-spacing:.07em">STANDING AUTHORITY</span>
+<span class="m" style="font-size:10px;padding:9px 12px;border-radius:4px;background:oklch(0.26 0.05 75 / .95);color:oklch(0.9 0.06 75);font-weight:600;letter-spacing:.07em">NO REACHBACK 6m</span>
+</div>
+<div style="position:absolute;left:20px;bottom:20px;width:400px;background:oklch(0.17 0.012 250 / .96);border:1px solid oklch(0.32 0.012 250);border-radius:5px;overflow:hidden">
+<div style="padding:11px 14px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.9 0.005 250)">DEADLINE QUEUE</span><span class="m" style="font-size:9.5px;color:oklch(0.6 0.008 250)">18 OPEN · BY SLACK</span></div>
+<div style="padding:9px 14px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10.5px;color:oklch(0.92 0.005 250)">CAS-121 · DELTA</span><span class="m" style="font-size:11px;font-weight:700;color:oklch(0.82 0.16 25)">−16</span></div>
+<div style="padding:9px 14px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10.5px;color:oklch(0.92 0.005 250)">CAS-114 · BRAVO</span><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.84 0.11 165)">+5</span></div>
+<div style="padding:9px 14px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10.5px;color:oklch(0.92 0.005 250)">CAS-118 · BRAVO</span><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.84 0.11 165)">+5</span></div>
+<div style="padding:9px 14px;display:flex;justify-content:space-between;align-items:center"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">CAS-127 · KILO</span><span class="m" style="font-size:10px;color:oklch(0.62 0.008 250)">no asset</span></div>
+</div>
+<div style="position:absolute;right:20px;bottom:20px;width:392px;background:oklch(0.17 0.012 250 / .96);border:1px solid oklch(0.44 0.1 75);border-radius:5px;overflow:hidden">
+<div style="padding:10px 14px;background:oklch(0.27 0.06 75);display:flex;justify-content:space-between"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.93 0.06 75)">ESCALATION · AWAITING AUTHORITY</span><span class="m" style="font-size:10px;color:oklch(0.86 0.05 75)">02:41</span></div>
+<div style="padding:13px 14px;display:flex;flex-direction:column;gap:11px">
+<span style="font-size:12px;line-height:1.55;color:oklch(0.9 0.006 250)">CAS-121 is 16 minutes outside the reach of every available asset. Diverting UAS-07 reaches her and misses CAS-118 by 4.</span>
+<div style="display:flex;gap:8px"><span class="m" style="font-size:10.5px;font-weight:700;padding:9px 14px;border-radius:3px;background:oklch(0.78 0.1 165);color:oklch(0.18 0.03 165)">HOLD</span><span class="m" style="font-size:10.5px;font-weight:700;padding:9px 14px;border-radius:3px;border:1px solid oklch(0.42 0.012 250);color:oklch(0.9 0.005 250)">DIVERT</span><span class="m" style="font-size:10px;padding:9px 4px;color:oklch(0.74 0.1 210)">see both routes</span></div>
+</div></div>
+<div style="position:absolute;right:20px;top:104px;background:oklch(0.17 0.012 250 / .96);border:1px solid oklch(0.32 0.012 250);border-radius:5px;padding:12px 14px;display:flex;flex-direction:column;gap:7px">
+<span class="m" style="font-size:9px;letter-spacing:.11em;color:oklch(0.56 0.008 250)">RING = MINUTES REMAINING</span>
+<span class="m" style="font-size:9px;color:oklch(0.7 0.008 250)">solid · deadline asserted</span>
+<span class="m" style="font-size:9px;color:oklch(0.7 0.008 250)">dashed · confidence too low to assert</span>
+<span class="m" style="font-size:9px;color:oklch(0.7 0.008 250)">solid line · sortie inside deadline</span>
+<span class="m" style="font-size:9px;color:oklch(0.7 0.008 250)">dashed line · sortie arrives late</span>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1f">
+<div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a><b>Decision feed.</b> The homepage is a chronological record written in sentences a human can read aloud — every allocation, every withholding, every escalation, timestamped and hashed. Built for the accreditor and the investigating officer as much as the commander.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.16 0.008 250);border:1px solid oklch(0.29 0.01 250);font-size:0">
+<div class="m" style="background:oklch(0.19 0.01 250);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.28 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">IRON HOUR · DECISION RECORD · TAMPER-EVIDENT</span></div>
+<div style="display:grid;grid-template-columns:1fr 356px">
+<div style="border-right:1px solid oklch(0.28 0.01 250)">
+<div style="padding:22px 30px 18px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:flex-end">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Newsreader',serif;font-size:25px;font-weight:500;color:oklch(0.96 0.005 250);letter-spacing:-.01em">Every decision, in order, in words</span><span style="font-size:12px;color:oklch(0.64 0.008 250)">Nothing is taken that is not written. 47 entries this shift · chain verified 4s ago.</span></div>
+<div style="display:flex;gap:8px"><span class="m" style="font-size:10px;padding:7px 11px;border-radius:3px;border:1px solid oklch(0.34 0.012 250);color:oklch(0.86 0.006 250)">FILTER</span><span class="m" style="font-size:10px;padding:7px 11px;border-radius:3px;border:1px solid oklch(0.34 0.012 250);color:oklch(0.86 0.006 250)">EXPORT FOR IO</span></div>
+</div>
+<div style="padding:18px 30px 22px;display:flex;flex-direction:column;gap:0">
+<div style="display:grid;grid-template-columns:86px 1fr;gap:20px;padding:16px 0;border-bottom:1px solid oklch(0.24 0.01 250)">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.9 0.005 250)">0412:04Z</span><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.86 0.1 75)">ESCALATED</span></div>
+<div style="display:flex;flex-direction:column;gap:7px;border-left:2px solid oklch(0.7 0.13 75);padding-left:18px">
+<span style="font-size:14.5px;line-height:1.6;color:oklch(0.95 0.005 250)">Refused to choose between CAS-121 and CAS-118 and referred the decision to the allocation authority.</span>
+<span style="font-size:12px;line-height:1.65;color:oklch(0.72 0.008 250)">One asset is in range of both. Holding the current route misses CAS-121 by 16 minutes; diverting misses CAS-118 by 4. Expected loss is equal on both branches, so no ground exists on which to prefer one casualty. Awaiting authority 2m 41s. The cost of continued inaction will be recorded at 0434Z.</span>
+<span class="m" style="font-size:9.5px;color:oklch(0.55 0.008 250)">E-0009 · inputs: telemetry BRAVO/DELTA 0411:52Z, lift state 0412:01Z, FLP ALPHA manifest · sha 4e91…c07a</span>
+</div></div>
+<div style="display:grid;grid-template-columns:86px 1fr;gap:20px;padding:16px 0;border-bottom:1px solid oklch(0.24 0.01 250)">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.9 0.005 250)">0411:58Z</span><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.78 0.09 165)">AUTHORISED · STANDING</span></div>
+<div style="display:flex;flex-direction:column;gap:7px;border-left:2px solid oklch(0.62 0.1 165);padding-left:18px">
+<span style="font-size:14.5px;line-height:1.6;color:oklch(0.95 0.005 250)">Launched UAS-07 from FLP ALPHA carrying 2U LTOWB and 2g TXA, routed CAS-114 then CAS-118.</span>
+<span style="font-size:12px;line-height:1.65;color:oklch(0.72 0.008 250)">CAS-114 has 17 minutes remaining and is reached in 12. CAS-118 has 31 and is reached in 26. Both inside deadline on one sortie, which is why the two-stop route was preferred to two launches. TXA is within the three-hour window for both.</span>
+<span class="m" style="font-size:9.5px;color:oklch(0.55 0.008 250)">A-0231 · no human in loop — standing authority, single-casualty gain, no trade-off · sha 8b12…9f4d</span>
+</div></div>
+<div style="display:grid;grid-template-columns:86px 1fr;gap:20px;padding:16px 0;border-bottom:1px solid oklch(0.24 0.01 250)">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.9 0.005 250)">0409:12Z</span><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.7 0.008 250)">WITHHELD</span></div>
+<div style="display:flex;flex-direction:column;gap:7px;border-left:2px solid oklch(0.42 0.01 250);padding-left:18px">
+<span style="font-size:14.5px;line-height:1.6;color:oklch(0.92 0.005 250)">Declined to assert a deadline for CAS-131 and tasked no sortie against an estimate.</span>
+<span style="font-size:12px;line-height:1.65;color:oklch(0.72 0.008 250)">Telemetry from SITE ECHO has been stale 9 minutes. A deadline computed from a 9-minute-old reading on a casualty with an applied tourniquet is not a number worth acting on. The medic has been asked for a voice confirmation. No blood is committed.</span>
+<span class="m" style="font-size:9.5px;color:oklch(0.55 0.008 250)">W-0044 · confidence 0.31, threshold 0.70 · sha 1cd7…22b8</span>
+</div></div>
+<div style="display:grid;grid-template-columns:86px 1fr;gap:20px;padding:16px 0;border-bottom:1px solid oklch(0.24 0.01 250)">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.9 0.005 250)">0407:12Z</span><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.78 0.09 165)">DELIVERED</span></div>
+<div style="display:flex;flex-direction:column;gap:7px;border-left:2px solid oklch(0.62 0.1 165);padding-left:18px">
+<span style="font-size:14.5px;line-height:1.6;color:oklch(0.92 0.005 250)">1U LTOWB reached CAS-109 at SITE JULIET with 9 minutes of slack. Cold chain held at 3.4°C throughout.</span>
+<span class="m" style="font-size:9.5px;color:oklch(0.55 0.008 250)">D-0198 · UAS-04 · flight 14m 02s · sha 77a0…31ee</span>
+</div></div>
+<div style="display:grid;grid-template-columns:86px 1fr;gap:20px;padding:16px 0">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:11px;font-weight:600;color:oklch(0.88 0.005 250)">0403:40Z</span><span class="m" style="font-size:9px;letter-spacing:.09em;color:oklch(0.78 0.13 25)">NOT PREVENTED</span></div>
+<div style="display:flex;flex-direction:column;gap:7px;border-left:2px solid oklch(0.62 0.16 25);padding-left:18px">
+<span style="font-size:14.5px;line-height:1.6;color:oklch(0.92 0.005 250)">CAS-133 died at SITE DELTA. No delivery could have changed the outcome.</span>
+<span style="font-size:12px;line-height:1.65;color:oklch(0.72 0.008 250)">Non-compressible torso haemorrhage with 9 minutes of physiological reserve. The intervention required was surgical and the nearest qualified hands were 71 minutes away. This is recorded as a death the system did not prevent, with the reason, so that the count is not flattered.</span>
+<span class="m" style="font-size:9.5px;color:oklch(0.55 0.008 250)">U-0021 · category: beyond the limit of prehospital medicine · sha 05f3…ba19</span>
+</div></div>
+</div></div>
+<div style="padding:22px 22px 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:11px;padding-bottom:16px;border-bottom:1px solid oklch(0.27 0.01 250)"><div style="width:28px;height:28px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:10px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div><div style="display:flex;flex-direction:column"><span class="m" style="font-size:11px;font-weight:700;letter-spacing:.06em;color:oklch(0.95 0.005 250)">IRON HOUR</span><span class="m" style="font-size:9px;color:oklch(0.58 0.008 250)">0412:16Z · CTF-76</span></div></div>
+<div style="border-radius:5px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);padding:14px;display:flex;flex-direction:column;gap:10px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">THIS SHIFT</span>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Decisions taken</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">47</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Under standing authority</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">44</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Escalated to a human</span><span class="m" style="font-size:11px;color:oklch(0.86 0.11 75);font-weight:600">3</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Withheld for low confidence</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">6</span></div>
+<div style="display:flex;justify-content:space-between;padding-top:9px;border-top:1px solid oklch(0.26 0.01 250)"><span class="m" style="font-size:10.5px;color:oklch(0.66 0.008 250)">Median time to decide</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">1.9s</span></div>
+</div>
+<div style="border-radius:5px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);padding:14px;display:flex;flex-direction:column;gap:9px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">DEATHS NOT PREVENTED · 29</span>
+<span class="m" style="font-size:10px;line-height:1.6;color:oklch(0.66 0.008 250)">Reported because a capability that hides its failures cannot be trusted with its successes.</span>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">Beyond prehospital medicine</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250)">11</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">Needed qualified hands</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250)">9</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">Launch point too distant</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250)">9</span></div>
+</div>
+<div style="border-radius:5px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);padding:14px;display:flex;flex-direction:column;gap:8px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">CHAIN INTEGRITY</span>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.75 0.13 165)"></span><span class="m" style="font-size:10.5px;color:oklch(0.86 0.006 250)">47 of 47 entries verified</span></div>
+<span class="m" style="font-size:9px;line-height:1.6;color:oklch(0.58 0.008 250);word-break:break-all">head cc9ac1ae86efa96f2fe7afd6ef99fde4ecaf3aed293fcd75a744f2f912305ada</span>
+</div>
+</div></div></div></div>
+
+<div class="dv-opt" id="1g">
+<div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a><b>Wall display.</b> Not a workstation. A ten-foot-readable board for the ops centre: enormous type, no small controls, one glanceable answer per zone. This is the screen the room looks at while someone else works the console.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.11 0.006 250);border:1px solid oklch(0.28 0.01 250);font-size:0">
+<div class="m" style="padding:11px 26px;display:flex;justify-content:space-between;border-bottom:2px solid oklch(0.26 0.01 250);font-size:11px;font-weight:700;letter-spacing:.18em;color:oklch(0.62 0.008 250)"><span>UNCLASSIFIED // SYNTHETIC DATA // DEMONSTRATION ONLY</span><span>IRON HOUR · CTF-76 · 0412:16Z</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid oklch(0.26 0.01 250)">
+<div style="padding:26px;border-right:2px solid oklch(0.26 0.01 250);display:flex;flex-direction:column;gap:10px">
+<span style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;letter-spacing:.14em;color:oklch(0.66 0.008 250)">TIGHTEST DEADLINE</span>
+<div style="display:flex;align-items:baseline;gap:12px"><span class="m" style="font-size:96px;font-weight:700;color:oklch(0.9 0.005 250);line-height:.9;letter-spacing:-.03em">17</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:600;letter-spacing:.1em;color:oklch(0.6 0.008 250)">MIN</span></div>
+<span class="m" style="font-size:15px;color:oklch(0.78 0.006 250)">CAS-114 · SITE BRAVO · served in 12</span>
+</div>
+<div style="padding:26px;border-right:2px solid oklch(0.26 0.01 250);display:flex;flex-direction:column;gap:10px;background:oklch(0.19 0.05 25)">
+<span style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;letter-spacing:.14em;color:oklch(0.8 0.07 25)">UNREACHABLE IN TIME</span>
+<div style="display:flex;align-items:baseline;gap:12px"><span class="m" style="font-size:96px;font-weight:700;color:oklch(0.84 0.17 25);line-height:.9;letter-spacing:-.03em">2</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:600;letter-spacing:.1em;color:oklch(0.74 0.09 25)">CASUALTIES</span></div>
+<span class="m" style="font-size:15px;color:oklch(0.86 0.06 25)">CAS-121 −16 · CAS-127 no asset</span>
+</div>
+<div style="padding:26px;display:flex;flex-direction:column;gap:10px;background:oklch(0.18 0.045 75)">
+<span style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;letter-spacing:.14em;color:oklch(0.84 0.08 75)">AWAITING AUTHORITY</span>
+<div style="display:flex;align-items:baseline;gap:12px"><span class="m" style="font-size:96px;font-weight:700;color:oklch(0.88 0.14 75);line-height:.9;letter-spacing:-.03em">1</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:600;letter-spacing:.1em;color:oklch(0.78 0.09 75)">02:41</span></div>
+<span class="m" style="font-size:15px;color:oklch(0.88 0.07 75)">CAS-121 vs CAS-118 · one asset in range</span>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1.35fr 1fr">
+<div style="border-right:2px solid oklch(0.26 0.01 250)">
+<div style="padding:20px 26px 14px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;letter-spacing:.14em;color:oklch(0.66 0.008 250)">DEADLINE BOARD · BY TIME REMAINING</span></div>
+<div class="m" style="display:grid;grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;padding:0 26px 8px;font-size:12px;letter-spacing:.1em;color:oklch(0.5 0.008 250)"><span>CASUALTY</span><span>SITE</span><span style="text-align:right">DEADLINE</span><span style="text-align:right">SLACK</span><span style="text-align:right">ASSET</span></div>
+<div class="m" style="display:grid;grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;padding:14px 26px;border-top:1px solid oklch(0.22 0.01 250);font-size:20px;color:oklch(0.92 0.005 250);align-items:baseline"><span style="font-weight:600">CAS-114</span><span style="font-size:16px;color:oklch(0.72 0.008 250)">BRAVO</span><span style="text-align:right">17</span><span style="text-align:right;color:oklch(0.84 0.12 165)">+5</span><span style="text-align:right;font-size:16px;color:oklch(0.8 0.006 250)">UAS-07</span></div>
+<div class="m" style="display:grid;grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;padding:14px 26px;border-top:1px solid oklch(0.22 0.01 250);font-size:20px;color:oklch(0.95 0.02 25);align-items:baseline;background:oklch(0.19 0.045 25)"><span style="font-weight:700">CAS-121</span><span style="font-size:16px;color:oklch(0.8 0.05 25)">DELTA</span><span style="text-align:right">22</span><span style="text-align:right;color:oklch(0.84 0.17 25);font-weight:700">−16</span><span style="text-align:right;font-size:16px;color:oklch(0.88 0.09 75)">ESCALATED</span></div>
+<div class="m" style="display:grid;grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;padding:14px 26px;border-top:1px solid oklch(0.22 0.01 250);font-size:20px;color:oklch(0.92 0.005 250);align-items:baseline"><span style="font-weight:600">CAS-118</span><span style="font-size:16px;color:oklch(0.72 0.008 250)">BRAVO</span><span style="text-align:right">31</span><span style="text-align:right;color:oklch(0.84 0.12 165)">+5</span><span style="text-align:right;font-size:16px;color:oklch(0.8 0.006 250)">UAS-07 · 2</span></div>
+<div class="m" style="display:grid;grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;padding:14px 26px;border-top:1px solid oklch(0.22 0.01 250);font-size:20px;color:oklch(0.92 0.005 250);align-items:baseline"><span style="font-weight:600">CAS-127</span><span style="font-size:16px;color:oklch(0.72 0.008 250)">KILO</span><span style="text-align:right">48</span><span style="text-align:right;font-size:16px;color:oklch(0.62 0.008 250)">none</span><span style="text-align:right;font-size:16px;color:oklch(0.7 0.008 250)">T+52</span></div>
+<div class="m" style="display:grid;grid-template-columns:1.1fr 1fr .8fr .8fr 1.1fr;padding:14px 26px;border-top:1px solid oklch(0.22 0.01 250);font-size:20px;color:oklch(0.72 0.006 250);align-items:baseline"><span style="font-weight:600">CAS-131</span><span style="font-size:16px;color:oklch(0.6 0.008 250)">ECHO</span><span style="text-align:right;font-size:15px">STALE 9m</span><span style="text-align:right;font-size:16px;color:oklch(0.6 0.008 250)">—</span><span style="text-align:right;font-size:16px;color:oklch(0.66 0.008 250)">WITHHELD</span></div>
+<div class="m" style="padding:14px 26px 22px;border-top:1px solid oklch(0.22 0.01 250);font-size:15px;color:oklch(0.58 0.008 250)">+ 13 casualties, all slack above +20</div>
+</div>
+<div>
+<div style="padding:20px 26px 14px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;letter-spacing:.14em;color:oklch(0.66 0.008 250)">POSTURE</span></div>
+<div style="padding:0 26px 20px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:14px;border-bottom:1px solid oklch(0.22 0.01 250)"><span class="m" style="font-size:16px;color:oklch(0.7 0.008 250)">LTOWB FORWARD</span><span class="m" style="font-size:34px;font-weight:600;color:oklch(0.92 0.005 250);line-height:1">31<span style="font-size:17px;color:oklch(0.62 0.008 250)">U</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:14px;border-bottom:1px solid oklch(0.22 0.01 250)"><span class="m" style="font-size:16px;color:oklch(0.7 0.008 250)">LIFT READY</span><span class="m" style="font-size:34px;font-weight:600;color:oklch(0.92 0.005 250);line-height:1">4<span style="font-size:17px;color:oklch(0.62 0.008 250)">/6</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:14px;border-bottom:1px solid oklch(0.22 0.01 250)"><span class="m" style="font-size:16px;color:oklch(0.7 0.008 250)">FLP CHARLIE DRY</span><span class="m" style="font-size:34px;font-weight:600;color:oklch(0.88 0.13 75);line-height:1">0522<span style="font-size:17px">Z</span></span></div>
+<div style="display:flex;flex-direction:column;gap:7px;padding:14px 16px;border-radius:4px;background:oklch(0.18 0.035 165);border:1px solid oklch(0.32 0.06 165)"><span class="m" style="font-size:13px;letter-spacing:.1em;color:oklch(0.78 0.05 165)">VS DOCTRINAL PUSH · SAME INPUTS</span><span class="m" style="font-size:38px;font-weight:700;color:oklch(0.86 0.13 165);line-height:1">−12 DEAD</span></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;padding:11px 13px;border-radius:4px;border:1px solid oklch(0.38 0.05 165);display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:12px;letter-spacing:.08em;color:oklch(0.72 0.05 165)">AUTHORITY</span><span class="m" style="font-size:15px;font-weight:600;color:oklch(0.9 0.03 165)">STANDING</span></div>
+<div style="flex:1;padding:11px 13px;border-radius:4px;background:oklch(0.24 0.05 75);display:flex;flex-direction:column;gap:4px"><span class="m" style="font-size:12px;letter-spacing:.08em;color:oklch(0.82 0.07 75)">REACHBACK</span><span class="m" style="font-size:15px;font-weight:600;color:oklch(0.92 0.06 75)">DOWN 6m</span></div>
+</div>
+</div></div></div></div></div>
+
+<div class="dv-opt" id="1h">
+<div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a><b>Counterfactual-led.</b> The homepage opens with the argument a programme office needs: the same casualties, aircraft and blood, scored against the doctrinal alternative — including the finding that tripling the fleet barely moves it. Live operations sit underneath.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.165 0.008 250);border:1px solid oklch(0.29 0.01 250);font-size:0">
+<div class="m" style="background:oklch(0.19 0.01 250);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.28 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">IRON HOUR · MEASURED AGAINST DOCTRINE</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 32px;border-bottom:1px solid oklch(0.28 0.01 250)">
+<div style="display:flex;align-items:center;gap:24px"><div style="display:flex;align-items:center;gap:11px"><div style="width:28px;height:28px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:10px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div><span class="m" style="font-size:11.5px;font-weight:700;letter-spacing:.07em;color:oklch(0.95 0.005 250)">IRON HOUR</span></div><div style="display:flex;gap:18px"><span class="m" style="font-size:10.5px;color:oklch(0.95 0.005 250);font-weight:600;padding-bottom:2px;border-bottom:2px solid oklch(0.75 0.11 165)">EVIDENCE</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">LIVE BOARD</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">SCENARIOS</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">RECORD</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">POLICY</span></div></div>
+<span class="m" style="font-size:10px;color:oklch(0.6 0.008 250)">RUN 0412Z · 18 CASUALTIES · 6 ASSETS · 31U · SEED 4471</span>
+</div>
+<div style="padding:30px 32px 26px;border-bottom:1px solid oklch(0.28 0.01 250)">
+<div style="display:grid;grid-template-columns:1fr 470px;gap:40px;align-items:start">
+<div>
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.14em;color:oklch(0.62 0.008 250)">SAME CASUALTIES · SAME AIRCRAFT · SAME BLOOD</span>
+<div style="font-size:30px;line-height:1.35;font-weight:500;color:oklch(0.96 0.005 250);letter-spacing:-.015em;margin-top:14px;max-width:700px">Deadline-ordered allocation left <span style="color:oklch(0.86 0.12 165)">12 fewer dead</span> of survivable wounds than doctrinal push resupply, with the baseline implemented at its strongest.</div>
+<div style="display:flex;gap:14px;margin-top:24px">
+<div style="flex:1;padding:16px 18px;border-radius:5px;background:oklch(0.2 0.035 25);border:1px solid oklch(0.36 0.08 25);display:flex;flex-direction:column;gap:9px"><span class="m" style="font-size:9.5px;letter-spacing:.1em;color:oklch(0.78 0.06 25)">DOCTRINAL PUSH</span><span class="m" style="font-size:40px;font-weight:700;color:oklch(0.84 0.16 25);line-height:1">41</span><span class="m" style="font-size:10px;line-height:1.5;color:oklch(0.74 0.04 25)">dead of survivable wounds · 1,140 sorties</span></div>
+<div style="flex:1;padding:16px 18px;border-radius:5px;background:oklch(0.2 0.03 165);border:1px solid oklch(0.34 0.06 165);display:flex;flex-direction:column;gap:9px"><span class="m" style="font-size:9.5px;letter-spacing:.1em;color:oklch(0.78 0.05 165)">THIS TASKING</span><span class="m" style="font-size:40px;font-weight:700;color:oklch(0.86 0.13 165);line-height:1">29</span><span class="m" style="font-size:10px;line-height:1.5;color:oklch(0.74 0.035 165)">dead of survivable wounds · 1,106 sorties</span></div>
+<div style="flex:1;padding:16px 18px;border-radius:5px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.31 0.012 250);display:flex;flex-direction:column;gap:9px"><span class="m" style="font-size:9.5px;letter-spacing:.1em;color:oklch(0.6 0.008 250)">TARGET</span><span class="m" style="font-size:40px;font-weight:700;color:oklch(0.9 0.005 250);line-height:1">0</span><span class="m" style="font-size:10px;line-height:1.5;color:oklch(0.62 0.008 250)">every number is a person</span></div>
+</div></div>
+<div style="border-radius:5px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.31 0.012 250);padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.11em;color:oklch(0.88 0.005 250)">THE FLEET LEVER IS INERT</span><span class="m" style="font-size:9.5px;color:oklch(0.58 0.008 250)">FLEET ×3.4, SAME LAUNCH POINTS</span></div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">Doctrinal push, baseline fleet</span><span class="m" style="font-size:11px;color:oklch(0.84 0.14 25);font-weight:600">41</span></div><div style="height:8px;background:oklch(0.24 0.01 250);border-radius:2px;overflow:hidden"><div style="width:100%;height:100%;background:oklch(0.6 0.16 25)"></div></div></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">Doctrinal push, fleet ×3.4</span><span class="m" style="font-size:11px;color:oklch(0.84 0.14 25);font-weight:600">38</span></div><div style="height:8px;background:oklch(0.24 0.01 250);border-radius:2px;overflow:hidden"><div style="width:92.7%;height:100%;background:oklch(0.6 0.16 25)"></div></div></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">This tasking, baseline fleet</span><span class="m" style="font-size:11px;color:oklch(0.86 0.12 165);font-weight:600">29</span></div><div style="height:8px;background:oklch(0.24 0.01 250);border-radius:2px;overflow:hidden"><div style="width:70.7%;height:100%;background:oklch(0.68 0.13 165)"></div></div></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between"><span class="m" style="font-size:10.5px;color:oklch(0.78 0.006 250)">This tasking, fleet ×3.4</span><span class="m" style="font-size:11px;color:oklch(0.86 0.12 165);font-weight:600">29</span></div><div style="height:8px;background:oklch(0.24 0.01 250);border-radius:2px;overflow:hidden"><div style="width:70.7%;height:100%;background:oklch(0.68 0.13 165)"></div></div></div>
+</div>
+<span class="m" style="font-size:10px;line-height:1.65;color:oklch(0.64 0.008 250);padding-top:4px;border-top:1px solid oklch(0.26 0.01 250)">Tripling the fleet bought three lives and cost 3.9× the sorties. Forward positioning is the binding lever. A capability proposed against this gap should say which of the two it is buying.</span>
+</div></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr">
+<div style="padding:22px 26px;border-right:1px solid oklch(0.28 0.01 250);display:flex;flex-direction:column;gap:13px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.11em;color:oklch(0.62 0.008 250)">LIVE NOW · 0412:16Z</span>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:11px;color:oklch(0.88 0.006 250)">CAS-114 · BRAVO</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">+5 · UAS-07</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:11px;color:oklch(0.88 0.006 250)">CAS-121 · DELTA</span><span class="m" style="font-size:11px;color:oklch(0.82 0.16 25);font-weight:700">−16 · escalated</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:11px;color:oklch(0.88 0.006 250)">CAS-118 · BRAVO</span><span class="m" style="font-size:11px;color:oklch(0.84 0.11 165);font-weight:600">+5 · UAS-07 stop 2</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="m" style="font-size:11px;color:oklch(0.8 0.006 250)">CAS-131 · ECHO</span><span class="m" style="font-size:11px;color:oklch(0.66 0.008 250)">withheld · stale 9m</span></div>
+<span class="m" style="font-size:10px;color:oklch(0.74 0.1 210);padding-top:4px">OPEN THE LIVE BOARD</span>
+</div>
+<div style="padding:22px 26px;border-right:1px solid oklch(0.28 0.01 250);display:flex;flex-direction:column;gap:13px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.11em;color:oklch(0.62 0.008 250)">DEATHS NOT PREVENTED · 29</span>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:11px;color:oklch(0.86 0.006 250)">Beyond prehospital medicine</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">11</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:11px;color:oklch(0.86 0.006 250)">Needed qualified hands</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">9</span></div>
+<div style="display:flex;justify-content:space-between"><span class="m" style="font-size:11px;color:oklch(0.86 0.006 250)">Launch point too distant</span><span class="m" style="font-size:11px;color:oklch(0.94 0.005 250);font-weight:600">9</span></div>
+<span class="m" style="font-size:10px;line-height:1.6;color:oklch(0.62 0.008 250);padding-top:4px">None of these is closed by more aircraft. Each is reported with its reason.</span>
+</div>
+<div style="padding:22px 26px;display:flex;flex-direction:column;gap:13px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.11em;color:oklch(0.62 0.008 250)">POLICY POSTURE</span>
+<span class="m" style="font-size:10.5px;line-height:1.7;color:oklch(0.84 0.006 250)">Unarmed medical delivery. Outside DoDD 3000.09. DoD AI Ethical Principles apply. No issuance governs autonomy in casualty prioritisation.</span>
+<div style="display:flex;flex-direction:column;gap:7px;padding-top:9px;border-top:1px solid oklch(0.26 0.01 250)">
+<div style="display:flex;align-items:center;gap:7px"><span style="width:5px;height:5px;border-radius:50%;background:oklch(0.75 0.13 165)"></span><span class="m" style="font-size:10px;color:oklch(0.82 0.006 250)">Human accountability preserved · 3 escalations</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:5px;height:5px;border-radius:50%;background:oklch(0.75 0.13 165)"></span><span class="m" style="font-size:10px;color:oklch(0.82 0.006 250)">Every decision reconstructable · chain verified</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:5px;height:5px;border-radius:50%;background:oklch(0.75 0.13 165)"></span><span class="m" style="font-size:10px;color:oklch(0.82 0.006 250)">Decides without reachback · currently down 6m</span></div>
+</div></div></div></div></div>
+
+<div class="dv-opt" id="1i">
+<div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a><b>Light briefing console.</b> Same product, daylight. Editorial typography, generous whitespace, prose that reads as a written brief rather than a telemetry dump — for the room where the audience is a programme office or an accreditor, not a watch floor.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.985 0.003 90);border:1px solid oklch(0.86 0.006 90);font-size:0">
+<div class="m" style="background:oklch(0.24 0.012 250);color:oklch(0.86 0.006 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 20px;display:flex;justify-content:space-between"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.68 0.008 250)">IRON HOUR · COMMANDER'S BRIEF · 0412:16Z</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:18px 40px;border-bottom:1px solid oklch(0.89 0.005 90)">
+<div style="display:flex;align-items:center;gap:26px">
+<div style="display:flex;align-items:center;gap:11px"><div style="width:29px;height:29px;border-radius:50%;border:1.5px solid oklch(0.52 0.14 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:10px;font-weight:700;color:oklch(0.5 0.16 25)">IH</span></div><span class="m" style="font-size:11.5px;font-weight:700;letter-spacing:.07em;color:oklch(0.24 0.01 250)">IRON HOUR</span></div>
+<div style="display:flex;gap:20px"><span class="m" style="font-size:10.5px;font-weight:600;color:oklch(0.24 0.01 250);padding-bottom:2px;border-bottom:2px solid oklch(0.5 0.16 25)">BRIEF</span><span class="m" style="font-size:10.5px;color:oklch(0.52 0.008 250)">BOARD</span><span class="m" style="font-size:10.5px;color:oklch(0.52 0.008 250)">THEATER</span><span class="m" style="font-size:10.5px;color:oklch(0.52 0.008 250)">EVIDENCE</span><span class="m" style="font-size:10.5px;color:oklch(0.52 0.008 250)">RECORD</span></div>
+</div>
+<div style="display:flex;gap:9px;align-items:center">
+<span class="m" style="font-size:10px;padding:6px 11px;border-radius:3px;border:1px solid oklch(0.72 0.09 160);color:oklch(0.42 0.11 160);font-weight:600;letter-spacing:.07em">STANDING AUTHORITY</span>
+<span class="m" style="font-size:10px;padding:6px 11px;border-radius:3px;background:oklch(0.94 0.06 85);color:oklch(0.42 0.1 70);font-weight:600;letter-spacing:.07em">REACHBACK DOWN 6m</span>
+</div></div>
+<div style="display:grid;grid-template-columns:1fr 452px;gap:0">
+<div style="padding:34px 40px;border-right:1px solid oklch(0.89 0.005 90)">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.14em;color:oklch(0.52 0.008 250)">SITUATION · 0412:16Z</span>
+<div style="font-family:'Newsreader',serif;font-size:31px;line-height:1.4;color:oklch(0.2 0.01 250);letter-spacing:-.01em;margin-top:16px;max-width:680px">Eighteen casualties are open across four sites. Fourteen will be reached inside their own deadline. <span style="background:oklch(0.93 0.05 25);padding:0 3px">Two will not</span>, and one of those needs your decision now.</div>
+<div style="margin-top:30px;display:flex;flex-direction:column;gap:22px">
+<div style="display:grid;grid-template-columns:120px 1fr;gap:22px">
+<span class="m" style="font-size:9.5px;letter-spacing:.1em;color:oklch(0.5 0.15 25);padding-top:4px">DECISION</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-left:2px solid oklch(0.5 0.15 25);padding-left:20px">
+<span style="font-family:'Newsreader',serif;font-size:19px;line-height:1.55;color:oklch(0.22 0.01 250)">One aircraft is in range of two casualties with incompatible deadlines.</span>
+<span style="font-size:13.5px;line-height:1.68;color:oklch(0.42 0.008 250)">CAS-121 at SITE DELTA needs four units of low-titre O whole blood inside 22 minutes; the nearest available lift arrives in 38. Diverting UAS-07 mid-route reaches her with three minutes to spare and misses CAS-118 by four. Expected loss is the same either way, so the system will not choose. It has held both branches open and is waiting on you — two minutes forty-one seconds so far, recorded.</span>
+<div style="display:flex;gap:10px;margin-top:6px"><span class="m" style="font-size:10.5px;font-weight:700;padding:10px 18px;border-radius:3px;background:oklch(0.34 0.1 160);color:oklch(0.98 0.01 160)">AUTHORISE HOLD</span><span class="m" style="font-size:10.5px;font-weight:700;padding:10px 18px;border-radius:3px;border:1px solid oklch(0.72 0.01 250);color:oklch(0.26 0.01 250)">AUTHORISE DIVERT</span></div>
+</div></div>
+<div style="display:grid;grid-template-columns:120px 1fr;gap:22px">
+<span class="m" style="font-size:9.5px;letter-spacing:.1em;color:oklch(0.42 0.11 160);padding-top:4px">DONE</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-left:2px solid oklch(0.72 0.09 160);padding-left:20px">
+<span style="font-family:'Newsreader',serif;font-size:19px;line-height:1.55;color:oklch(0.22 0.01 250)">UAS-07 is airborne from FLP ALPHA on a two-stop run.</span>
+<span style="font-size:13.5px;line-height:1.68;color:oklch(0.42 0.008 250)">Two units and two grams of tranexamic acid, reaching CAS-114 in twelve minutes and CAS-118 in twenty-six. Both inside deadline; TXA inside the three-hour window for both. Launched under standing authority at 0411:58Z without escalation, because the tasking gains a casualty and costs none.</span>
+</div></div>
+<div style="display:grid;grid-template-columns:120px 1fr;gap:22px">
+<span class="m" style="font-size:9.5px;letter-spacing:.1em;color:oklch(0.5 0.008 250);padding-top:4px">WITHHELD</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-left:2px solid oklch(0.78 0.008 250);padding-left:20px">
+<span style="font-family:'Newsreader',serif;font-size:19px;line-height:1.55;color:oklch(0.22 0.01 250)">No deadline is asserted for CAS-131 and no blood is committed to an estimate.</span>
+<span style="font-size:13.5px;line-height:1.68;color:oklch(0.42 0.008 250)">Telemetry from SITE ECHO has been stale nine minutes. The confidence in any deadline computed from it is 0.31 against a threshold of 0.70. The medic has been asked for voice confirmation. The system says it does not know rather than producing a plausible number.</span>
+</div></div>
+</div></div>
+<div style="padding:34px 34px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.13em;color:oklch(0.52 0.008 250)">THE BOARD</span>
+<div class="m" style="display:grid;grid-template-columns:1fr .7fr .6fr;font-size:9px;letter-spacing:.09em;color:oklch(0.56 0.008 250);padding-bottom:7px;border-bottom:1px solid oklch(0.88 0.005 90)"><span>CASUALTY · SITE</span><span style="text-align:right">DEADLINE</span><span style="text-align:right">SLACK</span></div>
+<div class="m" style="display:grid;grid-template-columns:1fr .7fr .6fr;font-size:11.5px;padding:9px 0;border-bottom:1px solid oklch(0.93 0.004 90);color:oklch(0.22 0.01 250)"><span>CAS-114 · BRAVO</span><span style="text-align:right">17:00</span><span style="text-align:right;color:oklch(0.42 0.11 160);font-weight:600">+5</span></div>
+<div class="m" style="display:grid;grid-template-columns:1fr .7fr .6fr;font-size:11.5px;padding:9px 0;border-bottom:1px solid oklch(0.93 0.004 90);color:oklch(0.22 0.01 250);background:oklch(0.96 0.03 25)"><span style="font-weight:600">CAS-121 · DELTA</span><span style="text-align:right">22:00</span><span style="text-align:right;color:oklch(0.48 0.18 25);font-weight:700">−16</span></div>
+<div class="m" style="display:grid;grid-template-columns:1fr .7fr .6fr;font-size:11.5px;padding:9px 0;border-bottom:1px solid oklch(0.93 0.004 90);color:oklch(0.22 0.01 250)"><span>CAS-118 · BRAVO</span><span style="text-align:right">31:00</span><span style="text-align:right;color:oklch(0.42 0.11 160);font-weight:600">+5</span></div>
+<div class="m" style="display:grid;grid-template-columns:1fr .7fr .6fr;font-size:11.5px;padding:9px 0;border-bottom:1px solid oklch(0.93 0.004 90);color:oklch(0.34 0.01 250)"><span>CAS-127 · KILO</span><span style="text-align:right">48:00</span><span style="text-align:right;color:oklch(0.55 0.008 250);font-size:10px">no asset</span></div>
+<div class="m" style="display:grid;grid-template-columns:1fr .7fr .6fr;font-size:11.5px;padding:9px 0;color:oklch(0.46 0.008 250)"><span>CAS-131 · ECHO</span><span style="text-align:right;font-size:10px">not asserted</span><span style="text-align:right;font-size:10px">—</span></div>
+<span class="m" style="font-size:10px;color:oklch(0.52 0.008 250)">+ 13 casualties, all slack above +20</span>
+</div>
+<div style="padding:18px 20px;border-radius:5px;background:oklch(0.96 0.02 160);border:1px solid oklch(0.83 0.06 160);display:flex;flex-direction:column;gap:8px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.11em;color:oklch(0.4 0.1 160)">AGAINST DOCTRINAL PUSH · IDENTICAL INPUTS</span>
+<span style="font-family:'Newsreader',serif;font-size:29px;color:oklch(0.32 0.12 160);line-height:1.1">12 fewer dead</span>
+<span style="font-size:12px;line-height:1.6;color:oklch(0.4 0.05 160)">41 against 29, same casualties, same aircraft, same blood, baseline implemented at its strongest. Tripling the fleet moves the baseline by three and this tasking not at all.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<span class="m" style="font-size:9.5px;font-weight:700;letter-spacing:.13em;color:oklch(0.52 0.008 250)">POSTURE</span>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid oklch(0.93 0.004 90)"><span class="m" style="font-size:11px;color:oklch(0.42 0.008 250)">LTOWB forward</span><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.22 0.01 250)">31U · 2 sites</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid oklch(0.93 0.004 90)"><span class="m" style="font-size:11px;color:oklch(0.42 0.008 250)">Lift available</span><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.22 0.01 250)">4 of 6</span></div>
+<div style="display:flex;justify-content:space-between;padding:7px 0"><span class="m" style="font-size:11px;color:oklch(0.42 0.008 250)">FLP CHARLIE dry</span><span class="m" style="font-size:11.5px;font-weight:600;color:oklch(0.46 0.12 70)">0522Z</span></div>
+</div>
+</div></div></div></div>
+
+<div class="dv-opt" id="1j">
+<div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a><b>Ask the system.</b> The homepage is a question box over a standing brief. The commander types what they need to know — "who can I not reach", "what if I move FLP CHARLIE forward 40km" — and gets structured cards, each citing the telemetry it used. Every answer is a record entry.</div>
+<div class="dv-card" style="width:1440px;background:oklch(0.155 0.008 250);border:1px solid oklch(0.29 0.01 250);font-size:0">
+<div class="m" style="background:oklch(0.19 0.01 250);color:oklch(0.68 0.008 250);font-size:9px;font-weight:600;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.28 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">IRON HOUR · ASK · LOCAL MODEL · NO REACHBACK</span></div>
+<div style="display:grid;grid-template-columns:196px 1fr">
+<div style="background:oklch(0.135 0.01 250);border-right:1px solid oklch(0.28 0.01 250);padding:18px 0">
+<div style="padding:0 16px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid oklch(0.24 0.01 250)"><div style="width:26px;height:26px;border-radius:50%;border:1.5px solid oklch(0.6 0.13 25);display:flex;align-items:center;justify-content:center"><span class="m" style="font-size:9.5px;font-weight:700;color:oklch(0.72 0.14 25)">IH</span></div><span class="m" style="font-size:10.5px;font-weight:700;letter-spacing:.06em;color:oklch(0.95 0.005 250)">IRON HOUR</span></div>
+<div style="padding:14px 10px 0;display:flex;flex-direction:column;gap:2px">
+<div style="padding:8px 11px;border-radius:4px;background:oklch(0.26 0.03 165)"><span class="m" style="font-size:11px;color:oklch(0.93 0.02 165);font-weight:600">ASK</span></div>
+<div style="padding:8px 11px"><span class="m" style="font-size:11px;color:oklch(0.7 0.008 250)">BOARD</span></div>
+<div style="padding:8px 11px"><span class="m" style="font-size:11px;color:oklch(0.7 0.008 250)">THEATER</span></div>
+<div style="padding:8px 11px"><span class="m" style="font-size:11px;color:oklch(0.7 0.008 250)">SCENARIOS</span></div>
+<div style="padding:8px 11px"><span class="m" style="font-size:11px;color:oklch(0.7 0.008 250)">RECORD</span></div>
+</div>
+<div style="margin:20px 10px 0;padding-top:14px;border-top:1px solid oklch(0.24 0.01 250);display:flex;flex-direction:column;gap:9px">
+<span class="m" style="font-size:8.5px;letter-spacing:.11em;color:oklch(0.52 0.008 250);padding:0 11px">RECENT</span>
+<span class="m" style="font-size:10px;line-height:1.5;color:oklch(0.66 0.008 250);padding:0 11px">who can I not reach</span>
+<span class="m" style="font-size:10px;line-height:1.5;color:oklch(0.66 0.008 250);padding:0 11px">when does CHARLIE run dry</span>
+<span class="m" style="font-size:10px;line-height:1.5;color:oklch(0.66 0.008 250);padding:0 11px">justify the CAS-114 launch</span>
+</div>
+<div style="margin:20px 10px 0;padding:11px;border-radius:4px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.29 0.01 250);display:flex;flex-direction:column;gap:6px">
+<span class="m" style="font-size:8.5px;letter-spacing:.11em;color:oklch(0.55 0.008 250)">ANSWERING FROM</span>
+<span class="m" style="font-size:9.5px;line-height:1.55;color:oklch(0.78 0.006 250)">local telemetry only · reachback down 6m · last sync 0406:04Z</span>
+</div>
+</div>
+<div style="padding:26px 34px 30px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px">
+<div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:19px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.01em">18 open casualties. 2 you cannot reach in time. 1 waiting on you.</span><span class="m" style="font-size:10.5px;color:oklch(0.62 0.008 250)">STANDING BRIEF · REGENERATED 0412:12Z · EVERY ANSWER BELOW IS A RECORD ENTRY</span></div>
+<span class="m" style="font-size:12.5px;font-weight:600;color:oklch(0.94 0.005 250)">0412:16Z</span>
+</div>
+<div style="padding:14px 18px;border-radius:6px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.36 0.012 250);display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+<span class="m" style="font-size:13px;color:oklch(0.9 0.006 250)">what happens if I move FLP CHARLIE 40km forward<span style="border-left:1.5px solid oklch(0.84 0.12 165);margin-left:2px"></span></span>
+<div style="display:flex;gap:9px;align-items:center"><span class="m" style="font-size:9.5px;color:oklch(0.58 0.008 250)">RUNS AGAINST LIVE STATE · 1.9s</span><span class="m" style="font-size:10.5px;font-weight:700;padding:8px 14px;border-radius:3px;background:oklch(0.78 0.1 165);color:oklch(0.18 0.03 165)">ASK</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border-radius:6px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="padding:11px 16px;border-bottom:1px solid oklch(0.27 0.01 250);display:flex;justify-content:space-between"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">ANSWER · WHO CAN I NOT REACH</span><span class="m" style="font-size:9.5px;color:oklch(0.58 0.008 250)">0412:09Z · Q-0114</span></div>
+<div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+<span style="font-size:14.5px;line-height:1.6;color:oklch(0.94 0.005 250)">Two, and for different reasons. CAS-121 is 16 minutes outside the reach of every available asset. CAS-127 has no asset at all before 52 minutes, against a 48-minute deadline.</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="padding:13px 15px;border-radius:4px;background:oklch(0.21 0.032 25);border:1px solid oklch(0.37 0.08 25);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:10.5px;font-weight:700;color:oklch(0.94 0.02 25)">CAS-121 · SITE DELTA</span><span class="m" style="font-size:10px;line-height:1.6;color:oklch(0.84 0.04 25)">deadline 22:00 · nearest arrival 38:00 · slack −16 · open pelvic, SI 1.7 rising, 4U required. Escalated: diverting UAS-07 reaches her at 19:00 and misses CAS-118 by 4.</span></div>
+<div style="padding:13px 15px;border-radius:4px;background:oklch(0.21 0.012 250);border:1px solid oklch(0.32 0.012 250);display:flex;flex-direction:column;gap:7px"><span class="m" style="font-size:10.5px;font-weight:700;color:oklch(0.92 0.005 250)">CAS-127 · SITE KILO</span><span class="m" style="font-size:10px;line-height:1.6;color:oklch(0.74 0.008 250)">deadline 48:00 · no asset free before 52:00 · frag abdominal, SI 0.9, 2U + FDP. Not an escalation: no reallocation of current assets reaches him either.</span></div>
+</div>
+<div style="display:flex;gap:14px;padding-top:12px;border-top:1px solid oklch(0.26 0.01 250)">
+<span class="m" style="font-size:9px;letter-spacing:.1em;color:oklch(0.55 0.008 250);width:96px;flex:none;padding-top:2px">CITED</span>
+<span class="m" style="font-size:9.5px;line-height:1.7;color:oklch(0.68 0.008 250)">wearable telemetry DELTA 0411:52Z · KILO 0411:49Z · lift state 0412:01Z · FLP ALPHA manifest 0410Z · FLP CHARLIE manifest 0410Z · CPG aerial delivery of blood products, 1 Dec 2025</span>
+</div></div></div>
+<div style="border-radius:6px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.44 0.1 75);overflow:hidden">
+<div style="padding:11px 16px;background:oklch(0.26 0.06 75);display:flex;justify-content:space-between"><span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.92 0.06 75)">THIS ONE NEEDS YOU · NOT ANSWERABLE BY ME</span><span class="m" style="font-size:10px;color:oklch(0.86 0.05 75)">02:41</span></div>
+<div style="padding:16px;display:flex;justify-content:space-between;align-items:center;gap:24px">
+<span style="font-size:13.5px;line-height:1.6;color:oklch(0.9 0.006 250);flex:1">CAS-121 and CAS-118 have the same expected loss on both branches. I will not rank two casualties on grounds I cannot state. Both routes are held open and the cost of waiting is being recorded.</span>
+<div style="display:flex;gap:9px;flex:none"><span class="m" style="font-size:10.5px;font-weight:700;padding:10px 16px;border-radius:3px;background:oklch(0.78 0.1 165);color:oklch(0.18 0.03 165)">HOLD</span><span class="m" style="font-size:10.5px;font-weight:700;padding:10px 16px;border-radius:3px;border:1px solid oklch(0.42 0.012 250);color:oklch(0.9 0.005 250)">DIVERT</span></div>
+</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="border-radius:6px;background:oklch(0.19 0.012 250);border:1px solid oklch(0.3 0.012 250);padding:15px;display:flex;flex-direction:column;gap:10px">
+<span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.88 0.005 250)">WHAT I DID WITHOUT ASKING</span>
+<span class="m" style="font-size:10.5px;line-height:1.65;color:oklch(0.8 0.006 250)">UAS-07 → CAS-114, CAS-118. 2U + 2g TXA. Both inside deadline. 0411:58Z, standing authority.</span>
+<span class="m" style="font-size:10.5px;line-height:1.65;color:oklch(0.8 0.006 250)">Withheld a deadline for CAS-131 — telemetry stale 9m, confidence 0.31 against 0.70.</span>
+<span class="m" style="font-size:10px;color:oklch(0.74 0.1 210)">44 more · open the record</span>
+</div>
+<div style="border-radius:6px;background:oklch(0.2 0.028 165);border:1px solid oklch(0.34 0.055 165);padding:15px;display:flex;flex-direction:column;gap:9px">
+<span class="m" style="font-size:10px;font-weight:700;letter-spacing:.1em;color:oklch(0.78 0.05 165)">IF YOU ASK ME WHETHER IT WORKS</span>
+<span class="m" style="font-size:21px;font-weight:600;color:oklch(0.86 0.13 165);line-height:1.1">29 against 41</span>
+<span class="m" style="font-size:10px;line-height:1.65;color:oklch(0.74 0.03 165)">Dead of survivable wounds, this tasking against doctrinal push, identical casualties and aircraft and blood. I also report the 29 I did not prevent, and why: 11 beyond prehospital medicine, 9 needed hands not materiel, 9 launch point too distant.</span>
+</div></div>
+</div></div></div></div>
+
+</div>
+<p class="dv-next">Try next: "build the full solution on <a class="dv-oid" href="#1c">1c</a>" · "<a class="dv-oid" href="#1a">1a</a> layout with <a class="dv-oid" href="#1b">1b</a>'s timeline as the main panel" · "make <a class="dv-oid" href="#1e">1e</a> use a real Western Pacific map" · "three more directions, weirder"</p>
+</section>
+</x-dc>
+</body>
+</html>
