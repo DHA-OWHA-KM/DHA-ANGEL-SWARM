@@ -1,0 +1,21 @@
+{
+  "id": "drone-flight-data-short-flight-v1",
+  "enabledByDefault": false,
+  "metric": "elapsed-time factor = archive median mean ground speed / each flight's mean ground speed",
+  "derivation": {
+    "source": "uploaded DroneFlightData_1788900484981.zip",
+    "archiveCsvFiles": 262,
+    "usableFlightsBeforeFactorTrim": 260,
+    "usableFlights": 254,
+    "filters": "At least 3 telemetry rows, elapsed time >=15 s, GPS path >=20 m, mean ground speed 0.2-40 m/s; retain dimensionless factors 0.5-2.0.",
+    "gpsPath": "Sum haversine distance between successive telemetry positions; individual jumps >=1000 m omitted.",
+    "normalization": "Each usable flight's mean path speed is divided into the usable-flight median (1.8731829534783209 m/s). Absolute source speed is not used by the simulation.",
+    "summary": {
+      "mean": 1.0362262622279275,
+      "quantiles": [[0, 0.505679225709626], [0.05, 0.5636451412465443], [0.1, 0.6704062873157791], [0.25, 0.8203474210414631], [0.5, 1.0053235089325647], [0.75, 1.1849825174602733], [0.9, 1.4660176531632154], [0.95, 1.6216127613913698], [1, 1.89377207581767]]
+    }
+  },
+  "use": "Candidate routes use the full filtered-sample mean factor. Committed outbound legs and returns use deterministic factors from a piecewise-linear inverse-CDF approximation over the stored quantiles, keyed by run seed and immutable leg identity.",
+  "provenance": "Derived locally from the user-uploaded DroneFlightData archive. The archive contains short flights dated June-July 2020 with GPS telemetry at coarse intervals and no evidence that its aircraft are the ANGEL SWARM platforms.",
+  "limitations": "This is an opt-in sensitivity model, not validation of TRV-150C, Soaring M25 or FVR-90 performance. It transfers only scale-independent timing variability. It does not alter published cruise speed, combat radius, ferry radius, payload, endurance, weather response, route geometry or threat geometry. Short flights, takeoff/landing phases, GPS sampling, turns and holds are mixed; observations are not independent platform trials and should not be extrapolated as an absolute speed or range model."
+}

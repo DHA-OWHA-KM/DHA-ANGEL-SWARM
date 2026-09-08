@@ -298,7 +298,11 @@ body[data-role-profile="SURGEON"] [data-pane="CASUALTIES"].sgOpen > .pane > .gpB
   function reachModel() {
     const eff = G('effectiveRadiusKm'), dist = G('dist'), P = thePayloads();
     if (!eff || !dist || !P || !P.BLOOD) return null;
-    return { km: plat => eff(plat, P.BLOOD.kg), dist: dist };
+    return {
+      km: plat => eff(plat, P.BLOOD.kg),
+      dist: dist,
+      expected: G('expectedFlightMinutes')
+    };
   }
 
   /* Everything the four pages read, gathered once so they cannot disagree
@@ -353,7 +357,12 @@ body[data-role-profile="SURGEON"] [data-pane="CASUALTIES"].sgOpen > .pane > .gpB
       let t = Infinity;
       for (const d of s.drones) {
         if (d.state === 'LOST') continue;              // it is not going anywhere
-        if (dd <= S.RM.km(d.plat)) t = Math.min(t, (dd / d.plat.speedKmh) * 60);
+        if (dd <= S.RM.km(d.plat)) {
+          const leg = S.RM.expected
+            ? S.RM.expected(S.A, d, s.b.x, s.b.y, c.x, c.y)
+            : (dd / d.plat.speedKmh) * 60;
+          t = Math.min(t, leg);
+        }
       }
       if (t < Infinity) { n++; if (t < bestT) { bestT = t; best = s; } }
     }

@@ -224,7 +224,8 @@ function escalationReasons(arm, world, d, route, value, tNow) {
   // 2. Risk to the airframe: the routing crosses a threat envelope.
   let px = d.x, py = d.y, loss = 0;
   for (const leg of route) {
-    loss = Math.max(loss, routeThreat(scn, px, py, leg.x, leg.y, d.plat.speedKmh));
+    const tf = arm.observedFlightVariability ? OBSERVED_FLIGHT_VARIABILITY.meanFactor : 1;
+    loss = Math.max(loss, routeThreat(scn, px, py, leg.x, leg.y, d.plat.speedKmh, tf));
     px = leg.x; py = leg.y;
   }
   if (loss > 0.10) reasons.push('THREAT TRANSIT ' + Math.round(loss * 100) + '%');
@@ -381,7 +382,7 @@ function explainAssignment(arm, world, dSel, c, leg, tNow, route) {
   const cands = [];
   for (const d of arm.drones) {
     const dk = dist(d.baseX, d.baseY, c.x, c.y);
-    const flightMin = (dist(d.x, d.y, c.x, c.y) / d.plat.speedKmh) * 60;
+    const flightMin = expectedFlightMinutes(arm, d, d.x, d.y, c.x, c.y);
     const eta = tNow + flightMin;
     const base = arm.bases[d.baseIdx];
     const row = { id: d.id, plat: d.plat.label, call: CALLSIGN[d.type] + '-' + String(d.id).padStart(2, '0'),
@@ -461,7 +462,7 @@ function allocateAngelSwarm(arm, world, tNow) {
       for (const c of (restricted || open)) {
         if (claimed.has(c.id)) continue;
 
-        const legMin = (dist(cx, cy, c.x, c.y) / d.plat.speedKmh) * 60;
+        const legMin = expectedFlightMinutes(arm, d, cx, cy, c.x, c.y);
         const eta = ct + legMin;
         const delayAtArrival = eta - c.tInjury;
 
@@ -492,7 +493,8 @@ function allocateAngelSwarm(arm, world, tNow) {
           }
 
           // Risk discount.
-          const pLoss = routeThreat(scn, cx, cy, c.x, c.y, d.plat.speedKmh);
+          const tf = arm.observedFlightVariability ? OBSERVED_FLIGHT_VARIABILITY.meanFactor : 1;
+          const pLoss = routeThreat(scn, cx, cy, c.x, c.y, d.plat.speedKmh, tf);
           value = value * (1 - pLoss) - pLoss * 0.28;
           // The risk discount can drive a marginal sortie below break-even.
           // Re-test rather than proposing a stop that is not worth making.
@@ -723,7 +725,7 @@ function allocateCurrentMethod(arm, world, tNow) {
       if (loadKg + P.kg > d.plat.payloadKg) break;
       if (!inRange(d, pick.x, pick.y, loadKg + P.kg)) break;
 
-      const legMin = (dist(cx, cy, pick.x, pick.y) / d.plat.speedKmh) * 60;
+      const legMin = expectedFlightMinutes(arm, d, cx, cy, pick.x, pick.y);
       const eta = ct + legMin;
       route.push({ casId: pick.id, payloadKey: pk, x: pick.x, y: pick.y, eta });
       loadKg += P.kg;
@@ -760,6 +762,20 @@ function launch(arm, d, route, tNow, world) {
                        stops: route.length, actor: arm._authActor || 'STANDING AUTHORITY',
                        proposalId: arm._authProposal != null ? arm._authProposal : null });
   arm._authActor = null; arm._authProposal = null;
+  /* Planning used the expected factor so all candidates were compared on the
+     same basis. A committed route now receives one stable factor per leg.
+     Recompute cumulative ETAs before any consumer records the tasking. */
+  if (arm.observedFlightVariability) {
+    let px = d.x, py = d.y, depart = tNow;
+    for (let i = 0; i < route.length; i++) {
+      const leg = route[i];
+      const key = ['OUT', d.id, d.sortieId, i, leg.casId].join('|');
+      leg.travelFactor = observedFlightFactor(arm.flightVariabilitySeed, key, true);
+      leg.travelMin = committedFlightMinutes(arm, d, px, py, leg.x, leg.y, key);
+      leg.eta = depart + leg.travelMin;
+      px = leg.x; py = leg.y; depart = leg.eta + HANDOFF_MIN;
+    }
+  }
   for (const leg of route) {
     if (takeStock(base, leg.payloadKey, 1, arm, tNow)) {
       d.manifest[leg.payloadKey] = (d.manifest[leg.payloadKey] || 0) + 1;
@@ -816,7 +832,16 @@ function beginReturn(arm, d, tNow, discardCold) {
   d.route = []; d.legIdx = 0;
   d.fromX = d.x; d.fromY = d.y;
   d.tDepart = tNow;
-  d.tHome = tNow + (dist(d.x, d.y, d.baseX, d.baseY) / d.plat.speedKmh) * 60;
+  if (arm.observedFlightVariability) {
+    const key = ['RETURN', d.id, d.sortieId].join('|');
+    d.returnTravelFactor = observedFlightFactor(arm.flightVariabilitySeed, key, true);
+    d.tHome = tNow + committedFlightMinutes(
+      arm, d, d.x, d.y, d.baseX, d.baseY, key);
+  } else {
+    /* Keep the default-off regression path byte-for-byte equivalent to the
+       historical expression. */
+    d.tHome = tNow + nominalFlightMinutes(d, d.x, d.y, d.baseX, d.baseY);
+  }
   d.target = null;
 }
 
@@ -1023,7 +1048,16 @@ function stepArm(arm, world, tNow, dt, rng) {
           d.tDepart = tNow + HANDOFF_MIN;
           d.destX = leg.x; d.destY = leg.y;
           d.target = leg.casId; d.payloadKey = leg.payloadKey;
-          d.tArrive = d.tDepart + (dist(d.x, d.y, leg.x, leg.y) / d.plat.speedKmh) * 60;
+          /* Preserve the factor materialized for this committed leg even when
+             the prior handoff makes its actual departure later than planned. */
+          d.tArrive = arm.observedFlightVariability
+            ? d.tDepart + nominalFlightMinutes(d, d.x, d.y, leg.x, leg.y) * leg.travelFactor
+            : d.tDepart + nominalFlightMinutes(d, d.x, d.y, leg.x, leg.y);
+          /* This is the authoritative committed ETA. Route projections and
+             audit views read leg.eta, while movement and treatment read
+             d.tArrive; keeping them equal prevents a planned launch-time ETA
+             from surviving after the real handoff changes departure time. */
+          leg.eta = d.tArrive;
         } else {
           beginReturn(arm, d, tNow + HANDOFF_MIN, false);
         }

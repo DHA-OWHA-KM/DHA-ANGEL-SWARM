@@ -189,6 +189,80 @@ const PLATFORMS = {
            note: 'Hybrid VTOL, 200+ km radius, up to 8 units fresh whole blood, chute drop from 100 ft AGL.' }
 };
 
+/* ------------------------------------------------ OBSERVED FLIGHT VARIABILITY
+   Optional, and deliberately separate from PLATFORMS. The published cruise
+   speeds and range figures above are platform facts and must never be
+   rewritten by an empirical timing model.
+
+   This compact distribution is mirrored, with derivation and limitations, in
+   data/observed-flight-variability.json. It uses only the dimensionless ratio
+   "archive median ground speed / flight mean ground speed" from 254 usable
+   short flights. It therefore transfers variability, not the small source
+   aircraft's absolute speed, endurance, range or payload performance.
+
+   Candidate routes use the distribution mean. Once a sortie commits, each
+   leg gets a stable inverse-CDF draw keyed from immutable run/aircraft/sortie/
+   leg data. No mutable arm RNG is consumed, so enabling this model cannot
+   perturb casualty generation, treatment outcomes or attrition draws. */
+const OBSERVED_FLIGHT_VARIABILITY = Object.freeze({
+  id: 'drone-flight-data-short-flight-v1',
+  meanFactor: 1.0362262622279275,
+  quantiles: Object.freeze([
+    Object.freeze([0.00, 0.5056792257096260]),
+    Object.freeze([0.05, 0.5636451412465443]),
+    Object.freeze([0.10, 0.6704062873157791]),
+    Object.freeze([0.25, 0.8203474210414631]),
+    Object.freeze([0.50, 1.0053235089325647]),
+    Object.freeze([0.75, 1.1849825174602733]),
+    Object.freeze([0.90, 1.4660176531632154]),
+    Object.freeze([0.95, 1.6216127613913698]),
+    Object.freeze([1.00, 1.8937720758176700])
+  ])
+});
+
+function flightKeyUniform(seed, key) {
+  /* FNV-1a is appropriate here: this is deterministic bucketing, not a
+     security boundary. Math.imul keeps the result identical in every host. */
+  const s = String(seed == null ? 0 : seed) + '|' + String(key);
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+function observedFlightFactor(seed, key, enabled) {
+  if (!enabled) return 1;
+  const u = flightKeyUniform(seed, key);
+  const q = OBSERVED_FLIGHT_VARIABILITY.quantiles;
+  for (let i = 1; i < q.length; i++) {
+    if (u <= q[i][0]) {
+      const span = q[i][0] - q[i - 1][0];
+      const f = span ? (u - q[i - 1][0]) / span : 0;
+      return q[i - 1][1] + (q[i][1] - q[i - 1][1]) * f;
+    }
+  }
+  return q[q.length - 1][1];
+}
+
+function nominalFlightMinutes(d, ax, ay, bx, by) {
+  return (dist(ax, ay, bx, by) / d.plat.speedKmh) * 60;
+}
+
+function expectedFlightMinutes(arm, d, ax, ay, bx, by) {
+  const factor = arm && arm.observedFlightVariability
+    ? OBSERVED_FLIGHT_VARIABILITY.meanFactor : 1;
+  return nominalFlightMinutes(d, ax, ay, bx, by) * factor;
+}
+
+function committedFlightMinutes(arm, d, ax, ay, bx, by, key) {
+  const enabled = !!(arm && arm.observedFlightVariability);
+  const seed = arm && arm.flightVariabilitySeed;
+  return nominalFlightMinutes(d, ax, ay, bx, by) *
+    observedFlightFactor(seed, key, enabled);
+}
+
 /* Combat radius is quoted at FULL payload. Medical payloads are a small
    fraction of capacity (a unit of blood in its container is 1.45 kg against a
    30 kg capacity), so usable radius is substantially greater. Interpolate
@@ -636,9 +710,9 @@ function onLand(scn, x, y) {
   return terrainOf(scn).elev(x, y) > 4;
 }
 /* Threat exposure integrated along a straight-line route (drones fly direct). */
-function routeThreat(scn, ax, ay, bx, by, speedKmh) {
+function routeThreat(scn, ax, ay, bx, by, speedKmh, timeFactor) {
   const steps = 24, d = dist(ax, ay, bx, by);
-  const minutes = (d / speedKmh) * 60;
+  const minutes = (d / speedKmh) * 60 * (timeFactor === undefined ? 1 : timeFactor);
   const perStep = minutes / steps;
   let survive = 1;
   for (let i = 0; i < steps; i++) {
@@ -852,9 +926,8 @@ function removeAirframeFromBoth(armA, armB, droneId) {
   return true;
 }
 
-function droneEta(d, tx, ty, tNow) {
-  const dkm = dist(d.x, d.y, tx, ty);
-  return tNow + (dkm / d.plat.speedKmh) * 60;
+function droneEta(d, tx, ty, tNow, arm) {
+  return tNow + expectedFlightMinutes(arm || null, d, d.x, d.y, tx, ty);
 }
 /* =========================================================================
    WHAT HAPPENS WHEN THE AIRCRAFT GETS THERE.
@@ -1026,6 +1099,10 @@ function createArm(world, label, allocatorKey, mode) {
   });
   return {
     label, allocatorKey, mode,
+    /* Opt-in only. Callers propagate the run option after createArm(); false
+       is the regression path and retains the historical arithmetic exactly. */
+    observedFlightVariability: false,
+    flightVariabilitySeed: world.seed,
     hitl: false, autoApproveAbove: 0.55,
     queue: [], audit: [],
     /* Transactional record. The UI reads aggregates; these are the rows. */

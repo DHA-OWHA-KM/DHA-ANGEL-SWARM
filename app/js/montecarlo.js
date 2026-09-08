@@ -287,6 +287,7 @@ function liveConfig() {
     scenario: A.scenarioKey || 'PACOM_CORAL',
     mode: A.mode || 'fair',
     telementor: A.telementor === undefined ? false : !!A.telementor,
+    observedFlightVariability: !!A.observedFlightVariability,
     crn: true
   };
 }

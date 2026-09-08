@@ -172,9 +172,11 @@ function replicate(cfg) {
 
   const A = createArm(w, 'A', 'ANGEL', mode);
   A.telementor = !!cfg.telementor;
+  A.observedFlightVariability = !!cfg.observedFlightVariability;
   A.hvaWeight = cfg.hvaWeight || 1.6;
   const B = createArm(w, 'B', 'CURRENT', mode);
   B.telementor = false;
+  B.observedFlightVariability = !!cfg.observedFlightVariability;
 
   const rA = makeRNG(cfg.seed * 3 + 1);
   const rB = makeRNG(cfg.crn === false ? cfg.seed * 3 + 2 : cfg.seed * 3 + 1);
@@ -192,6 +194,9 @@ function replicate(cfg) {
   return {
     seed: cfg.seed,
     value: cfg.value == null ? null : cfg.value,
+    observedFlightVariability: !!cfg.observedFlightVariability,
+    flightVariabilityProfile: (A.observedFlightVariability && B.observedFlightVariability)
+      ? OBSERVED_FLIGHT_VARIABILITY.id : null,
     casualties: w.stream.length,
     /* survivableDeaths is the headline metric everywhere else in this
        application: deaths among casualties whose wounds were survivable with

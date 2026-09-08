@@ -2820,7 +2820,7 @@ class Component extends DCLogic {
        row sets walkOn; walkStep is the last step reached, so navigating away
        by the rail and back re-joins the path where it was left. */
     walkOn: false, walkStep: 0,
-    cfg: { hitl: true, bar: 10, mode: 'fair', ingest: false, telementor: true }
+    cfg: { hitl: true, bar: 10, mode: 'fair', ingest: false, telementor: true, flightVariability: false }
   };
 
   componentDidMount() {
@@ -2940,10 +2940,35 @@ class Component extends DCLogic {
      undeployed are two runs rather than two readings of one, so switching the
      DEPLOY posture must not rebuild anything — which is why both are built
      here and neither is built lazily. */
-  buildBoth(scenario) {
-    this.runD = this.E.buildRun({ seed: 42, deployed: true, scenario });
-    this.runU = this.E.buildRun({ seed: 42, deployed: false, scenario });
+  buildBoth(scenario, observedFlightVariability = this.state.cfg.flightVariability) {
+    this.runD = this.E.buildRun({
+      seed: 42, deployed: true, scenario,
+      observedFlightVariability: !!observedFlightVariability
+    });
+    this.runU = this.E.buildRun({
+      seed: 42, deployed: false, scenario,
+      observedFlightVariability: !!observedFlightVariability
+    });
     this._hl = null;              /* the headline strip is per-scenario — see hlVals() */
+  }
+
+  /* A RUN-setting action rather than a bare state write. Pass the requested
+      value into the rebuild directly: setState is asynchronous, so rebuilding
+      from this.state here would run the OLD timing posture while the control
+      already displayed the new one. */
+  flightVariability(value) {
+    return () => {
+      const st = this.state;
+      if (st.cfg.flightVariability === value || !this.E) return;
+      this.buildBoth(st.scenario, value);
+      this.setState({
+        cfg: { ...st.cfg, flightVariability: value },
+        t: 0, running: false, resOpen: false, resetOpen: false,
+        expand: null, showAll: false, q: '', casFilter: 'ALL',
+        decisions: {}, extra: [], thread: [],
+        wgSweep: null, wgRanLever: null, wgError: null
+      });
+    };
   }
 
   /* CHANGING THE SCENARIO IS THE MOST EXPENSIVE RUN SETTING ON THE SETTINGS
@@ -3648,6 +3673,7 @@ class Component extends DCLogic {
     const navOf = k => here === k ? { bg: 'oklch(0.26 0.03 165)', fg: 'oklch(0.96 0.02 165)' } : { bg: 'transparent', fg: 'oklch(0.84 0.006 250)' };
     const nav = {}; ['dash', 'cas', 'dec', 'feed', 'tty', 'sensor', 'ops', 'ev', 'wargame', 'chat', 'map', 'data', 'auth', 'setup'].forEach(k => nav[k] = navOf(k));
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
+    go.flightVariability = value => this.flightVariability(value);
     const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
     const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
 
@@ -4100,8 +4126,9 @@ class Component extends DCLogic {
              selected theatre, which would now be a lie on six of the seven.
              The worker cfg has always carried a scenario field; it just was
              never given anything but the one. */
-          cfg: { scenario, seed: WG_SEED0 + i, mode: 'fair',
-                 telementor: true, crn: true, lever, value: g.v }
+           cfg: { scenario, seed: WG_SEED0 + i, mode: 'fair',
+                  telementor: true, crn: true, lever, value: g.v,
+                  observedFlightVariability: !!this.state.cfg.flightVariability }
         });
       });
       const rows = groups.map(() => []);
@@ -4133,8 +4160,9 @@ class Component extends DCLogic {
                    lost: d.filter(x => x < 0).length,
                    cas: wgMean(rs.map(r => r.casualties)) };
         });
-        this.setState({ wgRunning: false, wgDone: total, wgRanLever: lever,
-          wgSweep: { lever, seeds, reps: total, ms, workers: N, points } });
+         this.setState({ wgRunning: false, wgDone: total, wgRanLever: lever,
+           wgSweep: { lever, seeds, reps: total, ms, workers: N, points,
+                      observedFlightVariability: !!this.state.cfg.flightVariability } });
       };
 
       const pump = w => {
@@ -5841,12 +5869,17 @@ class Component extends DCLogic {
       ],
       cfg: st.cfg,
       isData: st.page === 'data',
-      resetAll: () => this.setState({
-        cfg: { hitl: true, mode: 'fair', ingest: true, bar: 25 },
-        speed: 4, group: 'loc', scope: '2d', side: false, panelOpen: false,
-        lay2: { hold: true, fall: true, crit: true, treated: true, dead: true, hv: true, air: true, routes: true, lp: true },
-        lay3: { geo: true, terrain: true, arcs: true, trails: true, cas: true, columns: true, threat: true, sectors: true, labels: true }
-      }),
+      resetAll: () => {
+        if (st.cfg.flightVariability && this.E) this.buildBoth(st.scenario, false);
+        this.setState({
+          cfg: { hitl: true, mode: 'fair', ingest: true, bar: 25, flightVariability: false },
+          t: 0, running: false, resOpen: false, resetOpen: false,
+          decisions: {}, extra: [], thread: [], wgSweep: null, wgRanLever: null, wgError: null,
+          speed: 4, group: 'loc', scope: '2d', side: false, panelOpen: false,
+          lay2: { hold: true, fall: true, crit: true, treated: true, dead: true, hv: true, air: true, routes: true, lp: true },
+          lay3: { geo: true, terrain: true, arcs: true, trails: true, cas: true, columns: true, threat: true, sectors: true, labels: true }
+        });
+      },
       setGroups: this.setGroups(),
       srcMeta: SRC_N.all + ' SOURCES · ' + SRC_N.build + ' IN BUILD · ' + SRC_N.runtime + ' AT RUNTIME · ' + SRC_N.modelled + ' MODELLED · ' + (s.commsDown ? 'ONE DEGRADED' : 'ALL NOMINAL'),
       /* THE FIFTH TAB IS THE ONLY ONE THAT IS NOT A FILTER. The first four
@@ -7309,6 +7342,8 @@ class Component extends DCLogic {
       { k: 'Allocation and fairness', sub: 'how the two arms are held against each other', ...RUN, rows: [
         { label: 'Control fairness', opts: [opt('FAIR', set('mode', 'fair'), cfg.mode === 'fair', 165), opt('REALISTIC', set('mode', 'realistic'), cfg.mode === 'realistic', 210)],
           note: 'Fair gives the doctrinal arm the same airframes, the same blood and the same casualties, so the only difference is the allocation. Realistic gives it the ground truth of a manual net, which is slower and favours ANGEL SWARM.' },
+        { label: 'Observed flight variability · EXPERIMENTAL', opts: [opt('ON', this.flightVariability(true), cfg.flightVariability, 75), opt('OFF', this.flightVariability(false), !cfg.flightVariability, 250)],
+          note: 'Applies deterministic, dataset-derived observed short-flight timing variability to ETA and route calculations. It does not replace published platform speeds or ranges and uses the same seed logic for reproducibility. Experimental analysis only — not platform validation. CHANGING THIS SETTING REBUILDS THE RUN.' },
         { label: 'Clock rate', opts: [1, 2, 4, 10].map(v => opt(v + '×', () => this.setState({ speed: v }), st.speed === v, 165)),
           note: 'How fast the exercise advances when it is running. It does not change the run, only how long you wait for it.' }
       ]},

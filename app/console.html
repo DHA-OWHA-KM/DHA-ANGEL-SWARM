@@ -1462,6 +1462,12 @@ try{var t=localStorage.getItem('angel.theme');
              Realistic applies START's published 57.8% sensitivity and 26% over-triage.</p>
           <div class="setRow"><label>Random seed</label><input id="seedInput" class="mono num" type="number" value="42" min="1"></div>
           <p>Same seeded stream and outcome draws in both arms, so the difference is the tasking decision.</p>
+           <div class="setRow"><label>Observed flight variability <small>· EXPERIMENTAL</small></label>
+             <span class="chip" id="flightVariabilityToggle">Off</span></div>
+           <p data-nofold>When enabled, the uploaded short-flight telemetry contributes only a
+             deterministic distribution of flight-time variation. It does not replace or validate
+             published platform speed, payload, range, weather, or reliability. Off preserves the
+             published reference run exactly; changing this setting restarts both arms.</p>
         </div>
 
         <div class="card set">

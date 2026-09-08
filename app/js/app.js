@@ -16,6 +16,9 @@ const APP = {
      double-click put it back. */
   theaterView: { k: 1, tx: 0, ty: 0 },
   scenarioKey: 'PACOM_CORAL', mode: 'fair', telementor: true, seed: 42,
+  /* Opt-in sensitivity model derived from short-flight telemetry. Keeping this
+     false preserves the published reference run and platform constants. */
+  observedFlightVariability: false,
   hitl: true, autoApproveAbove: 0.10,
   /* ANGEL SWARM is a capability that gets DEPLOYED into a fight already in
      progress. It starts undeployed: the JOA is running, casualties are
@@ -332,6 +335,22 @@ window.COUNT = COUNT;
 if (typeof ANGEL !== 'undefined') ANGEL.provide('counts', COUNT);
 
 /* ------------------------------------------------------------- LIFECYCLE */
+function setObservedFlightVariability(on) {
+  const next = !!on;
+  if (APP.observedFlightVariability === next) return next;
+  APP.observedFlightVariability = next;
+  resetSim(false);
+  return next;
+}
+/* State and setter only: a settings UI may bind these without this file
+   owning or changing the visual Settings markup. */
+APP.setObservedFlightVariability = setObservedFlightVariability;
+if (typeof ANGEL !== 'undefined' && ANGEL.provide) ANGEL.provide('flightVariability', {
+  get enabled() { return APP.observedFlightVariability; },
+  set: setObservedFlightVariability,
+  profile: OBSERVED_FLIGHT_VARIABILITY
+});
+
 function resetSim(keepRunning) {
   APP.world = createWorld(APP.scenarioKey, APP.seed);
   APP.armA = createArm(APP.world, 'ANGEL SWARM', 'CURRENT', APP.mode);
@@ -339,6 +358,8 @@ function resetSim(keepRunning) {
   APP.armB = createArm(APP.world, 'CURRENT — TRIAGE & PROXIMITY', 'CURRENT', APP.mode);
   APP.armA.telementor = APP.telementor;
   APP.armB.telementor = false;
+  APP.armA.observedFlightVariability = APP.observedFlightVariability;
+  APP.armB.observedFlightVariability = APP.observedFlightVariability;
   APP.armA.hitl = APP.hitl;
   APP.armA.autoApproveAbove = APP.autoApproveAbove;
   APP.rngA = makeRNG(APP.seed * 3 + 1);
@@ -364,6 +385,7 @@ function resetSim(keepRunning) {
   APP.angelActive = false; APP.alert = null;
   audit(APP.armA, 0, 'SYSTEM', 'RUN-START',
         `${APP.world.scn.name} · seed ${APP.seed} · control ${APP.mode} · telementoring ${APP.telementor ? 'on' : 'off'}` +
+        (APP.observedFlightVariability ? ' · observed flight variability on' : '') +
         ` · ${APP.opMode} · ANGEL SWARM NOT DEPLOYED`);
   if (APP.hvaRoles.size) audit(APP.armA, 0, 'COMMANDER', 'DESIGNATE',
         'Mission-critical roles: ' + [...APP.hvaRoles].map(r => ROLES[r].label).join(', '));
@@ -2280,6 +2302,8 @@ function runHeadless(cfg) {
   const w = createWorld(cfg.scenario, cfg.seed);
   const A = createArm(w, 'A', 'ANGEL', cfg.mode); A.telementor = cfg.telementor;
   const B = createArm(w, 'B', 'CURRENT', cfg.mode); B.telementor = false;
+  A.observedFlightVariability = !!cfg.observedFlightVariability;
+  B.observedFlightVariability = !!cfg.observedFlightVariability;
   const ra = makeRNG(cfg.seed * 3 + 1), rb = makeRNG(cfg.seed * 3 + 2);
   for (let t = 0; t <= w.scn.durationMin; t += 0.25) {
     stepArm(A, w, t, 0.25, ra); stepArm(B, w, t, 0.25, rb);
@@ -2300,6 +2324,8 @@ function captureRun(silent) {
   const hvaA = APP.armA.casualties.filter(c => c.hva);
   const rec = {
     scenario: APP.scenarioKey, seed: APP.seed, mode: APP.mode, telementor: APP.telementor,
+    observedFlightVariability: APP.observedFlightVariability,
+    flightVariabilityProfile: APP.observedFlightVariability ? OBSERVED_FLIGHT_VARIABILITY.id : null,
     hitl: APP.hitl, angel: APP.angelActive,
     casualties: APP.armA.casualties.length,
     a: a.survivableDeaths, b: b.survivableDeaths,
@@ -2320,7 +2346,9 @@ function captureRun(silent) {
     live: true
   };
   const dup = APP.runs.find(r => r.live && r.scenario === rec.scenario && r.seed === rec.seed &&
-    r.mode === rec.mode && r.telementor === rec.telementor && r.a === rec.a && r.b === rec.b);
+    r.mode === rec.mode && r.telementor === rec.telementor &&
+    !!r.observedFlightVariability === rec.observedFlightVariability &&
+    r.a === rec.a && r.b === rec.b);
   if (dup) return dup;
   APP.runs.push(rec);
   if (!silent) toast('Run saved', 'Added to the analysis library.', 'ok');
@@ -2345,6 +2373,7 @@ function reqRun(scenarioKey, seed, k, opts) {
     { fleet: b.fleet.map(([t, n]) => [t, Math.round(n * k)]) }));
   if (opts.extraBase) scn.bases = scn.bases.concat([opts.extraBase]);
   const A = createArm(w, 'A', 'ANGEL', APP.mode); A.telementor = APP.telementor;
+  A.observedFlightVariability = APP.observedFlightVariability;
   const r = makeRNG(seed * 3 + 1);
   for (let t = 0; t <= scn.durationMin; t += 0.25) stepArm(A, w, t, 0.25, r);
   finalize(A, scn.durationMin);
@@ -2455,7 +2484,10 @@ function runSweep() {
   for (const scenario of ['PACOM_CORAL', 'EUCOM_GRANITE'])
     for (const mode of ['fair', 'realistic'])
       for (const telementor of [true, false])
-        for (const seed of seeds) cfgs.push({ scenario, mode, telementor, seed });
+        for (const seed of seeds) cfgs.push({
+          scenario, mode, telementor, seed,
+          observedFlightVariability: APP.observedFlightVariability
+        });
   APP.sweep = { total: cfgs.length, done: 0, results: [] };
   render();
   const chunk = () => {
@@ -3908,6 +3940,8 @@ function runRoiSweep() {
     const w = createWorld(sc, sd);
     const A = createArm(w, 'A', 'ANGEL', 'fair'); A.telementor = true;
     const B = createArm(w, 'B', 'CURRENT', 'fair'); B.telementor = false;
+    A.observedFlightVariability = APP.observedFlightVariability;
+    B.observedFlightVariability = APP.observedFlightVariability;
     const ra = makeRNG(sd * 3 + 1), rb = makeRNG(sd * 3 + 2);
     for (let t = 0; t <= w.scn.durationMin; t += 0.25) { stepArm(A, w, t, 0.25, ra); stepArm(B, w, t, 0.25, rb); }
     finalize(A, w.scn.durationMin); finalize(B, w.scn.durationMin);
@@ -4346,6 +4380,11 @@ function syncChrome() {
   if (zl) zl.textContent = APP.mapViewport.zoom.toFixed(1) + '×';
   const tm = document.getElementById('tmToggle');
   if (tm) { tm.classList.toggle('on', APP.telementor); tm.textContent = APP.telementor ? 'Enabled' : 'Disabled'; }
+  const fv = document.getElementById('flightVariabilityToggle');
+  if (fv) {
+    fv.classList.toggle('on', APP.observedFlightVariability);
+    fv.textContent = APP.observedFlightVariability ? 'On' : 'Off';
+  }
   const hl = document.getElementById('hitlToggle');
   if (hl) { hl.classList.toggle('on', APP.hitl); hl.textContent = APP.hitl ? 'Enabled' : 'Autonomous'; }
   /* The light/dark switch is retired. `Theme: Dark` was a two-state control
@@ -4643,6 +4682,7 @@ function bindUI() {
     });
 
   on('tmToggle', () => { APP.telementor = !APP.telementor; resetSim(false); });
+  on('flightVariabilityToggle', () => setObservedFlightVariability(!APP.observedFlightVariability));
   on('hitlToggle', () => {
     APP.hitl = !APP.hitl;
     if (APP.armA) { APP.armA.hitl = APP.hitl; audit(APP.armA, APP.t, 'OPERATOR', 'POLICY', 'Authorisation mode: ' + (APP.hitl ? 'human-in-the-loop' : 'autonomous')); }

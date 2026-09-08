@@ -234,7 +234,7 @@ function causeOf(arm, c) {
   return 'busy';
 }
 
-function runEngine(seed, deployed) {
+function runEngine(seed, deployed, observedFlightVariability) {
   const world = createWorld(SCENARIO_KEY, seed);
   /* Captured at build time, not read at fold time. Everything the frame fold
      needs from the scenario is taken here so a snapshot of this run keeps
@@ -250,14 +250,16 @@ function runEngine(seed, deployed) {
   armA.hitl = !!deployed;
   armA.autoApproveAbove = 0.10;
   armA.hvaWeight = 1.6;
+  armA.observedFlightVariability = !!observedFlightVariability;
 
   const armB = createArm(world, 'CURRENT — TRIAGE & PROXIMITY', 'CURRENT', 'fair');
   armB.telementor = false;
+  armB.observedFlightVariability = !!observedFlightVariability;
 
   audit(armA, 0, 'SYSTEM', 'RUN-START',
     `JOA ${SCN.joa} — ${WORLD.name} · seed ${seed} · control fair · ` +
     (deployed ? 'ANGEL SWARM tasking arm A' : 'ANGEL SWARM not deployed — both arms on current triage and proximity') +
-    ' · EXERCISE');
+    (observedFlightVariability ? ' · observed flight variability on' : '') + ' · EXERCISE');
 
   const rngA = makeRNG(seed * 3 + 1);
   const rngB = makeRNG(seed * 3 + 2);
@@ -276,7 +278,11 @@ function runEngine(seed, deployed) {
 
   const captureRoutes = (arm, store) => {
     for (const d of arm.drones) {
-      if (d.sortieId == null || store.has(d.sortieId) || !d.route || !d.route.length) continue;
+      /* Refresh while the sortie is active. Later legs get their committed ETA
+         only when the preceding handoff establishes their real departure time;
+         retaining only the launch-time copy would split the UI/audit record
+         from the timeline that actually drives treatment and movement. */
+      if (d.sortieId == null || !d.route || !d.route.length) continue;
       store.set(d.sortieId, d.route.map(l => ({ casId: l.casId, payload: l.payloadKey, eta: l.eta })));
     }
   };
@@ -607,6 +613,7 @@ function buildRun(opts) {
   const o = opts || {};
   const seed = o.seed == null ? 42 : o.seed;
   const deployed = o.deployed !== false;
+  const observedFlightVariability = !!o.observedFlightVariability;
   /* THE SCENARIO IS PART OF THE RUN'S IDENTITY, so it is part of the cache
      key. Without it, switching theatre and asking for seed 42 again would
      hand back the JOA CORAL run under a JOA FJORD heading — the exact class
@@ -614,10 +621,11 @@ function buildRun(opts) {
      default rather than throwing: a bad selection should show the reference
      theatre, not an empty screen. */
   const scenario = useScenario(o.scenario == null ? SCENARIO_KEY : o.scenario);
-  const key = scenario + '|' + seed + '|' + (deployed ? 1 : 0);
+  const key = scenario + '|' + seed + '|' + (deployed ? 1 : 0) + '|' +
+    (observedFlightVariability ? 1 : 0);
   if (RUN_CACHE.has(key)) return RUN_CACHE.get(key);
 
-  const r = runEngine(seed, deployed);
+  const r = runEngine(seed, deployed, observedFlightVariability);
   const A = projectArm(r.armA, r.routesA, r.world, r.bloodAboardA);
   const B = projectArm(r.armB, r.routesB, r.world, r.bloodAboardB);
   /* The third arm is folded off the same world stream the other two were
@@ -625,7 +633,9 @@ function buildRun(opts) {
   const C = projectNoDelivery(r.world, r.scnRef.durationMin);
 
   const run = {
-    seed, deployed, scenario, _scn: r.scnRef,
+    seed, deployed, scenario, observedFlightVariability,
+    flightVariabilityProfile: observedFlightVariability ? OBSERVED_FLIGHT_VARIABILITY.id : null,
+    _scn: r.scnRef,
     /* THE CASUALTY STREAM — built once per world and cloned into both arms.
        Only its length is read by the design; the elements are the stream as
        generated, projected to plain data. */
@@ -648,7 +658,7 @@ function buildRun(opts) {
      evict the very run the screens around it are reading. Seven scenarios
      times two arms bounds this at fourteen, which is the point. */
   RUN_CACHE.set(key, run);
-  const pinned = k => k.endsWith('|42|1') || k.endsWith('|42|0');
+  const pinned = k => /\|42\|[01]\|0$/.test(k);
   if (RUN_CACHE.size > CACHE_MAX) {
     for (const k of RUN_CACHE.keys()) {
       if (pinned(k)) continue;

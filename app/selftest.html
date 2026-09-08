@@ -188,7 +188,7 @@ function rawRun(scenario, seed, deployed, watch) {
   const routesA = new Map(), routesB = new Map();
   const capture = (arm, store) => {
     for (const d of arm.drones) {
-      if (d.sortieId == null || store.has(d.sortieId) || !d.route || !d.route.length) continue;
+      if (d.sortieId == null || !d.route || !d.route.length) continue;
       store.set(d.sortieId, d.route.map(l => ({ casId: l.casId, payload: l.payloadKey, eta: l.eta })));
     }
   };
@@ -238,11 +238,14 @@ const REF = rawRun('PACOM_CORAL', 42, true, true);
 const REF2 = rawRun('PACOM_CORAL', 42, true, false);
 const OTHER = rawRun('PACOM_CORAL', 7, true, false);
 const BUILT = E.buildRun({ seed: 42, scenario: 'PACOM_CORAL', deployed: true });
+const BUILT_OBS = E.buildRun({
+  seed: 42, scenario: 'PACOM_CORAL', deployed: true, observedFlightVariability: true
+});
 const BYSCEN = {};
 for (const s of SCEN) BYSCEN[s] = rawRun(s, 42, true, false);
 
 const statPrint = a => JSON.stringify(a.stats);
-/* Eleven complete 180-minute two-arm runs are built before the first assertion
+/* Twelve complete 180-minute two-arm runs are built before the first assertion
    is evaluated. That cost belongs in the report, so it is measured here. */
 let FIXTURE_MS = Math.round(performance.now() - T_FIX0);
 
@@ -278,6 +281,124 @@ test('the responder tier drawn for a casualty is reproducible from its own store
   const w = createWorld('PACOM_CORAL', 42);
   const bad = w.stream.filter(c => weightedAt(c.uResponder, TIER_MIX) !== c.responder).length;
   eq(bad, 0, 'casualties whose stored uniform does not reproduce their tier');
+});
+
+/* ========================================================================== */
+group('OPT-IN OBSERVED FLIGHT VARIABILITY',
+      'Short-flight telemetry may vary travel time only when explicitly enabled; it must not rewrite platform facts or range.');
+
+test('the observed-flight model defaults off on every newly-created arm', () => {
+  const w = createWorld('PACOM_CORAL', 42), a = createArm(w, 'T', 'ANGEL', 'fair');
+  eq(a.observedFlightVariability, false);
+});
+test('off reproduces the historical direct travel-time arithmetic exactly', () => {
+  const w = createWorld('PACOM_CORAL', 42), a = createArm(w, 'T', 'ANGEL', 'fair');
+  const d = a.drones[0], x = d.x + 3.25, y = d.y + 4.5;
+  eq(expectedFlightMinutes(a, d, d.x, d.y, x, y),
+     (dist(d.x, d.y, x, y) / d.plat.speedKmh) * 60);
+  eq(committedFlightMinutes(a, d, d.x, d.y, x, y, 'leg'),
+     (dist(d.x, d.y, x, y) / d.plat.speedKmh) * 60);
+});
+test('one seed and immutable leg key always produce one identical factor', () => {
+  const a = observedFlightFactor(42, 'OUT|3|7|1|91', true);
+  eq(observedFlightFactor(42, 'OUT|3|7|1|91', true), a);
+});
+test('the deterministic observed factor is sensitive to the run seed', () => {
+  ok(observedFlightFactor(42, 'OUT|3|7|1|91', true) !==
+     observedFlightFactor(43, 'OUT|3|7|1|91', true),
+     'two seeds produced the same committed-leg factor');
+});
+test('candidate estimates use the documented archive mean without a random draw', () => {
+  const w = createWorld('PACOM_CORAL', 42), a = createArm(w, 'T', 'ANGEL', 'fair');
+  const d = a.drones[0]; a.observedFlightVariability = true;
+  near(expectedFlightMinutes(a, d, 0, 0, 3, 4),
+       nominalFlightMinutes(d, 0, 0, 3, 4) * OBSERVED_FLIGHT_VARIABILITY.meanFactor, 1e-12);
+});
+test('the runtime profile exactly matches the derived JSON profile', async () => {
+  const profile = await fetch('./data/observed-flight-variability.json').then(r => {
+    if (!r.ok) throw new Error('profile fetch returned HTTP ' + r.status);
+    return r.json();
+  });
+  eq(OBSERVED_FLIGHT_VARIABILITY.id, profile.id);
+  eq(OBSERVED_FLIGHT_VARIABILITY.meanFactor, profile.derivation.summary.mean);
+  eq(JSON.stringify(OBSERVED_FLIGHT_VARIABILITY.quantiles),
+     JSON.stringify(profile.derivation.summary.quantiles));
+});
+test('launch materializes stable factors and cumulative ETAs for every committed leg', () => {
+  const w = createWorld('PACOM_CORAL', 42), a = createArm(w, 'T', 'ANGEL', 'fair');
+  const d = a.drones[0]; a.observedFlightVariability = true;
+  const route = [
+    { casId: 901, payloadKey: 'TQ_KIT', x: d.x + 2, y: d.y + 1, eta: 0 },
+    { casId: 902, payloadKey: 'CHEST_SEAL', x: d.x + 3, y: d.y + 4, eta: 0 }
+  ];
+  launch(a, d, route, 5, w);
+  const e0 = 5 + nominalFlightMinutes(d, d.fromX, d.fromY, route[0].x, route[0].y) * route[0].travelFactor;
+  const e1 = e0 + HANDOFF_MIN +
+    nominalFlightMinutes(d, route[0].x, route[0].y, route[1].x, route[1].y) * route[1].travelFactor;
+  near(route[0].eta, e0, 1e-12); near(route[1].eta, e1, 1e-12);
+  eq(route[0].travelFactor, observedFlightFactor(42, 'OUT|' + d.id + '|1|0|901', true));
+});
+test('return travel receives its own stable committed factor', () => {
+  const w = createWorld('PACOM_CORAL', 42), a = createArm(w, 'T', 'ANGEL', 'fair');
+  const d = a.drones[0]; a.observedFlightVariability = true;
+  launch(a, d, [{ casId: 903, payloadKey: 'TQ_KIT', x: d.x + 2, y: d.y + 1, eta: 0 }], 5, w);
+  d.x = d.destX; d.y = d.destY;
+  beginReturn(a, d, 9, false);
+  const factor = observedFlightFactor(42, 'RETURN|' + d.id + '|1', true);
+  eq(d.returnTravelFactor, factor);
+  near(d.tHome, 9 + nominalFlightMinutes(d, d.x, d.y, d.baseX, d.baseY) * factor, 1e-12);
+});
+test('a later committed leg keeps its displayed ETA equal to the actual arrival timeline', () => {
+  const w = createWorld('PACOM_CORAL', 42), a = createArm(w, 'T', 'ANGEL', 'fair');
+  const d = a.drones[0]; a.observedFlightVariability = true;
+  /* createArm starts with an empty cohort and admits casualties over time.
+     This isolated mechanics check installs two explicit casualties and marks
+     the source stream consumed so stepArm cannot admit duplicates. */
+  const c0 = { ...w.stream[0] }, c1 = { ...w.stream[1] };
+  a.casualties.push(c0, c1);
+  a._streamIdx = w.stream.length;
+  c0.tInjury = 0; c0.tResolved = null; c0.outcome = null;
+  c1.tInjury = 0; c1.tResolved = null; c1.outcome = null;
+  const route = [
+    { casId: c0.id, payloadKey: 'TQ_KIT', x: d.x + 1.7, y: d.y + 0.8, eta: 0 },
+    { casId: c1.id, payloadKey: 'CHEST_SEAL', x: d.x + 3.1, y: d.y + 2.4, eta: 0 }
+  ];
+  launch(a, d, route, 5, w);
+  const launchEstimate = route[1].eta;
+  /* First tick establishes the real release/recovery sequence on station;
+     the second completes that handoff and commits the next departure. */
+  stepArm(a, w, d.tArrive + 0.17, 0.25, makeRNG(999));
+  stepArm(a, w, d.onStation.tRecover + 0.17, 0.25, makeRNG(999));
+  eq(d.legIdx, 1, 'the aircraft did not advance to its second stop');
+  near(route[1].eta, d.tArrive, 1e-12);
+  ok(route[1].eta !== launchEstimate, 'the second-leg ETA was not refreshed after the actual handoff');
+});
+test('flight variability never mutates the published platform constants', () => {
+  const before = JSON.stringify(PLATFORMS);
+  observedFlightFactor(42, 'OUT|1|1|0|1', true);
+  eq(JSON.stringify(PLATFORMS), before);
+  eq([PLATFORMS.HEAVY.speedKmh, PLATFORMS.LIGHT.speedKmh, PLATFORMS.LONG.speedKmh].join(','), '92,60,83');
+});
+test('flight variability leaves effective radius exactly unchanged', () => {
+  const before = effectiveRadiusKm(PLATFORMS.HEAVY, 1.45);
+  observedFlightFactor(99, 'RETURN|1|2', true);
+  eq(effectiveRadiusKm(PLATFORMS.HEAVY, 1.45), before);
+});
+test('angel-engine run identity includes the default-off option', () => {
+  eq(BUILT.observedFlightVariability, false);
+  eq(E.buildRun({ seed: 42, scenario: 'PACOM_CORAL', deployed: true,
+                  observedFlightVariability: false }), BUILT);
+});
+test('angel-engine separates and identifies deterministic observed-mode runs', () => {
+  eq(BUILT_OBS.observedFlightVariability, true);
+  eq(BUILT_OBS.flightVariabilityProfile, OBSERVED_FLIGHT_VARIABILITY.id);
+  ok(BUILT_OBS !== BUILT, 'ON and OFF resolved to the same cached run');
+  eq(E.buildRun({ seed: 42, scenario: 'PACOM_CORAL', deployed: true,
+                  observedFlightVariability: true }), BUILT_OBS);
+  const offArrivals = BUILT.A.sorties.flatMap(s => s.stops.map(k => k.arrive));
+  const onArrivals = BUILT_OBS.A.sorties.flatMap(s => s.stops.map(k => k.arrive));
+  ok(JSON.stringify(onArrivals) !== JSON.stringify(offArrivals),
+     'observed mode did not change any committed arrival time');
 });
 
 /* ========================================================================== */
@@ -732,6 +853,11 @@ test('the medic lever at the force\'s own 10% reproduces an unlevered run exactl
 });
 test('the triage lever restores PARAMS after each replication', () =>
   eq([PARAMS.START_SENSITIVITY, PARAMS.START_OVERTRIAGE].join('/'), '0.9/0.14'));
+test('the Monte Carlo replication applies and identifies the selected observed-flight profile', () => {
+  const r = rep({ observedFlightVariability: true });
+  eq(r.observedFlightVariability, true);
+  eq(r.flightVariabilityProfile, OBSERVED_FLIGHT_VARIABILITY.id);
+});
 test('a real Monte Carlo worker loads the shipped engine off disk', async () => {
   const w = new Worker('./js/mc.worker.js');
   try {
@@ -862,7 +988,7 @@ function paint(t0, done) {
     new Date().toISOString().replace('T', ' ').slice(0, 19) + 'Z · ' +
     'js/sim.js, js/optimizer.js, js/mc.worker.js, angel-engine.js · offline, this tab only. ' +
     'A further ' + FIXTURE_MS + ' ms was spent before the first assertion building the runs these ' +
-    'assertions read: eleven complete 180-minute two-arm runs and seven Monte Carlo replications.';
+    'assertions read: twelve complete 180-minute two-arm runs and eight Monte Carlo replications.';
   window.__SELFTEST__ = { pass: PASS, fail: FAIL, total: PASS + FAIL, ms, report: reportText(ms) };
 }
 
