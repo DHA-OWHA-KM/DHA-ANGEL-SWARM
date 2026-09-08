@@ -792,6 +792,13 @@ for (const s of SCEN) {
        ' sA=' + r.A.stats.sorties + ' sB=' + r.B.stats.sorties + ' unresolved=' + open);
   });
 }
+for (const s of SCEN) {
+  test(s + ' gives every projected casualty a named site', () => {
+    const run = E.buildRun({ seed: 42, scenario: s, deployed: true });
+    const unnamed = run.A.cas.filter(c => !c.site || c.site === 'SITE UNNAMED');
+    eq(unnamed.length, 0, 'casualties without a geographic site name');
+  });
+}
 test('forward delivery is never worse than no forward delivery, on any of the seven', () => {
   const bad = SCEN.filter(s => BYSCEN[s].A.stats.survivableDeaths > BYSCEN[s].C.survivableDeaths ||
                                BYSCEN[s].B.stats.survivableDeaths > BYSCEN[s].C.survivableDeaths);

@@ -99,11 +99,20 @@ let UNITS = unitsFor(SCN);
    placename. Casualties carry `unit` = 'U<clusterIndex>', so site and cluster
    are the same object seen from two directions. */
 function siteNameFor(cluster) {
+  /* Maritime scenarios name casualty ground from their islands. Continuous
+     land scenarios have no islands, so use their named map places instead of
+     allowing every casualty to fall through to SITE UNNAMED. Prefer land
+     labels where available; sea/strait labels are only a last geographic
+     fallback. */
+  const namedIslands = (SCN.islands || []).filter(p => p && p.name);
+  const namedPlaces = (SCN.places || []).filter(p => p && p.name);
+  const landPlaces = namedPlaces.filter(p => p.kind === 'land');
+  const candidates = namedIslands.length ? namedIslands
+    : landPlaces.length ? landPlaces : namedPlaces;
   let best = null, bd = Infinity;
-  for (const isl of (SCN.islands || [])) {
-    if (!isl.name) continue;
-    const d = dist(cluster.x, cluster.y, isl.x, isl.y);
-    if (d < bd) { bd = d; best = isl.name; }
+  for (const place of candidates) {
+    const d = dist(cluster.x, cluster.y, place.x, place.y);
+    if (d < bd) { bd = d; best = place.name; }
   }
   return 'SITE ' + (best || 'UNNAMED');
 }
