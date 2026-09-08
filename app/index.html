@@ -34,6 +34,10 @@
 body{margin:0;background:oklch(0.14 0.008 250);font-family:'IBM Plex Sans',system-ui,sans-serif}
 a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 210)}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:oklch(0.33 0.012 250);border-radius:5px}::-webkit-scrollbar-track{background:oklch(0.18 0.01 250)}
+@keyframes authorityVeilIn{from{opacity:0}to{opacity:1}}
+@keyframes authorityPanelIn{0%{opacity:0;transform:translateY(-18px) scale(.975)}62%{opacity:1;transform:translateY(3px) scale(1.004)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes authorityLineIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.authority-veil,.authority-panel,.authority-line{animation:none!important}}
 </style></helmet>
 
 <div style="min-height:100vh;background:oklch(0.17 0.01 250);color:oklch(0.92 0.005 250)">
@@ -201,6 +205,27 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <span style="font-size:10px;font-weight:600;letter-spacing:.08em;padding:6px 10px;border-radius:4px;border:1px solid {{ posture.pillBorder }};color:{{ posture.pillFg }};background:{{ posture.pillBg }}">{{ posture.pill }}</span>
 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-size:12.5px;color:oklch(0.94 0.005 250);font-weight:600">{{ clock }}</span><span style="font-size:8.5px;color:oklch(0.58 0.008 250);letter-spacing:.06em">{{ tPlus }}</span></div>
 </div></div>
+
+<!-- A new human-authority task is an interruption, not a status chip. The
+     engine remains the source of truth: this exists only while s.pending
+     contains an open escalation. Its entrance runs once, then becomes still. -->
+<sc-if value="{{ interrupt.show }}" hint-placeholder-val="{{ false }}">
+<div class="authority-veil" style="position:fixed;inset:0;z-index:46;background:oklch(0.08 0.012 250 / .78);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:82px 24px 28px;animation:authorityVeilIn 180ms ease-out both">
+<div class="authority-panel" role="alertdialog" aria-modal="true" aria-labelledby="authority-title" aria-describedby="authority-copy" tabindex="0" style="width:620px;max-width:calc(100vw - 48px);border-radius:7px;overflow:hidden;background:oklch(0.185 0.014 250);border:1px solid oklch(0.61 0.16 25);box-shadow:0 26px 80px oklch(0.04 0.01 250 / .72),0 0 0 1px oklch(0.3 0.08 25);animation:authorityPanelIn 440ms cubic-bezier(.2,.8,.2,1) both">
+<div class="authority-line" style="height:4px;background:oklch(0.7 0.19 25);transform-origin:left;animation:authorityLineIn 620ms cubic-bezier(.2,.8,.2,1) 80ms both"></div>
+<div style="padding:20px 22px 18px;display:flex;gap:17px;align-items:flex-start">
+<div style="width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:oklch(0.29 0.08 25);border:1px solid oklch(0.55 0.15 25)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v9" stroke="oklch(0.9 0.15 25)" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="17.5" r="1.4" fill="oklch(0.9 0.15 25)"/></svg></div>
+<div style="min-width:0;flex:1">
+<div style="font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.16em;color:oklch(0.76 0.11 25);margin-bottom:7px">SIMULATION RUNNING · HUMAN AUTHORITY REQUIRED</div>
+<div id="authority-title" style="font:650 20px/1.2 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.96 0.008 250)">{{ interrupt.title }}</div>
+<div id="authority-copy" style="font:400 12px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.72 0.01 250);margin-top:8px">{{ interrupt.copy }}</div>
+<div style="display:flex;align-items:baseline;gap:9px;margin-top:14px;padding:10px 12px;border-radius:4px;background:oklch(0.24 0.05 25);border:1px solid oklch(0.4 0.1 25);font-family:'IBM Plex Mono',monospace"><span style="font-size:9px;font-weight:700;letter-spacing:.11em;color:oklch(0.72 0.08 25)">DECISION WINDOW REMAINING</span><span style="margin-left:auto;font-size:20px;font-weight:700;color:oklch(0.9 0.15 25)">{{ interrupt.remaining }}</span></div>
+<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px">
+<span onClick="{{ interrupt.review }}" role="button" tabindex="0" style="cursor:pointer;padding:10px 16px;border-radius:4px;background:oklch(0.72 0.15 75);color:oklch(0.18 0.03 75);font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.08em">REVIEW DECISIONS</span>
+<span onClick="{{ interrupt.dismiss }}" role="button" tabindex="0" style="cursor:pointer;padding:9px 14px;border-radius:4px;border:1px solid oklch(0.36 0.012 250);color:oklch(0.72 0.008 250);font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.07em">REMAIN ON THIS SCREEN</span>
+<span style="font:600 9px 'IBM Plex Mono',monospace;color:oklch(0.61 0.008 250);margin-left:auto">SIMULATED TIME CONTINUES · DECISION PACE</span>
+</div></div></div></div></div>
+</sc-if>
 
 <sc-if value="{{ deployOpen }}" hint-placeholder-val="{{ false }}">
 <div style="position:fixed;inset:0;z-index:40;background:oklch(0.1 0.01 250 / 0.78);display:flex;align-items:center;justify-content:center;padding:30px">
@@ -2820,6 +2845,7 @@ class Component extends DCLogic {
        row sets walkOn; walkStep is the last step reached, so navigating away
        by the rail and back re-joins the path where it was left. */
     walkOn: false, walkStep: 0,
+    interruptOpen: false,
     cfg: { hitl: true, bar: 10, mode: 'fair', ingest: false, telementor: true, flightVariability: false }
   };
 
@@ -2838,7 +2864,7 @@ class Component extends DCLogic {
            scrubbing all still resolve through snapshot(run, t). */
         const nt = Math.min(180, this.state.t + this.state.speed * 0.12);
         const done = nt >= 180;
-        this.setState({ t: nt, running: !done, resOpen: done || this.state.resOpen });
+        this.setState({ t: nt, running: !done, resOpen: done || this.state.resOpen }, () => this.checkPendingAttention());
       }
       /* THE WAVEFORM IS NOT DRAWN FROM HERE ANY MORE. This interval used to
          push seven samples of a hand-rolled pulse into component state and
@@ -2925,6 +2951,32 @@ class Component extends DCLogic {
       scenarios: () => (this.E ? this.E.SCENARIO_LIST.map(x => x.key) : [])
     };
   }
+
+  checkPendingAttention() {
+    if (!this.E || !this.state.deployed) return;
+    if (this.state.t === 0) this._knownPending = new Set();
+    const pending = this.snap().pending || [];
+    const known = this._knownPending || new Set();
+    const fresh = pending.some(p => !known.has(p.id));
+    pending.forEach(p => known.add(p.id));
+    this._knownPending = known;
+    if (fresh) {
+      /* Keep the exercise live, but do not let an accelerated demo setting
+         consume an eight-minute authority window in two wall-clock seconds.
+         Decision pace advances at one simulated quarter-minute per second,
+         giving the operator roughly half a minute to review the escalation. */
+      if (!this._decisionPace) {
+        this._preDecisionSpeed = this.state.speed;
+        this._decisionPace = true;
+      }
+      this.setState({ speed: 0.25, interruptOpen: true });
+    } else if (!pending.length && this._decisionPace) {
+      const speed = this._preDecisionSpeed || 4;
+      this._decisionPace = false;
+      this._preDecisionSpeed = null;
+      this.setState({ speed });
+    }
+  }
   componentWillUnmount() {
     if (window.ANGEL_DESIGN && window.ANGEL_DESIGN.setScenario) delete window.ANGEL_DESIGN;
     if (this._opFix) { clearTimeout(this._opFix); this._opFix = 0; }
@@ -2941,6 +2993,10 @@ class Component extends DCLogic {
      DEPLOY posture must not rebuild anything — which is why both are built
      here and neither is built lazily. */
   buildBoth(scenario, observedFlightVariability = this.state.cfg.flightVariability) {
+    /* Proposal ids restart with a rebuilt exercise, so attention tracking must
+       restart with it too. Otherwise the first escalation in a second run can
+       share an id with the previous run and be mistaken for one already seen. */
+    this._knownPending = new Set();
     this.runD = this.E.buildRun({
       seed: 42, deployed: true, scenario,
       observedFlightVariability: !!observedFlightVariability
@@ -2960,10 +3016,12 @@ class Component extends DCLogic {
     return () => {
       const st = this.state;
       if (st.cfg.flightVariability === value || !this.E) return;
+      const speed = this._decisionPace ? (this._preDecisionSpeed || 4) : st.speed;
+      this._decisionPace = false; this._preDecisionSpeed = null;
       this.buildBoth(st.scenario, value);
       this.setState({
         cfg: { ...st.cfg, flightVariability: value },
-        t: 0, running: false, resOpen: false, resetOpen: false,
+        t: 0, running: false, speed, resOpen: false, resetOpen: false,
         expand: null, showAll: false, q: '', casFilter: 'ALL',
         decisions: {}, extra: [], thread: [],
         wgSweep: null, wgRanLever: null, wgError: null
@@ -2981,9 +3039,11 @@ class Component extends DCLogic {
   pickScenario(key) {
     return () => {
       if (this.state.scenario === key || !this.E) return;
+      const speed = this._decisionPace ? (this._preDecisionSpeed || 4) : this.state.speed;
+      this._decisionPace = false; this._preDecisionSpeed = null;
       wgSyncScenario(this.E, key);
       this.buildBoth(key);
-      this.setState({ scenario: key, t: 0, running: false, resOpen: false,
+      this.setState({ scenario: key, t: 0, running: false, speed, resOpen: false,
                       expand: null, showAll: false, q: '', casFilter: 'ALL',
                       thread: [], wgSweep: null, wgRanLever: null, wgError: null });
       /* AND THE MAP GOES WITH IT. Two engines run here — this shell's, and
@@ -3163,12 +3223,15 @@ class Component extends DCLogic {
        because the reset dialog promises that nothing is kept and that promise
        is worth more than the thirty seconds of compute. */
     wgSweep: null, wgRanLever: null, wgRunning: false, wgDone: 0, wgTotal: 0, wgError: null,
-    thread: [], ask: ''
+    thread: [], ask: '', interruptOpen: false
   };
   resetRun() {
     this.depTotal = 0; this._fin = null; this._finKey = null;
     this._mapCatchAt = null; this._mapCatchN = 0;
-    this.setState({ ...this.COLD });
+    this._knownPending = new Set();
+    const speed = this._decisionPace ? (this._preDecisionSpeed || 4) : this.state.speed;
+    this._decisionPace = false; this._preDecisionSpeed = null;
+    this.setState({ ...this.COLD, speed });
   }
 
   /* ---- THE RUN AFTER IT ENDS --------------------------------------------
@@ -3675,7 +3738,13 @@ class Component extends DCLogic {
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
     go.flightVariability = value => this.flightVariability(value);
     const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
-    const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
+    const speeds = [0.25, 1, 2, 4, 10].map(v => ({
+      label: v === 0.25 ? '¼×' : v + '×', ...seg(st.speed === v, 165),
+      on: () => {
+        this._decisionPace = false; this._preDecisionSpeed = null;
+        this.setState({ speed: v });
+      }
+    }));
 
     if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
 
@@ -3702,6 +3771,14 @@ class Component extends DCLogic {
          blank. See alertVals() for the same two states in the top bar. */
       badge: { cas: s.open || null, data: s.commsDown ? 1 : null, ...this.decChip(s) },
       posture: this.posture(s), pa: this.primary(s, finished),
+      interrupt: {
+        show: !!st.interruptOpen && s.pending.length > 0,
+        title: s.pending.length === 1 ? 'A decision is waiting for you' : s.pending.length + ' decisions are waiting for you',
+        copy: 'A newly escalated tasking is outside standing authority. The simulation is still running at decision pace; review it before the eight-minute decision window expires.',
+        remaining: s.pending.length ? this.mmss(Math.max(0, s.pending[0].tRaised + 8 - st.t)) : '00:00',
+        review: () => this.setState({ page: 'dec', expand: null, interruptOpen: false }),
+        dismiss: () => this.setState({ interruptOpen: false })
+      },
       isDash: st.page === 'dash', isCas: st.page === 'cas',
       isDec: st.page === 'dec', isFeed: st.page === 'feed',
       isStub: false,
@@ -5871,6 +5948,7 @@ class Component extends DCLogic {
       isData: st.page === 'data',
       resetAll: () => {
         if (st.cfg.flightVariability && this.E) this.buildBoth(st.scenario, false);
+        this._decisionPace = false; this._preDecisionSpeed = null;
         this.setState({
           cfg: { hitl: true, mode: 'fair', ingest: true, bar: 25, flightVariability: false },
           t: 0, running: false, resOpen: false, resetOpen: false,
