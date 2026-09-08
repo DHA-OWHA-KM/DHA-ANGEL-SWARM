@@ -887,10 +887,10 @@
     if (!booted) return false;
     try { var g = gb(); return !!(g && g.ready && g.ready()); } catch (e) { return false; }
   }
-  function globeOff() {
+  function globeOff(silent, holdFrame) {
     globeWanted = false;
     var g = gb();
-    if (g && g.unmount) { try { g.unmount(); } catch (e) { /* already down */ } }
+    if (g && g.unmount) { try { g.unmount(silent, holdFrame); } catch (e) { /* already down */ } }
   }
   function globeOn() {
     var g = gb();
@@ -1331,7 +1331,7 @@
       }
       /* Leaving the globe is the globe coming down first, so the scale that
          is arriving mounts into a stage nothing else is holding. */
-      if (globeWanted) globeOff();
+      if (globeWanted) globeOff(true, s === 'THEATRE'); // Keep the outgoing frame until Theatre paints.
       try { W.setMapScope(s); } catch (e) { return false; }
       fire();
       return true;
