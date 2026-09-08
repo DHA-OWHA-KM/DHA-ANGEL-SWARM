@@ -177,12 +177,14 @@ const SCEN = ['PACOM_CORAL', 'PACOM_BASALT', 'PACOM_MARINER', 'PACOM_TIMBER',
 
 /* A full headless run of both arms, exactly as angel-engine.js runEngine() does it,
    plus the per-step observations no ledger records. */
-function rawRun(scenario, seed, deployed, watch) {
+function rawRun(scenario, seed, deployed, watch, observedFlightVariability) {
   const world = createWorld(scenario, seed);
   const A = createArm(world, 'A', deployed ? 'ANGEL' : 'CURRENT', 'fair');
   A.telementor = !!deployed; A.hitl = !!deployed; A.autoApproveAbove = 0.10; A.hvaWeight = 1.6;
   const B = createArm(world, 'B', 'CURRENT', 'fair');
   B.telementor = false;
+  A.observedFlightVariability = !!observedFlightVariability;
+  B.observedFlightVariability = !!observedFlightVariability;
   const rA = makeRNG(seed * 3 + 1), rB = makeRNG(seed * 3 + 2);
   const steps = Math.round(world.scn.durationMin / DTM);
   const routesA = new Map(), routesB = new Map();
@@ -243,6 +245,8 @@ const BUILT_OBS = E.buildRun({
 });
 const BYSCEN = {};
 for (const s of SCEN) BYSCEN[s] = rawRun(s, 42, true, false);
+const BYSCEN_OBS = {};
+for (const s of SCEN) BYSCEN_OBS[s] = rawRun(s, 42, true, false, true);
 
 const statPrint = a => JSON.stringify(a.stats);
 /* Twelve complete 180-minute two-arm runs are built before the first assertion
@@ -793,6 +797,26 @@ test('forward delivery is never worse than no forward delivery, on any of the se
                                BYSCEN[s].B.stats.survivableDeaths > BYSCEN[s].C.survivableDeaths);
   eq(bad.length, 0, 'joint operating areas where flying nothing beat flying something: ' + bad.join(','));
 });
+for (const s of SCEN) {
+  const off = BYSCEN[s];
+  test(s + ' OFF — ANGEL wins or ties current method (' +
+       off.A.stats.survivableDeaths + ' ≤ ' + off.B.stats.survivableDeaths + ')', () => {
+    ok(off.A.stats.survivableDeaths <= off.B.stats.survivableDeaths,
+       'ANGEL lost with observed flight variability OFF',
+       'ANGEL survivable deaths ≤ current-method survivable deaths',
+       off.A.stats.survivableDeaths + ' > ' + off.B.stats.survivableDeaths);
+  });
+}
+for (const s of SCEN) {
+  const on = BYSCEN_OBS[s];
+  test(s + ' ON — ANGEL wins or ties current method (' +
+       on.A.stats.survivableDeaths + ' ≤ ' + on.B.stats.survivableDeaths + ')', () => {
+    ok(on.A.stats.survivableDeaths <= on.B.stats.survivableDeaths,
+       'ANGEL lost with observed flight variability ON',
+       'ANGEL survivable deaths ≤ current-method survivable deaths',
+       on.A.stats.survivableDeaths + ' > ' + on.B.stats.survivableDeaths);
+  });
+}
 
 /* ========================================================================== */
 group('COMMANDER\'S LEVERS AND THE MONTE CARLO PATH',

@@ -73,6 +73,23 @@
   var slot = null, lastBox = '';
   var listeners = [];
   var frameMaskedFor = '';
+  var frameBlackout = null;
+
+  function showFrameBlackout() {
+    if (!dock || frameBlackout) return;
+    frameBlackout = document.createElement('div');
+    frameBlackout.id = 'angelMapBlackout';
+    frameBlackout.setAttribute('aria-hidden', 'true');
+    frameBlackout.style.cssText =
+      'position:absolute;inset:0;z-index:5;pointer-events:none;background:#000';
+    dock.appendChild(frameBlackout);
+  }
+
+  function clearFrameBlackout() {
+    if (!frameBlackout) return;
+    try { frameBlackout.remove(); } catch (e) { /* already gone */ }
+    frameBlackout = null;
+  }
 
   function maskFrameFor(s) {
     if (!frame) return;
@@ -86,6 +103,7 @@
     frameMaskedFor = '';
     frame.style.opacity = '1';
     frame.style.pointerEvents = 'auto';
+    clearFrameBlackout();
   }
 
   function ensureDock() {
@@ -257,6 +275,13 @@
        still reaches the retry and failure states on the original schedule. */
     var busyAt = s === 'THEATRE' && stFrom === 'GLOBE' ? HANDOFF_BUSY_AT : BUSY_AT;
     if (age < busyAt) { showState(''); return; }
+    /* A Globe → Theatre handoff intentionally stays solid black until the
+       first Theatre frame is ready. Do not put a loading card over that
+       blackout; only a real timeout is allowed to replace it with an error. */
+    if (s === 'THEATRE' && stFrom === 'GLOBE' && age < FAIL_AT) {
+      showState('');
+      return;
+    }
     if (age < FAIL_AT) {
       showState('busy', 'BUILDING ' + name,
         stRetried ? 'The first attempt did not come up. Trying once more.'
@@ -1372,7 +1397,10 @@
          expose its empty mount or transient loading card. The globe also
          retains its outgoing frame behind that mask until Theatre paints. */
       var leavingGlobeForTheatre = globeWanted && s === 'THEATRE';
-      if (leavingGlobeForTheatre) maskFrameFor(s);
+      if (leavingGlobeForTheatre) {
+        showFrameBlackout();
+        maskFrameFor(s);
+      }
       if (globeWanted) globeOff(true, leavingGlobeForTheatre);
       try { W.setMapScope(s); }
       catch (e) {
