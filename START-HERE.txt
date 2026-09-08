@@ -36,7 +36,7 @@ place. They are thirds of one folder and none runs on its own.
                                for parts 2 and 3
 
 
-NEW IN 6.5 — WHERE THIS SITS
+NEW IN 1.0 — WHERE THIS SITS
 ============================
 
 The one question this package could not previously answer is the first

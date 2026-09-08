@@ -1,6 +1,6 @@
 # ANGEL SWARM — `angel-engine.js` DATA CONTRACT
 
-**Derived from:** `/home/claude/angel/DESIGN/ANGEL_SWARM-v2.dc.html` (324,163 B, 3,122 lines)
+**Derived from:** `/home/build/angel/DESIGN/ANGEL_SWARM-v2.dc.html` (324,163 B, 3,122 lines)
 **Method:** exhaustive trace of every `this.E.*`, `run()`, `snap()`, `runD`, `runU` read in the
 `<script data-dc-script>` block, then every `{{ }}` binding in the `<x-dc>` template traced back
 to the `renderVals()` local that produced it.

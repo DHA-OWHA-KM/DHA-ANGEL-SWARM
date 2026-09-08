@@ -126,10 +126,10 @@ Neither model is accompanied by a signature or an in-build integrity check today
 
 | File | Bytes | SHA-256 | What it is |
 |---|---:|---|---|
-| `app/index.html` | 658,929 | `fed55e125de4f1ce…` | The shipped single-page application (Claude Design canvas template plus component logic). |
+| `app/index.html` | 658,929 | `fed55e125de4f1ce…` | The shipped single-page application (Design Canvas template plus component logic). |
 | `app/design.html` | 658,929 | `fed55e125de4f1ce…` | Byte-identical copy of index.html held for the design canvas. |
 | `app/selftest.html` | 51,055 | `090aaf6e520a2ccc…` | Standalone engine self-test: 118 assertions against the simulation engine. |
-| `app/support.js` | 69,150 | `8fe7df74405f3c55…` | Claude Design canvas runtime (React-based renderer for the x-dc template). |
+| `app/support.js` | 69,150 | `8fe7df74405f3c55…` | Design Canvas runtime (React-based renderer for the x-dc template). |
 | `app/angel-engine.js` | 41,243 | `f1e36b5f221544f7…` | Engine adapter: buildRun({seed, deployed, scenario}) and snapshot(run, t). |
 | `app/js/sim.js` | 56,334 | `979ca6b062f71741…` | Simulation engine: world, casualty stream, scenarios, payloads, platforms. |
 | `app/js/optimizer.js` | 62,098 | `6aea2ba4b945e54e…` | Allocators for both arms, plus the SHA-256 (FIPS 180-4) hash-chained audit log. |

@@ -7,7 +7,7 @@ Fourteen sheets. The load order is declared by hand in each shell and is load-be
 | File | What it does |
 |---|---|
 | `theme.css` | The single source of colour: one token contract declared four times, once per theme, selected by `body[data-theme]`. Deaths are never green and triage colour stays doctrinal. |
-| `design.css` | The design system extracted verbatim from the Claude Design canvas — colour in oklch, type, spacing, component shape — and the only place a new colour or type size may be introduced. |
+| `design.css` | The design system extracted verbatim from the Design Canvas — colour in oklch, type, spacing, component shape — and the only place a new colour or type size may be introduced. |
 | `app.css` | The console shell: layout, panes, cards, tables, the command bar and the rail, with a floor of custom properties for a document that has lost its theme attribute. |
 | `fonts.css` | Declares IBM Plex Sans, IBM Plex Mono and Barlow Condensed as local `@font-face` rules against `../fonts/`, replacing the canvas's `fonts.googleapis.com` link so the first paint issues no off-origin request. |
 | `polish.css` | The cross-cutting pass loaded third: repairs shell layout at densities the original design never reached and reconciles separately authored panes onto the host's idiom. |

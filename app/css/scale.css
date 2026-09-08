@@ -199,7 +199,7 @@ html body .note{ margin:var(--s4) 0 0 }
    Off-scale values declared in sheets this pass does not own. Machine-derived
    from those sources and snapped to the same eight steps, at a specificity
    that beats a runtime-injected <style>. Regenerate with
-       node /home/claude/angel/_sp_gen.mjs <sources…>
+       node /home/build/angel/_sp_gen.mjs <sources…>
    ========================================================================= */
 
 /* ---- snapped from page-grouped.js ---- */

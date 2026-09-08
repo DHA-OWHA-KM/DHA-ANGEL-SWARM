@@ -4,7 +4,7 @@
    This file is NOT a simulation. It is a thin projection of the real ANGEL
    SWARM engine — app/js/sim.js and app/js/optimizer.js, the same two files
    the shipped application and the Monte Carlo worker load verbatim — onto
-   the small, pure, seekable surface the Claude Design canvas expects:
+   the small, pure, seekable surface the Design Canvas expects:
 
        buildRun({ seed, deployed }) -> Run
        snapshot(run, t)             -> Frame

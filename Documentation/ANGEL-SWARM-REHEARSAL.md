@@ -3,7 +3,7 @@
 
 UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 
-**Version 6.5 · 5 September 2026, against the v6.4 build.** Every figure in here
+**Version 1.0 · 5 September 2026, against the v6.4 build.** Every figure in here
 was checked against the shipped engine or measured off the running application.
 Where a build change contradicted a line this script used to carry, the old line
 was cut rather than softened — a presenter saying something the demo then

@@ -19,7 +19,7 @@ For the file-by-file detail of every source file here — what each module actua
 | `angel-engine.js` | Runs the engine headlessly once, end to end, records its ledgers, and exposes `buildRun()` and a memoised `snapshot()` so the canvas can seek to any minute. It computes no outcome of its own. |
 | `angel-map.js` | Draws no map. It docks the console in a same-origin iframe over the slot the design draws, so the three real renderers keep their own cameras while React rewrites the page around them. |
 | `angel-ppg.js` | The live photoplethysmogram element: advances a 100 Hz sample clock and paints the 500-sample window that is the model's actual input tensor. Nothing is interpolated. |
-| `support.js` | The Claude Design runtime, generated rather than hand-written. It expects `window.React` and `window.ReactDOM`, which is why `vendor/react/` is loaded first. |
+| `support.js` | The Design Canvas runtime, generated rather than hand-written. It expects `window.React` and `window.ReactDOM`, which is why `vendor/react/` is loaded first. |
 
 ## Subfolders
 

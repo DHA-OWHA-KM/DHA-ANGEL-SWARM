@@ -2,7 +2,7 @@
 
 **Read-only audit. No application file was changed.**
 
-Date: 2026-08-24 · Build: v3.5 · Server: `http://127.0.0.1:8791` serving `/home/claude/angel/app`
+Date: 2026-08-24 · Build: v3.5 · Server: `http://127.0.0.1:8791` serving `/home/build/angel/app`
 Method: headless Chromium (SwiftShader), 1680×1050, real pointer presses (`page.mouse.click` at the
 element's centre — never `locator.click()` and never `element.click()`), 600 ms settle, wide state
 snapshot before and after, destination restored between presses.

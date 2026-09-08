@@ -8,7 +8,7 @@ UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 
 ## Two shells, one engine
 
-The tree carries two working front ends over the same simulation. `app/console.html` is the analyst console: it loads the forty-odd modules in `app/js/` directly as classic scripts and deferred ES modules. `app/index.html` is the design build: a Claude Design canvas document (`<x-dc>` template plus a `text/x-dc` script) driven by the vendored runtime in `app/support.js`, which reads its live figures through the adapter `app/angel-engine.js` and mounts the console itself, unmodified, in a same-origin frame wherever a real map or a real analyst pane is required.
+The tree carries two working front ends over the same simulation. `app/console.html` is the analyst console: it loads the forty-odd modules in `app/js/` directly as classic scripts and deferred ES modules. `app/index.html` is the design build: a Design Canvas document (`<x-dc>` template plus a `text/x-dc` script) driven by the vendored runtime in `app/support.js`, which reads its live figures through the adapter `app/angel-engine.js` and mounts the console itself, unmodified, in a same-origin frame wherever a real map or a real analyst pane is required.
 
 Underneath both, `app/js/sim.js` and `app/js/optimizer.js` are the engine. They touch no DOM and hold no state outside the objects they are handed, which is why the Monte Carlo worker (`app/js/mc.worker.js`), the self-test page (`app/selftest.html`), the design adapter (`app/angel-engine.js`) and the verification script (`Documentation/verification/winprob.mjs`) can all load those same two files verbatim and get the same numbers. Any claim in this package that quotes a death count is a claim about those two files.
 
@@ -21,7 +21,7 @@ Underneath both, `app/js/sim.js` and `app/js/optimizer.js` are the engine. They 
 | `angel-engine.js` | Runs the shipped engine headlessly once, end to end (T+0 to T+180 at a 0.25 min step), records its casualty, sortie, delivery, stock and audit ledgers plus a per-step fleet trace, and exposes `buildRun({seed, deployed})` and a memoised `snapshot(run, t)` so the design canvas can seek to any minute; it computes no outcome of its own and loads `js/sim.js` and `js/optimizer.js` itself when its host has not already done so. |
 | `angel-map.js` | Draws no map. It mounts the whole console in a same-origin iframe and docks that frame over the slot the design draws, so the three real renderers (`js/theater.js`, `js/geo.js` + `js/map.js`, `js/geo3d.js`) keep their own cameras and bindings while React rewrites the surrounding page; it also servos the run clock as a rate rather than stepping it, and measures the design's columns to keep the map inset in scale. |
 | `angel-ppg.js` | Renders the photoplethysmogram at the rate it is produced: it dynamically imports `synth()` from `js/device.js` — the same generator CRI-Net was trained against — advances a 100 Hz sample clock against `performance.now()` inside `requestAnimationFrame`, and paints a 500-sample window, the model's actual `float32[1,1,500]` input tensor. Nothing is interpolated or resampled. Written as a classic-script IIFE publishing one custom element, because the canvas loader evaluates modules as text through `new Function`. |
-| `support.js` | The Claude Design runtime, generated from `dc-runtime/src/*.ts` and not edited by hand: it parses the `<x-dc>` template out of the document, binds props, walks and re-renders text nodes, and resolves `<x-import>` elements against globals such as `angel-map` and `angel-ppg`. It expects `window.React` and `window.ReactDOM` and fetches them from unpkg only if they are absent, which is why `vendor/react/` is loaded first. |
+| `support.js` | The Design Canvas runtime, generated from `dc-runtime/src/*.ts` and not edited by hand: it parses the `<x-dc>` template out of the document, binds props, walks and re-renders text nodes, and resolves `<x-import>` elements against globals such as `angel-map` and `angel-ppg`. It expects `window.React` and `window.ReactDOM` and fetches them from unpkg only if they are absent, which is why `vendor/react/` is loaded first. |
 | `index.html` | The design build: a 7,565-line canvas document carrying every screen's markup, the `text/x-dc` script that drives them, the component manifest, and the `x-import` slots for the live waveform and the docked map. Loads the vendored React pair, `support.js`, `js/telemetry.js` and `js/dataproducts.js`, and carries the favicon inline so no `/favicon.ico` request is ever issued. |
 | `design.html` | Byte-identical copy of `index.html` (md5 `61e4da7c…`), kept under the name the design canvas addresses it by. |
 | `console.html` | The analyst console shell: declares the thirteen stylesheets by hand in load order (`theme.css` first so tokens resolve, `polish.css` after the shell sheet, `scale.css` last) and loads the forty-two modules of `app/js/` that make up the console. This is the surface the map, terminal, evidence and wall panes actually live on. |
@@ -125,7 +125,7 @@ Load order is declared by hand in each shell and is load-bearing: `theme.css` fi
 | File | What it does |
 |---|---|
 | `theme.css` | The single source of colour: one token contract declared four times, once per theme, selected by `body[data-theme="KEY"]`. Deaths are never green, triage stays doctrinal, and no hue between 285 and 350 above 35% saturation is permitted. |
-| `design.css` | The design system extracted verbatim from the Claude Design canvas — colour in oklch, type, spacing and component shape — and the only place a new colour or type size may be introduced. |
+| `design.css` | The design system extracted verbatim from the Design Canvas — colour in oklch, type, spacing and component shape — and the only place a new colour or type size may be introduced. |
 | `app.css` | The console shell: layout, panes, cards, tables, the command bar and the rail, driven from the custom properties it declares as a floor for a document that has lost the theme attribute. |
 | `fonts.css` | Declares the three families as local `@font-face` rules against the woff2 files in `app/fonts/`, replacing the canvas's `fonts.googleapis.com` link so the first paint issues no off-origin request. |
 | `polish.css` | The cross-cutting pass loaded third: fixes shell layout faults at densities the original design did not reach, reconciles separately authored panes onto the host's `.pane`/`.paneHead`/`.card` idiom, and carries the command palette and shortcut sheet chrome. |
@@ -215,14 +215,14 @@ Build-time scripts. They run once, offline, and produce the files in `app/models
 
 ## `design/`
 
-The Claude Design canvases the console's visual language was extracted from, kept for provenance. These are the design artefacts, not the application: `app/` is what runs.
+The Design Canvases the console's visual language was extracted from, kept for provenance. These are the design artefacts, not the application: `app/` is what runs.
 
 | File | What it does |
 |---|---|
 | `ANGEL_SWARM.dc.html` | The original canvas — the nine destinations, the rail, the command bar and the `isCas`/`isDec`/`isFeed` blocks that `app/css/design.css` and the page modules were built from. |
 | `ANGEL_SWARM-v2.dc.html` | The larger second canvas, 3,122 lines, carrying the expanded screen set. |
 | `Homepage_Directions.dc.html` | The homepage direction studies, in canvas mode with its own type ramp. |
-| `support.js` | Byte-identical copy of `app/support.js` — the Claude Design runtime — so the canvases open standalone. |
+| `support.js` | Byte-identical copy of `app/support.js` — the Design Canvas runtime — so the canvases open standalone. |
 | `angel-engine.js` | The canvas-era engine: a small self-contained deterministic run model with its own PRNG, platform table and `buildRun()`/`snapshot()`. It is superseded by `app/angel-engine.js`, which computes nothing itself and reads the shipped engine's ledgers instead; this copy is kept so the canvases still render. |
 | `theater-map.js` | The canvas-era GPU map, drawing WebGL2 geometry through a perspective camera over CartoDB raster tiles. It is superseded and not shipped: the application's maps are `app/js/theater.js`, `map.js`, `geo3d.js` and `theater3d.js`, and none of them fetches a tile. |
 

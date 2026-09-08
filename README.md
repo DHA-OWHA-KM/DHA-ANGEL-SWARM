@@ -6,7 +6,7 @@ The whole thing is one static binary and a folder. It installs nothing, writes n
 
 > `UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
 >
-> **Version:** v6.5, 5 September 2026
+> **Version:** v1.0, 5 September 2026
 > **AOR in the shipped scenarios:** PACOM and EUCOM — seven theatres, `PACOM_CORAL` by default
 > **Default posture:** NOT DEPLOYED, on purpose — press **Deploy** to hand tasking authority to the system mid-fight
 > **Author:** Junayd S. Park, DHA Office of Warfighter Health Advantage · Team DHA RESCUE · NDIA Hackathon 2026
@@ -535,7 +535,7 @@ DoDI 8510.01 · DoD Cloud Computing SRG · NIST SP 800-37, 800-53 Rev. 5, 800-17
 
 ### Differences from the v6.5 package
 
-This repository is the v6.5 package, restructured for publication. **No file that the application loads was modified.** The changes are:
+This repository is the v6.5 package, restructured and renumbered for publication as v1.0. **No application logic was modified** — the only edits inside files the application loads are comments and one label in the dependency table. The changes are:
 
 | Change | Why |
 |---|---|
@@ -544,6 +544,8 @@ This repository is the v6.5 package, restructured for publication. **No file tha
 | A `.md` rendering created for every document and a `README.md` for every folder | So the whole repository is readable in the browser without downloading anything. |
 | The eight prebuilt binaries un-ignored in `.gitignore`; `train/train.log` re-admitted | So a plain ZIP download is a working program. Reasoning is inline in `.gitignore`. |
 | This `README.md` rewritten | The v6.5 README's links pointed at `OUT/`, `RESEARCH/` and `cmd/` — paths that do not exist in this layout. Preserved unchanged at [`Documentation/README-original-v6.5.md`](Documentation/README-original-v6.5.md). |
+| Version renumbered to **v1.0** | Public release numbering. Applied to the current-version markers only; the recorded build history (v1.1–v6.5) is unchanged in the changelog, and `CHECKSUMS.txt` is preserved as the v6.5 package record. |
+| The vendored canvas runtime is referred to as **Design Canvas** | Naming normalised across the document set, the CSS headers and the in-app dependency table. `app/support.js` itself is byte-for-byte unchanged; its SBOM entry, hash and size are unchanged. |
 | `CHECKSUMS-REPO.txt` added | `CHECKSUMS.txt` records the original package paths and is preserved unchanged; this one records the repository layout. See [`CHECKSUMS.md`](CHECKSUMS.md). |
 
 ---

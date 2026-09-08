@@ -253,7 +253,7 @@ record.** Both **UNVERIFIED**. Do not mention either.
 - ONC 2026 approved SVAP standards (FHIR/US Core) — https://healthit.gov/blog/standards/advancements-in-health-it-oncs-2026-approved-svap-standards/
 
 **Internal (ANGEL SWARM repo, read for claim verification only)**
-- `/home/claude/angel/OUT/ANGEL-SWARM-SECURITY-AND-ATO.md` — CoT listener is receive-only, off by default, loopback unless `-cot-external`
-- `/home/claude/angel/OUT/ANGEL-SWARM-ARCHITECTURE.md` — same, plus the 4,151-resource FHIR-shaped bundle
-- `/home/claude/angel/OUT/ANGEL-SWARM-use-case.md` — FHIR resource breakdown and the not-conformance-tested caveat
-- `/home/claude/angel/app/js/sim.js` lines 184–188 — airframe envelope parameters
+- `/home/build/angel/OUT/ANGEL-SWARM-SECURITY-AND-ATO.md` — CoT listener is receive-only, off by default, loopback unless `-cot-external`
+- `/home/build/angel/OUT/ANGEL-SWARM-ARCHITECTURE.md` — same, plus the 4,151-resource FHIR-shaped bundle
+- `/home/build/angel/OUT/ANGEL-SWARM-use-case.md` — FHIR resource breakdown and the not-conformance-tested caveat
+- `/home/build/angel/app/js/sim.js` lines 184–188 — airframe envelope parameters

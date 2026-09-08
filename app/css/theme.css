@@ -4,7 +4,7 @@
    token contract, declared four times. Nothing else in this tree is allowed
    to carry a hex literal for a semantic quantity.
 
-   Contract: /home/claude/angel/THEME_CONTRACT.md
+   Contract: /home/build/angel/THEME_CONTRACT.md
      · body[data-theme="KEY"] — one attribute write switches every surface.
      · Deaths are NEVER green. "fewer dead", never "lives saved".
      · Triage stays doctrinal: IMMEDIATE red · DELAYED yellow · MINIMAL green
@@ -248,8 +248,8 @@ body[data-theme] .band{
    the worst of them, subject to the destinations whose hue the contract
    already decides. Reproduce it with
 
-       node /home/claude/angel/navsearch.mjs      re-run the search
-       node /home/claude/angel/navcheck.mjs --table   score this table
+       node /home/build/angel/navsearch.mjs      re-run the search
+       node /home/build/angel/navcheck.mjs --table   score this table
 
    Measured on this table:
      worst adjacent pair, protan/deutan   ΔE 8.20  (high-contrast,
@@ -305,7 +305,7 @@ body[data-theme] [data-view="SETTINGS"]  {--niC:var(--nav-olive)}
 /* ==========================================================================
    MEASURED — every coloured text run in this application, against the surface
    it actually sits on, per theme. 79 runs each. Produced by
-   /home/claude/angel/themecontrast.mjs, which imports `contrast` and
+   /home/build/angel/themecontrast.mjs, which imports `contrast` and
    `validate` from the dataviz skill's validator rather than carrying a second
    implementation of the same arithmetic.
 
@@ -366,9 +366,9 @@ body[data-theme] [data-view="SETTINGS"]  {--niC:var(--nav-olive)}
    re-checks that rather than trusting this sentence.
 
    Generated and verified by:
-     /home/claude/angel/navpal.mjs     token extraction + OKLab/CVD maths
-     /home/claude/angel/navsearch.mjs  the assignment search
-     /home/claude/angel/navcheck.mjs   the score for the shipped table
+     /home/build/angel/navpal.mjs     token extraction + OKLab/CVD maths
+     /home/build/angel/navsearch.mjs  the assignment search
+     /home/build/angel/navcheck.mjs   the score for the shipped table
    All three import `contrast` from the data-viz validator rather than
    carrying a second implementation of the same arithmetic.
    ========================================================================== */
@@ -402,7 +402,7 @@ body[data-theme] [data-view="SETTINGS"]  {--niC:var(--nav-olive)}
 
    Hue in sRGB HSL is 259-262 across the four themes, saturation 91-100%.
    None of them is within 285-350, so the pink ban holds. Verified by
-   /home/claude/angel/provcheck.mjs, which reads the tokens out of a running
+   /home/build/angel/provcheck.mjs, which reads the tokens out of a running
    page rather than out of this comment.
 
    The DETERMINISTIC stamp — the optimiser's mark — deliberately adds no

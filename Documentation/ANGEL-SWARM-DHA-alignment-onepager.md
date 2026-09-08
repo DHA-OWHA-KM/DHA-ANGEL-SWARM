@@ -1,7 +1,7 @@
 # ANGEL SWARM against the DHA ask — one page
 
 **NDIA Global Defense Hackathon 2026 · Military Health System / Defense Health Agency Combat Support**
-**UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY · Version 6.5 · revised 5 September 2026 against the shipped build**
+**UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY · Version 1.0 · revised 5 September 2026 against the shipped build**
 
 All quotations: Robert Hammer, "Data, technology, people vital for warfighter health advantage, says Defense Health Agency director," Defense Health Agency Communications, Aug. 13, 2026 — https://dha.mil/News/2026/08/14/14/56/Data-technology-people-vital-for-warfighter — reporting the 2026 Defense Health Information Technology Symposium, Aug. 11, New Orleans.
 

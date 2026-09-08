@@ -6,7 +6,7 @@
 
 **UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY**
 
-*Use case document · Version 6.5 · 5 September 2026*
+*Use case document · Version 1.0 · 5 September 2026*
 
 ---
 

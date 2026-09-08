@@ -35,7 +35,7 @@ HQ copies; the application itself loads them from `app/video/` by relative path.
 
 ---
 
-## NEW IN 6.5 — WHERE THIS SITS
+## NEW IN 1.0 — WHERE THIS SITS
 
 The one question this package could not previously answer is the first one a program
 office asks: where does this belong among the things we already fund? It is answered

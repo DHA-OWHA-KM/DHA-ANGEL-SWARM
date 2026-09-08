@@ -2013,7 +2013,7 @@ WHAT CHANGED IN 5.0 — THE DESIGN IS THE APPLICATION
 
   The interface is no longer an interpretation of a design. It IS the design.
 
-  The Claude Design canvas — ANGEL_SWARM-v2.dc.html, its runtime support.js,
+  The Design Canvas — ANGEL_SWARM-v2.dc.html, its runtime support.js,
   and its theater-map.js — is served as the application's own front page,
   effectively verbatim. Nobody re-typed a colour, redrew an icon or estimated
   a margin, so none of those can drift. Every previous attempt on this project
@@ -2067,8 +2067,8 @@ WHAT CHANGED IN 5.0 — THE DESIGN IS THE APPLICATION
 
 WHAT CHANGED IN 4.0 — A NEW DESIGN, NOT A NEW COAT OF PAINT
 
-  The interface is rebuilt onto the design the user produced in Claude
-  Design (DESIGN/ANGEL_SWARM.dc.html). Every previous version of this
+  The interface is rebuilt onto the design the user produced in Design
+  Canvas (DESIGN/ANGEL_SWARM.dc.html). Every previous version of this
   console was an argument with itself about layout. This one has a drawing
   to answer to.
 

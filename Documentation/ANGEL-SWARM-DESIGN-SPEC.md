@@ -1,6 +1,6 @@
 # ANGEL SWARM — design specification
 
-**For Claude Design.** Every feature, what it does, what the operator expects, and what comes back.
+**For Design Canvas.** Every feature, what it does, what the operator expects, and what comes back.
 
 Junayd S. Park · Team DHA RESCUE · NDIA Global Defense Hackathon 2026
 Version 1.3 · 5 September 2026 · **current as of v6.4**

@@ -1605,7 +1605,7 @@
       "type": "file",
       "bom-ref": "src:app/index.html",
       "name": "app/index.html",
-      "description": "The shipped single-page application (Claude Design canvas template plus component logic).",
+      "description": "The shipped single-page application (Design Canvas template plus component logic).",
       "scope": "required",
       "hashes": [
         {
@@ -1698,7 +1698,7 @@
       "type": "file",
       "bom-ref": "src:app/support.js",
       "name": "app/support.js",
-      "description": "Claude Design canvas runtime (React-based renderer for the x-dc template).",
+      "description": "Design Canvas runtime (React-based renderer for the x-dc template).",
       "scope": "required",
       "hashes": [
         {

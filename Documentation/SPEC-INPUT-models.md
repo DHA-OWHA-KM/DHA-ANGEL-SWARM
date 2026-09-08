@@ -1,6 +1,6 @@
 # SPEC INPUT — Models, analysis, data, ingest, maps, provenance, roles
 
-Factual inventory of everything at `/home/claude/angel/app` **except** the simulation
+Factual inventory of everything at `/home/build/angel/app` **except** the simulation
 engine (`sim.js`, `optimizer.js` step loop, `app.js` lifecycle), which a parallel
 document covers. Every claim below cites a file and line. Where a figure on screen
 cannot be traced to a source in the repository it is called out explicitly in
@@ -766,7 +766,7 @@ engagements" on either pane moves both.
 ### 3.5 The IL5 deployment cost analysis
 
 `OUT/ANGEL-SWARM-IL5-deployment-cost-impact-analysis.md` (also `.docx`, also in the
-claude.ai project). **It is a document, not a screen** — nothing under `app/js/`
+design canvas project). **It is a document, not a screen** — nothing under `app/js/`
 references IL5. Its architecture assertions do check out against this repo: three
 models run locally in the browser on CPU; a 104,162-parameter 1-D CNN via ONNX
 Runtime Web; a 22.9 MB int8 sentence encoder; an optional small LM via

@@ -1,7 +1,7 @@
 /* ==========================================================================
    ANGEL SWARM — THE SHELL
    ==========================================================================
-   The navigation, the chrome and the page frame, rebuilt to the Claude Design
+   The navigation, the chrome and the page frame, rebuilt to the Design Canvas
    canvas in DESIGN/ANGEL_SWARM.dc.html.
 
    NINE DESTINATIONS, NOT TWENTY-FOUR. The canvas draws nine and the

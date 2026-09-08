@@ -2312,7 +2312,7 @@ const SRC_DEFS = [
     note: 'Vendored and loaded first so the design runtime finds window.React already present and never requests it from unpkg.com.' },
   { n: 'ReactDOM 18.3.1', ty: 'DOM renderer · UMD production', or: 'app/vendor/react/react-dom.production.min.js', fe: 'This canvas', del: 'IN BUILD', st: 'LOADED', sz: '131,835 B',
     note: 'Same reason as React above: the off-origin fetch is short-circuited before it can be made.' },
-  { n: 'Claude Design runtime', ty: 'template and component runtime', or: 'app/support.js', fe: 'Binds every value rendered on every screen here', del: 'IN BUILD', st: 'LOADED', sz: 'in build',
+  { n: 'Design Canvas runtime', ty: 'template and component runtime', or: 'app/support.js', fe: 'Binds every value rendered on every screen here', del: 'IN BUILD', st: 'LOADED', sz: 'in build',
     note: 'The {{ }} holes in this page are resolved by it. It fetches nothing once React is already on the page.' },
   { n: 'Vendored typefaces', ty: '11 woff2 faces · IBM Plex Sans, IBM Plex Mono, Barlow Condensed', or: 'app/fonts/', fe: 'Every glyph on every screen', del: 'IN BUILD', st: 'LOADED', sz: '220,156 B',
     note: 'No font host is contacted. A build that fetched its type would make a request off its own origin, and this one makes none.' },

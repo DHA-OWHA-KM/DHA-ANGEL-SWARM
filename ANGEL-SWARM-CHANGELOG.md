@@ -1061,7 +1061,7 @@ UNCHANGED, AND CHECKED: seed 42 gives ANGEL SWARM 23 dead of survivable wounds o
 
 The interface is no longer an interpretation of a design. It IS the design.
 
-The Claude Design canvas — ANGEL_SWARM-v2.dc.html, its runtime support.js, and its theater-map.js — is served as the application's own front page, effectively verbatim. Nobody re-typed a colour, redrew an icon or estimated a margin, so none of those can drift. Every previous attempt on this project failed at exactly that seam.
+The Design Canvas — ANGEL_SWARM-v2.dc.html, its runtime support.js, and its theater-map.js — is served as the application's own front page, effectively verbatim. Nobody re-typed a colour, redrew an icon or estimated a margin, so none of those can drift. Every previous attempt on this project failed at exactly that seam.
 
 WHAT WAS REPLACED IS THE ENGINE UNDERNEATH, NOT THE INTERFACE ON TOP. The canvas shipped with a 29 KB simulation of its own — good enough to make the screens move, not good enough to defend. It is gone. In its place is an adapter exposing the identical contract — buildRun(), snapshot(), tally(), WORLD, PAYLOADS, PLATFORMS — computed from the real engine: the two-arm simulation, the constrained tasking optimiser, the paired replication study, the hash-chained audit record.
 
@@ -1081,7 +1081,7 @@ THE OLD CONSOLE IS NOT DELETED. It is at /console.html, working, for anything th
 
 ## WHAT CHANGED IN 4.0 — A NEW DESIGN, NOT A NEW COAT OF PAINT
 
-The interface is rebuilt onto the design the user produced in Claude Design (DESIGN/ANGEL_SWARM.dc.html). Every previous version of this console was an argument with itself about layout. This one has a drawing to answer to.
+The interface is rebuilt onto the design the user produced in Design Canvas (DESIGN/ANGEL_SWARM.dc.html). Every previous version of this console was an argument with itself about layout. This one has a drawing to answer to.
 
 NINE DESTINATIONS, NOT TWENTY-FOUR. Command Overview, Live Casualties, Decision, Decision Feed, Analyst Terminal, Ops Center Wall, Evidence, Ask ANGEL, Theater Map. Nothing was deleted: the other fifteen destinations are tabs inside the nine, and the mapping is written down in one place — SECTIONS at the top of js/shell.js — rather than being discoverable only by clicking.
 

@@ -1,12 +1,12 @@
 # ANGEL SWARM — SPEC INPUT: FEATURES, CONTROLS AND STATES
 
-**Scope.** The user-facing surface of `/home/claude/angel/app`, as served at
+**Scope.** The user-facing surface of `/home/build/angel/app`, as served at
 `http://127.0.0.1:8791`. Read-only inventory. Nothing in the application was modified.
 
-**Method.** Source read at `/home/claude/angel/app/js/*.js` and `index.html`; every behavioural claim
+**Method.** Source read at `/home/build/angel/app/js/*.js` and `index.html`; every behavioural claim
 below was then verified in headless Chromium (SwiftShader, 1600×1000) driving the real build. Screenshots
 of every state are in
-`/tmp/claude-0/-home-claude/8be0bac1-19e5-5a26-a5c6-5999484e54f4/scratchpad/shots/`.
+`/tmp/build-0/-home-build/8be0bac1-19e5-5a26-a5c6-5999484e54f4/scratchpad/shots/`.
 
 **Two registers are used throughout and are never merged:**
 
@@ -694,10 +694,10 @@ Stated because a designer redrawing every screen should know which behaviours we
 | `css/design.css` | — | The allow-list at line 317 that governs everything above |
 | `index.html` | 1754 | The old chrome, the 24 panes, and every dialog |
 
-**Screenshots.** `/tmp/claude-0/-home-claude/8be0bac1-19e5-5a26-a5c6-5999484e54f4/scratchpad/shots/` —
+**Screenshots.** `/tmp/build-0/-home-build/8be0bac1-19e5-5a26-a5c6-5999484e54f4/scratchpad/shots/` —
 `cold-*.png` (all nine + settings), `deployed-*.png`, `early-*.png`, `pending-*.png`, `finished-*.png`,
 `tab-*.png` (every tab of every tabbed destination), `deploy-modal.png`, `deploying.png`, `runmodal.png`,
 `acct.png`, `keysheet.png`, `palette*.png`, `undeployed-running-*.png`, `loading-*.png`, `toast-1.png`.
 
-**Related.** `/home/claude/angel/DEAD-CONTROLS.md` audits the **old 24-view rail** (1131 presses, 7 dead
+**Related.** `/home/build/angel/DEAD-CONTROLS.md` audits the **old 24-view rail** (1131 presses, 7 dead
 controls) and does not cover the nine-destination shell; this document does. The two do not overlap.

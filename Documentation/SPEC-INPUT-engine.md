@@ -1,6 +1,6 @@
 # ANGEL SWARM — Engine Inventory (input to the design specification)
 
-Factual inventory of the simulation engine at `/home/claude/angel/app`, read from
+Factual inventory of the simulation engine at `/home/build/angel/app`, read from
 source. Every claim cites `file:line`. Nothing here is a design recommendation and
 nothing here describes the current UI.
 
@@ -8,9 +8,9 @@ Sources of truth:
 
 | File | Lines | Role |
 |---|---|---|
-| `/home/claude/angel/app/js/sim.js` | 1013 | Constants, scenarios, terrain, casualty/drone construction, world + arm construction |
-| `/home/claude/angel/app/js/optimizer.js` | 1137 | Both allocators, HITL/proposals, audit chain, flight mechanics, delivery resolution, death causes |
-| `/home/claude/angel/app/js/app.js` | 6586 | `APP` state, `COUNT` counting contract, run lifecycle, deployment, telemetry/polling, exports |
+| `/home/build/angel/app/js/sim.js` | 1013 | Constants, scenarios, terrain, casualty/drone construction, world + arm construction |
+| `/home/build/angel/app/js/optimizer.js` | 1137 | Both allocators, HITL/proposals, audit chain, flight mechanics, delivery resolution, death causes |
+| `/home/build/angel/app/js/app.js` | 6586 | `APP` state, `COUNT` counting contract, run lifecycle, deployment, telemetry/polling, exports |
 
 Load order matters: all three are classic scripts. `sim.js` and `optimizer.js` are
 plain top-level `const`/`function` declarations shared by bare name; `app.js`
