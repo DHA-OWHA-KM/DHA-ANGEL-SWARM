@@ -223,7 +223,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px">
 <span onClick="{{ interrupt.review }}" role="button" tabindex="0" style="cursor:pointer;padding:10px 16px;border-radius:4px;background:oklch(0.72 0.15 75);color:oklch(0.18 0.03 75);font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.08em">REVIEW DECISIONS</span>
 <span onClick="{{ interrupt.dismiss }}" role="button" tabindex="0" style="cursor:pointer;padding:9px 14px;border-radius:4px;border:1px solid oklch(0.36 0.012 250);color:oklch(0.72 0.008 250);font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.07em">REMAIN ON THIS SCREEN</span>
-<span style="font:600 9px 'IBM Plex Mono',monospace;color:oklch(0.61 0.008 250);margin-left:auto">SIMULATED TIME CONTINUES · DECISION PACE</span>
+<span style="font:600 9px 'IBM Plex Mono',monospace;color:oklch(0.61 0.008 250);margin-left:auto">SIMULATED TIME CONTINUES</span>
 </div></div></div></div></div>
 </sc-if>
 
@@ -2960,22 +2960,7 @@ class Component extends DCLogic {
     const fresh = pending.some(p => !known.has(p.id));
     pending.forEach(p => known.add(p.id));
     this._knownPending = known;
-    if (fresh) {
-      /* Keep the exercise live, but do not let an accelerated demo setting
-         consume an eight-minute authority window in two wall-clock seconds.
-         Decision pace advances at one simulated quarter-minute per second,
-         giving the operator roughly half a minute to review the escalation. */
-      if (!this._decisionPace) {
-        this._preDecisionSpeed = this.state.speed;
-        this._decisionPace = true;
-      }
-      this.setState({ speed: 0.25, interruptOpen: true });
-    } else if (!pending.length && this._decisionPace) {
-      const speed = this._preDecisionSpeed || 4;
-      this._decisionPace = false;
-      this._preDecisionSpeed = null;
-      this.setState({ speed });
-    }
+    if (fresh) this.setState({ interruptOpen: true });
   }
   componentWillUnmount() {
     if (window.ANGEL_DESIGN && window.ANGEL_DESIGN.setScenario) delete window.ANGEL_DESIGN;
@@ -3016,12 +3001,10 @@ class Component extends DCLogic {
     return () => {
       const st = this.state;
       if (st.cfg.flightVariability === value || !this.E) return;
-      const speed = this._decisionPace ? (this._preDecisionSpeed || 4) : st.speed;
-      this._decisionPace = false; this._preDecisionSpeed = null;
       this.buildBoth(st.scenario, value);
       this.setState({
         cfg: { ...st.cfg, flightVariability: value },
-        t: 0, running: false, speed, resOpen: false, resetOpen: false,
+        t: 0, running: false, resOpen: false, resetOpen: false,
         expand: null, showAll: false, q: '', casFilter: 'ALL',
         decisions: {}, extra: [], thread: [],
         wgSweep: null, wgRanLever: null, wgError: null
@@ -3039,11 +3022,9 @@ class Component extends DCLogic {
   pickScenario(key) {
     return () => {
       if (this.state.scenario === key || !this.E) return;
-      const speed = this._decisionPace ? (this._preDecisionSpeed || 4) : this.state.speed;
-      this._decisionPace = false; this._preDecisionSpeed = null;
       wgSyncScenario(this.E, key);
       this.buildBoth(key);
-      this.setState({ scenario: key, t: 0, running: false, speed, resOpen: false,
+      this.setState({ scenario: key, t: 0, running: false, resOpen: false,
                       expand: null, showAll: false, q: '', casFilter: 'ALL',
                       thread: [], wgSweep: null, wgRanLever: null, wgError: null });
       /* AND THE MAP GOES WITH IT. Two engines run here — this shell's, and
@@ -3229,9 +3210,7 @@ class Component extends DCLogic {
     this.depTotal = 0; this._fin = null; this._finKey = null;
     this._mapCatchAt = null; this._mapCatchN = 0;
     this._knownPending = new Set();
-    const speed = this._decisionPace ? (this._preDecisionSpeed || 4) : this.state.speed;
-    this._decisionPace = false; this._preDecisionSpeed = null;
-    this.setState({ ...this.COLD, speed });
+    this.setState({ ...this.COLD });
   }
 
   /* ---- THE RUN AFTER IT ENDS --------------------------------------------
@@ -3738,13 +3717,7 @@ class Component extends DCLogic {
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
     go.flightVariability = value => this.flightVariability(value);
     const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
-    const speeds = [0.25, 1, 2, 4, 10].map(v => ({
-      label: v === 0.25 ? '¼×' : v + '×', ...seg(st.speed === v, 165),
-      on: () => {
-        this._decisionPace = false; this._preDecisionSpeed = null;
-        this.setState({ speed: v });
-      }
-    }));
+    const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
 
     if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
 
@@ -3772,10 +3745,10 @@ class Component extends DCLogic {
       badge: { cas: s.open || null, data: s.commsDown ? 1 : null, ...this.decChip(s) },
       posture: this.posture(s), pa: this.primary(s, finished),
       interrupt: {
-        show: !!st.interruptOpen && s.pending.length > 0,
-        title: s.pending.length === 1 ? 'A decision is waiting for you' : s.pending.length + ' decisions are waiting for you',
-        copy: 'A newly escalated tasking is outside standing authority. The simulation is still running at decision pace; review it before the eight-minute decision window expires.',
-        remaining: s.pending.length ? this.mmss(Math.max(0, s.pending[0].tRaised + 8 - st.t)) : '00:00',
+        show: !!st.interruptOpen && this.pendingFor(s).length > 0,
+        title: this.pendingFor(s).length === 1 ? 'A decision is waiting for you' : this.pendingFor(s).length + ' decisions are waiting for you',
+        copy: 'A newly escalated tasking is outside standing authority. The simulation is still running at your selected speed; review it before the eight-minute decision window expires.',
+        remaining: this.pendingFor(s).length ? this.mmss(Math.max(0, this.pendingFor(s)[0].tRaised + 8 - st.t)) : '00:00',
         review: () => this.setState({ page: 'dec', expand: null, interruptOpen: false }),
         dismiss: () => this.setState({ interruptOpen: false })
       },
@@ -3794,6 +3767,7 @@ class Component extends DCLogic {
 
   opsVals(s) {
     const st = this.state, cold = !st.deployed && st.t === 0, fin = st.t >= 180;
+    const pending = this.pendingFor(s);
     const F = fin ? this.fin() : null;
     const band = fin ? [
       /* THE WALL STATES THE RESULT AS FINAL. Every figure it carried while the
@@ -3834,7 +3808,7 @@ class Component extends DCLogic {
         ? { label: 'TIGHTEST DEADLINE', val: this.mmss(s.tightest.tRem), unit: 'MIN', sub: s.tightest.cid + ' · ' + s.tightest.site, hue: s.tightest.tRem < 8 ? 25 : 75 }
         : { label: 'TIGHTEST DEADLINE', val: 'NONE', unit: '', sub: cold ? 'no casualty admitted yet' : 'no casualty is inside a deadline this system holds', hue: 250 },
       { label: 'UNREACHABLE IN TIME', val: String(s.unreachable), unit: s.unreachable === 1 ? 'CASUALTY' : 'CASUALTIES', sub: s.unreachable ? s.rows.filter(r => r.reach === 0).slice(0, 3).map(r => r.cid).join(' · ') : 'every open casualty is inside the reach of an aircraft', hue: s.unreachable ? 25 : 165 },
-      { label: 'AWAITING AUTHORITY', val: s.pending.length ? String(s.pending.length) : 'NONE', unit: s.pending.length ? 'DECISION' : '', sub: s.pending.length ? s.pending[0].call + ' → ' + this.cidOf(s.pending[0].casId) + ' · ' + s.pending[0].grounds[0] : 'nothing is outside standing authority', hue: s.pending.length ? 75 : 250 }
+      { label: 'AWAITING AUTHORITY', val: pending.length ? String(pending.length) : 'NONE', unit: pending.length ? 'DECISION' : '', sub: pending.length ? pending[0].call + ' → ' + this.cidOf(pending[0].casId) + ' · ' + pending[0].grounds[0] : 'nothing is outside standing authority', hue: pending.length ? 75 : 250 }
     ];
     return {
       isOps: st.page === 'ops',
@@ -4745,10 +4719,10 @@ class Component extends DCLogic {
       return RUN({
         prose: s.escalated + ' escalation' + (s.escalated === 1 ? ' was' : 's were') + ' raised in this run. ' +
           s.approved + ' ' + (s.approved === 1 ? 'was' : 'were') + ' authorised and ' + s.lapsed + ' lapsed unactioned' +
-          (fin ? '.' : ', with ' + s.pending.length + ' still open.') +
+          (fin ? '.' : ', with ' + this.pendingFor(s).length + ' still open.') +
           ' An authority that lapses is a decision the record has to show as one, so it is counted rather than quietly dropped.',
         figures: [F('Raised', s.escalated), F('Authorised', s.approved), F('Lapsed unactioned', s.lapsed),
-                  F('Still open', fin ? 0 : s.pending.length),
+                  F('Still open', fin ? 0 : this.pendingFor(s).length),
                   ...esc.slice(0, 4).map(e => F(e.eid + ' · ' + e.summary, e.state || e.st || '')),
                   F('As at', asAt)],
         cite: 'Escalation record · every proposal raised, with what became of it, at ' + asAt });
@@ -5948,7 +5922,6 @@ class Component extends DCLogic {
       isData: st.page === 'data',
       resetAll: () => {
         if (st.cfg.flightVariability && this.E) this.buildBoth(st.scenario, false);
-        this._decisionPace = false; this._preDecisionSpeed = null;
         this.setState({
           cfg: { hitl: true, mode: 'fair', ingest: true, bar: 25, flightVariability: false },
           t: 0, running: false, resOpen: false, resetOpen: false,
@@ -6352,7 +6325,7 @@ class Component extends DCLogic {
            died yet — this is a projection, and red in this application is
            reserved for what actually happened. */
         f: r.slack == null ? 'NO ASSET' : (r.slack >= 0 ? '+' : '') + Math.round(r.slack), fFg: (r.slack == null || r.slack < 0) ? AMB : N })), out: s.rows.length ? '' : 'no casualty is inside a deadline this system holds' },
-      { cmd: 'angel escalations', out: s.escalated ? s.escalated + ' raised · ' + s.approved + ' authorised · ' + s.lapsed + ' lapsed · ' + s.pending.length + ' pending' : 'nothing is waiting on a person' },
+      { cmd: 'angel escalations', out: s.escalated ? s.escalated + ' raised · ' + s.approved + ' authorised · ' + s.lapsed + ' lapsed · ' + this.pendingFor(s).length + ' pending' : 'nothing is waiting on a person' },
       { cmd: 'angel compare --baseline doctrinal-push --same-inputs', out: !S ? 'ANGEL SWARM is not deployed. There is no allocation to compare.' : !s.readable ? 'not yet readable — ' + s.resolvedSurv + ' of the survivable cohort resolved, floor is 10' : s.dA + ' vs ' + s.dB + ' survivable deaths · ' + (s.delta > 0 ? s.delta + ' fewer dead' : 'level') },
       { cmd: 'record verify --chain', out: 'chain intact · ' + s.auditN + ' entries · head sha256 ' + this.hashShort(s.feed[0] ? s.feed[0].hash : null) + ' (first 12 of 64)' }
     ];
@@ -6447,7 +6420,8 @@ class Component extends DCLogic {
 
   decVals(s) {
     const st = this.state, A = this.run().A, cold = !st.deployed && st.t === 0;
-    const p = s.pending[0];
+    const pending = this.pendingFor(s);
+    const p = pending[0];
     const decided = p ? st.decisions[p.id] : null;
     const handled = A.audit.filter(e => e.t <= st.t && e.action === 'AUTO-DISPATCH').slice(-6).reverse()
       .map(e => {
@@ -6464,8 +6438,10 @@ class Component extends DCLogic {
     const act = (kind) => () => {
       if (!p) return;
       const prev = A.audit.filter(e => e.t <= st.t).slice(-1)[0];
+      const others = pending.filter(x => x.id !== p.id);
       this.setState({
         decisions: { ...st.decisions, [p.id]: kind },
+        page: 'map', expand: null, interruptOpen: others.length > 0,
         extra: st.extra.concat([(() => {
           /* The operator's own row. It used to carry an invented number
              dressed up as a hash, which is exactly the thing this screen
@@ -6496,7 +6472,7 @@ class Component extends DCLogic {
       escLogSub: fin ? 'RUN COMPLETE · EVERY ONE CLOSED' : 'AS AT T+' + Math.floor(st.t),
       isDecPending: !!p && !decided, isDecDone: !!p && !!decided, isDecIdle: !p,
       dec: p ? {
-        chip: (s.pending.length) + (s.pending.length === 1 ? ' DECISION REQUIRES YOU' : ' DECISIONS REQUIRE YOU'),
+        chip: pending.length + (pending.length === 1 ? ' DECISION REQUIRES YOU' : ' DECISIONS REQUIRE YOU'),
         eid: 'E-' + String(p.id).padStart(4, '0'), summary: p.call + ' → ' + this.cidOf(p.casId),
         raised: 'RAISED T+' + p.tRaised.toFixed(1), elapsed: this.mmss(Math.max(0, st.t - p.tRaised)),
         lapse: this.mmss(Math.max(0, p.tRaised + 8 - st.t)),
@@ -6506,7 +6482,7 @@ class Component extends DCLogic {
         bTitle: 'OPTION B · HOLD', bServe: p.altId ? this.cidOf(p.altId) : '—',
         grounds: p.grounds, decision: decided,
         recAction: rec ? rec.action : '', recSeq: rec ? '#' + String(rec.seq).padStart(4, '0') : '', recHash: rec ? this.hashShort(rec.hash) : '', recDetail: rec ? rec.detail : '',
-        others: s.pending.slice(1).map(o => ({ eid: 'E-' + String(o.id).padStart(4, '0'), summary: o.call + ' → ' + this.cidOf(o.casId), grounds: o.grounds.join(' · ') }))
+        others: pending.slice(1).map(o => ({ eid: 'E-' + String(o.id).padStart(4, '0'), summary: o.call + ' → ' + this.cidOf(o.casId), grounds: o.grounds.join(' · ') }))
       } : {},
       decApprove: act('APPROVED'), decHold: act('HELD'),
       decIdle: {
@@ -6548,6 +6524,7 @@ class Component extends DCLogic {
 
   feedVals(s) {
     const st = this.state;
+    const pending = this.pendingFor(s);
     const TAG = {
       'ESCALATE': ['ESCALATED', 75], 'AUTO-DISPATCH': ['AUTHORISED · STANDING', 165], 'APPROVE': ['AUTHORISED AFTER ESCALATION', 165],
       'REJECT': ['WITHHELD', 250], 'TREAT': ['DELIVERED', 195], 'NOT-PREVENTED': ['NOT PREVENTED', 25], 'WASTE': ['WASTED', 25],
@@ -6563,7 +6540,7 @@ class Component extends DCLogic {
         time: this.pad(Math.floor(zulu / 60)) + this.pad(Math.floor(zulu % 60)) + 'Z',
         tag: label, tagBg: 'oklch(0.26 0.05 ' + hue + ')', tagFg: 'oklch(0.9 0.08 ' + hue + ')',
         detail: e.detail, seq: '#' + String(e.seq).padStart(4, '0'), actor: e.actor, hash: 'sha256 ' + this.hashShort(e.hash),
-        hasOpen: e.action === 'ESCALATE' && s.pending.some(p => e.detail.includes('E-' + String(p.id).padStart(4, '0'))),
+        hasOpen: e.action === 'ESCALATE' && pending.some(p => e.detail.includes('E-' + String(p.id).padStart(4, '0'))),
         open: this.go('dec'),
         /* A casualty named in the record is a casualty whose record can be
            opened. The board carries the open cohort while the run is going
@@ -7046,7 +7023,16 @@ class Component extends DCLogic {
   decTally(s) {
     const st = this.state;
     return { took: Object.keys(st.decisions).length, asked: s.escalated || 0,
-             pend: s.pending.length, lapsed: s.lapsed || 0 };
+             pend: this.pendingFor(s).length, lapsed: s.lapsed || 0 };
+  }
+
+  /* The engine frame is a deterministic record of every proposal's scheduled
+     lifetime. Operator answers live in this interactive shell, so a proposal
+     already answered here must no longer be presented as waiting merely
+     because its recorded engine close time has not arrived yet. */
+  pendingFor(s) {
+    const decisions = this.state.decisions || {};
+    return (s && s.pending || []).filter(p => !decisions[p.id]);
   }
 
   decChip(s) {
@@ -7187,7 +7173,7 @@ class Component extends DCLogic {
       : s.rows.slice(0, 8).map(r => this.qRow(r));
     const causeMax = Math.max(1, ...Object.values(s.causes));
     const causes = [['noLaunchPoint', 'No launch point'], ['noResponder', 'No responder'], ['treatedDied', 'Reached, died'], ['tooFast', 'Faster than flight'], ['busy', 'All aircraft busy']].map(([k, l]) => ({ label: l, n: s.causes[k], w: Math.round(s.causes[k] / causeMax * 100) + '%', fill: 'oklch(0.62 0.16 25)' }));
-    const pend = s.pending[0];
+    const pend = this.pendingFor(s)[0];
     const esc = pend ? {
       summary: pend.call + ' → ' + this.cidOf(pend.casId), raised: 'RAISED T+' + pend.tRaised.toFixed(1),
       lapse: 'LAPSES IN ' + this.mmss(Math.max(0, pend.tRaised + 8 - st.t)),
