@@ -72,6 +72,21 @@
   var dock = null, frame = null, W = null, booted = false, bootErr = null;
   var slot = null, lastBox = '';
   var listeners = [];
+  var frameMaskedFor = '';
+
+  function maskFrameFor(s) {
+    if (!frame) return;
+    frameMaskedFor = s || '';
+    frame.style.opacity = frameMaskedFor ? '0' : '1';
+    frame.style.pointerEvents = frameMaskedFor ? 'none' : 'auto';
+  }
+
+  function revealFrame(s) {
+    if (!frame || (s && frameMaskedFor && frameMaskedFor !== s)) return;
+    frameMaskedFor = '';
+    frame.style.opacity = '1';
+    frame.style.pointerEvents = 'auto';
+  }
 
   function ensureDock() {
     if (dock) return dock;
@@ -85,7 +100,9 @@
     frame.id = 'angelMapFrame';
     frame.title = 'ANGEL SWARM map';
     frame.setAttribute('scrolling', 'no');
-    frame.style.cssText = 'display:block;width:100%;height:100%;border:0;background:transparent';
+    frame.style.cssText =
+      'display:block;width:100%;height:100%;border:0;background:transparent;' +
+      'opacity:1;pointer-events:auto';
     frame.src = FRAME_SRC;
     frame.addEventListener('load', onFrameLoad);
     dock.appendChild(frame);
@@ -211,7 +228,13 @@
       stRetried = false;
     }
     if (!s) { showState(''); return; }
-    if (paneLive(s)) { stAt = now; stRetried = false; showState(''); return; }
+    if (paneLive(s)) {
+      revealFrame(s);
+      stAt = now;
+      stRetried = false;
+      showState('');
+      return;
+    }
 
     var age = now - stAt;
     var name = s === 'GLOBE' ? 'THE GLOBE'
@@ -1337,14 +1360,25 @@
       if (s === '3D' && !ready3d()) return false;
       if (s === 'GLOBE') {
         if (!readyGlobe()) return false;
+        revealFrame();
         var ok = globeOn();
         fire();
         return ok;
       }
       /* Leaving the globe is the globe coming down first, so the scale that
-         is arriving mounts into a stage nothing else is holding. */
-      if (globeWanted) globeOff(true, s === 'THEATRE'); // Keep the outgoing frame until Theatre paints.
-      try { W.setMapScope(s); } catch (e) { return false; }
+         is arriving mounts into a stage nothing else is holding. Theatre is
+         masked before the globe is removed and revealed only after its
+         renderer reports a painted frame, so repeated scale switching cannot
+         expose its empty mount or transient loading card. The globe also
+         retains its outgoing frame behind that mask until Theatre paints. */
+      var leavingGlobeForTheatre = globeWanted && s === 'THEATRE';
+      if (leavingGlobeForTheatre) maskFrameFor(s);
+      if (globeWanted) globeOff(true, leavingGlobeForTheatre);
+      try { W.setMapScope(s); }
+      catch (e) {
+        if (leavingGlobeForTheatre) revealFrame();
+        return false;
+      }
       fire();
       return true;
     },
