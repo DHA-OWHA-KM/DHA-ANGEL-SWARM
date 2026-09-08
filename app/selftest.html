@@ -926,6 +926,140 @@ test('the two arms differ in outcome only because they allocate differently', ()
      ' A=' + REF.A.stats.survivableDeaths + ' B=' + REF.B.stats.survivableDeaths);
 });
 
+/* ========================================================================== */
+group('UNIVERSAL SEARCH RUN GATE',
+      'Command-bar matching stays deterministic, and a live run cannot execute navigation.');
+
+const SEARCH_ROWS = [
+  { kind: 'SITE', label: 'SITE CORAL', text: 'SITE CORAL 3d sustainment brigade' },
+  { kind: 'ASSET', label: 'M25-01 · LIGHT', text: 'M25-01 LIGHT KADENA' },
+  { kind: 'CASUALTY', label: 'CAS-007 · MEDIC', text: 'CAS-007 MEDIC SITE CORAL IMMEDIATE' }
+];
+test('allowed search finds casualties, assets, and sites with deterministic ordering', () => {
+  eq(E.universalSearch(SEARCH_ROWS, 'site').map(r => r.kind).join(','), 'CASUALTY,SITE');
+  eq(E.universalSearch(SEARCH_ROWS, 'm25')[0].kind, 'ASSET');
+});
+test('result destinations do not depend on which page launched the command bar', () => {
+  for (const origin of ['dash', 'tty', 'ev', 'setup']) {
+    eq(origin + ':' + E.universalSearchDestination('CASUALTY'), origin + ':cas');
+    eq(origin + ':' + E.universalSearchDestination('ASSET'), origin + ':map');
+    eq(origin + ':' + E.universalSearchDestination('SITE'), origin + ':map');
+  }
+});
+test('empty and no-match queries return explicit empty result sets', () => {
+  eq(E.universalSearch(SEARCH_ROWS, '').length, 0);
+  eq(E.universalSearch(SEARCH_ROWS, 'does-not-exist').length, 0);
+});
+test('a running scenario blocks execution while retaining countdown arithmetic', () => {
+  const x = E.searchExecutionState({ running: true, query: 'CAS-007', durationMin: 180, elapsedMin: 60, speed: 4 });
+  eq(x.allowed, false); eq(x.blocked, true); eq(x.seconds, 30);
+});
+test('countdown follows speed, reaches zero, and permits the pending query after stop', () => {
+  eq(E.searchExecutionState({ running: true, query: 'SITE', durationMin: 180, elapsedMin: 179, speed: 10 }).seconds, 1);
+  const done = E.searchExecutionState({ running: false, query: 'SITE', durationMin: 180, elapsedMin: 180, speed: 10 });
+  eq(done.seconds, 0); eq(done.allowed, true);
+});
+test('completion estimate uses the playback clock rate of speed minutes per second', () => {
+  const ticks = (180 - 60) / (4 * 0.12);
+  near(E.searchExecutionState({ running: true, query: 'SITE', durationMin: 180, elapsedMin: 60, speed: 4 }).seconds,
+       ticks * 0.12, 1e-12);
+});
+test('both canvas entry files carry keyboard, pointer, accessibility, and retry wiring', async () => {
+  const pages = await Promise.all(['index.html', 'design.html'].map(p => fetch('./' + p).then(r => r.text())));
+  for (const html of pages) {
+    ok(html.includes('onKeyDown="{{ search.key }}"'), 'keyboard search wiring absent');
+    ok(html.includes('onMouseDown="{{ r.open }}"'), 'pointer search wiring absent');
+    ok(html.includes('<input role="combobox"'), 'search input is not an accessible combobox');
+    ok(html.includes('aria-live="polite"'), 'accessible search status absent');
+    ok(html.includes('role="button" tabindex="0" onClick="{{ search.retryNow }}" onKeyDown="{{ search.retryKey }}"'),
+       'semantic keyboard retry action absent');
+    ok(html.includes('const gate = this.searchGate()') && html.includes('if (gate.blocked) return this.blockSearch()'),
+       'shared run gate absent from execution');
+    ok(html.includes('universalSearchDestination'), 'cross-page destination wiring absent');
+    ok(html.includes('const currentCasualties = this.state.t >= duration ? this.fin().rows : this.snap().rows'),
+       'search indexes unreachable casualty records');
+    ok(html.includes("w.APP.sel = { kind: 'drone', id }"), 'asset result does not focus its map record');
+  }
+});
+test('the shipped command bar preserves and executes search safely through the run lifecycle', async () => {
+  const frame = document.createElement('iframe');
+  frame.src = './index.html?selftest=search';
+  frame.title = 'Universal search browser regression';
+  frame.style.cssText = 'position:fixed;left:-2000px;top:0;width:1280px;height:800px;border:0';
+  document.body.appendChild(frame);
+  const wait = async (fn, what, limit = 15000) => {
+    const end = performance.now() + limit;
+    while (performance.now() < end) {
+      const value = (() => { try { return fn(); } catch (e) { return null; } })();
+      if (value) return value;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    throw new Error('timed out waiting for ' + what);
+  };
+  try {
+    const input = await wait(() => frame.contentDocument &&
+      frame.contentDocument.querySelector('input[aria-label="Search casualties, assets, and sites"]'), 'command bar');
+    const component = await wait(() => frame.contentWindow.ANGEL_DESIGN &&
+      frame.contentWindow.ANGEL_DESIGN.testComponent &&
+      frame.contentWindow.ANGEL_DESIGN.testComponent(), 'canvas component');
+    const set = patch => new Promise(resolve => component.setState(patch, resolve));
+    const key = name => input.dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown', { key: name, bubbles: true }));
+
+    await set({ page: 'ev', q: 'SITE', t: 60, speed: 4, running: true,
+      searchOpen: true, searchAt: 0, searchPending: null, searchNotice: '' });
+    key('Enter');
+    await wait(() => component.state.searchNotice === 'blocked', 'blocked search notice');
+    eq(component.state.page, 'ev', 'blocked Enter navigated away');
+    eq(component.state.searchPending, 'SITE', 'blocked query was not preserved');
+    const status1 = frame.contentDocument.querySelector('[role="status"]').textContent;
+    ok(status1.includes('00:30'), 'blocked countdown did not use the playback clock rate');
+    eq(input.getAttribute('aria-activedescendant'), '', 'blocked combobox points at a hidden option');
+
+    await set({ t: 64 });
+    const status2 = await wait(() => {
+      const el = frame.contentDocument.querySelector('[role="status"]');
+      return el && el.textContent.includes('00:29') ? el.textContent : null;
+    }, 'updated countdown');
+    ok(status2 !== status1, 'countdown did not update with scenario time');
+
+    await set({ running: false });
+    const retry = await wait(() => frame.contentDocument.querySelector('[role="button"][tabindex="0"]'), 'retry action');
+    retry.dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await wait(() => component.state.searchNotice === 'results' && component.state.searchPending === null, 'keyboard retry');
+    eq(component.state.page, 'ev', 'retry navigated before a result was selected');
+
+    await set({ page: 'tty', q: 'M25-01', running: false, searchOpen: true, searchAt: 0,
+      searchPending: null, searchNotice: 'results' });
+    const option = await wait(() => frame.contentDocument.querySelector('[role="option"]'), 'asset option');
+    option.dispatchEvent(new frame.contentWindow.MouseEvent('mousedown', { bubbles: true }));
+    await wait(() => component.state.page === 'map', 'pointer destination');
+    const mapSelection = await wait(() => {
+      const w = component.mapFrameWin();
+      return w && w.APP && w.APP.sel && w.APP.sel.kind === 'drone' ? w.APP.sel : null;
+    }, 'embedded map asset selection', 20000);
+    ok(mapSelection.id != null, 'asset result did not select an aircraft');
+
+    await set({ q: 'SITE', searchOpen: true, searchPending: 'SITE', searchNotice: 'blocked',
+      running: false, t: 180 });
+    ok(component.searchVals().retry, 'completion did not expose pending-query retry');
+    eq(component.searchGate().seconds, 0, 'completion countdown did not reach zero');
+
+    component.resetRun();
+    await wait(() => component.state.q === '' && !component.state.searchOpen, 'reset cleanup');
+    eq(component.state.searchPending, null, 'reset retained a pending query');
+    eq(component.state.searchNotice, '', 'reset retained a stale notice');
+
+    await set({ q: 'M25', searchOpen: true, searchPending: 'M25', searchNotice: 'blocked' });
+    component.pickScenario('PACOM_BASALT')();
+    await wait(() => component.state.scenario === 'PACOM_BASALT', 'scenario change');
+    eq(component.state.q, '', 'scenario change retained the old query');
+    eq(component.state.searchPending, null, 'scenario change retained a pending query');
+    eq(component.state.searchNotice, '', 'scenario change retained a stale notice');
+  } finally {
+    frame.remove();
+  }
+});
+
 /* ------------------------------------------------------------------ webcrypto */
 async function webSha(s) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));

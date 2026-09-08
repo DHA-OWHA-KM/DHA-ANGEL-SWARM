@@ -166,7 +166,16 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="min-width:0">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid oklch(0.28 0.01 250);background:oklch(0.185 0.01 250);position:sticky;top:0;z-index:6">
 <div style="display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 340px">
-<div style="display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:5px;background:oklch(0.22 0.012 250);border:1px solid oklch(0.31 0.012 250);flex:1 1 170px;min-width:130px;max-width:230px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="10.5" cy="10.5" r="6.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2"/><path d="m15.5 15.5 4.5 4.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2" stroke-linecap="round"/></svg><input value="{{ q }}" onChange="{{ onQ }}" placeholder="Search casualty, asset, site" style="border:0;background:transparent;outline:none;font:400 10.5px 'IBM Plex Mono',monospace;color:oklch(0.9 0.005 250);width:100%"/></div>
+<div style="position:relative;flex:1 1 170px;min-width:130px;max-width:300px">
+<div style="display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:5px;background:oklch(0.22 0.012 250);border:1px solid {{ search.edge }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="10.5" cy="10.5" r="6.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2"/><path d="m15.5 15.5 4.5 4.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2" stroke-linecap="round"/></svg><input role="combobox" value="{{ q }}" onChange="{{ onQ }}" onKeyDown="{{ search.key }}" onFocus="{{ search.focus }}" aria-label="Search casualties, assets, and sites" aria-controls="universal-search-results" aria-expanded="{{ search.open }}" aria-activedescendant="{{ search.activeId }}" autocomplete="off" placeholder="Search casualty, asset, site" style="border:0;background:transparent;outline:none;font:400 10.5px 'IBM Plex Mono',monospace;color:oklch(0.9 0.005 250);width:100%"/></div>
+<sc-if value="{{ search.show }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:36px;left:0;width:300px;z-index:30;border-radius:5px;overflow:hidden;background:oklch(0.19 0.012 250);border:1px solid oklch(0.38 0.02 250);box-shadow:0 15px 36px oklch(0.05 0 0 / .65)">
+<div role="status" aria-live="polite" style="padding:8px 10px;font:600 9px/1.45 'IBM Plex Mono',monospace;letter-spacing:.03em;color:{{ search.statusFg }};background:{{ search.statusBg }}">{{ search.status }}</div>
+<div id="universal-search-results" role="listbox">
+<sc-for list="{{ search.results }}" as="r" hint-placeholder-count="3"><div id="{{ r.domId }}" role="option" aria-selected="{{ r.active }}" onMouseDown="{{ r.open }}" style="padding:8px 10px;cursor:pointer;border-top:1px solid oklch(0.27 0.01 250);background:{{ r.bg }};display:flex;flex-direction:column;gap:2px"><span style="font:700 9.5px 'IBM Plex Mono',monospace;color:oklch(0.92 0.01 250)">{{ r.label }}</span><span style="font:400 8.5px 'IBM Plex Mono',monospace;color:oklch(0.61 0.008 250)">{{ r.meta }}</span></div></sc-for>
+</div>
+<sc-if value="{{ search.retry }}" hint-placeholder-val="{{ false }}"><div role="button" tabindex="0" onClick="{{ search.retryNow }}" onKeyDown="{{ search.retryKey }}" style="padding:9px 10px;cursor:pointer;border-top:1px solid oklch(0.38 0.08 165);font:700 9px 'IBM Plex Mono',monospace;color:oklch(0.86 0.12 165);background:oklch(0.25 0.05 165)">RUN STOPPED · TRY “{{ q }}” NOW</div></sc-if>
+</div></sc-if>
+</div>
 <span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.09em;padding:6px 10px;border-radius:4px;background:oklch(0.3 0.07 75);color:oklch(0.9 0.06 75)">FPCON BRAVO</span>
 
 <!-- MISSION IN PROGRESS.  Away from the Theater Map there was no way to tell
@@ -2788,6 +2797,7 @@ class Component extends DCLogic {
     page: 'dash', t: 0, running: false, deployed: false, speed: 4, group: 'loc',
     resOpen: false, resetOpen: false, casFilter: 'ALL',
     expand: null, showAll: false, casTab: 'board', ready: false, q: '',
+    searchOpen: false, searchAt: 0, searchPending: null, searchNotice: '',
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
     role: 'COMMANDER', decisions: {}, extra: [],
     filter: 'ALL', limit: 30, feedTab: 'dec',
@@ -2924,6 +2934,11 @@ class Component extends DCLogic {
       scenario: () => this.state.scenario,
       scenarios: () => (this.E ? this.E.SCENARIO_LIST.map(x => x.key) : [])
     };
+    /* Browser regressions use the real mounted component, but only on the
+       explicit self-test URL. The ordinary application bridge stays narrow. */
+    if (new URLSearchParams(window.location.search).get('selftest') === 'search') {
+      window.ANGEL_DESIGN.testComponent = () => this;
+    }
   }
   componentWillUnmount() {
     if (window.ANGEL_DESIGN && window.ANGEL_DESIGN.setScenario) delete window.ANGEL_DESIGN;
@@ -2960,6 +2975,7 @@ class Component extends DCLogic {
       this.buildBoth(key);
       this.setState({ scenario: key, t: 0, running: false, resOpen: false,
                       expand: null, showAll: false, q: '', casFilter: 'ALL',
+                      searchOpen: false, searchAt: 0, searchPending: null, searchNotice: '',
                       thread: [], wgSweep: null, wgRanLever: null, wgError: null });
       /* AND THE MAP GOES WITH IT. Two engines run here — this shell's, and
          app.js's own inside the map frame — and until now only one direction
@@ -3113,6 +3129,117 @@ class Component extends DCLogic {
   mmss(m) { if (m == null) return '—'; const a = Math.abs(m); return (m < 0 ? '−' : '') + this.pad(Math.floor(a)) + ':' + this.pad(Math.round((a % 1) * 60)); }
   go(p) { return () => this.setState({ page: p, expand: null }); }
   tPlus() { return 'T+' + Math.floor(this.state.t) + ' MIN'; }
+  searchIndex() {
+    if (!this.E || !this.run()) return [];
+    const A = this.run().A;
+    const duration = this.E.WORLD.durationMin;
+    const currentCasualties = this.state.t >= duration ? this.fin().rows : this.snap().rows;
+    const casualties = currentCasualties.map(c => ({
+      kind: 'CASUALTY', key: 'cas:' + c.id, label: c.cid + ' · ' + c.name,
+      meta: c.site + ' · ' + c.cls, text: [c.cid, c.name, c.site, c.unit, c.injury, c.cls].join(' '),
+      act: this.openRec(c.id)
+    }));
+    const assets = A.drones.map(d => ({
+      kind: 'ASSET', key: 'asset:' + d.id, label: d.call + ' · ' + d.platLabel,
+      meta: d.base.name + ' · AIRCRAFT', text: [d.call, d.platLabel, d.base.name, d.type].join(' '),
+      act: () => this.focusMapAsset(d.id)
+    }));
+    const sites = this.E.WORLD.sites.map((s, i) => ({
+      kind: 'SITE', key: 'site:' + i, label: s.name,
+      meta: s.unit + ' · CASUALTY SITE', text: [s.name, s.unit].join(' '),
+      act: () => this.setState({ page: this.E.universalSearchDestination('SITE'), expand: null })
+    }));
+    return casualties.concat(assets, sites);
+  }
+  focusMapAsset(id) {
+    this.setState({ page: this.E.universalSearchDestination('ASSET'), expand: null }, () => {
+      let tries = 0;
+      const focus = () => {
+        const w = this.mapFrameWin();
+        if (w && w.APP && w.APP.armA && w.APP.armA.drones.some(d => d.id === id)) {
+          w.APP.sel = { kind: 'drone', id };
+          if (typeof w.goView === 'function') w.goView('FLEET');
+          if (typeof w.render === 'function') w.render();
+          return;
+        }
+        if (++tries < 30) setTimeout(focus, 100);
+      };
+      focus();
+    });
+  }
+  searchMatches(q = this.state.q) {
+    const needle = String(q || '').trim().toLowerCase();
+    if (!needle) return [];
+    return this.E.universalSearch(this.searchIndex(), needle);
+  }
+  blockSearch() {
+    const q = String(this.state.q || '').trim();
+    this.setState({ searchOpen: true, searchPending: q || this.state.searchPending, searchNotice: 'blocked' });
+    return false;
+  }
+  searchGate() {
+    const duration = this.E && this.E.WORLD ? this.E.WORLD.durationMin : 180;
+    return this.E.searchExecutionState({ running: this.state.running, query: this.state.q, durationMin: duration, elapsedMin: this.state.t, speed: this.state.speed });
+  }
+  executeSearch(result) {
+    const gate = this.searchGate();
+    if (gate.blocked) return this.blockSearch();
+    const q = String(this.state.q || '').trim();
+    if (gate.empty) { this.setState({ searchOpen: true, searchNotice: 'empty', searchAt: 0 }); return false; }
+    const hits = this.searchMatches(q);
+    if (result) {
+      const hit = hits.find(r => r.key === result.key);
+      if (!hit) return false;
+      this.setState({ searchOpen: false, searchNotice: '', searchPending: null }, hit.act);
+      return true;
+    }
+    if (!hits.length) { this.setState({ searchOpen: true, searchNotice: 'none', searchAt: 0 }); return false; }
+    this.setState({ searchOpen: true, searchNotice: 'results', searchAt: 0, searchPending: null });
+    return true;
+  }
+  retrySearch(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    this.setState({ searchNotice: '', searchPending: null, searchOpen: false, searchAt: 0 }, () => this.executeSearch());
+  }
+  searchKey(e) {
+    const hits = this.searchMatches();
+    if (e.key === 'Escape') { e.preventDefault(); this.setState({ searchOpen: false, searchNotice: '' }); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const n = hits.length || 1, d = e.key === 'ArrowDown' ? 1 : -1;
+      this.setState({ searchOpen: true, searchNotice: hits.length ? 'results' : this.state.searchNotice, searchAt: (this.state.searchAt + d + n) % n });
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this.state.searchNotice === 'blocked' && !this.state.running && this.state.searchPending) { this.retrySearch(); return; }
+      const picked = this.state.searchOpen && hits.length ? hits[Math.min(this.state.searchAt, hits.length - 1)] : null;
+      if (picked) this.executeSearch(picked); else this.executeSearch();
+    }
+  }
+  searchVals() {
+    const st = this.state, q = String(st.q || '').trim(), hits = this.searchMatches(q);
+    const duration = this.E && this.E.WORLD ? this.E.WORLD.durationMin : 180;
+    const seconds = this.E ? this.E.searchExecutionState({ running: st.running, query: q, durationMin: duration, elapsedMin: st.t, speed: st.speed }).seconds : 0;
+    const countdown = this.pad(Math.floor(seconds / 60)) + ':' + this.pad(seconds % 60);
+    const blocked = st.searchNotice === 'blocked' && st.running;
+    const retry = st.searchNotice === 'blocked' && !st.running && !!st.searchPending;
+    let status = !q ? 'TYPE A CASUALTY, ASSET, OR SITE' : hits.length + (hits.length === 1 ? ' MATCH' : ' MATCHES');
+    if (st.searchNotice === 'empty') status = 'ENTER A SEARCH TERM';
+    if (st.searchNotice === 'none') status = 'NO MATCHES FOR “' + q + '”';
+    if (blocked) status = 'SEARCH UNAVAILABLE DURING RUN · EXPECTED COMPLETE IN ' + countdown;
+    if (retry) status = 'RUN STOPPED · YOUR SEARCH IS READY';
+    return {
+      show: !!st.searchOpen, open: st.searchOpen ? 'true' : 'false',
+      edge: blocked ? 'oklch(0.62 0.16 25)' : 'oklch(0.31 0.012 250)',
+      status, statusFg: blocked ? 'oklch(0.88 0.14 25)' : retry ? 'oklch(0.86 0.12 165)' : 'oklch(0.68 0.008 250)',
+      statusBg: blocked ? 'oklch(0.27 0.07 25)' : retry ? 'oklch(0.24 0.04 165)' : 'oklch(0.22 0.012 250)',
+      activeId: !blocked && !retry && hits.length ? 'universal-result-' + Math.min(st.searchAt, hits.length - 1) : '',
+      results: (blocked || retry ? [] : hits).map((r, i) => ({ ...r, domId: 'universal-result-' + i, active: i === st.searchAt ? 'true' : 'false', bg: i === st.searchAt ? 'oklch(0.27 0.04 195)' : 'transparent', open: e => { if (e && e.preventDefault) e.preventDefault(); this.executeSearch(r); } })),
+      retry, retryNow: e => this.retrySearch(e), retryKey: e => { if (e.key === 'Enter' || e.key === ' ') this.retrySearch(e); },
+      key: e => this.searchKey(e), focus: () => { if (q || st.searchPending) this.setState({ searchOpen: true }); }
+    };
+  }
   /* THE SIX STATES ARE STILL THERE — COLD, STBY, EARLY, MID, PEND, DONE.
      They are reached by deploying and running the scenario, which is the only
      honest way to arrive at one, rather than jumped to from a switcher. */
@@ -3128,6 +3255,7 @@ class Component extends DCLogic {
   COLD = {
     page: 'dash', t: 0, running: false, deployed: false, resOpen: false, resetOpen: false,
     expand: null, showAll: false, casTab: 'board', q: '', casFilter: 'ALL', groupShut: {},
+    searchOpen: false, searchAt: 0, searchPending: null, searchNotice: '',
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
     decisions: {}, extra: [], filter: 'ALL', limit: 30, feedTab: 'dec',
     ttyTab: 'transcript', opsTab: 'wall', evTab: 'cf',
@@ -3651,7 +3779,7 @@ class Component extends DCLogic {
     const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
     const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
 
-    if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
+    if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, search: { show: false, open: 'false', edge: 'oklch(0.31 0.012 250)', results: [], retry: false, key: () => {}, focus: () => {} }, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
 
     const s = this.snap(), t = st.t;
     const zulu = 240 + t;
@@ -3666,7 +3794,8 @@ class Component extends DCLogic {
          reads, so there is one answer to what theatre this is. */
       joaStamp: 'JOA ' + this.E.WORLD.joa + ' · ' + this.E.WORLD.theater,
       joaName: this.E.WORLD.joa,
-      q: st.q, onQ: e => this.setState({ q: e.target.value }),
+      q: st.q, onQ: e => this.setState({ q: e.target.value, searchOpen: true, searchAt: 0, searchNotice: '', searchPending: null }),
+      search: this.searchVals(),
       /* THE DECISIONS CHIP WAS AMBER AND IT ONLY EVER SHOWED WHAT WAS OPEN AT
          THIS INSTANT. Escalations lapse after eight simulated minutes, so the
          chip blinked on and off and a run could finish with three unanswered

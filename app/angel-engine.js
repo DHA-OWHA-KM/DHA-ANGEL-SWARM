@@ -938,6 +938,30 @@ function snapshot(run, t) {
   return f;
 }
 
+/* Pure command-bar helpers. Keeping matching and wall-time arithmetic outside
+   the canvas makes every submission path share one deterministic answer and
+   lets the browser self-test exercise the run gate without synthetic clicks. */
+function universalSearch(records, query) {
+  const needle = String(query || '').trim().toLowerCase();
+  if (!needle) return [];
+  return (records || []).filter(r => String(r.text || '').toLowerCase().includes(needle))
+    .sort((a, b) => String(a.kind).localeCompare(String(b.kind)) ||
+      String(a.label).localeCompare(String(b.label))).slice(0, 8);
+}
+
+function universalSearchDestination(kind) {
+  return kind === 'CASUALTY' ? 'cas' : (kind === 'ASSET' || kind === 'SITE') ? 'map' : null;
+}
+
+function searchExecutionState({ running, query, durationMin, elapsedMin, speed }) {
+  const q = String(query || '').trim();
+  /* The playback clock advances `speed` simulated minutes per wall-clock
+     second (speed * 0.12 every 120 ms), so no extra minutes-to-seconds factor
+     belongs here. */
+  const seconds = Math.max(0, Math.ceil(Math.max(0, durationMin - elapsedMin) / Math.max(1, speed)));
+  return { allowed: !running && !!q, blocked: !!running, empty: !q, seconds };
+}
+
 /* ================================================================ exports */
 
 const STOCK0 = Object.assign({}, STOCK_INIT);
@@ -956,7 +980,7 @@ const RESPONDER_MIX = TIER_MIX.map(([k, w]) => ({
 const distFn = dist;
 const effRadiusFn = effectiveRadiusKm;
 
-export { buildRun, snapshot, tally, WORLD, INJURY_LABEL, STOCK0, SCENARIO_LIST, SCENARIO_DEFAULT, RESPONDER_MIX };
+export { buildRun, snapshot, tally, universalSearch, universalSearchDestination, searchExecutionState, WORLD, INJURY_LABEL, STOCK0, SCENARIO_LIST, SCENARIO_DEFAULT, RESPONDER_MIX };
 /* Aliased so this module never declares a binding that would shadow the
    engine's own globals of the same name. */
 export {
