@@ -6,7 +6,7 @@ The whole thing is one static binary and a folder. It installs nothing, writes n
 
 > `UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
 >
-> **Version:** v1.0, 5 September 2026
+> **Version:** v1.0, 8 September 2026
 > **AOR in the shipped scenarios:** PACOM and EUCOM — seven theatres, `PACOM_CORAL` by default
 > **Default posture:** NOT DEPLOYED, on purpose — press **Deploy** to hand tasking authority to the system mid-fight
 > **Author:** Junayd S. Park, DHA Office of Warfighter Health Advantage · Team DHA RESCUE · NDIA Hackathon 2026

@@ -6,7 +6,7 @@
 
 **UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY**
 
-*Version 1.0 · 5 September 2026*
+*Version 1.0 · 8 September 2026*
 
 **Source for every quotation in this document:** Robert Hammer, Defense Health Agency Communications, "Data, technology, people vital for warfighter health advantage, says Defense Health Agency director," Aug. 13, 2026. https://dha.mil/News/2026/08/14/14/56/Data-technology-people-vital-for-warfighter — reporting the 2026 Defense Health Information Technology Symposium, Aug. 11, New Orleans, Louisiana.
 

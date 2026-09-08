@@ -1,6 +1,6 @@
 # ANGEL SWARM — architecture and decision record
 
-**Current as of v1.0, 5 September 2026.** The body of this document is the
+**Current as of v1.0, 8 September 2026.** The body of this document is the
 v3.1 decision record — how the local-deployment build and its telemetry
 ingest tier were built, what was measured, and every trap that was hit. That
 record is still accurate about the things it describes and is deliberately

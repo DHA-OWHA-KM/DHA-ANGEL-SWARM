@@ -1,6 +1,6 @@
 # Doctrinal terminology audit
 
-**ANGEL SWARM — Version 1.0 · 5 September 2026.** First issued 26 August 2026; adoption record added 4 September 2026; occurrence counts re-measured against the shipped build on 5 September 2026, and re-measured again the same day after the analyst console was swept — see §4a.
+**ANGEL SWARM — Version 1.0 · 8 September 2026.** First issued 26 August 2026; adoption record added 4 September 2026; occurrence counts re-measured against the shipped build on 5 September 2026, and re-measured again the same day after the analyst console was swept — see §4a.
 Prepared for a terminology overhaul of the solution, its documents and its film.
 **This document is authoritative for naming across the application, every
 shipped document and both films.** §4a records what was actually adopted, and
