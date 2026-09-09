@@ -1232,6 +1232,26 @@ body.standby #cmdbar .master .mlab svg{color:var(--amb)}
   content:''; position:absolute; left:-4px; top:2px; bottom:2px; width:3px;
   border-radius:0 2px 2px 0; background:var(--niC, var(--cyan));
 }
+/* Every destination uses the approved soft fade. The selected k5 surface and
+   outer bar remain stronger because active entries are excluded. */
+#rail .navItem[data-view]:not(.on){
+  transition:background-color .22s ease-in-out;
+}
+#rail .navItem[data-view]:not(.on):is(:hover, :focus-visible){
+  background:var(--k4);
+}
+#rail .navItem[data-view]:not(.on):is(:hover, :focus-visible) .ni{
+  filter:brightness(1.5) saturate(1.18);
+  transition:filter .22s ease-in-out;
+}
+#rail .navItem[data-view]:focus-visible{
+  outline:2px solid var(--niC, var(--t-hi));
+  outline-offset:1px;
+}
+@media (prefers-reduced-motion:reduce){
+  #rail .navItem[data-view]:not(.on),
+  #rail .navItem[data-view]:not(.on) .ni{transition:none}
+}
 /* The command-palette entry has no destination and therefore no hue; it is
    plainly a utility and stays on the text tone. */
 #rail .navItem.navCmd .ni,

@@ -1,1 +1,2 @@
 - [Globe-to-Theatre handoff](globe-theatre-handoff.md) — preserve the outgoing painted Globe until Theatre has loaded and painted; keep the three-renderer contract coordinated.
+- [Navigation hover treatment](navigation-hover-treatment.md) — the approved menu feedback is a soft surface fade with a clearly brighter, slightly saturated icon.

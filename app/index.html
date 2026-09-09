@@ -34,10 +34,15 @@
 body{margin:0;background:oklch(0.14 0.008 250);font-family:'IBM Plex Sans',system-ui,sans-serif}
 a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 210)}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:oklch(0.33 0.012 250);border-radius:5px}::-webkit-scrollbar-track{background:oklch(0.18 0.01 250)}
+.app-nav-menu>div{position:relative;transition:background-color .22s ease-in-out}
+.app-nav-menu>div svg{transition:filter .22s ease-in-out}
+.app-nav-menu>div:is(:hover,:focus-visible){background:oklch(0.225 0.014 250)!important}
+.app-nav-menu>div:is(:hover,:focus-visible) svg{filter:brightness(1.5) saturate(1.18)}
+.app-nav-menu>div:focus-visible{outline:2px solid oklch(0.78 0.01 250);outline-offset:-2px}
 @keyframes authorityVeilIn{from{opacity:0}to{opacity:1}}
 @keyframes authorityPanelIn{0%{opacity:0;transform:translateY(-18px) scale(.975)}62%{opacity:1;transform:translateY(3px) scale(1.004)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes authorityLineIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@media (prefers-reduced-motion:reduce){.authority-veil,.authority-panel,.authority-line{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.authority-veil,.authority-panel,.authority-line{animation:none!important}.app-nav-menu>div,.app-nav-menu>div svg{transition:none}}
 </style></helmet>
 
 <div style="min-height:100vh;background:oklch(0.17 0.01 250);color:oklch(0.92 0.005 250)">
@@ -52,7 +57,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 13px 'IBM Plex Mono',monospace;color:oklch(0.96 0.005 250);letter-spacing:.05em">ANGEL SWARM</span><span style="font:400 8px/1.45 'IBM Plex Mono',monospace;color:oklch(0.55 0.008 250);letter-spacing:.05em">DHA · PHYSIOLOGICAL-DEADLINE BLOOD ALLOCATION</span></div>
 </div>
 
-<div style="padding:12px 9px 0;display:flex;flex-direction:column;gap:1px">
+<div class="app-nav-menu" style="padding:12px 9px 0;display:flex;flex-direction:column;gap:1px">
 <div onClick="{{ go.dash }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dash.fg }};flex:1">Command Overview</span></div>
@@ -84,7 +89,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2" y="4" width="20" height="13" rx="2" fill="oklch(0.32 0.07 200)" stroke="oklch(0.68 0.13 200)" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="oklch(0.68 0.13 200)" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.5 9 9l3 3.5L15 7l3.5 6.5" stroke="oklch(0.85 0.16 200)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ops.fg }};flex:1">Ops Center Wall</span></div>
 
-<div onClick="{{ go.ev }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ev.bg }}">
+<div data-selected="{{ nav.ev.selected }}" role="button" tabindex="0" onClick="{{ go.ev }}" onKeyDown="{{ nav.ev.key }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ev.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.1 75)" stroke="oklch(0.72 0.14 75)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.94 0.08 75)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ev.fg }};flex:1">Evidence</span></div>
 
@@ -98,7 +103,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 
 </div>
 
-<div style="margin:14px 9px 0;padding:12px 0 0;border-top:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:1px">
+<div class="app-nav-menu" style="margin:14px 9px 0;padding:12px 0 0;border-top:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:1px">
 <div onClick="{{ go.auth }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.auth.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="10" width="16" height="10" rx="2" fill="oklch(0.55 0.11 85)"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="oklch(0.75 0.13 85)" stroke-width="2"/></svg><span style="font-size:12px;color:{{ nav.auth.fg }}">Authority &amp; Policy</span></div>
 <div onClick="{{ go.data }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.data.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><ellipse cx="12" cy="5.5" rx="7.5" ry="3" fill="oklch(0.62 0.11 220)"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13" stroke="oklch(0.62 0.11 220)" stroke-width="1.6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" stroke="oklch(0.78 0.12 220)" stroke-width="1.6"/></svg><span style="font-size:12px;color:{{ nav.data.fg }};flex:1">Data Sources</span><sc-if value="{{ badge.data }}" hint-placeholder-val="{{ true }}"><span style="font:600 9px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.38 0.1 75);color:oklch(0.94 0.06 75)">{{ badge.data }}</span></sc-if></div>
 <div onClick="{{ go.setup }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.setup.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="3.4" fill="oklch(0.7 0.03 250)"/><path d="M12 2.5v3.2M12 18.3v3.2M21.5 12h-3.2M5.7 12H2.5M18.7 5.3l-2.3 2.3M7.6 16.4l-2.3 2.3M18.7 18.7l-2.3-2.3M7.6 7.6 5.3 5.3" stroke="oklch(0.6 0.02 250)" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:{{ nav.setup.fg }}">Settings</span></div>
@@ -3712,9 +3717,10 @@ class Component extends DCLogic {
     const seg = (on, hue) => on ? { bg: 'oklch(0.3 0.06 ' + hue + ')', fg: 'oklch(0.95 0.03 ' + hue + ')' } : { bg: 'transparent', fg: 'oklch(0.62 0.008 250)' };
     const NAV_OF = { feed: 'dec' };                              // a tab inside a destination keeps that destination lit
     const here = NAV_OF[st.page] || st.page;
-    const navOf = k => here === k ? { bg: 'oklch(0.26 0.03 165)', fg: 'oklch(0.96 0.02 165)' } : { bg: 'transparent', fg: 'oklch(0.84 0.006 250)' };
+    const navOf = k => here === k ? { bg: 'oklch(0.26 0.03 165) !important', fg: 'oklch(0.96 0.02 165)', selected: true } : { bg: 'transparent', fg: 'oklch(0.84 0.006 250)', selected: false };
     const nav = {}; ['dash', 'cas', 'dec', 'feed', 'tty', 'sensor', 'ops', 'ev', 'wargame', 'chat', 'map', 'data', 'auth', 'setup'].forEach(k => nav[k] = navOf(k));
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
+    nav.ev.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go.ev(); } };
     go.flightVariability = value => this.flightVariability(value);
     const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
     const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
