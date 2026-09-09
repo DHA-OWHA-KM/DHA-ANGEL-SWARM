@@ -2564,6 +2564,26 @@ const WALK = [
     cap: 'Engine self-test, under Display: 118 assertions against the shipped engine, this reference result among them. You do not have to take my word for it.' }
 ];
 
+/* One explicit public URL vocabulary for the application's top-level
+   destinations. Query parameters other than `destination` and the hash are
+   preserved so the contract remains same-document and embed-friendly. */
+const DESTINATION_SLUG = {
+  dash: 'command-overview', cas: 'live-casualties', dec: 'decisions',
+  feed: 'decision-feed', tty: 'analyst-terminal', sensor: 'sensor-model',
+  ops: 'ops-center', ev: 'evidence', wargame: 'war-game', chat: 'ask-angel',
+  map: 'theater-map', data: 'data-products', auth: 'authority-policy',
+  setup: 'settings'
+};
+const PAGE_FOR_DESTINATION = Object.fromEntries(Object.entries(DESTINATION_SLUG).map(([page, slug]) => [slug, page]));
+function destinationFromURL(loc = window.location) {
+  return PAGE_FOR_DESTINATION[new URL(loc.href).searchParams.get('destination')] || 'dash';
+}
+function destinationURL(page, loc = window.location) {
+  const url = new URL(loc.href);
+  url.searchParams.set('destination', DESTINATION_SLUG[page] || DESTINATION_SLUG.dash);
+  return url.pathname + url.search + url.hash;
+}
+
 const ARM = {
   A: { key: 'ANGEL', name: 'ANGEL SWARM',
        spine: 'oklch(0.72 0.13 165)', label: 'oklch(0.80 0.09 165)',
@@ -2815,7 +2835,7 @@ const SHA256_K = new Uint32Array([
 
 class Component extends DCLogic {
   state = {
-    page: 'dash', t: 0, running: false, deployed: false, speed: 4, group: 'loc',
+    page: destinationFromURL(), t: 0, running: false, deployed: false, speed: 4, group: 'loc',
     resOpen: false, resetOpen: false, casFilter: 'ALL',
     expand: null, showAll: false, casTab: 'board', ready: false, q: '',
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
@@ -2855,6 +2875,9 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
+    history.replaceState({ ...(history.state || {}), angelDestination: this.state.page }, '', destinationURL(this.state.page));
+    this._onPopState = () => this.navigate(destinationFromURL(), {}, false);
+    window.addEventListener('popstate', this._onPopState);
     import('./angel-engine.js').then(E => {
       this.E = E;
       wgSyncScenario(E, this.state.scenario);
@@ -2975,6 +2998,7 @@ class Component extends DCLogic {
     if (this._vwTO) { clearTimeout(this._vwTO); this._vwTO = 0; }
     if (this._onVW) window.removeEventListener('resize', this._onVW);
     if (this._onKey) window.removeEventListener('keydown', this._onKey);
+    if (this._onPopState) window.removeEventListener('popstate', this._onPopState);
   }
 
   /* Both arms of a scenario are built together and held for the life of the
@@ -3182,7 +3206,16 @@ class Component extends DCLogic {
   snap() { return this.E.snapshot(this.run(), this.state.t); }
   pad(n) { return String(n).padStart(2, '0'); }
   mmss(m) { if (m == null) return '—'; const a = Math.abs(m); return (m < 0 ? '−' : '') + this.pad(Math.floor(a)) + ':' + this.pad(Math.round((a % 1) * 60)); }
-  go(p) { return () => this.setState({ page: p, expand: null }); }
+  navigate(page, patch = {}, push = true) {
+    const next = DESTINATION_SLUG[page] ? page : 'dash';
+    if (next === this.state.page) {
+      if (Object.keys(patch).length) this.setState(patch);
+      return;
+    }
+    if (push) history.pushState({ angelDestination: next }, '', destinationURL(next));
+    this.setState({ expand: null, ...patch, page: next });
+  }
+  go(p) { return () => this.navigate(p); }
   tPlus() { return 'T+' + Math.floor(this.state.t) + ' MIN'; }
   /* THE SIX STATES ARE STILL THERE — COLD, STBY, EARLY, MID, PEND, DONE.
      They are reached by deploying and running the scenario, which is the only
@@ -3215,7 +3248,7 @@ class Component extends DCLogic {
     this.depTotal = 0; this._fin = null; this._finKey = null;
     this._mapCatchAt = null; this._mapCatchN = 0;
     this._knownPending = new Set();
-    this.setState({ ...this.COLD });
+    this.navigate('dash', { ...this.COLD });
   }
 
   /* ---- THE RUN AFTER IT ENDS --------------------------------------------
@@ -3336,8 +3369,8 @@ class Component extends DCLogic {
   recReach(s, id) { return id != null && (this.state.t >= 180 || (s && s.rows.some(r => r.id === id))); }
   openRec(id) {
     return () => {
-      this.setState({
-        page: 'cas', casTab: 'board', expand: id,
+      this.navigate('cas', {
+        casTab: 'board', expand: id,
         casFilter: 'ALL', q: '', showAll: true, groupShut: {}
       });
       this.revealRec();
@@ -3722,7 +3755,7 @@ class Component extends DCLogic {
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
     nav.ev.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go.ev(); } };
     go.flightVariability = value => this.flightVariability(value);
-    const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
+    const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.navigate({ COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r], { role: r }) }));
     const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
 
     if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
@@ -3755,7 +3788,7 @@ class Component extends DCLogic {
         title: this.pendingFor(s).length === 1 ? 'A decision is waiting for you' : this.pendingFor(s).length + ' decisions are waiting for you',
         copy: 'A newly escalated tasking is outside standing authority. The simulation is still running at your selected speed; review it before the eight-minute decision window expires.',
         remaining: this.pendingFor(s).length ? this.mmss(Math.max(0, this.pendingFor(s)[0].tRaised + 8 - st.t)) : '00:00',
-        review: () => this.setState({ page: 'dec', expand: null, interruptOpen: false }),
+        review: () => this.navigate('dec', { interruptOpen: false }),
         dismiss: () => this.setState({ interruptOpen: false })
       },
       isDash: st.page === 'dash', isCas: st.page === 'cas',
@@ -3836,7 +3869,7 @@ class Component extends DCLogic {
           cid: r.cid, site: r.site.replace('SITE ', ''), t: 'DIED',
           asset: (r.causeLabel || 'NOT FILED').toUpperCase(),
           fg: 'oklch(0.84 0.15 25)',
-          open: () => { this.setState({ page: 'cas', expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
+          open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
         }))
         : s.rows.slice(0, 6).map(r => ({
           cid: r.cid, site: r.site.replace('SITE ', ''), t: r.tRem == null ? 'NOT ASSERTED' : this.mmss(r.tRem),
@@ -5025,7 +5058,7 @@ class Component extends DCLogic {
        ground twice over. */
     const chips = [];
     if (globeOK) chips.push(['globe', 'GLOBE', 'sphere']);
-    chips.push(['theatre', 'THEATRE', 'globe'], ['2d', 'TACTICAL 2D', 'sheet']);
+    chips.push(['theatre', 'THEATER', 'globe'], ['2d', 'TACTICAL 2D', 'sheet']);
     if (gpu) chips.push(['3d', 'TACTICAL 3D', 'cube']);
 
     /* A change that starts inside the map — an operation picked off the
@@ -6445,9 +6478,9 @@ class Component extends DCLogic {
       if (!p) return;
       const prev = A.audit.filter(e => e.t <= st.t).slice(-1)[0];
       const others = pending.filter(x => x.id !== p.id);
-      this.setState({
+      this.navigate('map', {
         decisions: { ...st.decisions, [p.id]: kind },
-        page: 'map', expand: null, interruptOpen: others.length > 0,
+        interruptOpen: others.length > 0,
         extra: st.extra.concat([(() => {
           /* The operator's own row. It used to carry an invented number
              dressed up as a hash, which is exactly the thing this screen
@@ -6649,7 +6682,7 @@ class Component extends DCLogic {
     return {
       resOpen: st.resOpen,
       closeRes: () => this.setState({ resOpen: false }),
-      openAnalysis: () => this.setState({ resOpen: false, page: 'ev', expand: null }),
+      openAnalysis: () => this.navigate('ev', { resOpen: false }),
       armA: ARM.A, armB: ARM.B, armC: ARM.C,
       res: {
         stamp: 'T+180 · SEED 42 · ' + s.admitted + ' CASUALTIES · COMMON RANDOM NUMBERS',
@@ -6885,7 +6918,7 @@ class Component extends DCLogic {
      st.page anywhere that is not a destination. */
   walkGo(i) {
     const j = Math.max(0, Math.min(WALK.length - 1, i));
-    this.setState({ walkStep: j, page: WALK[j].page });
+    this.navigate(WALK[j].page, { walkStep: j });
   }
 
   cmpVals(s) {
@@ -7174,7 +7207,7 @@ class Component extends DCLogic {
         idFg: 'oklch(0.84 0.1 25)', arrFg: r.reach == null ? 'oklch(0.55 0.008 250)' : 'oklch(0.9 0.005 250)',
         slackFg: 'oklch(0.82 0.15 25)', taskFg: 'oklch(0.74 0.008 250)',
         rowBg: 'transparent',
-        open: () => { this.setState({ page: 'cas', expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
+        open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
       }))
       : s.rows.slice(0, 8).map(r => this.qRow(r));
     const causeMax = Math.max(1, ...Object.values(s.causes));
@@ -7225,7 +7258,7 @@ class Component extends DCLogic {
       slackFg: r.slack == null ? 'oklch(0.58 0.008 250)' : r.slack < 0 ? 'oklch(0.78 0.16 25)' : 'oklch(0.8 0.11 165)',
       taskFg: r.tasking === 'ESCALATED' ? 'oklch(0.85 0.1 75)' : r.tasking ? 'oklch(0.74 0.05 165)' : 'oklch(0.62 0.008 250)',
       rowBg: r.slack != null && r.slack < 0 ? 'oklch(0.21 0.03 25)' : 'transparent',
-      open: () => { this.setState({ page: 'cas', expand: r.id, casTab: 'board' }); this.revealRec(); }
+      open: () => { this.navigate('cas', { expand: r.id, casTab: 'board' }); this.revealRec(); }
     };
   }
   miniMap(s) {
@@ -7439,7 +7472,7 @@ class Component extends DCLogic {
         /* THE WALKTHROUGH IS TURNED ON HERE AND NOWHERE ELSE, and it is off
            until it is. ON puts the operator on step one rather than leaving
            the bar sitting on this screen claiming to be step five. */
-        { label: 'Guided walkthrough', opts: [opt('ON', () => this.setState({ walkOn: true, walkStep: 0, page: WALK[0].page }), st.walkOn, 195), opt('OFF', () => this.setState({ walkOn: false }), !st.walkOn, 195)],
+        { label: 'Guided walkthrough', opts: [opt('ON', () => this.navigate(WALK[0].page, { walkOn: true, walkStep: 0 }), st.walkOn, 195), opt('OFF', () => this.setState({ walkOn: false }), !st.walkOn, 195)],
           note: 'Off by default. On, a bar at the foot of the window walks the five destinations of the brief in order and prints one line about each \u2014 left and right arrows step, Escape exits, and the arrows are left alone while the cursor is in a field. It moves between screens and changes nothing any screen draws.' }
       ]}
     ];

@@ -934,7 +934,7 @@
           }
         }
         try { g.unmount(); } catch (e) { /* already down */ }
-        var LABEL = { '2D': 'TACTICAL 2D', '3D': 'TACTICAL 3D', 'THEATRE': 'THEATRE' };
+        var LABEL = { '2D': 'TACTICAL 2D', '3D': 'TACTICAL 3D', 'THEATRE': 'THEATER' };
         if (!pressScopeChip(LABEL[to] || 'TACTICAL 2D')) {
           try { W.setMapScope(to); } catch (e) { /* the theatre still stands */ }
         }

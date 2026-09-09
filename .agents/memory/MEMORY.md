@@ -1,3 +1,4 @@
 - [Globe-to-Theatre handoff](globe-theatre-handoff.md) — preserve the outgoing painted Globe until Theatre has loaded and painted; keep the three-renderer contract coordinated.
 - [Navigation hover treatment](navigation-hover-treatment.md) — the approved menu feedback is a soft surface fade with a clearly brighter, slightly saturated icon.
 - [Map layout emphasis](map-layout-emphasis.md) — treat side-by-side as the emphasized comparison mode; Single is the neutral dark state.
+- [Browser checks after cold load](browser-checks-cold-load.md) — wait for destination-specific ready content before testing map lifecycle; the rail appears much earlier.

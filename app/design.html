@@ -37,6 +37,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 .app-nav-menu>div{position:relative;transition:background-color .22s ease-in-out}
 .app-nav-menu>div svg{transition:filter .22s ease-in-out}
 .app-nav-menu>div:is(:hover,:focus-visible){background:oklch(0.225 0.014 250)!important}
+.app-nav-menu>div[data-selected="true"]{background:oklch(0.26 0.03 165)!important}
 .app-nav-menu>div:is(:hover,:focus-visible) svg{filter:brightness(1.5) saturate(1.18)}
 .app-nav-menu>div:focus-visible{outline:2px solid oklch(0.78 0.01 250);outline-offset:-2px}
 @media (prefers-reduced-motion:reduce){.app-nav-menu>div,.app-nav-menu>div svg{transition:none}}
@@ -55,34 +56,34 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 
 <div class="app-nav-menu" style="padding:12px 9px 0;display:flex;flex-direction:column;gap:1px">
-<div onClick="{{ go.dash }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
+<div data-selected="{{ nav.dash.selected }}" onClick="{{ go.dash }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dash.fg }};flex:1">Command Overview</span></div>
 
-<div onClick="{{ go.map }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.map.bg }}">
+<div data-selected="{{ nav.map.selected }}" onClick="{{ go.map }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.map.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z" fill="oklch(0.36 0.06 195)" stroke="oklch(0.66 0.11 195)" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 4v13M15 6.5v13" stroke="oklch(0.66 0.11 195)" stroke-width="1.4"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.map.fg }};flex:1">Theater Map</span></div>
 
-<div onClick="{{ go.cas }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.cas.bg }}">
+<div data-selected="{{ nav.cas.selected }}" onClick="{{ go.cas }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.cas.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.5 2.8c0 5.8-8.5 11.3-8.5 11.3Z" fill="oklch(0.62 0.19 25)"/><path d="M4 12.6h4l1.6-3 2.6 5.4 1.8-2.4H20" stroke="oklch(0.97 0.02 25)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.cas.fg }};flex:1">Live Casualties</span>
 <sc-if value="{{ badge.cas }}" hint-placeholder-val="{{ true }}"><span style="font:600 9.5px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.4 0.13 25);color:oklch(0.96 0.02 25)">{{ badge.cas }}</span></sc-if></div>
 
-<div onClick="{{ go.dec }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dec.bg }}">
+<div data-selected="{{ nav.dec.selected }}" onClick="{{ go.dec }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dec.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 21V11m0 0L5 4m7 7 7-7" stroke="oklch(0.8 0.15 75)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="4" r="2.6" fill="oklch(0.85 0.15 75)"/><circle cx="5" cy="4" r="2.6" fill="oklch(0.55 0.1 75)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dec.fg }};flex:1">Decisions</span>
 <sc-if value="{{ badge.dec }}" hint-placeholder-val="{{ true }}"><span style="font:700 9.5px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:{{ badge.decBg }};color:{{ badge.decFg }}">{{ badge.dec }}</span></sc-if></div>
 
-<div onClick="{{ go.tty }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}">
+<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.tty.fg }};flex:1">Analyst Terminal</span></div>
 
-<div onClick="{{ go.sensor }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.sensor.bg }}">
+<div data-selected="{{ nav.sensor.selected }}" onClick="{{ go.sensor }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.sensor.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M2 12h3.5l2-5.5 3 11 2.5-7 2 4h6.5" stroke="oklch(0.82 0.15 300)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.sensor.fg }};flex:1">Sensor &amp; Model</span>
 <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.88 0.11 300)">✦ AI</span></div>
 
-<div onClick="{{ go.ops }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ops.bg }}">
+<div data-selected="{{ nav.ops.selected }}" onClick="{{ go.ops }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ops.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2" y="4" width="20" height="13" rx="2" fill="oklch(0.32 0.07 200)" stroke="oklch(0.68 0.13 200)" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="oklch(0.68 0.13 200)" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.5 9 9l3 3.5L15 7l3.5 6.5" stroke="oklch(0.85 0.16 200)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ops.fg }};flex:1">Ops Center Wall</span></div>
 
@@ -90,10 +91,10 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.12 300)" stroke="oklch(0.72 0.16 300)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.93 0.1 300)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ev.fg }};flex:1">Evidence</span></div>
 
-<div onClick="{{ go.wargame }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.wargame.bg }}">
+<div data-selected="{{ nav.wargame.selected }}" onClick="{{ go.wargame }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.wargame.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="8" width="5.6" height="12" rx="1.2" fill="oklch(0.62 0.13 300)"/><rect x="14.4" y="4" width="5.6" height="16" rx="1.2" fill="oklch(0.38 0.08 300)"/><path d="M3 20.8h18" stroke="oklch(0.88 0.1 300)" stroke-width="1.6"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.wargame.fg }};flex:1">War Game</span></div>
-<div onClick="{{ go.chat }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.chat.bg }}">
+<div data-selected="{{ nav.chat.selected }}" onClick="{{ go.chat }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.chat.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-4H5.5A2.5 2.5 0 0 1 3 14.5v-8Z" fill="oklch(0.4 0.12 330)" stroke="oklch(0.72 0.16 330)" stroke-width="1.4"/><path d="m12 7 1.1 2.6L15.7 11l-2.6 1.1L12 14.7l-1.1-2.6L8.3 11l2.6-1.1L12 7Z" fill="oklch(0.93 0.11 330)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.chat.fg }};flex:1">Ask ANGEL</span>
 <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.88 0.11 300)">✦ AI</span></div>
@@ -101,9 +102,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 
 <div class="app-nav-menu" style="margin:14px 9px 0;padding:12px 0 0;border-top:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:1px">
-<div onClick="{{ go.auth }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.auth.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="10" width="16" height="10" rx="2" fill="oklch(0.55 0.11 85)"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="oklch(0.75 0.13 85)" stroke-width="2"/></svg><span style="font-size:12px;color:{{ nav.auth.fg }}">Authority &amp; Policy</span></div>
-<div onClick="{{ go.data }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.data.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><ellipse cx="12" cy="5.5" rx="7.5" ry="3" fill="oklch(0.62 0.11 220)"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13" stroke="oklch(0.62 0.11 220)" stroke-width="1.6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" stroke="oklch(0.78 0.12 220)" stroke-width="1.6"/></svg><span style="font-size:12px;color:{{ nav.data.fg }};flex:1">Data Sources</span><sc-if value="{{ badge.data }}" hint-placeholder-val="{{ true }}"><span style="font:600 9px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.38 0.1 75);color:oklch(0.94 0.06 75)">{{ badge.data }}</span></sc-if></div>
-<div onClick="{{ go.setup }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.setup.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="3.4" fill="oklch(0.7 0.03 250)"/><path d="M12 2.5v3.2M12 18.3v3.2M21.5 12h-3.2M5.7 12H2.5M18.7 5.3l-2.3 2.3M7.6 16.4l-2.3 2.3M18.7 18.7l-2.3-2.3M7.6 7.6 5.3 5.3" stroke="oklch(0.6 0.02 250)" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:{{ nav.setup.fg }}">Settings</span></div>
+<div data-selected="{{ nav.auth.selected }}" onClick="{{ go.auth }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.auth.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="10" width="16" height="10" rx="2" fill="oklch(0.55 0.11 85)"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="oklch(0.75 0.13 85)" stroke-width="2"/></svg><span style="font-size:12px;color:{{ nav.auth.fg }}">Authority &amp; Policy</span></div>
+<div data-selected="{{ nav.data.selected }}" onClick="{{ go.data }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.data.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><ellipse cx="12" cy="5.5" rx="7.5" ry="3" fill="oklch(0.62 0.11 220)"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13" stroke="oklch(0.62 0.11 220)" stroke-width="1.6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" stroke="oklch(0.78 0.12 220)" stroke-width="1.6"/></svg><span style="font-size:12px;color:{{ nav.data.fg }};flex:1">Data Sources</span><sc-if value="{{ badge.data }}" hint-placeholder-val="{{ true }}"><span style="font:600 9px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.38 0.1 75);color:oklch(0.94 0.06 75)">{{ badge.data }}</span></sc-if></div>
+<div data-selected="{{ nav.setup.selected }}" onClick="{{ go.setup }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.setup.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="3.4" fill="oklch(0.7 0.03 250)"/><path d="M12 2.5v3.2M12 18.3v3.2M21.5 12h-3.2M5.7 12H2.5M18.7 5.3l-2.3 2.3M7.6 16.4l-2.3 2.3M18.7 18.7l-2.3-2.3M7.6 7.6 5.3 5.3" stroke="oklch(0.6 0.02 250)" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:{{ nav.setup.fg }}">Settings</span></div>
 </div>
 
 <div style="margin:12px 11px 0;padding:7px 10px;border-radius:5px;background:oklch(0.21 0.012 250);border:1px solid oklch(0.28 0.01 250);display:flex;flex-direction:column;gap:2px;font-family:'IBM Plex Mono',monospace">
@@ -2540,6 +2541,24 @@ const WALK = [
     cap: 'Engine self-test, under Display: 118 assertions against the shipped engine, this reference result among them. You do not have to take my word for it.' }
 ];
 
+/* Keep this URL vocabulary aligned with the launch surface. */
+const DESTINATION_SLUG = {
+  dash: 'command-overview', cas: 'live-casualties', dec: 'decisions',
+  feed: 'decision-feed', tty: 'analyst-terminal', sensor: 'sensor-model',
+  ops: 'ops-center', ev: 'evidence', wargame: 'war-game', chat: 'ask-angel',
+  map: 'theater-map', data: 'data-products', auth: 'authority-policy',
+  setup: 'settings'
+};
+const PAGE_FOR_DESTINATION = Object.fromEntries(Object.entries(DESTINATION_SLUG).map(([page, slug]) => [slug, page]));
+function destinationFromURL(loc = window.location) {
+  return PAGE_FOR_DESTINATION[new URL(loc.href).searchParams.get('destination')] || 'dash';
+}
+function destinationURL(page, loc = window.location) {
+  const url = new URL(loc.href);
+  url.searchParams.set('destination', DESTINATION_SLUG[page] || DESTINATION_SLUG.dash);
+  return url.pathname + url.search + url.hash;
+}
+
 const ARM = {
   A: { key: 'ANGEL', name: 'ANGEL SWARM',
        spine: 'oklch(0.72 0.13 165)', label: 'oklch(0.80 0.09 165)',
@@ -2791,7 +2810,7 @@ const SHA256_K = new Uint32Array([
 
 class Component extends DCLogic {
   state = {
-    page: 'dash', t: 0, running: false, deployed: false, speed: 4, group: 'loc',
+    page: destinationFromURL(), t: 0, running: false, deployed: false, speed: 4, group: 'loc',
     resOpen: false, resetOpen: false, casFilter: 'ALL',
     expand: null, showAll: false, casTab: 'board', ready: false, q: '',
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
@@ -2830,6 +2849,9 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
+    history.replaceState({ ...(history.state || {}), angelDestination: this.state.page }, '', destinationURL(this.state.page));
+    this._onPopState = () => this.navigate(destinationFromURL(), {}, false);
+    window.addEventListener('popstate', this._onPopState);
     import('./angel-engine.js').then(E => {
       this.E = E;
       wgSyncScenario(E, this.state.scenario);
@@ -2939,6 +2961,7 @@ class Component extends DCLogic {
     if (this._vwTO) { clearTimeout(this._vwTO); this._vwTO = 0; }
     if (this._onVW) window.removeEventListener('resize', this._onVW);
     if (this._onKey) window.removeEventListener('keydown', this._onKey);
+    if (this._onPopState) window.removeEventListener('popstate', this._onPopState);
   }
 
   /* Both arms of a scenario are built together and held for the life of the
@@ -3117,7 +3140,16 @@ class Component extends DCLogic {
   snap() { return this.E.snapshot(this.run(), this.state.t); }
   pad(n) { return String(n).padStart(2, '0'); }
   mmss(m) { if (m == null) return '—'; const a = Math.abs(m); return (m < 0 ? '−' : '') + this.pad(Math.floor(a)) + ':' + this.pad(Math.round((a % 1) * 60)); }
-  go(p) { return () => this.setState({ page: p, expand: null }); }
+  navigate(page, patch = {}, push = true) {
+    const next = DESTINATION_SLUG[page] ? page : 'dash';
+    if (next === this.state.page) {
+      if (Object.keys(patch).length) this.setState(patch);
+      return;
+    }
+    if (push) history.pushState({ angelDestination: next }, '', destinationURL(next));
+    this.setState({ expand: null, ...patch, page: next });
+  }
+  go(p) { return () => this.navigate(p); }
   tPlus() { return 'T+' + Math.floor(this.state.t) + ' MIN'; }
   /* THE SIX STATES ARE STILL THERE — COLD, STBY, EARLY, MID, PEND, DONE.
      They are reached by deploying and running the scenario, which is the only
@@ -3149,7 +3181,7 @@ class Component extends DCLogic {
   resetRun() {
     this.depTotal = 0; this._fin = null; this._finKey = null;
     this._mapCatchAt = null; this._mapCatchN = 0;
-    this.setState({ ...this.COLD });
+    this.navigate('dash', { ...this.COLD });
   }
 
   /* ---- THE RUN AFTER IT ENDS --------------------------------------------
@@ -3270,8 +3302,8 @@ class Component extends DCLogic {
   recReach(s, id) { return id != null && (this.state.t >= 180 || (s && s.rows.some(r => r.id === id))); }
   openRec(id) {
     return () => {
-      this.setState({
-        page: 'cas', casTab: 'board', expand: id,
+      this.navigate('cas', {
+        casTab: 'board', expand: id,
         casFilter: 'ALL', q: '', showAll: true, groupShut: {}
       });
       this.revealRec();
@@ -3651,11 +3683,11 @@ class Component extends DCLogic {
     const seg = (on, hue) => on ? { bg: 'oklch(0.3 0.06 ' + hue + ')', fg: 'oklch(0.95 0.03 ' + hue + ')' } : { bg: 'transparent', fg: 'oklch(0.62 0.008 250)' };
     const NAV_OF = { feed: 'dec' };                              // a tab inside a destination keeps that destination lit
     const here = NAV_OF[st.page] || st.page;
-    const navOf = k => here === k ? { bg: 'oklch(0.26 0.03 165) !important', fg: 'oklch(0.96 0.02 165)', selected: true } : { bg: 'transparent', fg: 'oklch(0.84 0.006 250)', selected: false };
+    const navOf = k => here === k ? { bg: 'oklch(0.26 0.03 165)', fg: 'oklch(0.96 0.02 165)', selected: true } : { bg: 'transparent', fg: 'oklch(0.84 0.006 250)', selected: false };
     const nav = {}; ['dash', 'cas', 'dec', 'feed', 'tty', 'sensor', 'ops', 'ev', 'wargame', 'chat', 'map', 'data', 'auth', 'setup'].forEach(k => nav[k] = navOf(k));
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
     nav.ev.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go.ev(); } };
-    const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.setState({ role: r, page: { COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r] }) }));
+    const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.navigate({ COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r], { role: r }) }));
     const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
 
     if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
@@ -3760,7 +3792,7 @@ class Component extends DCLogic {
           cid: r.cid, site: r.site.replace('SITE ', ''), t: 'DIED',
           asset: (r.causeLabel || 'NOT FILED').toUpperCase(),
           fg: 'oklch(0.84 0.15 25)',
-          open: () => { this.setState({ page: 'cas', expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
+          open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
         }))
         : s.rows.slice(0, 6).map(r => ({
           cid: r.cid, site: r.site.replace('SITE ', ''), t: r.tRem == null ? 'NOT ASSERTED' : this.mmss(r.tRem),
@@ -4947,7 +4979,7 @@ class Component extends DCLogic {
        ground twice over. */
     const chips = [];
     if (globeOK) chips.push(['globe', 'GLOBE', 'sphere']);
-    chips.push(['theatre', 'THEATRE', 'globe'], ['2d', 'TACTICAL 2D', 'sheet']);
+    chips.push(['theatre', 'THEATER', 'globe'], ['2d', 'TACTICAL 2D', 'sheet']);
     if (gpu) chips.push(['3d', 'TACTICAL 3D', 'cube']);
 
     /* A change that starts inside the map — an operation picked off the
@@ -6562,7 +6594,7 @@ class Component extends DCLogic {
     return {
       resOpen: st.resOpen,
       closeRes: () => this.setState({ resOpen: false }),
-      openAnalysis: () => this.setState({ resOpen: false, page: 'ev', expand: null }),
+      openAnalysis: () => this.navigate('ev', { resOpen: false }),
       armA: ARM.A, armB: ARM.B, armC: ARM.C,
       res: {
         stamp: 'T+180 · SEED 42 · ' + s.admitted + ' CASUALTIES · COMMON RANDOM NUMBERS',
@@ -6798,7 +6830,7 @@ class Component extends DCLogic {
      st.page anywhere that is not a destination. */
   walkGo(i) {
     const j = Math.max(0, Math.min(WALK.length - 1, i));
-    this.setState({ walkStep: j, page: WALK[j].page });
+    this.navigate(WALK[j].page, { walkStep: j });
   }
 
   cmpVals(s) {
@@ -7078,7 +7110,7 @@ class Component extends DCLogic {
         idFg: 'oklch(0.84 0.1 25)', arrFg: r.reach == null ? 'oklch(0.55 0.008 250)' : 'oklch(0.9 0.005 250)',
         slackFg: 'oklch(0.82 0.15 25)', taskFg: 'oklch(0.74 0.008 250)',
         rowBg: 'transparent',
-        open: () => { this.setState({ page: 'cas', expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
+        open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
       }))
       : s.rows.slice(0, 8).map(r => this.qRow(r));
     const causeMax = Math.max(1, ...Object.values(s.causes));
@@ -7129,7 +7161,7 @@ class Component extends DCLogic {
       slackFg: r.slack == null ? 'oklch(0.58 0.008 250)' : r.slack < 0 ? 'oklch(0.78 0.16 25)' : 'oklch(0.8 0.11 165)',
       taskFg: r.tasking === 'ESCALATED' ? 'oklch(0.85 0.1 75)' : r.tasking ? 'oklch(0.74 0.05 165)' : 'oklch(0.62 0.008 250)',
       rowBg: r.slack != null && r.slack < 0 ? 'oklch(0.21 0.03 25)' : 'transparent',
-      open: () => { this.setState({ page: 'cas', expand: r.id, casTab: 'board' }); this.revealRec(); }
+      open: () => { this.navigate('cas', { expand: r.id, casTab: 'board' }); this.revealRec(); }
     };
   }
   miniMap(s) {
@@ -7341,7 +7373,7 @@ class Component extends DCLogic {
         /* THE WALKTHROUGH IS TURNED ON HERE AND NOWHERE ELSE, and it is off
            until it is. ON puts the operator on step one rather than leaving
            the bar sitting on this screen claiming to be step five. */
-        { label: 'Guided walkthrough', opts: [opt('ON', () => this.setState({ walkOn: true, walkStep: 0, page: WALK[0].page }), st.walkOn, 195), opt('OFF', () => this.setState({ walkOn: false }), !st.walkOn, 195)],
+        { label: 'Guided walkthrough', opts: [opt('ON', () => this.navigate(WALK[0].page, { walkOn: true, walkStep: 0 }), st.walkOn, 195), opt('OFF', () => this.setState({ walkOn: false }), !st.walkOn, 195)],
           note: 'Off by default. On, a bar at the foot of the window walks the five destinations of the brief in order and prints one line about each \u2014 left and right arrows step, Escape exits, and the arrows are left alone while the cursor is in a field. It moves between screens and changes nothing any screen draws.' }
       ]}
     ];
