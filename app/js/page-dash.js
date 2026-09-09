@@ -26,6 +26,7 @@
   window.DPAGES = window.DPAGES || {};
   window.DPAGES.dash = function (L) {
     const esc = D().esc, MIN = D().MIN;
+    D().searchContext('Search casualty, site, injury, tasking…', 'queue and brief records');
     if (!L) return `<div class="d-head"><div><h1>Command Overview</h1>
       <p>Waiting for the run.</p></div></div>`;
 
@@ -33,6 +34,7 @@
     const tightMin = tight ? Math.max(0, tight.left) : null;
     const delta = L.deadB - L.deadA;      // positive = fewer dead under ANGEL SWARM
     const blood = shelf(L);
+    const queue = L.timed.filter(r => timedMatches(r));
 
     /* THE DELTA IS A DEATH FIGURE. Red, and never phrased as lives saved. */
     const deltaTile = !L.deployed
@@ -62,8 +64,8 @@
 
       <div class="d-cols">
         <div class="d-stack">
-          ${briefCard(L)}
-          ${queueCard(L)}
+          ${briefCard(L, queue)}
+          ${queueCard(L, queue)}
         </div>
         <div class="d-stack">
           ${escCard(L)}
@@ -88,10 +90,10 @@
   /* Three lines, the canvas's three labels. Each one is a real statement
      about this run or it is not drawn at all — an empty slot is honest and a
      manufactured sentence is not. */
-  function briefCard(L) {
+  function briefCard(L, timed) {
     const esc = D().esc, MIN = D().MIN;
     const rows = [];
-    const worst = L.timed.find(r => r.unreachable || (r.slack !== null && r.slack < 0)) || L.timed[0];
+    const worst = timed.find(r => r.unreachable || (r.slack !== null && r.slack < 0)) || timed[0];
     if (worst) {
       const c = worst.c;
       rows.push(['TOP RISK', 'risk',
@@ -102,34 +104,39 @@
             ? `The nearest aircraft arrives ${Math.abs(Math.round(worst.slack))} minutes late.`
             : `Inside the reach of ${worst.sites} launch point${worst.sites === 1 ? '' : 's'}.`)]);
     }
-    const flying = (L.A.drones || []).filter(d => d.state === 'OUTBOUND' && d.task);
+    const flying = (L.A.drones || []).filter(d => d.state === 'OUTBOUND' && d.task)
+      .filter(d => D().matches(d.tail, d.id, d.type, d.plat && d.plat.label,
+        d.baseName, d.state, d.task, d.target != null ? D().casId({ id:d.target }) : '',
+        'action outbound tasked standing authority'));
     if (flying.length) {
       const d = flying[0];
       rows.push(['ACTION', 'act',
         `${esc(d.tail || ('AC-' + d.id))} is outbound. Executed under standing authority.`]);
     }
-    const stale = L.open.filter(c => (L.now - c.tPinged) > 2).length;
+    const stale = L.open.filter(c => (L.now - c.tPinged) > 2)
+      .filter(c => casualtyMatches(c)).length;
     if (stale) rows.push(['CHANGE', '',
       `${stale} ${stale === 1 ? 'casualty has' : 'casualties have'} a reading the network ` +
       `will not act on. No deadline is asserted and no sortie is tasked against an estimate.`]);
 
-    if (!rows.length) rows.push(['STATE', '', 'Nothing is open. No allocation is being made.']);
+    if (!rows.length && !D().query())
+      rows.push(['STATE', '', 'Nothing is open. No allocation is being made.']);
 
     return `<section class="d-card"><header>
         <h2>Allocation brief</h2>
         <span class="d-meta">GENERATED LOCALLY &middot; T+${Math.floor(L.now)}</span></header>
-      <div class="body">${rows.map(([k, cls, v]) =>
+      <div class="body">${rows.length ? rows.map(([k, cls, v]) =>
         `<div class="d-line-item ${cls}"><span class="k">${k}</span><span class="v">${v}</span></div>`
-      ).join('')}</div></section>`;
+      ).join('') : D().noMatches('brief records')}</div></section>`;
   }
 
   /* ---- the deadline queue ----------------------------------------------- */
   const COLS = '96px 1fr 88px 92px 72px 128px';
-  function queueCard(L) {
+  function queueCard(L, queue) {
     const esc = D().esc, MIN = D().MIN;
     const INJ = { TRUNCAL_HEM:'truncal haem', JUNCTIONAL_HEM:'junctional haem',
                   EXTREMITY_HEM:'extremity haem', AIRWAY:'airway', OTHER:'other' };
-    const rows = L.timed.slice(0, 8).map(r => {
+    const rows = queue.slice(0, 8).map(r => {
       const c = r.c, breach = r.unreachable || (r.slack !== null && r.slack < 0);
       return `<div class="row${breach ? ' breach' : ''}" style="grid-template-columns:${COLS}">
         <span class="id">${esc(D().casId(c))}</span>
@@ -152,8 +159,24 @@
           <span>CASUALTY</span><span>SITE &middot; MECHANISM</span>
           <span class="r">DEADLINE</span><span class="r">ARRIVAL</span>
           <span class="r">SLACK</span><span class="r">TASKING</span></div>
-        ${rows || '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No casualty is inside a deadline this system holds.</div>'}
+        ${rows || (D().query() ? D().noMatches('queue records') : '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No casualty is inside a deadline this system holds.</div>')}
       </div></section>`;
+  }
+
+  function casualtyMatches(c) {
+    return D().matches(D().casId(c), c.id, c.cls, c.role, c.unitName,
+      c.injury, c.needs, c.assignedTo,
+      c.assignedTo != null ? 'tasked' : 'queued', 'stale reading change');
+  }
+
+  function timedMatches(r) {
+    const c = r.c;
+    return D().matches(D().casId(c), c.id, c.cls, c.role, c.unitName,
+      c.injury, c.needs, c.assignedTo, r.site && r.site.b.name,
+      r.unreachable ? 'unreachable no asset breach' : '',
+      r.slack !== null && r.slack < 0 ? 'late negative slack' : 'inside deadline',
+      c.assignedTo != null ? 'tasked' : 'queued',
+      r.left, r.eta, r.slack);
   }
 
   /* ---- the escalation card ---------------------------------------------- */

@@ -63,7 +63,12 @@
   };
   const svg = k => '<svg width="17" height="17" viewBox="0 0 24 24" fill="none">' + ICON[k] + '</svg>';
 
-  const S = { page: 'dash' };
+  const S = {
+    page: 'dash',
+    query: '',
+    search: null,
+    blockedAttempt: false
+  };
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -127,6 +132,27 @@
   const MIN = m => (m == null || !isFinite(m)) ? '—'
     : (m < 0 ? '−' : '') + String(Math.floor(Math.abs(m))).padStart(2,'0') + ':' +
       String(Math.round((Math.abs(m) % 1) * 60)).padStart(2,'0');
+  const CS = window.ContextSearch;
+
+  function searchContext(placeholder, noun) {
+    S.search = placeholder ? { placeholder, noun: noun || 'records' } : null;
+  }
+  function query() { return S.query; }
+  function matches() {
+    return CS.matches.apply(null, [S.query].concat(Array.prototype.slice.call(arguments)));
+  }
+  function noMatches(noun) {
+    return `<div class="d-no-match" role="status">No ${esc(noun || (S.search && S.search.noun) || 'records')} match “${esc(S.query)}”.</div>`;
+  }
+  function missionActive() {
+    return CS.missionActive(window.APP);
+  }
+  function wallRemaining() {
+    return CS.wallRemaining(window.APP);
+  }
+  function countdown(s) {
+    return CS.countdown(s);
+  }
 
   /* ---- the rail --------------------------------------------------------- */
   function railHTML(L) {
@@ -181,9 +207,23 @@
     const mm = String(Math.floor(t % 60)).padStart(2,'0');
     const ss = String(Math.floor((t % 1) * 60)).padStart(2,'0');
     const auth = A && A.angelActive ? 'ALLOCATION AUTHORITY' : 'STANDBY — NO AUTHORITY';
+    const active = missionActive();
+    const searchLabel = S.search ? `Filter ${S.search.noun} on this screen` : '';
+    const search = S.search ? `<div class="d-search-wrap">
+      <label class="d-search">
+        <span class="d-sr">${esc(searchLabel)}</span>
+        <input id="dContextSearch" type="search" autocomplete="off"
+          aria-label="${esc(searchLabel)}" placeholder="${esc(S.search.placeholder)}"
+          value="${esc(S.query)}" ${active ? 'aria-disabled="true"' : ''}>
+        ${S.query ? '<button type="button" data-search-clear aria-label="Clear screen search">×</button>' : ''}
+      </label>
+      ${S.blockedAttempt && active ? `<span class="d-search-block" role="status" aria-live="polite">
+        Search unavailable until this mission finishes · ${countdown(wallRemaining())} wall time${
+          A && !A.running ? ' · paused' : ''}</span>` : ''}
+    </div>` : '';
     return `<div class="d-top">
       <div style="display:flex;gap:12px;align-items:center">
-        <label class="d-search"><span>Search casualty, asset, site</span></label>
+        ${search}
         <span class="d-fpcon">FPCON BRAVO</span>
       </div>
       <div style="display:flex;gap:16px;align-items:center">
@@ -230,14 +270,30 @@
       }
     }).observe(document.body, { childList: true });
     host.addEventListener('click', ev => {
+      if (ev.target.closest('[data-search-clear]')) {
+        S.query = ''; S.blockedAttempt = false; paint(); return;
+      }
       const b = ev.target.closest('[data-page]');
       if (!b) return;
       go(b.dataset.page, b.dataset.sec);
     });
+    host.addEventListener('input', ev => {
+      if (!ev.target || ev.target.id !== 'dContextSearch') return;
+      CS.input(S, ev.target.value, window.APP);
+      ev.target.value = S.query;
+      paint();
+    });
+    host.addEventListener('beforeinput', ev => {
+      if (ev.target && ev.target.id === 'dContextSearch' && missionActive()) {
+        ev.preventDefault();
+        S.blockedAttempt = true;
+        paint();
+      }
+    });
   }
 
   function go(page, sec) {
-    S.page = page;
+    CS.navigate(S, page);
     if (sec && typeof window.goView === 'function') window.goView(sec);
     else {
       const first = (SECTIONS[page] || [])[0];
@@ -247,16 +303,68 @@
     paint();
   }
 
+  /* The page itself is live and may be replaced. The search field is not:
+     keeping that one DOM node stable preserves focus, selection, IME
+     composition and virtual-keyboard state across both input-driven and
+     one-second simulation repaints. */
+  function syncTop(main, L) {
+    const box = document.createElement('div');
+    box.innerHTML = topHTML(L);
+    const next = box.firstElementChild;
+    const cur = main.querySelector(':scope > .d-top');
+    if (!cur) { main.insertBefore(next, main.firstChild); return; }
+    const curWrap = cur.querySelector('.d-search-wrap');
+    const nextWrap = next.querySelector('.d-search-wrap');
+    if (!curWrap || !nextWrap) { cur.replaceWith(next); return; }
+
+    const field = curWrap.querySelector('#dContextSearch');
+    const nextField = nextWrap.querySelector('#dContextSearch');
+    field.placeholder = nextField.placeholder;
+    field.setAttribute('aria-label', nextField.getAttribute('aria-label'));
+    if (nextField.hasAttribute('aria-disabled')) field.setAttribute('aria-disabled', 'true');
+    else field.removeAttribute('aria-disabled');
+    if (field.value !== S.query) field.value = S.query;
+
+    const oldClear = curWrap.querySelector('[data-search-clear]');
+    const newClear = nextWrap.querySelector('[data-search-clear]');
+    if (oldClear && !newClear) oldClear.remove();
+    else if (!oldClear && newClear)
+      curWrap.querySelector('.d-search').appendChild(newClear);
+
+    const oldBlock = curWrap.querySelector('.d-search-block');
+    const newBlock = nextWrap.querySelector('.d-search-block');
+    if (oldBlock && newBlock) oldBlock.replaceWith(newBlock);
+    else if (oldBlock) oldBlock.remove();
+    else if (newBlock) curWrap.appendChild(newBlock);
+
+    cur.children[1].replaceWith(next.children[1]);
+  }
+
   function paint() {
     const L = live();
     const rail = document.getElementById('dRail');
     const main = document.getElementById('dMain');
     if (!rail || !main) return;
+    const owner = window.APP && OWNER[window.APP.view];
+    if (owner && owner !== S.page) {
+      CS.navigate(S, owner);
+    }
+    if (missionActive() && S.query) S.query = '';
+    if (!missionActive()) S.blockedAttempt = false;
     const cls = document.querySelector('#dShell > .d-class');
     if (cls) cls.outerHTML = classHTML(L);
     rail.innerHTML = railHTML(L);
     const page = window.DPAGES && window.DPAGES[S.page];
-    main.innerHTML = topHTML(L) + (page ? page(L) : emptyPage(S.page));
+    S.search = null;
+    const body = page ? page(L) : emptyPage(S.page);
+    syncTop(main, L);
+    let pageHost = main.querySelector(':scope > #dPage');
+    if (!pageHost) {
+      pageHost = document.createElement('div');
+      pageHost.id = 'dPage';
+      main.appendChild(pageHost);
+    }
+    pageHost.innerHTML = body;
   }
 
   function emptyPage(k) {
@@ -265,7 +373,10 @@
       <p>Not yet adapted to this design.</p></div></div>`;
   }
 
-  window.DSHELL = { mount, paint, go, NAV, SECTIONS, OWNER, live, esc, MIN, svg, casId, dueAt };
+  window.DSHELL = {
+    mount, paint, go, NAV, SECTIONS, OWNER, live, esc, MIN, svg, casId, dueAt,
+    searchContext, query, matches, noMatches, missionActive, wallRemaining, countdown
+  };
   window.DPAGES = window.DPAGES || {};
 
   if (document.readyState === 'loading')

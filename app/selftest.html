@@ -141,6 +141,7 @@
      worker path itself still loads the shipped engine. -->
 <script src="./js/mc.worker.js"></script>
 <script src="./js/map-layout-state.js"></script>
+<script src="./js/context-search-state.js"></script>
 
 <script type="module">
 window.onmessage = null;   /* mc.worker.js installs a worker handler; not wanted on a page */
@@ -962,6 +963,589 @@ test('returning to Single clears Side by side from every mirrored control', () =
   syncMapLayoutHighlights(host, 'COP');
   eq(host.querySelectorAll('[data-mapview].on').length, 0,
      'a mirrored highlight survived the layout change');
+});
+
+/* ======================================================== contextual search */
+group('CONTEXTUAL SCREEN SEARCH',
+      'Screen filtering is scoped, reset on destination changes, and unavailable throughout an active mission.');
+
+test('matching is case-insensitive and whitespace-normalized', () => {
+  ok(ContextSearch.matches('  cas-012 ', 'CAS-012 · Forward sector'),
+     'a visible casualty id did not match');
+  ok(ContextSearch.matches('forward sector', '  FORWARD   SECTOR  '),
+     'visible whitespace was not normalized');
+});
+
+test('no-match filtering produces an empty record set', () => {
+  const rows = ['CAS-012', 'CAS-044', 'M25-03'];
+  eq(rows.filter(row => ContextSearch.matches('basalt', row)).length, 0,
+     'an unrelated record survived the filter');
+});
+
+test('moving to another destination clears the query and blocked feedback', () => {
+  const state = { page:'cas', query:'CAS-012', blockedAttempt:true };
+  ContextSearch.navigate(state, 'feed');
+  eq(state.query, '', 'the prior screen query survived navigation');
+  eq(state.blockedAttempt, false, 'blocked feedback survived navigation');
+});
+
+test('moving within one destination preserves its contextual query', () => {
+  const state = { page:'cas', query:'blood', blockedAttempt:false };
+  ContextSearch.navigate(state, 'cas');
+  eq(state.query, 'blood', 'a same-destination subsection cleared the query');
+});
+
+function searchMission(overrides) {
+  return Object.assign({
+    world:{ scn:{ durationMin:180 } }, t:30, tView:30,
+    running:true, finished:false, speed:2
+  }, overrides || {});
+}
+
+test('typing during a playing mission is declined without a filter side effect', () => {
+  const state = { query:'', blockedAttempt:false };
+  eq(ContextSearch.input(state, 'CAS-012', searchMission()), false,
+     'active-mission input was accepted');
+  eq(state.query, '', 'active-mission input changed the filter');
+  eq(state.blockedAttempt, true, 'the accessible blocked state was not raised');
+});
+
+test('the blocked countdown is wall time adjusted for simulation speed', () => {
+  eq(ContextSearch.countdown(ContextSearch.wallRemaining(searchMission())), '1:15');
+  eq(ContextSearch.countdown(ContextSearch.wallRemaining(searchMission({ speed:10 }))), '0:15');
+});
+
+test('pause freezes the countdown and keeps the unfinished mission gated', () => {
+  const paused = searchMission({ running:false });
+  ok(ContextSearch.missionActive(paused), 'a paused unfinished mission became searchable');
+  const before = ContextSearch.wallRemaining(paused);
+  const after = ContextSearch.wallRemaining(paused);
+  eq(after, before, 'paused wall time continued to count down');
+});
+
+test('resume and speed changes recalculate the live countdown', () => {
+  const app = searchMission({ running:false, speed:2 });
+  const paused = ContextSearch.wallRemaining(app);
+  app.running = true;
+  app.speed = 4;
+  eq(ContextSearch.wallRemaining(app), paused / 2,
+     'the countdown did not react to the selected simulation speed');
+});
+
+test('reset and completion both enable search cleanly', () => {
+  const state = { query:'', blockedAttempt:true };
+  const reset = searchMission({ t:0, tView:0, running:false });
+  ok(!ContextSearch.missionActive(reset), 'a reset mission remained gated');
+  ok(ContextSearch.input(state, 'blood', reset), 'search did not enable after reset');
+  const complete = searchMission({ t:180, tView:180, running:false, finished:true });
+  ok(!ContextSearch.missionActive(complete), 'a complete mission remained gated');
+  ok(ContextSearch.input(state, 'casualty', complete), 'search did not enable on completion');
+  eq(ContextSearch.wallRemaining(complete), 0, 'completed countdown was not zero');
+});
+
+let CONSOLE_FRAME = null;
+async function consoleFrame() {
+  if (CONSOLE_FRAME) return CONSOLE_FRAME;
+  const frame = document.createElement('iframe');
+  frame.src = './console.html';
+  frame.title = 'Contextual search browser fixture';
+  frame.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0';
+  document.body.appendChild(frame);
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('console fixture timed out')), 30000);
+    frame.onload = () => {
+      const poll = () => {
+        const w = frame.contentWindow;
+        if (w && w.DSHELL && w.APP && frame.contentDocument.getElementById('dShell')) {
+          clearTimeout(timer); CONSOLE_FRAME = frame; resolve(frame);
+        } else setTimeout(poll, 50);
+      };
+      poll();
+    };
+  });
+  return frame;
+}
+
+async function consoleType(frame, value) {
+  const input = frame.contentDocument.getElementById('dContextSearch');
+  input.focus();
+  input.value = value;
+  input.dispatchEvent(new Event('input', { bubbles:true }));
+  await new Promise(resolve => setTimeout(resolve, 20));
+}
+
+test('the shipped shell filters, shows no-match, hides unsuitable screens, and clears alternate navigation', async () => {
+  const frame = await consoleFrame();
+  const w = frame.contentWindow, doc = frame.contentDocument;
+  const input = () => doc.getElementById('dContextSearch');
+  const searchable = ['dash', 'cas', 'dec', 'feed', 'tty', 'ops', 'ev'];
+  for (const page of searchable) {
+    w.DSHELL.go(page);
+    await new Promise(resolve => setTimeout(resolve, 20));
+    ok(input(), page + ' did not expose contextual search');
+    ok(/^Filter .+ on this screen$/.test(input().getAttribute('aria-label')),
+       page + ' search has no screen-specific accessible name');
+  }
+  for (const page of ['chat', 'map']) {
+    w.DSHELL.go(page);
+    await new Promise(resolve => setTimeout(resolve, 20));
+    ok(!input(), page + ' exposed a duplicate or unsuitable search');
+  }
+  for (const [page, hiddenTab, visibleTab] of [
+    ['tty', 'QUERY', 'TTY'],
+    ['ops', 'THEATER', 'WALL'],
+    ['ev', 'CONF', 'EV']
+  ]) {
+    w.DSHELL.go(page);
+    doc.querySelector(`[data-bgrp="${page}"][data-btab="${hiddenTab}"]`).click();
+    ok(!input(), page + ' exposed search on a subsection without filterable records');
+    doc.querySelector(`[data-bgrp="${page}"][data-btab="${visibleTab}"]`).click();
+    ok(input(), page + ' did not restore search on its record subsection');
+  }
+
+  const A = w.APP;
+  w.resetSim(false);
+  while (!A.finished) {
+    w.stepSim();
+    A.tView = A.t;
+    if (w.DSHELL.live().open.length) break;
+  }
+  A.running = false; A.finished = true;
+  w.DSHELL.go('cas');
+  w.DSHELL.paint();
+  const before = doc.querySelectorAll('.pa-row').length;
+  const firstId = doc.querySelector('.pa-row .pa-id .n').textContent.split('·')[0].trim();
+  await consoleType(frame, firstId.toLowerCase());
+  const after = doc.querySelectorAll('.pa-row').length;
+  ok(before > 0 && after > 0 && after <= before,
+     'a case-insensitive casualty id match did not retain the visible record');
+  ok(doc.querySelector('.pa-row').textContent.indexOf(firstId) >= 0,
+     'the matched casualty was not the row left on screen');
+  doc.querySelector('[data-cas="tab:SUPPLY"]').click();
+  eq(w.DSHELL.query(), firstId.toLowerCase(),
+     'a same-destination subsection change cleared the contextual query');
+  ok(/launch point|stock/i.test(input().placeholder),
+     'the same-destination subsection did not update the placeholder');
+  doc.querySelector('[data-cas="tab:CASUALTIES"]').click();
+
+  w.DSHELL.go('feed');
+  await consoleType(frame, 'run-start');
+  ok(doc.querySelector('.pa-entry'), 'text search did not retain a matching feed record');
+  doc.querySelector('[data-feed="togglefilter"]').click();
+  doc.querySelector('[data-feed="filter:DELIVERED"]').click();
+  ok(doc.querySelector('.d-no-match'), 'category and text filters did not compose to an empty result');
+  doc.querySelector('[data-feed="filter:ALL"]').click();
+  ok(doc.querySelector('.pa-entry'), 'clearing the category filter did not restore the text match');
+
+  w.DSHELL.go('dec');
+  const auditStart = A.armA.audit.length;
+  const olderAuto = 'SELFTEST OLDER AUTO-DISPATCH RECORD';
+  const olderTreat = 'SELFTEST OLDER TREAT RECORD';
+  A.armA.audit.push(
+    { action:'AUTO-DISPATCH', detail:olderAuto, t:1 },
+    { action:'AUTO-DISPATCH', detail:'SELFTEST NEWER AUTO 1', t:2 },
+    { action:'AUTO-DISPATCH', detail:'SELFTEST NEWER AUTO 2', t:3 },
+    { action:'AUTO-DISPATCH', detail:'SELFTEST NEWER AUTO 3', t:4 },
+    { action:'TREAT', detail:olderTreat, t:1, meta:{ outcome:'STABLE' } },
+    { action:'TREAT', detail:'SELFTEST NEWER TREAT 1', t:2 },
+    { action:'TREAT', detail:'SELFTEST NEWER TREAT 2', t:3 }
+  );
+  w.DSHELL.paint();
+  await consoleType(frame, olderAuto.toLowerCase());
+  ok(Array.from(doc.querySelectorAll('.pa-side .pa-item .a'))
+       .some(el => el.textContent === olderAuto),
+     'an older auto-dispatch was capped out before contextual filtering');
+  await consoleType(frame, olderTreat.toLowerCase());
+  ok(Array.from(doc.querySelectorAll('.pa-side .pa-item .a'))
+       .some(el => el.textContent === olderTreat),
+     'an older treatment record was capped out before contextual filtering');
+  A.armA.audit.splice(auditStart);
+  w.DSHELL.paint();
+
+  w.DSHELL.go('dash');
+  await consoleType(frame, 'definitely-no-screen-match');
+  ok(doc.querySelector('.d-no-match'), 'the rendered screen did not show a no-match state');
+  const focused = input();
+  focused.setSelectionRange(4, 4);
+  await new Promise(resolve => setTimeout(resolve, 1050));
+  eq(input().value, 'definitely-no-screen-match', 'the periodic repaint lost the query');
+  eq(doc.activeElement, focused, 'the periodic repaint replaced or blurred the active search field');
+  eq(input().selectionStart, 4, 'the periodic repaint moved the search caret');
+
+  w.goView('AUDIT');
+  w.DSHELL.paint();
+  await new Promise(resolve => setTimeout(resolve, 20));
+  eq(w.DSHELL.query(), '', 'alternate navigation carried the prior query into Decision Feed');
+  ok(doc.querySelector('[data-page="feed"]').classList.contains('on'),
+     'alternate navigation did not synchronize the shell destination');
+});
+
+test('the shipped shell blocks the complete countdown lifecycle and unlocks after reset or completion', async () => {
+  const frame = await consoleFrame();
+  const w = frame.contentWindow, doc = frame.contentDocument, A = w.APP;
+  const input = () => doc.getElementById('dContextSearch');
+  w.DSHELL.go('dash');
+  A.t = 30; A.tView = 30; A.speed = 2; A.running = true; A.finished = false;
+  w.DSHELL.paint();
+  await consoleType(frame, 'CAS-001');
+  eq(w.DSHELL.query(), '', 'typing during play changed the visible filter');
+  let feedback = doc.querySelector('.d-search-block');
+  ok(feedback, 'the blocked attempt did not produce feedback');
+  eq(feedback.getAttribute('aria-live'), 'polite', 'blocked feedback is not an accessible live region');
+  const running = feedback.textContent.trim();
+  const wallBefore = w.ContextSearch.wallRemaining(A);
+  const raf = w.requestAnimationFrame;
+  w.requestAnimationFrame = () => 0;
+  A.lastFrame = 1000; A.acc = 0;
+  for (let frameNo = 1; frameNo <= 10; frameNo++) w.loop(1000 + frameNo * 100);
+  w.requestAnimationFrame = raf;
+  const wallAfter = w.ContextSearch.wallRemaining(A);
+  ok(Math.abs((wallBefore - wallAfter) - 1) < 0.01,
+     'one wall second in the real simulation loop did not remove one countdown second');
+  w.DSHELL.paint();
+  feedback = doc.querySelector('.d-search-block');
+  const advanced = feedback.textContent.trim();
+  ok(advanced !== running, 'the running wall-clock countdown did not decrement with mission time');
+
+  A.running = false;
+  w.DSHELL.paint();
+  feedback = doc.querySelector('.d-search-block');
+  ok(/paused/i.test(feedback.textContent), 'pause was not reflected in countdown feedback');
+  eq(input().getAttribute('aria-disabled'), 'true', 'pause enabled search before the mission ended');
+  eq(feedback.textContent.replace(/\s*· paused\s*/, '').trim(), advanced,
+     'the wall-clock countdown moved while paused');
+
+  A.speed = 4;
+  w.DSHELL.paint();
+  ok(doc.querySelector('.d-search-block').textContent.trim() !== feedback.textContent.trim(),
+     'a speed change did not recalculate wall-clock time');
+  A.running = true;
+  w.DSHELL.paint();
+  eq(input().getAttribute('aria-disabled'), 'true', 'resume did not restore the gate');
+
+  A.running = false; A.t = 0; A.tView = 0; A.finished = false;
+  w.DSHELL.paint();
+  eq(input().getAttribute('aria-disabled'), null, 'reset did not enable search');
+  ok(!doc.querySelector('.d-search-block'), 'reset left blocked feedback behind');
+
+  A.t = A.world.scn.durationMin; A.tView = A.t; A.finished = true;
+  w.DSHELL.paint();
+  eq(input().getAttribute('aria-disabled'), null, 'completion did not enable search');
+  await consoleType(frame, 'casualty');
+  eq(w.DSHELL.query(), 'casualty', 'completion did not accept a new query');
+});
+
+let PRIMARY_FRAME = null;
+let PRIMARY_INSTANCE = null;
+const pauseFor = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function primaryInstance(frame) {
+  if (PRIMARY_INSTANCE) return PRIMARY_INSTANCE;
+  const fixture = frame.contentWindow.ANGEL_DESIGN &&
+    frame.contentWindow.ANGEL_DESIGN.contextSearchFixture;
+  if (typeof fixture === 'function') {
+    PRIMARY_INSTANCE = fixture();
+    return PRIMARY_INSTANCE;
+  }
+  throw new Error('primary console did not expose its gated contextual-search fixture');
+}
+
+async function primaryFrame() {
+  if (PRIMARY_FRAME) return PRIMARY_FRAME;
+  const frame = document.createElement('iframe');
+  frame.title = 'Primary console contextual search browser fixture';
+  frame.style.cssText = 'position:fixed;width:1280px;height:800px;left:-2000px;top:-2000px;border:0';
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('primary console fixture timed out')), 30000);
+    frame.onload = () => {
+      const poll = () => {
+        const w = frame.contentWindow;
+        const ready = w && w.ANGEL_DESIGN && w.ANGEL_DESIGN.contextSearchFixture &&
+          frame.contentDocument.getElementById('contextSearch');
+        if (ready) {
+          try {
+            const instance = primaryInstance(frame);
+            if (!instance.E) { setTimeout(poll, 50); return; }
+            clearTimeout(timer);
+            PRIMARY_FRAME = frame;
+            resolve(frame);
+          } catch (_) {
+            setTimeout(poll, 50);
+          }
+        } else setTimeout(poll, 50);
+      };
+      poll();
+    };
+    frame.src = './?context-search-selftest=primary';
+    document.body.appendChild(frame);
+  });
+  return frame;
+}
+
+async function primarySetState(instance, patch) {
+  await new Promise(resolve => instance.setState(patch, resolve));
+  await pauseFor(25);
+}
+
+async function primaryGo(frame, page, patch) {
+  primaryInstance(frame).navigate(page, patch || {});
+  await pauseFor(40);
+}
+
+async function primaryType(frame, value) {
+  const input = frame.contentDocument.getElementById('contextSearch');
+  ok(input, 'the primary contextual search input is not rendered');
+  input.focus();
+  const setValue = Object.getOwnPropertyDescriptor(frame.contentWindow.HTMLInputElement.prototype, 'value').set;
+  setValue.call(input, value);
+  input.dispatchEvent(new frame.contentWindow.Event('input', { bubbles:true }));
+  await pauseFor(40);
+}
+
+function primaryClickText(frame, text) {
+  const el = Array.from(frame.contentDocument.querySelectorAll('span'))
+    .find(node => node.textContent.trim() === text);
+  ok(el, 'could not find the primary console control "' + text + '"');
+  el.click();
+  return pauseFor(40);
+}
+
+async function primaryPopTo(frame, slug) {
+  const w = frame.contentWindow;
+  const url = new w.URL(w.location.href);
+  url.searchParams.set('destination', slug);
+  w.history.pushState({ angelDestination:slug }, '', url.pathname + url.search + url.hash);
+  w.dispatchEvent(new w.PopStateEvent('popstate', { state:w.history.state }));
+  await pauseFor(50);
+}
+
+test('the primary route exposes contextual search only for meaningful record screens and subsections', async () => {
+  const frame = await primaryFrame();
+  const doc = frame.contentDocument;
+  const input = () => doc.getElementById('contextSearch');
+  const searchable = ['dash', 'cas', 'dec', 'feed', 'tty', 'ops', 'ev'];
+  for (const page of searchable) {
+    await primaryGo(frame, page);
+    ok(input(), page + ' did not expose contextual search on the primary route');
+    ok(/^Search .+/.test(input().getAttribute('aria-label')),
+       page + ' search has no screen-specific accessible name');
+    ok(input().placeholder && input().placeholder !== 'Search',
+       page + ' search has no screen-specific placeholder');
+  }
+  for (const page of ['map', 'chat', 'sensor', 'wargame', 'auth', 'data', 'setup']) {
+    await primaryGo(frame, page);
+    ok(!input(), page + ' exposed a duplicate or artificial primary search');
+  }
+
+  await primaryGo(frame, 'tty', { ttyTab:'transcript' });
+  await primaryType(frame, 'handoff');
+  await primaryClickText(frame, 'SQL CONSOLE');
+  ok(!input(), 'Analyst Terminal exposed contextual search beside its purpose-built SQL query');
+  await primaryClickText(frame, 'TRANSCRIPT');
+  eq(input().value, 'handoff', 'a same-destination hidden subsection cleared the terminal query');
+
+  await primaryGo(frame, 'ops', { opsTab:'wall' });
+  await primaryClickText(frame, 'THEATRE');
+  ok(!input(), 'Ops Center exposed contextual search on the embedded theater');
+  await primaryClickText(frame, 'WALL');
+  ok(input(), 'Ops Center did not restore search on its Wall record collection');
+
+  await primaryGo(frame, 'ev', { evTab:'cf' });
+  await primaryClickText(frame, 'REPLICATIONS');
+  ok(!input(), 'Evidence exposed contextual search on Replications');
+  await primaryClickText(frame, 'ACCOUNTABILITY RECORD');
+  ok(input(), 'Evidence did not expose search on the Accountability Record');
+  await primaryClickText(frame, 'AFTER ACTION');
+  ok(!input(), 'Evidence exposed contextual search on After Action');
+  await primaryClickText(frame, 'COUNTERFACTUAL');
+  ok(input(), 'Evidence did not restore search on Counterfactual');
+});
+
+test('the primary route filters before caps, composes with existing controls, preserves repaints, and resets every navigation path', async () => {
+  const frame = await primaryFrame();
+  const doc = frame.contentDocument;
+  const instance = primaryInstance(frame);
+  const input = () => doc.getElementById('contextSearch');
+  await primarySetState(instance, {
+    t:0, running:false, deployed:false, q:'', blockedAttempt:false,
+    casTab:'board', casFilter:'ALL', feedTab:'dec', filter:'ALL', limit:30,
+    ttyTab:'transcript', opsTab:'wall', evTab:'cf', deployOpen:false,
+    deploying:false, depOnline:0, interruptOpen:false
+  });
+
+  await primaryGo(frame, 'dash');
+  await primaryType(frame, '  STATE  ');
+  ok(!doc.querySelector('.context-no-match'),
+     'a case-insensitive Command Overview brief match produced a no-match state');
+  await primaryType(frame, 'definitely-no-primary-screen-match');
+  ok(doc.querySelector('.context-no-match'),
+     'the primary Command Overview did not show its no-match state');
+
+  await primaryClickText(frame, 'Live Casualties');
+  eq(input().value, '', 'a direct rail destination carried the prior query');
+  await primaryClickText(frame, 'SUPPLY');
+  const supplyName = instance.snap().stock[0].name;
+  const supplyQuery = supplyName.toUpperCase();
+  await primaryType(frame, supplyQuery);
+  ok(!doc.querySelector('.context-no-match') && doc.body.textContent.indexOf(supplyName) >= 0,
+     'the Supply collection did not retain its case-insensitive place match');
+  const focused = input();
+  focused.setSelectionRange(2, 2);
+  await primarySetState(instance, { deploying:true, depOnline:0 });
+  await pauseFor(310);
+  await primarySetState(instance, { deploying:false });
+  eq(input().value, supplyQuery, 'recurring primary-console repaints lost the query');
+  eq(doc.activeElement, focused, 'recurring primary-console repaints blurred the search field');
+  eq(input().selectionStart, 2, 'recurring primary-console repaints moved the search caret');
+  await primaryClickText(frame, 'FLEET');
+  eq(input().value, supplyQuery, 'a same-destination casualty subsection cleared the query');
+  ok(/platform|tail|launch/i.test(input().placeholder),
+     'the Fleet subsection did not update its contextual placeholder');
+  await primaryType(frame, 'definitely-no-fleet-match');
+  ok(doc.querySelector('.context-no-match'), 'Fleet did not show its screen-appropriate no-match state');
+
+  await primaryGo(frame, 'dash');
+  await primaryType(frame, 'brief');
+  await primaryClickText(frame, 'OPEN FULL BOARD →');
+  eq(input().value, '', 'a programmatic in-screen destination link carried the prior query');
+
+  await primaryType(frame, 'casualty');
+  await primaryPopTo(frame, 'decision-feed');
+  eq(input().value, '', 'History API navigation carried the prior query into Decision Feed');
+  ok(/decision feed/i.test(input().getAttribute('aria-label')),
+     'popstate did not synchronize the contextual search destination');
+  await primaryType(frame, 'run start');
+  ok(!doc.querySelector('.context-no-match'), 'Decision Feed did not retain its matching audit record');
+  await primaryClickText(frame, 'DELIVERED');
+  ok(/NO RECORDS MATCH/i.test(doc.body.textContent),
+     'Decision Feed category and text filters did not compose to an empty result');
+  await primaryClickText(frame, 'ALL');
+  ok(!/NO RECORDS MATCH/i.test(doc.body.textContent),
+     'clearing the Decision Feed category filter did not restore the text match');
+
+  let pendingFixture = null;
+  for (let t = 0; t < 180 && !pendingFixture; t += 0.25) {
+    const snapshot = instance.E.snapshot(instance.runD, t);
+    if (snapshot.pending && snapshot.pending.length) {
+      pendingFixture = { t, snapshot, proposal:snapshot.pending[0] };
+    }
+  }
+  ok(pendingFixture, 'the deployed run has no pending-decision fixture');
+  const matchedProposal = pendingFixture.proposal;
+  const unmatchedProposal = {
+    ...matchedProposal,
+    id:matchedProposal.id + 100000,
+    call:'SELFTEST-UNMATCHED-PROPOSAL',
+    grounds:(matchedProposal.grounds || []).slice(),
+    route:(matchedProposal.route || []).map(r => ({ ...r }))
+  };
+  const fixtureSnapshot = {
+    ...pendingFixture.snapshot,
+    pending:[matchedProposal, unmatchedProposal]
+  };
+  instance.snap = () => fixtureSnapshot;
+  await primaryGo(frame, 'dec');
+  await primarySetState(instance, {
+    deployed:true, t:pendingFixture.t, running:false,
+    q:'definitely-no-pending-decision-match', blockedAttempt:true,
+    interruptOpen:false
+  });
+  ok(doc.querySelector('.context-no-match'),
+     'an unmatched pending proposal did not produce the Decisions no-match state');
+  ok(doc.body.textContent.indexOf('AUTHORISE A · COMMIT') < 0 &&
+     doc.body.textContent.indexOf('AUTHORISE B · HOLD') < 0,
+     'an unrelated pending proposal remained actionable under a no-match query');
+  const matchedEid = 'E-' + String(matchedProposal.id).padStart(4, '0');
+  await primarySetState(instance, { q:matchedEid });
+  ok(!doc.querySelector('.context-no-match') &&
+     doc.body.textContent.indexOf('AUTHORISE A · COMMIT') >= 0,
+     'a matching pending proposal did not restore its decision action surface');
+  await primaryClickText(frame, 'AUTHORISE A · COMMIT');
+  ok(instance.state.interruptOpen,
+     'acting on one filtered proposal suppressed attention for unmatched pending proposals');
+  ok(instance.state.decisions[matchedProposal.id] === 'APPROVED',
+     'the visible filtered proposal action did not record its decision');
+  delete instance.snap;
+  await primarySetState(instance, {
+    t:0, running:false, deployed:false, decisions:{}, extra:[],
+    q:'', blockedAttempt:false, interruptOpen:false
+  });
+});
+
+test('the primary route blocks and narrates the full active-mission countdown lifecycle', async () => {
+  const frame = await primaryFrame();
+  const doc = frame.contentDocument;
+  const instance = primaryInstance(frame);
+  const input = () => doc.getElementById('contextSearch');
+  const feedback = () => doc.querySelector('.context-search-note');
+
+  await primaryGo(frame, 'dash');
+  await primarySetState(instance, {
+    t:0, running:false, deployed:true, speed:2, q:'pre-run',
+    blockedAttempt:false, deployOpen:false, deploying:false,
+    resOpen:false, resetOpen:false, interruptOpen:false
+  });
+  instance.startMission();
+  await pauseFor(40);
+  eq(instance.state.q, '', 'Play carried a pre-run query into the mission');
+  eq(input().getAttribute('aria-disabled'), 'true', 'Play did not gate contextual search');
+
+  await primarySetState(instance, { t:30, running:true, speed:2, q:'', blockedAttempt:false });
+  await primaryType(frame, 'CAS-001');
+  eq(instance.state.q, '', 'typing during play changed the primary screen filter');
+  eq(input().value, '', 'the blocked text remained visible as an apparent active filter');
+  ok(feedback(), 'the primary route did not explain the blocked search attempt');
+  eq(feedback().getAttribute('aria-live'), 'polite',
+     'the primary blocked-search explanation is not an accessible live region');
+  ok(/mission finishes/i.test(feedback().textContent),
+     'the blocked-search explanation did not say when search becomes available');
+  const runningText = feedback().textContent.trim();
+  const tBefore = instance.state.t;
+  await pauseFor(1450);
+  ok(instance.state.t > tBefore, 'the real 120 ms mission clock did not advance');
+  ok(feedback().textContent.trim() !== runningText,
+     'the primary wall-clock countdown did not change as the mission advanced');
+
+  await primarySetState(instance, { running:false });
+  const pausedText = feedback().textContent.trim();
+  ok(/paused/i.test(pausedText), 'pause was not reflected in primary blocked-search feedback');
+  eq(input().getAttribute('aria-disabled'), 'true', 'pause enabled search before mission completion');
+  await pauseFor(360);
+  eq(feedback().textContent.trim(), pausedText, 'the primary countdown moved while paused');
+
+  await primarySetState(instance, { speed:4 });
+  const fasterText = feedback().textContent.trim();
+  ok(fasterText !== pausedText, 'a paused speed change did not recalculate primary wall time');
+  instance.startMission();
+  await pauseFor(45);
+  ok(feedback() && !/paused/i.test(feedback().textContent),
+     'Resume cleared or failed to resume the blocked-search countdown');
+  eq(input().getAttribute('aria-disabled'), 'true', 'Resume did not keep contextual search gated');
+
+  await primarySetState(instance, {
+    t:0, running:false, deployed:false, q:'', blockedAttempt:false,
+    resOpen:false, resetOpen:false, interruptOpen:false
+  });
+  eq(input().getAttribute('aria-disabled'), null, 'reset did not enable primary contextual search');
+  ok(!feedback(), 'reset left primary blocked-search feedback behind');
+
+  await primarySetState(instance, { t:30, running:false, deployed:true, speed:2, blockedAttempt:true });
+  ok(feedback() && /paused/i.test(feedback().textContent),
+     'a paused unfinished mission did not remain search-gated');
+  await primarySetState(instance, { t:180, running:false });
+  eq(input().getAttribute('aria-disabled'), null, 'completion did not enable primary contextual search');
+  ok(!feedback(), 'completion left blocked-search feedback visible');
+  await primaryType(frame, 'run complete');
+  eq(instance.state.q, 'run complete', 'completion did not accept a new contextual query');
+
+  await primaryGo(frame, 'feed', { feedTab:'dec', filter:'ALL', limit:6 });
+  const complete = instance.snap();
+  const older = complete.feed[complete.feed.length - 1];
+  ok(older && older.hash, 'the completed run did not expose an older audit record fixture');
+  const olderHash = instance.hashShort(older.hash);
+  await primaryType(frame, olderHash);
+  ok(!doc.querySelector('.context-no-match') && doc.body.textContent.indexOf(olderHash) >= 0,
+     'an older audit match was capped out before contextual filtering');
 });
 
 /* ------------------------------------------------------------------ webcrypto */

@@ -245,6 +245,7 @@
         <div style="padding:14px 20px 26px">${P.slot('ttySlot')}</div></div>`;
     }
     P.release();
+    D().searchContext('Search transcript records', 'transcript records');
 
     if (!L) return `<div class="b-tty">${head}
       <div class="b-blk"><span class="b-cmd">$ angel status</span>
@@ -290,7 +291,16 @@
   function queueBlock(L) {
     const MIN = D().MIN;
     const SHOW = 8;
-    const rows = L.timed.slice(0, SHOW).map(r => {
+    const found = L.timed.filter(r => {
+      const c = r.c;
+      const d = P.droneOf(L.A, c.assignedTo);
+      const needs = (c.needs || []).map(P.payShort).join(' ');
+      return D().matches(D().casId(c), r.site && r.site.b.name, c.unitName,
+        MECH[c.injury], c.injury, d && P.call(d), needs,
+        r.unreachable ? 'no asset unreachable' : d ? 'auto assigned' : 'queued',
+        r.left, r.eta, r.slack);
+    });
+    const rows = found.slice(0, SHOW).map(r => {
       const c = r.c;
       const breach = r.unreachable || (r.slack !== null && r.slack < 0);
       const stale = (L.now - c.tPinged) > 2;
@@ -316,20 +326,29 @@
         P.lpad(r.eta === null ? '—' : MIN(r.eta), 7) + '  ' + slack + '  ' +
         P.pad(esc(needs), 26) + esc(authority) + '</div>';
     }).join('');
-    const rest = L.timed.length - Math.min(SHOW, L.timed.length);
+    const rest = found.length - Math.min(SHOW, found.length);
+    const empty = D().query()
+      ? D().noMatches('casualties')
+      : '<div class="qt">no casualty is inside a deadline this system holds</div>';
     return `<div class="b-blk"><span class="b-cmd">$ angel queue --sort deadline</span></div>
       <div class="b-tbl">
         <div class="hd">${P.pad('ID', 9)}${P.pad('SITE', 16)}${P.pad('MECHANISM', 24)} CRM     DEADLINE  ${P.pad('ASSET', 9)} ARRIVE  SLACK  ${P.pad('PAYLOAD', 26)}AUTHORITY</div>
-        ${rows || '<div class="qt">no casualty is inside a deadline this system holds</div>'}
+        ${rows || empty}
         ${rest > 0 ? `<div class="qt" style="padding-top:6px">... ${rest} row${rest === 1 ? '' : 's'} suppressed — \`queue --all\`</div>` : ''}
       </div>`;
   }
 
   /* ---- $ angel escalations ----------------------------------------------- */
   function escBlock(L) {
-    const q = P.pending(L.A);
+    const q = P.pending(L.A).filter(p => D().matches(
+      'E-' + String(p.id).padStart(4, '0'), p.summary, (p.reasons || []).join(' '),
+      p.responder, p.leadDeadline, p.eta, 'escalation awaiting authority'));
     const st = (L.A.stats || {});
     if (!q.length) {
+      if (D().query()) {
+        return `<div class="b-blk"><span class="b-cmd">$ angel escalations</span>
+          <div class="b-esc" style="border-left-color:var(--d-line-hard)">${D().noMatches('escalations')}</div></div>`;
+      }
       return `<div class="b-blk"><span class="b-cmd">$ angel escalations</span>
         <div class="b-esc" style="border-left-color:var(--d-line-hard)">
           <span class="q">nothing is waiting on a person.</span>
@@ -390,10 +409,17 @@
   function explainBlock(L) {
     const pick = L.A.casualties
       .filter(c => c.decision && c.decision.t != null && c.decision.t <= L.now)
+      .filter(c => {
+        const k = c.decision;
+        return D().matches(D().casId(c), k.call, k.plat, k.base, P.pay(k.payload),
+          k.responder, k.crmUsed, (k.candidates || []).map(x =>
+            [x.call, x.verdict, x.chosen ? 'chosen' : 'not chosen'].join(' ')).join(' '));
+      })
       .sort((x, y) => y.decision.t - x.decision.t)[0];
     if (!pick) {
       return `<div class="b-blk"><span class="b-cmd">$ angel explain --last</span>
-        <div style="margin-top:8px;font-size:12px;color:var(--d-t5)">no tasking has been recorded yet</div></div>`;
+        ${D().query() ? D().noMatches('tasking records') :
+          '<div style="margin-top:8px;font-size:12px;color:var(--d-t5)">no tasking has been recorded yet</div>'}</div>`;
     }
     const k = pick.decision;
     const lost = (k.candidates || []).filter(c => !c.chosen).slice(0, 3);

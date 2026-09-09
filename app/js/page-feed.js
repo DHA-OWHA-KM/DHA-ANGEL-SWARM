@@ -58,6 +58,7 @@
 
   window.DPAGES = window.DPAGES || {};
   window.DPAGES.feed = function (L) {
+    D().searchContext('Search this feed by decision, casualty, unit, or record…', 'feed records');
     if (!L) return `<div class="d-head"><div><h1>Decision Feed</h1>
       <p>Waiting for the run. Nothing has been decided yet.</p></div></div>`;
     const esc = D().esc;
@@ -107,9 +108,15 @@
      ====================================================================== */
   function entriesTab(L) {
     const all = build(L);
-    const list = (S.filter === 'ALL') ? all : all.filter(e => e.tag.indexOf(S.filter) === 0);
+    const category = (S.filter === 'ALL') ? all : all.filter(e => e.tag.indexOf(S.filter) === 0);
+    const list = category.filter(e => D().matches(
+      e.tag, e.head, e.detail, e.prov, e.t, zulu(e.t)
+    ));
     const shown = list.slice(0, S.limit);
-    if (!shown.length) return `<div class="pa-entries"><span class="d-note">Nothing under this filter yet.</span></div>`;
+    if (!shown.length) return `<div class="pa-entries">${
+      D().query() ? D().noMatches(S.filter === 'ALL' ? 'decision records' : S.filter.toLowerCase() + ' records')
+                  : '<span class="d-note">Nothing under this filter yet.</span>'
+    }</div>`;
     return `<div class="pa-entries">${shown.map(entry).join('')}
       ${list.length > shown.length
         ? `<div style="padding:16px 0"><button class="d-btn" type="button" data-feed="more">SHOW ${Math.min(40, list.length - shown.length)} EARLIER</button></div>`
@@ -248,22 +255,31 @@
   const ST_COLS = '86px 84px 1fr 86px 128px';
   function streamTab(L) {
     const esc = D().esc;
-    const rows = (window.COUNT ? COUNT.streamTo(L.A) : (L.A.stream || []))
-      .slice(-60).reverse();
+    const all = (window.COUNT ? COUNT.streamTo(L.A) : (L.A.stream || [])).slice().reverse();
+    const rows = all.filter(e => D().matches(
+      e.t, zulu(e.t), e.call, e.phase, e.text,
+      e.casId != null ? D().casId({ id: e.casId }) : '', e.relay,
+      e.tRecv === null ? 'buffered on aircraft' : ''
+    ));
+    const shown = rows.slice(0, S.limit);
     return `<div style="padding:14px 26px 24px"><section class="d-card">
       <header><h2>What the aircraft reported</h2>
-        <span class="d-meta">${rows.length} SHOWN &middot; THE STREAM IS WHAT WAS REPORTED, THE DELIVERY LOG IS WHAT HAPPENED</span></header>
+        <span class="d-meta">${shown.length} SHOWN &middot; THE STREAM IS WHAT WAS REPORTED, THE DELIVERY LOG IS WHAT HAPPENED</span></header>
       <div class="d-tbl">
         <div class="hd" style="grid-template-columns:${ST_COLS}">
           <span>TIME</span><span>CALL</span><span>REPORT</span><span>CASUALTY</span><span>RELAY</span></div>
-        ${rows.map(e => `<div class="row" style="grid-template-columns:${ST_COLS};align-items:start">
+        ${shown.map(e => `<div class="row" style="grid-template-columns:${ST_COLS};align-items:start">
           <span>${zulu(e.t)}</span>
           <span class="sub">${esc(e.call || '')}</span>
           <span class="sub" style="line-height:1.5">${esc(e.phase || '')}${e.text ? ' — ' + esc(e.text) : ''}</span>
           <span class="sub">${e.casId != null ? esc(D().casId({ id: e.casId })) : '—'}</span>
           <span class="sub" style="color:${e.tRecv === null ? 'var(--d-amb)' : 'var(--d-t5)'}">${
             e.tRecv === null ? 'BUFFERED ON AIRCRAFT' : esc(e.relay || '')}</span></div>`).join('') ||
-          '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">Nothing has been reported yet.</div>'}
+          (D().query() ? D().noMatches('ground reports')
+            : '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">Nothing has been reported yet.</div>')}
+        ${rows.length > shown.length
+          ? `<div style="padding:16px 0"><button class="d-btn" type="button" data-feed="more">SHOW ${Math.min(40, rows.length - shown.length)} EARLIER</button></div>`
+          : ''}
       </div></section></div>`;
   }
 

@@ -95,6 +95,16 @@
 
   window.DPAGES = window.DPAGES || {};
   window.DPAGES.cas = function (L) {
+    const noun = S.tab === 'CASUALTIES' ? 'casualties'
+      : S.tab === 'SUPPLY' ? 'launch points'
+      : S.tab === 'FLEET' ? 'airframes' : 'launch points';
+    D().searchContext(S.tab === 'CASUALTIES'
+      ? 'Search casualty, unit, injury, need…'
+      : S.tab === 'SUPPLY'
+        ? 'Search launch point or stock…'
+        : S.tab === 'FLEET'
+          ? 'Search call, platform, base, state…'
+          : 'Search launch point or siting…', noun);
     if (!L) return `<div class="d-head"><div><h1>Live Casualties</h1>
       <p>Waiting for the run. Nothing is on telemetry yet.</p></div></div>`;
     const esc = D().esc;
@@ -126,6 +136,7 @@
     if (S.tab === 'FLEET')        return head + tabs + fleetTab(L);
     if (S.tab === 'LAUNCHPOINTS') return head + tabs + lpTab(L);
 
+    const visibleOpen = open.filter(c => casualtyMatches(L, c, rowById.get(c.id)));
     const tiles = `<div class="d-tiles pa-t3">
         <div class="d-tile${missed ? ' crit d-death' : ''}">
           <span class="d-lab">MISSED IF NOTHING CHANGES</span>
@@ -141,12 +152,22 @@
           <span class="d-unit">no deadline claimed</span></div></div>
       </div>`;
 
-    return head + tabs + tiles + `<div class="pa-pad">${board(L, open, rowById)}</div>`;
+    return head + tabs + tiles + `<div class="pa-pad">${board(L, visibleOpen, rowById)}</div>`;
   };
+
+  function casualtyMatches(L, c, r) {
+    const need = (c.needs || []).map(k => NEED[k] || k);
+    return D().matches(D().casId(c), c.id, c.cls, roleOf(c), c.unitName,
+      placeOf(L.scn, c), c.injury, INJ[c.injury], c.needs, need,
+      c.assignedTo, r && r.site && r.site.b.name,
+      r && r.unreachable ? 'unreachable no asset' : '',
+      c.assignedTo != null ? 'tasked' : 'queued');
+  }
 
   /* ---- the board -------------------------------------------------------- */
   function board(L, open, rowById) {
     const esc = D().esc;
+    if (D().query() && !open.length) return D().noMatches('casualties');
     const groups = (S.grp === 'DEADLINE') ? byDeadline(L, open, rowById)
                                           : byLocation(L, open, rowById);
     let hidden = 0;
@@ -335,8 +356,12 @@
     const esc = D().esc;
     const keys = ['BLOOD', 'PLASMA', 'TXA', 'TQ_KIT', 'CHEST_SEAL'];
     const bases = L.A.bases || [];
+    const shownBases = bases.filter(b => D().matches(
+      b.name, b.stock, b.spent, b.wastedUnits,
+      keys.map(k => [k, NEED[k], b.stock && b.stock[k], b.spent && b.spent[k]]),
+      'stock shelf issued drawn down lost'));
     const tot = k => bases.reduce((s, b) => s + ((b.stock && b.stock[k]) || 0), 0);
-    const rows = bases.map(b => {
+    const rows = shownBases.map(b => {
       const issued = keys.reduce((s, k) => s + ((b.spent && b.spent[k]) || 0), 0);
       const lost = ((b.wastedUnits && b.wastedUnits.BLOOD) || 0) +
                    ((b.wastedUnits && b.wastedUnits.PLASMA) || 0);
@@ -353,7 +378,7 @@
           <span>LAUNCH POINT</span><span class="r">WHOLE BLOOD</span><span class="r">PLASMA</span>
           <span class="r">TXA</span><span class="r">HAEM KIT</span><span class="r">CHEST SEAL</span>
           <span class="r">DRAWN DOWN</span></div>
-        ${rows || '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No launch point is stood up.</div>'}
+        ${rows || (D().query() ? D().noMatches('launch points') : '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No launch point is stood up.</div>')}
       </div></section>
       <p class="d-note" style="margin:11px 2px 0">${esc(payLabel('BLOOD'))} &middot; ${
         typeof PAYLOADS !== 'undefined' && PAYLOADS.BLOOD ? esc(PAYLOADS.BLOOD.note) : ''}</p>
@@ -364,7 +389,14 @@
   const FLT_COLS = '96px 132px 148px 104px 1fr 96px 70px';
   function fleetTab(L) {
     const esc = D().esc, MIN = D().MIN;
-    const ds = (L.A.drones || []).slice().sort((a, b) => a.baseIdx - b.baseIdx || a.id - b.id);
+    const ds = (L.A.drones || []).filter(d => {
+      const state = d.state === 'LOST' ? 'LOST' : d.held ? 'HELD' : d.state;
+      const load = Object.keys(d.manifest || {}).filter(k => d.manifest[k] > 0)
+        .map(k => [k, NEED[k], d.manifest[k]]);
+      return D().matches(callOf(d), d.id, d.plat && d.plat.label, d.baseName,
+        state, load, d.target != null ? D().casId({ id: d.target }) : '',
+        d.sorties, d.held ? 'held' : '');
+    }).sort((a, b) => a.baseIdx - b.baseIdx || a.id - b.id);
     const rows = ds.map(d => {
       const state = d.state === 'LOST' ? 'LOST' : d.held ? 'HELD' : d.state;
       const col = d.state === 'LOST' ? 'var(--d-red)'
@@ -387,7 +419,7 @@
         <div class="hd" style="grid-template-columns:${FLT_COLS}">
           <span>CALL</span><span>PLATFORM</span><span>LAUNCH POINT</span><span>STATE</span>
           <span>CARRYING</span><span>TASKED TO</span><span class="r">SORTIES</span></div>
-        ${rows || '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No airframe is stood up.</div>'}
+        ${rows || (D().query() ? D().noMatches('airframes') : '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No airframe is stood up.</div>')}
       </div></section></div>`;
   }
 
@@ -403,7 +435,14 @@
     if (!S0) return `<div class="pa-pad"><section class="d-card"><header><h2>Launch points</h2></header>
       <div class="body"><span class="d-note">The reach model has not published yet.</span></div></section></div>`;
 
-    const rows = S0.sites.map(s => {
+    const sites = S0.sites.filter(s => {
+      const siting = s.scnB ? (s.scnB.afloat ? 'AFLOAT' : 'ASHORE') : 'not recorded';
+      return D().matches(s.b.name, siting, s.ready, s.air, s.lost, s.sorties,
+        L.timed.filter(r => r.site === s).map(r => [
+          D().casId(r.c), r.c.unitName, r.c.injury, INJ[r.c.injury]
+        ]));
+    });
+    const rows = sites.map(s => {
       const inReach = L.timed.filter(r => r.site === s).length;
       const siting = s.scnB ? (s.scnB.afloat ? 'AFLOAT' : 'ASHORE') : 'not recorded';
       return `<div class="row" style="grid-template-columns:${LP_COLS}">
@@ -423,7 +462,7 @@
         <div class="hd" style="grid-template-columns:${LP_COLS}">
           <span>LAUNCH POINT</span><span>SITING</span><span class="r">READY</span><span class="r">AIRBORNE</span>
           <span class="r">LOST</span><span class="r">SORTIES</span><span class="r">OPEN CASUALTIES</span></div>
-        ${rows}
+        ${rows || (D().query() ? D().noMatches('launch points') : '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No launch point is stood up.</div>')}
       </div></section>
       <p class="d-note" style="margin:11px 2px 0">Reach is the allocator&rsquo;s own test: an aircraft based here can fly to the position and get home carrying a unit of whole blood.</p>
       </div>`;

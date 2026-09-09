@@ -53,6 +53,7 @@
       return `${head}<div style="padding:16px 22px 24px">${P.slot('evSlot')}</div>`;
     }
     P.release();
+    D().searchContext('Search evidence summary', 'evidence records');
 
     if (!L) return `${head}<div class="d-head"><div><h1>Evidence</h1>
       <p>No run is loaded in this page yet.</p></div></div>`;
@@ -130,14 +131,15 @@
         'study answers and this panel will not answer for it. Open REPLICATIONS and run one.';
     }
 
-    const max = Math.max(1, ...rows.map(r => r[1] || 0));
-    const bars = rows.map(([lab, v]) => v === null || v === undefined ? '' : `
+    const found = rows.filter(([lab, v]) => D().matches(lab, v, title, right));
+    const max = Math.max(1, ...found.map(r => r[1] || 0));
+    const bars = found.map(([lab, v]) => v === null || v === undefined ? '' : `
       <div class="b-bar d-death"><div class="t"><span>${esc(lab)}</span>
         <span class="d-fig" style="font-size:11px">${typeof v === 'number' && v % 1 ? v.toFixed(1) : v}</span></div>
         <div class="d-bar"><i style="width:${Math.max(2, (v / max) * 100).toFixed(1)}%"></i></div></div>`).join('');
 
     return `<div class="b-lever"><div class="h"><span>${esc(title)}</span><span>${right}</span></div>
-      <div class="b-bars">${bars}</div>
+      <div class="b-bars">${bars || (D().query() ? D().noMatches('comparison rows') : '')}</div>
       <span class="foot">${foot}</span>
       <button class="b-link" type="button" data-bgrp="ev" data-btab="CONF" data-bview="CONFIDENCE">OPEN THE REPLICATION STUDY &rarr;</button>
     </div>`;
@@ -146,7 +148,15 @@
   /* ---- live now ----------------------------------------------------------- */
   function liveCol(L) {
     const MIN = D().MIN;
-    const rows = L.timed.slice(0, 4).map(r => {
+    const found = L.timed.filter(r => {
+      const c = r.c;
+      const stale = (L.now - c.tPinged) > 2;
+      const d = P.droneOf(L.A, c.assignedTo);
+      return D().matches(D().casId(c), r.site && r.site.b.name, c.unitName,
+        r.slack, d && P.call(d), stale ? 'withheld stale' : '',
+        r.unreachable ? 'no asset unreachable' : 'deadline casualty');
+    });
+    const rows = found.slice(0, 4).map(r => {
       const c = r.c;
       const stale = (L.now - c.tPinged) > 2;
       const d = P.droneOf(L.A, c.assignedTo);
@@ -157,8 +167,11 @@
       return `<div class="b-kv ${cls}"><span>${esc(D().casId(c))} &middot; ${esc(r.site ? r.site.b.name : (c.unitName || '—'))}</span>
         <span>${esc(right)}</span></div>`;
     }).join('');
+    const empty = D().query()
+      ? D().noMatches('live casualties')
+      : '<span class="note">Nothing is open inside a deadline this system holds.</span>';
     return `<div><span class="h">LIVE NOW &middot; ${P.zulu(L.now)}</span>
-      ${rows || '<span class="note">Nothing is open inside a deadline this system holds.</span>'}
+      ${rows || empty}
       <button class="b-link" type="button" data-page="cas">OPEN THE LIVE BOARD &rarr;</button></div>`;
   }
 
@@ -182,10 +195,15 @@
       return `<div><span class="h">DEATHS NOT PREVENTED &middot; ${L.deadA}</span>
         <span class="note">The attribution is not available in this session.</span></div>`;
     }
-    const rows = CAUSE.filter(([k]) => c[k]).map(([k, lab]) =>
+    const found = CAUSE.filter(([k]) => c[k])
+      .filter(([k, lab]) => D().matches(lab, c[k], k, 'death cause'));
+    const rows = found.map(([k, lab]) =>
       `<div class="b-kv"><span>${lab}</span><span class="d-fig" style="font-size:11px">${c[k]}</span></div>`).join('');
+    const empty = D().query()
+      ? D().noMatches('death causes')
+      : '<span class="note">Nobody has died of a survivable wound in this run.</span>';
     return `<div class="d-death"><span class="h" style="color:var(--d-red-t)">DEATHS NOT PREVENTED &middot; ${c.total}</span>
-      ${rows || '<span class="note">Nobody has died of a survivable wound in this run.</span>'}
+      ${rows || empty}
       <span class="note">Only the first line is a tasking failure, and only the last is a fleet-size
         failure. Each is reported with its reason rather than folded into one number.</span></div>`;
   }

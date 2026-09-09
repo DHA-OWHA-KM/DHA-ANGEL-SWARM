@@ -65,11 +65,12 @@
 
   window.DPAGES = window.DPAGES || {};
   window.DPAGES.dec = function (L) {
+    D().searchContext('Search proposals, casualties, aircraft, grounds…', 'decision records');
     if (!L) return `<div class="d-head"><div><h1>Decision</h1>
       <p>Waiting for the run.</p></div></div>`;
 
     const q = (L.A.queue || []);
-    const pend = q.filter(p => p.state === 'PENDING');
+    const pend = q.filter(p => p.state === 'PENDING' && proposalMatches(L, p));
     if (S.focus != null && !pend.some(p => p.id === S.focus)) S.focus = null;
     const p = pend.find(x => x.id === S.focus) || pend[0] || null;
 
@@ -78,6 +79,28 @@
       <div class="pa-side">${handled(L)}${theater(L)}${toll(L)}</div>
     </div>`;
   };
+
+  function proposalMatches(L, p) {
+    if (!D().query()) return true;
+    const arm = L.A;
+    const d = (arm.drones || []).find(x => x.id === p.droneId);
+    const disposition = {
+      PENDING: 'decision requires you awaiting pending',
+      APPROVED: 'authorised approved',
+      REJECTED: 'withheld rejected',
+      EXPIRED: 'lapsed unactioned expired'
+    };
+    const values = [
+      p.id, p.state, disposition[p.state], p.summary, (p.reasons || []).join(' '), p.gain,
+      p.tRaised, `T+${Number(p.tRaised).toFixed(1)}`, callOf(d), d && d.baseName, d && d.type
+    ];
+    for (const leg of (p.route || [])) {
+      const c = (arm.casualties || []).find(x => x.id === leg.casId);
+      values.push(D().casId({ id: leg.casId }), leg.payloadKey, payLabel(leg.payloadKey),
+        leg.eta, c && c.cls, c && c.unitName);
+    }
+    return D().matches.apply(null, values);
+  }
 
   /* ---- the escalation itself -------------------------------------------- */
   function focus(L, p, pend) {
@@ -238,8 +261,12 @@
   const H_COLS = '1fr 116px 150px 92px';
   function history(L) {
     const esc = D().esc;
-    const done = (L.A.queue || []).filter(p => p.state !== 'PENDING').slice(-8).reverse();
-    if (!done.length) return '';
+    const done = (L.A.queue || []).filter(p =>
+      p.state !== 'PENDING' && proposalMatches(L, p)).slice(-8).reverse();
+    if (!done.length) return D().query()
+      ? `<section class="d-card" style="margin-top:22px"><header><h2>Decided this shift</h2></header>${
+          D().noMatches('decided records')}</section>`
+      : '';
     const word = { APPROVED:'AUTHORISED', REJECTED:'WITHHELD', EXPIRED:'LAPSED UNACTIONED' };
     const col = { APPROVED:'var(--d-teal-2)', REJECTED:'var(--d-t4)', EXPIRED:'var(--d-amb)' };
     return `<section class="d-card" style="margin-top:22px"><header>
@@ -258,11 +285,15 @@
 
   /* ---- nothing is waiting ------------------------------------------------ */
   function quiet(L, q) {
+    const pending = q.some(p => p.state === 'PENDING');
+    const searchEmpty = !!D().query() && pending;
     return `<div style="display:flex;align-items:center;gap:12px">
-        <span class="pa-chip" style="background:var(--d-panel-2);color:var(--d-t4)">NOTHING REQUIRES YOU</span>
+        <span class="pa-chip" style="background:var(--d-panel-2);color:var(--d-t4)">${
+          searchEmpty ? 'NO MATCHING DECISION' : 'NOTHING REQUIRES YOU'}</span>
         <span style="font:400 11px var(--d-mono);color:var(--d-t5)">T+${Math.floor(L.now)} MIN</span></div>
-      <div class="pa-lede">Nothing is waiting on you. Everything inside standing authority has already gone,
-        and every escalation raised this shift has been disposed of.</div>
+      ${searchEmpty ? D().noMatches('pending decisions') :
+        `<div class="pa-lede">Nothing is waiting on you. Everything inside standing authority has already gone,
+        and every escalation raised this shift has been disposed of.</div>`}
       <div class="pa-why"><span class="k">WHAT WOULD REACH YOU</span>
         <span class="v">A route is escalated on named grounds and on nothing else: an expected benefit
         below the standing-authority threshold, a routing that crosses a threat envelope, a draw that
@@ -277,19 +308,29 @@
   function handled(L) {
     const esc = D().esc;
     const arm = L.A;
-    const auto = (arm.audit || []).filter(e => e.action === 'AUTO-DISPATCH').slice(-3).reverse();
-    const treated = (arm.audit || []).filter(e => e.action === 'TREAT').slice(-2).reverse();
     const noDl = L.open.filter(c => c.deadlineMin >= 9000).length;
-    const items = [];
-    for (const e of auto) items.push([e.detail,
-      `dispatched under standing authority · T+${e.t.toFixed(1)} · no trade-off to state`]);
-    for (const e of treated) items.push([e.detail,
-      `T+${e.t.toFixed(1)}${e.meta && e.meta.outcome ? ' · outcome reported ' + String(e.meta.outcome).toLowerCase() : ''}`]);
-    if (noDl) items.push([noDl + (noDl === 1 ? ' casualty carries' : ' casualties carry') + ' no asserted deadline',
-      'MINIMAL triage — the network holds no physiological clock for them and claims none']);
+    const auditItems = action => (arm.audit || []).filter(e => e.action === action).map(e => [
+      e.detail,
+      action === 'AUTO-DISPATCH'
+        ? `dispatched under standing authority · T+${e.t.toFixed(1)} · no trade-off to state`
+        : `T+${e.t.toFixed(1)}${e.meta && e.meta.outcome ? ' · outcome reported ' + String(e.meta.outcome).toLowerCase() : ''}`
+    ]);
+    /* Match the complete audit collection before retaining each panel's
+       existing newest-three/newest-two caps. Older matching records must not
+       disappear merely because unrelated newer records filled the panel. */
+    const auto = auditItems('AUTO-DISPATCH')
+      .filter(([a, b]) => D().matches(a, b, 'handled without you')).slice(-3).reverse();
+    const treated = auditItems('TREAT')
+      .filter(([a, b]) => D().matches(a, b, 'handled without you')).slice(-2).reverse();
+    const noDeadline = noDl ? [[
+      noDl + (noDl === 1 ? ' casualty carries' : ' casualties carry') + ' no asserted deadline',
+      'MINIMAL triage — the network holds no physiological clock for them and claims none'
+    ]].filter(([a, b]) => D().matches(a, b, 'handled without you')) : [];
+    const shown = auto.concat(treated, noDeadline);
     return `<section class="pa-panel"><h3><span>HANDLED WITHOUT YOU</span></h3>
-      ${items.length ? items.slice(0, 6).map(([a, b]) =>
+      ${shown.length ? shown.slice(0, 6).map(([a, b]) =>
         `<div class="pa-item"><span class="a">${esc(a)}</span><span class="b">${esc(b)}</span></div>`).join('')
+        : D().query() ? D().noMatches('handled records')
         : '<div class="pa-item"><span class="b">Nothing has been dispatched under standing authority yet.</span></div>'}
       </section>`;
   }

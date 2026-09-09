@@ -23,6 +23,9 @@
      result, a JSON Schema for each, and a catalog manifest. Every byte is
      generated here and handed over as a blob; nothing leaves this origin. -->
 <script src="./js/dataproducts.js"></script>
+<!-- Shared, deliberately small state primitives for the primary console's
+     contextual search.  This must precede the inline application below. -->
+<script src="./js/context-search-state.js"></script>
 <!-- Same inline data: icon app/index.html uses — without it the browser
      issues an automatic /favicon.ico request that 404s in the console. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;1.6 1.04 20.8 20.8&quot;%3E%3Crect x=&quot;1.6&quot; y=&quot;1.04&quot; width=&quot;20.8&quot; height=&quot;20.8&quot; rx=&quot;4.4&quot; fill=&quot;%230b1119&quot;/%3E%3Cg fill=&quot;%23f05653&quot;%3E%3Cpath d=&quot;M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z&quot;/%3E%3Cpath d=&quot;M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z&quot;/%3E%3Cpath d=&quot;M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z&quot;/%3E%3C/g%3E%3C/svg%3E">
@@ -39,6 +42,13 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 .app-nav-menu>div:not([data-selected="true"]):is(:hover,:focus-visible){background:oklch(0.225 0.014 250)!important}
 .app-nav-menu>div:not([data-selected="true"]):is(:hover,:focus-visible) svg{filter:brightness(1.5) saturate(1.18)}
 .app-nav-menu>div:focus-visible{outline:2px solid oklch(0.78 0.01 250);outline-offset:-2px}
+.context-search{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;background:oklch(0.22 0.012 250);border:1px solid oklch(0.31 0.012 250);flex:1 1 190px;min-width:150px;max-width:310px}
+.context-search input{border:0;background:transparent;outline:none;font:400 10.5px 'IBM Plex Mono',monospace;color:oklch(0.9 0.005 250);width:100%;min-width:0}
+.context-search:focus-within{border-color:oklch(0.65 0.1 210);box-shadow:0 0 0 2px oklch(0.65 0.1 210 / .22)}
+.context-search button{border:0;background:transparent;color:oklch(0.72 0.008 250);cursor:pointer;font:700 16px/1 'IBM Plex Mono',monospace;padding:0 2px}
+.context-search button:focus-visible{outline:2px solid oklch(0.75 0.12 210);outline-offset:1px}
+.context-search-note{font:600 8.5px/1.35 'IBM Plex Mono',monospace;color:oklch(0.86 0.1 75);max-width:260px}
+.context-no-match{border:1px dashed oklch(0.34 0.012 250);border-radius:5px;background:oklch(0.19 0.009 250);padding:16px;text-align:center;color:oklch(0.65 0.008 250);font:600 9.5px/1.45 'IBM Plex Mono',monospace;letter-spacing:.08em}
 @keyframes authorityVeilIn{from{opacity:0}to{opacity:1}}
 @keyframes authorityPanelIn{0%{opacity:0;transform:translateY(-18px) scale(.975)}62%{opacity:1;transform:translateY(3px) scale(1.004)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes authorityLineIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
@@ -175,7 +185,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="min-width:0">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid oklch(0.28 0.01 250);background:oklch(0.185 0.01 250);position:sticky;top:0;z-index:6">
 <div style="display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 340px">
-<div style="display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:5px;background:oklch(0.22 0.012 250);border:1px solid oklch(0.31 0.012 250);flex:1 1 170px;min-width:130px;max-width:230px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="10.5" cy="10.5" r="6.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2"/><path d="m15.5 15.5 4.5 4.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2" stroke-linecap="round"/></svg><input value="{{ q }}" onChange="{{ onQ }}" placeholder="Search casualty, asset, site" style="border:0;background:transparent;outline:none;font:400 10.5px 'IBM Plex Mono',monospace;color:oklch(0.9 0.005 250);width:100%"/></div>
+<sc-if value="{{ search.show }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 190px"><div class="context-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="10.5" cy="10.5" r="6.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2"/><path d="m15.5 15.5 4.5 4.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2" stroke-linecap="round"/></svg><label style="display:contents"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{{ search.label }}</span><input id="contextSearch" type="search" autocomplete="off" value="{{ q }}" onBeforeInput="{{ blockQ }}" onChange="{{ onQ }}" aria-label="{{ search.label }}" aria-disabled="{{ search.disabled }}" placeholder="{{ search.placeholder }}"/></label><sc-if value="{{ search.hasQ }}" hint-placeholder-val="{{ false }}"><button onClick="{{ clearQ }}" type="button" aria-label="Clear screen search">×</button></sc-if></div><sc-if value="{{ search.blocked }}" hint-placeholder-val="{{ false }}"><span class="context-search-note" role="status" aria-live="polite">{{ search.blockedNote }}</span></sc-if></div></sc-if>
 <span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.09em;padding:6px 10px;border-radius:4px;background:oklch(0.3 0.07 75);color:oklch(0.9 0.06 75)">FPCON BRAVO</span>
 
 <!-- MISSION IN PROGRESS.  Away from the Theater Map there was no way to tell
@@ -397,6 +407,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;align-items:baseline;gap:5px"><span style="font-size:20px;font-weight:600;color:{{ k.valFg }};line-height:1">{{ k.val }}</span><span style="font-size:9.5px;color:{{ k.unitFg }}">{{ k.unit }}</span></div>
 </div></sc-for>
 </div>
+<sc-if value="{{ dash.noMatches }}" hint-placeholder-val="{{ false }}"><div class="context-no-match" style="margin-top:12px">NO COMMAND OVERVIEW RECORDS MATCH “{{ q }}”</div></sc-if>
 
 <div style="display:grid;grid-template-columns:1fr 372px;gap:12px;padding:12px 0 0;align-items:start">
 <div style="display:flex;flex-direction:column;gap:12px">
@@ -505,6 +516,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;gap:3px;margin-bottom:13px;font-family:'IBM Plex Mono',monospace">
 <sc-for list="{{ casTabs }}" as="t" hint-placeholder-count="4"><span onClick="{{ t.on }}" style="display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:7px 12px;border-radius:4px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.icon }}{{ t.label }}</span></sc-for>
 </div>
+<sc-if value="{{ cas.subNoMatches }}" hint-placeholder-val="{{ false }}"><div class="context-no-match" style="margin-bottom:13px">NO {{ cas.subLabel }} RECORDS MATCH “{{ q }}”</div></sc-if>
 
 <sc-if value="{{ casTab.board }}" hint-placeholder-val="{{ true }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:2px 0 16px;font-family:'IBM Plex Mono',monospace">
@@ -702,6 +714,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;gap:3px;margin-bottom:13px;font-family:'IBM Plex Mono',monospace">
 <sc-for list="{{ pageTabs }}" as="t" hint-placeholder-count="2"><span onClick="{{ t.on }}" style="display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:7px 13px;border-radius:4px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.icon }}{{ t.label }}</span></sc-for>
 </div>
+<sc-if value="{{ decNoMatches }}" hint-placeholder-val="{{ false }}"><div class="context-no-match" style="margin-bottom:13px">NO DECISION RECORDS MATCH “{{ q }}”</div></sc-if>
 
 <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start">
 <div style="display:flex;flex-direction:column;gap:12px">
@@ -869,6 +882,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </sc-for>
 <div style="padding:10px 14px;font:400 9px 'IBM Plex Mono',monospace;color:oklch(0.56 0.008 250)">The stream is what was reported. The delivery log is what happened.</div>
 </sc-if>
+<sc-if value="{{ feed.noMatches }}" hint-placeholder-val="{{ false }}"><div style="padding:28px 14px;text-align:center;font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.66 0.008 250)">NO RECORDS MATCH “{{ q }}”</div></sc-if>
 </div>
 
 <div style="display:flex;flex-direction:column;gap:12px">
@@ -931,6 +945,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 
 <sc-if value="{{ ttyTab.transcript }}" hint-placeholder-val="{{ true }}">
 <div style="border-radius:6px;background:oklch(0.135 0.012 165);border:1px solid oklch(0.3 0.04 165);padding:14px 16px;display:flex;flex-direction:column;gap:13px;font-family:'IBM Plex Mono',monospace">
+<sc-if value="{{ ttyNoMatches }}" hint-placeholder-val="{{ false }}"><div class="context-no-match">NO TRANSCRIPT EXCHANGES MATCH “{{ q }}”</div></sc-if>
 <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="5">
 <div style="display:flex;flex-direction:column;gap:6px">
 <span style="font-size:11.5px;color:oklch(0.86 0.08 195)">$ {{ b.cmd }}</span>
@@ -1257,6 +1272,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ evTab.cf }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:12px">
 <span style="font-size:17px;font-weight:600;line-height:1.45;color:{{ claimFg }};text-wrap:pretty">{{ claim }}</span>
+<sc-if value="{{ evCfNoMatches }}" hint-placeholder-val="{{ false }}"><div class="context-no-match">NO COUNTERFACTUAL CAUSES OR LEVERS MATCH “{{ q }}”</div></sc-if>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:4px 0 5px;font-family:'IBM Plex Mono',monospace">
 <sc-for list="{{ evTiles }}" as="t" hint-placeholder-count="4">
 <div style="padding:16px 15px 15px;border-radius:6px;background:{{ t.bg }};border:1px solid {{ t.border }};box-shadow:{{ t.spine }};display:flex;flex-direction:column;gap:9px"><span style="font-size:8.5px;font-weight:700;letter-spacing:.09em;line-height:1.3;color:{{ t.labelFg }}">{{ t.label }}</span><span style="font-size:46px;font-weight:700;color:{{ t.valFg }};line-height:1">{{ t.val }}</span><span style="font-size:9.5px;color:oklch(0.72 0.008 250)">{{ t.sub }}</span></div>
@@ -2837,7 +2853,7 @@ class Component extends DCLogic {
   state = {
     page: destinationFromURL(), t: 0, running: false, deployed: false, speed: 4, group: 'loc',
     resOpen: false, resetOpen: false, casFilter: 'ALL',
-    expand: null, showAll: false, casTab: 'board', ready: false, q: '',
+    expand: null, showAll: false, casTab: 'board', ready: false, q: '', blockedAttempt: false,
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
     role: 'COMMANDER', decisions: {}, extra: [],
     filter: 'ALL', limit: 30, feedTab: 'dec',
@@ -2978,6 +2994,17 @@ class Component extends DCLogic {
       scenario: () => this.state.scenario,
       scenarios: () => (this.E ? this.E.SCENARIO_LIST.map(x => x.key) : [])
     };
+    /* Browser regression checks exercise this shipped page in an iframe.
+       The runtime intentionally exposes component definitions, not mounted
+       logic instances, so offer one non-production fixture handle only on
+       the explicit self-test URL. Normal application sessions never receive
+       it and the map-facing ANGEL_DESIGN contract above stays unchanged. */
+    if (new URL(location.href).searchParams.get('context-search-selftest') === 'primary') {
+      Object.defineProperty(window.ANGEL_DESIGN, 'contextSearchFixture', {
+        value: () => this,
+        enumerable: false
+      });
+    }
   }
 
   checkPendingAttention() {
@@ -3206,6 +3233,54 @@ class Component extends DCLogic {
   snap() { return this.E.snapshot(this.run(), this.state.t); }
   pad(n) { return String(n).padStart(2, '0'); }
   mmss(m) { if (m == null) return '—'; const a = Math.abs(m); return (m < 0 ? '−' : '') + this.pad(Math.floor(a)) + ':' + this.pad(Math.round((a % 1) * 60)); }
+  /* The top-bar field is one contextual control, not a second query language.
+     Keep its state in the component so every value builder filters the same
+     string, while the shared primitive owns the mission gate semantics. */
+  searchApp() {
+    return { world: { scn: { durationMin: 180 } }, t: this.state.t,
+      tView: this.state.t, speed: this.state.speed, running: this.state.running,
+      finished: this.state.t >= 180 };
+  }
+  searchMatch() { return window.ContextSearch.matches.apply(null, [this.state.q].concat([].slice.call(arguments))); }
+  searchContext() {
+    const st = this.state, active = window.ContextSearch.missionActive(this.searchApp());
+    const byPage = {
+      dash: ['Search queue and allocation brief', 'Search queue or brief'],
+      dec: ['Search pending, handled, and decision history', 'Search decisions, casualty, asset, or grounds'],
+      feed: ['Search decision feed and ground stream', 'Search feed, casualty, asset, or action']
+    };
+    let item = byPage[st.page] || null;
+    if (st.page === 'cas') item = {
+      board: ['Search casualty board', 'Search casualty, name, site, injury, or payload'],
+      supply: ['Search supply board', 'Search launch point, stock, or item'],
+      fleet: ['Search fleet board', 'Search call sign, platform, launch point, or tasking'],
+      lp: ['Search launch points', 'Search launch point, siting, or readiness']
+    }[st.casTab];
+    if (st.page === 'tty' && st.ttyTab === 'transcript') item = ['Search terminal transcript', 'Search command or transcript output'];
+    if (st.page === 'ops' && st.opsTab === 'wall') item = ['Search operations wall', 'Search casualty, site, asset, or outcome'];
+    if (st.page === 'ev' && st.evTab === 'cf') item = ['Search counterfactual evidence', 'Search causes or levers'];
+    if (st.page === 'ev' && st.evTab === 'rec') item = ['Search accountability record', 'Search actor, action, detail, or hash'];
+    return {
+      show: !!item, label: item ? item[0] : '', placeholder: item ? item[1] : '',
+      hasQ: !!st.q, disabled: active ? 'true' : null,
+      blocked: !!st.blockedAttempt && active,
+      blockedNote: 'Search unavailable until this mission finishes · ' +
+        window.ContextSearch.countdown(window.ContextSearch.wallRemaining(this.searchApp())) +
+        (st.running ? '' : ' · paused')
+    };
+  }
+  setSearch(value) {
+    const next = { query: this.state.q, blockedAttempt: !!this.state.blockedAttempt };
+    const ok = window.ContextSearch.input(next, value, this.searchApp());
+    this.setState({ q: next.query, blockedAttempt: next.blockedAttempt });
+    return ok;
+  }
+  startMission() {
+    /* A pre-run query cannot become an invisible filter once Play is pressed,
+       but feedback raised during an unfinished run belongs to that run and
+       must survive Pause → Resume so its live countdown remains coherent. */
+    this.setState({ running: true, q: '' });
+  }
   navigate(page, patch = {}, push = true) {
     const next = DESTINATION_SLUG[page] ? page : 'dash';
     if (next === this.state.page) {
@@ -3213,7 +3288,10 @@ class Component extends DCLogic {
       return;
     }
     if (push) history.pushState({ angelDestination: next }, '', destinationURL(next));
-    this.setState({ expand: null, ...patch, page: next });
+    /* A destination is a new collection. Sub-tabs use setState and retain the
+       query; all route paths (rail, history, and programmatic navigation)
+       pass through here and clear it centrally. */
+    this.setState({ expand: null, q: '', blockedAttempt: false, ...patch, page: next });
   }
   go(p) { return () => this.navigate(p); }
   tPlus() { return 'T+' + Math.floor(this.state.t) + ' MIN'; }
@@ -3231,7 +3309,7 @@ class Component extends DCLogic {
      on its seed, so playing it again reproduces the same result exactly. */
   COLD = {
     page: 'dash', t: 0, running: false, deployed: false, resOpen: false, resetOpen: false,
-    expand: null, showAll: false, casTab: 'board', q: '', casFilter: 'ALL', groupShut: {},
+    expand: null, showAll: false, casTab: 'board', q: '', blockedAttempt: false, casFilter: 'ALL', groupShut: {},
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
     decisions: {}, extra: [], filter: 'ALL', limit: 30, feedTab: 'dec',
     ttyTab: 'transcript', opsTab: 'wall', evTab: 'cf',
@@ -3773,7 +3851,14 @@ class Component extends DCLogic {
          reads, so there is one answer to what theatre this is. */
       joaStamp: 'JOA ' + this.E.WORLD.joa + ' · ' + this.E.WORLD.theater,
       joaName: this.E.WORLD.joa,
-      q: st.q, onQ: e => this.setState({ q: e.target.value }),
+       q: st.q, search: this.searchContext(),
+       onQ: e => this.setSearch(e.target.value),
+       blockQ: e => {
+         if (window.ContextSearch.missionActive(this.searchApp())) {
+           e.preventDefault(); this.setSearch(this.state.q);
+         }
+       },
+       clearQ: () => this.setState({ q: '', blockedAttempt: false }),
       /* THE DECISIONS CHIP WAS AMBER AND IT ONLY EVER SHOWED WHAT WAS OPEN AT
          THIS INSTANT. Escalations lapse after eight simulated minutes, so the
          chip blinked on and off and a run could finish with three unanswered
@@ -3849,6 +3934,22 @@ class Component extends DCLogic {
       { label: 'UNREACHABLE IN TIME', val: String(s.unreachable), unit: s.unreachable === 1 ? 'CASUALTY' : 'CASUALTIES', sub: s.unreachable ? s.rows.filter(r => r.reach === 0).slice(0, 3).map(r => r.cid).join(' · ') : 'every open casualty is inside the reach of an aircraft', hue: s.unreachable ? 25 : 165 },
       { label: 'AWAITING AUTHORITY', val: pending.length ? String(pending.length) : 'NONE', unit: pending.length ? 'DECISION' : '', sub: pending.length ? pending[0].call + ' → ' + this.cidOf(pending[0].casId) + ' · ' + pending[0].grounds[0] : 'nothing is outside standing authority', hue: pending.length ? 75 : 250 }
     ];
+    const opsBoard = fin
+      ? (F.survDead.length ? F.survDead : F.dead)
+        .filter(r => this.searchMatch(r.cid, r.site, 'DIED', r.causeLabel || 'NOT FILED'))
+        .slice(0, 6).map(r => ({
+          cid: r.cid, site: r.site.replace('SITE ', ''), t: 'DIED',
+          asset: (r.causeLabel || 'NOT FILED').toUpperCase(),
+          fg: 'oklch(0.84 0.15 25)',
+          open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
+        }))
+      : s.rows.filter(r => this.searchMatch(r.cid, r.site, r.tRem, r.tasking, r.arrival))
+        .slice(0, 6).map(r => ({
+          cid: r.cid, site: r.site.replace('SITE ', ''), t: r.tRem == null ? 'NOT ASSERTED' : this.mmss(r.tRem),
+          asset: r.tasking === 'ESCALATED' ? 'AWAITING AUTHORITY' : r.tasking ? r.tasking : r.arrival == null ? 'NO ASSET' : 'QUEUED',
+          fg: r.slack != null && r.slack < 0 ? 'oklch(0.84 0.15 25)' : r.tasking ? 'oklch(0.86 0.12 165)' : 'oklch(0.78 0.008 250)',
+          open: this.go('cas')
+        }));
     return {
       isOps: st.page === 'ops',
       ops: {
@@ -3864,21 +3965,9 @@ class Component extends DCLogic {
       opsTabs: [['wall', 'WALL', 'wall'], ['theatre', 'THEATRE', 'globe']].map(([k, l, m]) => ({ label: l, icon: mk(m), on: () => this.setState({ opsTab: k }), bg: st.opsTab === k ? 'oklch(0.3 0.05 165)' : 'oklch(0.21 0.012 250)', fg: st.opsTab === k ? 'oklch(0.95 0.03 165)' : 'oklch(0.66 0.008 250)' })),
       isOpsWall: st.opsTab === 'wall', isOpsTheatre: st.opsTab === 'theatre',
       band: band.map(b => ({ ...b, bg: 'oklch(0.2 0.03 ' + b.hue + ')', border: 'oklch(0.36 0.07 ' + b.hue + ')', labelFg: 'oklch(0.74 0.05 ' + b.hue + ')', valFg: b.hue === 250 ? 'oklch(0.78 0.008 250)' : 'oklch(0.86 0.14 ' + b.hue + ')', armName: b.armName || '', armFg: b.armFg || 'transparent', spine: b.spine || 'none' })),
-      opsBoard: fin
-        ? (F.survDead.length ? F.survDead : F.dead).slice(0, 6).map(r => ({
-          cid: r.cid, site: r.site.replace('SITE ', ''), t: 'DIED',
-          asset: (r.causeLabel || 'NOT FILED').toUpperCase(),
-          fg: 'oklch(0.84 0.15 25)',
-          open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
-        }))
-        : s.rows.slice(0, 6).map(r => ({
-          cid: r.cid, site: r.site.replace('SITE ', ''), t: r.tRem == null ? 'NOT ASSERTED' : this.mmss(r.tRem),
-          asset: r.tasking === 'ESCALATED' ? 'AWAITING AUTHORITY' : r.tasking ? r.tasking : r.arrival == null ? 'NO ASSET' : 'QUEUED',
-          fg: r.slack != null && r.slack < 0 ? 'oklch(0.84 0.15 25)' : r.tasking ? 'oklch(0.86 0.12 165)' : 'oklch(0.78 0.008 250)',
-          open: this.go('cas')
-        })),
-      opsBoardEmpty: fin ? (F.dead.length === 0) : s.rows.length === 0,
-      opsEmptyWhy: cold ? 'NO CASUALTY ADMITTED — THE CLOCK HAS NOT STARTED' : fin ? 'RUN COMPLETE — NOBODY DIED OF WOUNDS' : 'NO CASUALTY IS INSIDE A DEADLINE THIS SYSTEM HOLDS',
+      opsBoard,
+      opsBoardEmpty: opsBoard.length === 0,
+      opsEmptyWhy: st.q ? 'NO OPS WALL RECORDS MATCH “' + st.q + '”' : cold ? 'NO CASUALTY ADMITTED — THE CLOCK HAS NOT STARTED' : fin ? 'RUN COMPLETE — NOBODY DIED OF WOUNDS' : 'NO CASUALTY IS INSIDE A DEADLINE THIS SYSTEM HOLDS',
       opsPosture: [
         { k: 'WHOLE BLOOD FORWARD', v: s.bloodU + 'U · ' + s.sitesWithBlood + ' SITES' },
         { k: 'LIFT READY', v: s.ready + '/' + s.total + ' · ' + s.airborne + ' AIRBORNE' },
@@ -4001,7 +4090,8 @@ class Component extends DCLogic {
       'NOT-PREVENTED': 25, 'WASTE': 25, 'EXPIRE': 75, 'LOSS': 25, 'RUN-START': 250, 'RUN-COMPLETE': 300
     };
     const V = st.recVerify;
-    const recRows = s.feed.slice(0, st.recLimit).map(e => {
+    const recMatches = s.feed.filter(e => this.searchMatch(e.seq, e.actor, e.action, e.detail, e.hash));
+    const recRows = recMatches.slice(0, st.recLimit).map(e => {
       const hue = REC_HUE[e.action] == null ? 250 : REC_HUE[e.action];
       const broken = V && V.bad.indexOf(e.seq) >= 0;
       return {
@@ -4032,8 +4122,16 @@ class Component extends DCLogic {
     const A = this.run().A, B = this.run().B;
     const causeMax = Math.max(1, ...Object.values(s.causes));
     const bloodIssued = A.stockLog.filter(e => e.reason === 'ISSUE' && e.item === 'BLOOD' && e.t <= st.t).length;
+    const evCfNoMatches = !!st.q
+      && ![['noLaunchPoint', 'No launch point close enough to reach them', 'the laydown, not the fleet'], ['noResponder', 'Nobody on scene could administer what they needed', 'training and telementoring'], ['treatedDied', 'Reached in time and died anyway', 'beyond prehospital medicine'], ['tooFast', 'Collapsed faster than any aircraft could fly', 'beyond any tasking'], ['busy', 'Every aircraft was committed elsewhere', 'the only fleet-size failure']]
+        .some(x => this.searchMatch(x[0], x[1], x[2], s.causes[x[0]]))
+      && ![
+        ['FORWARD POSITIONING', 'binding', 'The deaths that remain are mostly out of reach of every launch point. Moving a pad moves the result.'],
+        ['FLEET SIZE', 'weak — and it helps the other arm slightly more', 'The lever moves the shared force, so both arms grow together.']
+      ].some(x => this.searchMatch(x[0], x[1], x[2]));
     return {
       isEv: st.page === 'ev',
+      evCfNoMatches,
       evTabs: [['cf', 'COUNTERFACTUAL', 'compare'], ['rep', 'REPLICATIONS', 'stack'], ['rec', 'ACCOUNTABILITY RECORD', 'chain'], ['aar', 'AFTER ACTION', 'clip']].map(([k, l, m]) => ({ label: l, icon: mk(m), on: () => this.setState({ evTab: k }), bg: st.evTab === k ? 'oklch(0.3 0.05 165)' : 'oklch(0.21 0.012 250)', fg: st.evTab === k ? 'oklch(0.95 0.03 165)' : 'oklch(0.66 0.008 250)' })),
       evTab: { cf: st.evTab === 'cf', rep: st.evTab === 'rep', rec: st.evTab === 'rec', aar: st.evTab === 'aar' },
       recTiles: [
@@ -4049,7 +4147,7 @@ class Component extends DCLogic {
       })),
       rec: {
         rows: recRows, empty: !recRows.length,
-        emptyWhy: 'NOTHING HAS BEEN WRITTEN YET',
+        emptyWhy: st.q ? 'NO ACCOUNTABILITY RECORDS MATCH “' + st.q + '”' : 'NOTHING HAS BEEN WRITTEN YET',
         meta: (s.auditN + ' ENTRIES · NEWEST FIRST · AS AT T+' + Math.floor(st.t)),
         verified: V ? (V.bad.length ? V.bad.length + ' of ' + V.n + ' entries FAILED verification' : V.ok + ' of ' + V.n + ' entries verified')
           : 'Chain not verified in this session',
@@ -4059,7 +4157,7 @@ class Component extends DCLogic {
         bd: V ? (V.bad.length ? 'oklch(0.4 0.1 25)' : 'oklch(0.34 0.05 165)') : 'oklch(0.3 0.012 250)',
         verifyLabel: V ? 'VERIFY AGAIN' : 'VERIFY CHAIN',
         verify: recVerify, export: recExport, exported: st.recExported,
-        more: s.feed.length > st.recLimit ? 'SHOW ' + Math.min(40, s.feed.length - st.recLimit) + ' EARLIER' : null,
+        more: recMatches.length > st.recLimit ? 'SHOW ' + Math.min(40, recMatches.length - st.recLimit) + ' EARLIER' : null,
         moreOn: () => this.setState({ recLimit: st.recLimit + 40 })
       },
       claim: !st.deployed ? 'ANGEL SWARM is not deployed. Both arms are running current triage and proximity, so there is no counterfactual to state.'
@@ -4098,7 +4196,7 @@ class Component extends DCLogic {
         + 'arrives, and it does not claim everyone dies — most of this cohort lives. The 180-minute window is the scenario\u2019s own '
         + 'premise: evacuation delayed greater than 72 hours, COL Jason Corley, Director of the Armed Services Blood Program, June 2026. '
         + 'All three arms share one casualty stream and one set of random draws, so the three tolls are three readings of one battle.',
-      evCauses: [['noLaunchPoint', 'No launch point close enough to reach them', 'the laydown, not the fleet'], ['noResponder', 'Nobody on scene could administer what they needed', 'training and telementoring'], ['treatedDied', 'Reached in time and died anyway', 'beyond prehospital medicine'], ['tooFast', 'Collapsed faster than any aircraft could fly', 'beyond any tasking'], ['busy', 'Every aircraft was committed elsewhere', 'the only fleet-size failure']].map(([k, l, note]) => ({ label: l, note, n: s.causes[k], w: Math.round(s.causes[k] / causeMax * 100) + '%' })),
+      evCauses: [['noLaunchPoint', 'No launch point close enough to reach them', 'the laydown, not the fleet'], ['noResponder', 'Nobody on scene could administer what they needed', 'training and telementoring'], ['treatedDied', 'Reached in time and died anyway', 'beyond prehospital medicine'], ['tooFast', 'Collapsed faster than any aircraft could fly', 'beyond any tasking'], ['busy', 'Every aircraft was committed elsewhere', 'the only fleet-size failure']].filter(x => this.searchMatch(x[0], x[1], x[2], s.causes[x[0]])).map(([k, l, note]) => ({ label: l, note, n: s.causes[k], w: Math.round(s.causes[k] / causeMax * 100) + '%' })),
       levers: [
         { k: 'FORWARD POSITIONING', v: 'binding', note: 'The deaths that remain are mostly out of reach of every launch point. Moving a pad moves the result.', hue: 165, w: '86%' },
         /* MEASURED, AND THE CLAIM THAT WAS HERE WAS FALSE. It said growing the
@@ -4112,7 +4210,7 @@ class Component extends DCLogic {
            tasked on triage and proximity. */
         { k: 'FLEET SIZE', v: 'weak — and it helps the other arm slightly more',
           note: 'The lever moves the shared force, so both arms grow together. Tripling every airframe count: ANGEL SWARM 23.4 → 22.2 survivable deaths, current triage and proximity 28.0 → 26.4. The gap holds at 4.6 → 4.2. Seven ANGEL SWARM airframes still beat twenty-one flown on today\u2019s tasking, by 3.0 deaths on 92 of 100 identical battles. Two buckets shrink, not one — "every aircraft committed" 0.9 → 0.4 and "no launch point in reach" 4.7 → 4.1. The largest bucket, nobody on scene who could administer, does not move at all: 12.0 at every fleet size.', hue: 250, w: '20%' }
-      ],
+      ].filter(l => this.searchMatch(l.k, l.v, l.note)),
       repl: st.repl, hasRepl: !!st.repl, noRepl: !st.repl && !st.replRunning, replRunning: st.replRunning, runRepl,
       aar: {
         head: !st.deployed ? 'Not deployed — no result to report' : !s.readable ? 'Not yet readable' : (s.delta > 0 ? s.delta + ' fewer dead of survivable wounds' : 'Level'),
@@ -6328,7 +6426,7 @@ class Component extends DCLogic {
     const finT = st.t >= 180;
     const F = finT ? this.fin() : null;
     const CZL = this.FIN_CAUSE;
-    const blocks = finT ? [
+    const blocks = (finT ? [
       /* THE SURVIVABLE-DEATH CLAUSE NAMES ITS ARM AND CARRIES THE OTHER ONE.
          It read '23 dead of survivable wounds' — arm A's toll, printed on a
          status line that says nothing about which tasking produced it, with
@@ -6367,7 +6465,7 @@ class Component extends DCLogic {
       { cmd: 'angel escalations', out: s.escalated ? s.escalated + ' raised · ' + s.approved + ' authorised · ' + s.lapsed + ' lapsed · ' + this.pendingFor(s).length + ' pending' : 'nothing is waiting on a person' },
       { cmd: 'angel compare --baseline doctrinal-push --same-inputs', out: !S ? 'ANGEL SWARM is not deployed. There is no allocation to compare.' : !s.readable ? 'not yet readable — ' + s.resolvedSurv + ' of the survivable cohort resolved, floor is 10' : s.dA + ' vs ' + s.dB + ' survivable deaths · ' + (s.delta > 0 ? s.delta + ' fewer dead' : 'level') },
       { cmd: 'record verify --chain', out: 'chain intact · ' + s.auditN + ' entries · head sha256 ' + this.hashShort(s.feed[0] ? s.feed[0].hash : null) + ' (first 12 of 64)' }
-    ];
+    ]).filter(b => this.searchMatch(b.cmd, b.out, ...(b.table || []).map(r => Object.values(r).join(' '))));
     /* WHICH CELL IS A DEATH COUNT IS DECLARED PER QUERY, not sniffed from the
        column header, because "n" is a count of dead in the first query and
        would be a count of anything at all in another one. The meaning lives in
@@ -6415,6 +6513,7 @@ class Component extends DCLogic {
       ttyTabs: tabs.map(([k, l, m]) => ({ label: l, icon: mk(m), on: () => this.setState({ ttyTab: k }), bg: st.ttyTab === k ? 'oklch(0.3 0.05 165)' : 'oklch(0.21 0.012 250)', fg: st.ttyTab === k ? 'oklch(0.95 0.03 165)' : 'oklch(0.66 0.008 250)' })),
       ttyTab: { transcript: st.ttyTab === 'transcript', sql: st.ttyTab === 'sql', doctrine: st.ttyTab === 'doctrine', data: st.ttyTab === 'data' },
       blocks: blocks.map(b => ({ ...b, hasTable: !!(b.table && b.table.length), hasOut: !!b.out, segs: ttySegs(b.out) })),
+      ttyNoMatches: !!st.q && blocks.length === 0,
       ttyHead: 'ANGEL SWARM // ALLOC-TTY // ANALYST SESSION // SYNTHETIC DATA · ' + (finT ? 'RUN CLOSED AT T+180 · THE RECORD IS STILL QUERYABLE' : s.commsDown ? 'SATCOM DENIED · LAST-KNOWN-GOOD PLAN HELD' : 'LOCAL DECIDE · NO REACHBACK REQUIRED'),
       sqlList: Q.map((x, i) => ({ label: x.t, on: () => this.setState({ sql: i }), bg: st.sql === i ? 'oklch(0.28 0.05 195)' : 'oklch(0.21 0.012 250)', fg: st.sql === i ? 'oklch(0.94 0.06 195)' : 'oklch(0.68 0.008 250)' })),
       /* A wasted delivery is amber and not red even though the palette gives
@@ -6459,10 +6558,23 @@ class Component extends DCLogic {
 
   decVals(s) {
     const st = this.state, A = this.run().A, cold = !st.deployed && st.t === 0;
-    const pending = this.pendingFor(s);
+    /* A proposal is an actionable record, so it obeys the same contextual
+       filter as the historical rows below. Select the focused proposal only
+       after matching every user-visible identifier, route fact and ground;
+       otherwise a no-match query could leave an unrelated COMMIT/HOLD action
+       on screen. */
+    const allPending = this.pendingFor(s);
+    const pending = allPending.filter(x => this.searchMatch(
+      'E-' + String(x.id).padStart(4, '0'),
+      x.call, this.cidOf(x.casId), 'RAISED T+' + x.tRaised.toFixed(1),
+      x.eta, x.deadline, x.gain,
+      x.altId ? this.cidOf(x.altId) : '',
+      ...(x.grounds || []),
+      ...(x.route || []).map(r => this.E.PAYLOADS[r.payload].short)
+    ));
     const p = pending[0];
     const decided = p ? st.decisions[p.id] : null;
-    const handled = A.audit.filter(e => e.t <= st.t && e.action === 'AUTO-DISPATCH').slice(-6).reverse()
+    const handled = A.audit.filter(e => e.t <= st.t && e.action === 'AUTO-DISPATCH')
       .map(e => {
         /* Same for a tasking handled under standing authority. The audit
            entry carries no casualty field of its own — it carries the text,
@@ -6472,12 +6584,15 @@ class Component extends DCLogic {
         const m = /CAS-0*(\d+)/.exec(e.detail || '');
         return { text: e.detail, t: 'T+' + e.t.toFixed(1),
                  open: m ? this.openRec(Number(m[1])) : null };
-      });
+      }).filter(h => this.searchMatch(h.t, h.text)).slice(-6).reverse();
     const rec = st.extra.length ? st.extra[st.extra.length - 1] : null;
     const act = (kind) => () => {
       if (!p) return;
       const prev = A.audit.filter(e => e.t <= st.t).slice(-1)[0];
-      const others = pending.filter(x => x.id !== p.id);
+      /* Search narrows what is rendered, not what remains operationally
+         outstanding. Keep follow-up attention alive for every unmatched
+         proposal after acting on the one visible result. */
+      const others = allPending.filter(x => x.id !== p.id);
       this.navigate('map', {
         decisions: { ...st.decisions, [p.id]: kind },
         interruptOpen: others.length > 0,
@@ -6503,13 +6618,14 @@ class Component extends DCLogic {
        is the queue of things still waiting, and at T+180 it is empty because
        nothing is still waiting — which is not the same as nothing having been
        asked. The disposition of all of them is on the record either way. */
-    const escLog = this.finEsc();
+    const escLog = this.finEsc().filter(e => this.searchMatch(e.eid, e.summary, e.raised, e.closed, e.state, e.grounds, e.payload, e.benefit));
     const fin = st.t >= 180;
     return {
       escLog, hasEscLog: escLog.length > 0,
+      decNoMatches: !!st.q && pending.length === 0 && escLog.length === 0 && handled.length === 0,
       escLogHead: escLog.length + (escLog.length === 1 ? ' ESCALATION RAISED THIS RUN' : ' ESCALATIONS RAISED THIS RUN'),
       escLogSub: fin ? 'RUN COMPLETE · EVERY ONE CLOSED' : 'AS AT T+' + Math.floor(st.t),
-      isDecPending: !!p && !decided, isDecDone: !!p && !!decided, isDecIdle: !p,
+      isDecPending: !!p && !decided, isDecDone: !!p && !!decided, isDecIdle: !p && !st.q,
       dec: p ? {
         chip: pending.length + (pending.length === 1 ? ' DECISION REQUIRES YOU' : ' DECISIONS REQUIRE YOU'),
         eid: 'E-' + String(p.id).padStart(4, '0'), summary: p.call + ' → ' + this.cidOf(p.casId),
@@ -6534,8 +6650,10 @@ class Component extends DCLogic {
           ? [...new Set(escLog.map(e => e.grounds))]
           : ['Expected benefit below the standing-authority bar', 'Route transits a threat envelope', 'Last whole blood or plasma unit off a shelf', 'A MINIMAL casualty would displace an unassigned IMMEDIATE']
       },
-      handled, hasHandled: handled.length > 0, noHandled: handled.length === 0,
-      noHandledWhy: fin ? 'Nothing was dispatched under standing authority this run.' : 'Nothing has been dispatched under standing authority yet.',
+      handled,
+      hasHandled: handled.length > 0,
+      noHandled: handled.length === 0,
+      noHandledWhy: st.q ? 'No standing-authority dispatch matches this query.' : fin ? 'Nothing was dispatched under standing authority this run.' : 'Nothing has been dispatched under standing authority yet.',
       /* A DEATH COUNT WAS PRINTING NEUTRAL HERE. This strip drew every row in
          the same colour, so DIED OF WOUNDS sat beside ADMITTED and SORTIES
          FLOWN looking exactly like them. Deaths are red wherever they appear. */
@@ -6571,7 +6689,8 @@ class Component extends DCLogic {
     };
     const casOf = d => { const m = /\bCAS-(\d+)\b/.exec(d || ''); return m ? +m[1] : null; };
     const all = st.extra.slice().reverse().concat(s.feed);
-    const filt = st.filter === 'ALL' ? all : all.filter(e => (TAG[e.action] || ['', 250])[0].startsWith(st.filter));
+    const filt = (st.filter === 'ALL' ? all : all.filter(e => (TAG[e.action] || ['', 250])[0].startsWith(st.filter)))
+      .filter(e => this.searchMatch(e.seq, e.actor, e.action, (TAG[e.action] || [e.action])[0], e.detail, e.hash));
     const entries = filt.slice(0, st.limit).map(e => {
       const [label, hue] = TAG[e.action] || [e.action, 250];
       const zulu = 240 + e.t;
@@ -6601,13 +6720,14 @@ class Component extends DCLogic {
         more: filt.length > st.limit ? 'SHOW ' + Math.min(30, filt.length - st.limit) + ' EARLIER' : null,
         moreOn: () => this.setState({ limit: st.limit + 30 }),
         emptyWhy: 'Nothing under this filter yet.',
+        noMatches: !!st.q && (st.feedTab === 'dec' ? !entries.length : !s.stream.some(e => this.searchMatch(e.call, e.kind, this.cidOf(e.casId), e.payload && this.E.PAYLOADS[e.payload].short))),
         chainN: (s.auditN + st.extra.length) + ' of ' + (s.auditN + st.extra.length) + ' entries verified',
         chainHead: 'head ' + this.hashShort(s.feed[0] ? s.feed[0].hash : null),
         deaths: s.dA
       },
       shift: [['Decisions taken', s.approved + s.lapsed], ['Under standing authority', s.sortiesFlown - s.approved], ['Escalated to a human', s.escalated], ['Authorised after escalation', s.approved], ['Withheld', Object.keys(st.decisions).filter(k => st.decisions[k] === 'HELD').length], ['Lapsed unactioned', s.lapsed]].map(([k, v]) => ({ k, v })),
       fcauses: [['noLaunchPoint', 'No launch point in reach'], ['noResponder', 'Nobody on scene could administer'], ['treatedDied', 'Reached in time, died anyway'], ['tooFast', 'Collapsed faster than any flight'], ['busy', 'Every aircraft committed']].map(([k, l]) => ({ label: l, n: s.causes[k], w: Math.round(s.causes[k] / causeMax * 100) + '%' })),
-      streamRows: s.stream.slice(0, 40).map(e => {
+      streamRows: s.stream.filter(e => this.searchMatch(e.call, e.kind, this.cidOf(e.casId), e.payload && this.E.PAYLOADS[e.payload].short)).slice(0, 40).map(e => {
         const zulu = 240 + e.t;
         return {
           time: this.pad(Math.floor(zulu / 60)) + this.pad(Math.floor(zulu % 60)) + 'Z', call: e.call || '—',
@@ -6656,9 +6776,9 @@ class Component extends DCLogic {
     });
     if (!st.deployed) return mk('STEP 1 OF 2', 'Deploy ANGEL SWARM', 'Until you deploy, both arms run current triage and proximity and there is no comparison to read.', 'DEPLOY →', 'DEPLOY ANGEL SWARM', 165, () => this.setState({ deployOpen: true, deploying: false, depOnline: 0 }), false, 'DEPLOY');
     if (finished) return mk('RUN COMPLETE', (s.delta > 0 ? s.delta + ' fewer dead of survivable wounds' : 'Result not readable'), s.dA + ' under ANGEL SWARM against ' + s.dB + ' under current triage and proximity · same casualties, same aircraft, same blood.', 'OPEN THE RESULT →', 'RUN COMPLETE', 25, () => this.setState({ resOpen: true }), false, 'RUN COMPLETE');
-    if (!st.running && st.t === 0) return mk('STEP 2 OF 2', 'Play the scenario', '7 airframes online across 3 launch points. Press play and the clock runs to T+180 on its own.', 'PLAY →', 'PLAY', 165, () => this.setState({ running: true }), true, 'PLAY');
+    if (!st.running && st.t === 0) return mk('STEP 2 OF 2', 'Play the scenario', '7 airframes online across 3 launch points. Press play and the clock runs to T+180 on its own.', 'PLAY →', 'PLAY', 165, () => this.startMission(), true, 'PLAY');
     if (st.running) return mk('RUNNING', 'T+' + Math.floor(st.t) + ' of 180 minutes', s.readable ? s.resolvedSurv + ' of the survivable cohort resolved — the comparison is readable.' : 'Only ' + s.resolvedSurv + ' resolved. Below 10 the comparison is not yet readable.', 'PAUSE', 'RUNNING ' + st.speed + '×', 210, () => this.setState({ running: false }), true, 'PAUSE');
-    return mk('PAUSED', 'T+' + Math.floor(st.t) + ' of 180 minutes', s.readable ? 'Comparison readable — ' + s.resolvedSurv + ' of the survivable cohort resolved.' : 'Not yet readable — ' + s.resolvedSurv + ' of the survivable cohort resolved.', 'RESUME →', 'RESUME', 165, () => this.setState({ running: true }), true, 'RESUME');
+    return mk('PAUSED', 'T+' + Math.floor(st.t) + ' of 180 minutes', s.readable ? 'Comparison readable — ' + s.resolvedSurv + ' of the survivable cohort resolved.' : 'Not yet readable — ' + s.resolvedSurv + ' of the survivable cohort resolved.', 'RESUME →', 'RESUME', 165, () => this.startMission(), true, 'RESUME');
   }
 
   /* THE RESULT, AND IT OPENS ITSELF.
@@ -7197,8 +7317,11 @@ class Component extends DCLogic {
        queue, so the same six columns are re-pointed at the deaths the run did
        not prevent — the one list a commander opens a finished run to read. */
     const finQ = finished ? (F.survDead.length ? F.survDead : F.dead) : [];
-    const queue = finished
-      ? finQ.slice(0, 8).map(r => ({
+    const queueSource = finished
+      ? finQ.filter(r => this.searchMatch(r.cid, r.site, r.injury, r.deadlineMin, r.reach, r.outcome, r.causeLabel, r.payload))
+      : s.rows.filter(r => this.searchMatch(r.cid, r.site, r.injury, r.tRem, r.arrival, r.slack, r.tasking));
+    const queue = (finished
+      ? queueSource.slice(0, 8).map(r => ({
         cid: r.cid, meta: r.site.replace('SITE ', '') + ' · ' + r.injury,
         deadline: r.deadlineMin >= 9000 ? 'NONE' : this.mmss(r.deadlineMin),
         arrival: r.reach == null ? '—' : this.mmss(r.reach),
@@ -7209,7 +7332,7 @@ class Component extends DCLogic {
         rowBg: 'transparent',
         open: () => { this.navigate('cas', { expand: r.id, casTab: 'board', casFilter: 'DIED' }); this.revealRec(); }
       }))
-      : s.rows.slice(0, 8).map(r => this.qRow(r));
+      : queueSource.slice(0, 8).map(r => this.qRow(r)));
     const causeMax = Math.max(1, ...Object.values(s.causes));
     const causes = [['noLaunchPoint', 'No launch point'], ['noResponder', 'No responder'], ['treatedDied', 'Reached, died'], ['tooFast', 'Faster than flight'], ['busy', 'All aircraft busy']].map(([k, l]) => ({ label: l, n: s.causes[k], w: Math.round(s.causes[k] / causeMax * 100) + '%', fill: 'oklch(0.62 0.16 25)' }));
     const pend = this.pendingFor(s)[0];
@@ -7221,8 +7344,10 @@ class Component extends DCLogic {
       grounds: pend.grounds
     } : null;
     const mini = this.miniMap(s);
+    const briefFiltered = brief.filter(b => this.searchMatch(b.tag, b.text));
+    const noMatches = !!st.q && queue.length === 0 && briefFiltered.length === 0;
     return {
-      tiles, brief, queue, causes, esc, mini,
+      tiles, brief: briefFiltered, queue, causes, esc, mini,
       dash: {
         sub: finished ? s.admitted + ' casualties admitted over 180 minutes, all resolved. This is the record of the run, not a live board.'
           : cold ? 'Nothing is open. The run has not started.' : s.open + ' open casualties ranked by time remaining, not by appearance.',
@@ -7234,10 +7359,10 @@ class Component extends DCLogic {
         qc1: 'CASUALTY', qc2: 'SITE · MECHANISM',
         qc3: 'DEADLINE', qc4: finished ? 'REACHED' : 'ARRIVAL',
         qc5: finished ? 'OUTCOME' : 'SLACK', qc6: finished ? 'FIRST CONSTRAINT' : 'TASKING',
-        queueN: finished ? (finQ.length > 8 ? 'TOP 8 OF ' + finQ.length : 'ALL ' + finQ.length) : s.rows.length ? 'TOP 8 OF ' + s.rows.length : '',
-        hasQueue: queue.length > 0, emptyQueue: queue.length === 0,
-        emptyTitle: finished ? 'NOBODY DIED OF A SURVIVABLE WOUND' : cold ? 'NO CASUALTIES YET' : 'NOTHING INSIDE A DEADLINE',
-        emptyWhy: finished ? 'Every casualty in this run was resolved and none of the survivable cohort was lost.' : cold ? 'The clock has not started, so no casualty has been admitted.' : 'No open casualty carries a deadline this system will assert.',
+        queueN: queueSource.length > 8 ? 'TOP 8 OF ' + queueSource.length : queueSource.length ? 'ALL ' + queueSource.length : '',
+        hasQueue: queue.length > 0, emptyQueue: queue.length === 0 && !noMatches, noMatches,
+        emptyTitle: st.q ? 'NO QUEUE ROWS MATCH “' + st.q + '”' : finished ? 'NOBODY DIED OF A SURVIVABLE WOUND' : cold ? 'NO CASUALTIES YET' : 'NOTHING INSIDE A DEADLINE',
+        emptyWhy: st.q ? 'The query may still match an allocation brief record.' : finished ? 'Every casualty in this run was resolved and none of the survivable cohort was lost.' : cold ? 'The clock has not started, so no casualty has been admitted.' : 'No open casualty carries a deadline this system will assert.',
         hasEsc: !!pend, noEsc: !pend,
         noEscWhy: cold ? 'Nothing has been raised, because nothing has happened yet.' : s.escalated ? s.escalated + ' escalations raised this run, ' + s.approved + ' authorised, ' + s.lapsed + ' lapsed unactioned.' : 'Everything so far has gone under standing authority.',
         deaths: s.dA,
@@ -7555,7 +7680,8 @@ class Component extends DCLogic {
     ];
     const fSel = CASF.find(f => f[0] === st.casFilter) || CASF[0];
     const base = fin ? F.rows.filter(fSel[2]) : s.rows;
-    const rows = st.q ? base.filter(r => (r.cid + r.name + r.site).toLowerCase().includes(st.q.toLowerCase())) : base;
+    const rows = base.filter(r => this.searchMatch(r.cid, r.name, r.site, r.unit, r.role, r.injury,
+      r.cls, r.responder, r.needs, r.tasking, r.payload, r.causeLabel));
     let groups = [];
     if (fin && st.group !== 'loc') {
       [['DIED OF SURVIVABLE WOUNDS', r => r.died && r.surv], ['DIED, OTHER TRIAGE CATEGORIES', r => r.died && !r.surv], ['REACHED AND TREATED', r => !r.died && r.treated], ['SURVIVED WITHOUT A DELIVERY', r => !r.died && !r.treated]].forEach(([n, f]) => {
@@ -7609,6 +7735,14 @@ class Component extends DCLogic {
       : [{ label: 'MISSED IF NOTHING CHANGES', val: s.missed, ...RED3 },
          { label: 'INSIDE DEADLINE', val: s.inside, ...GRN3 },
          { label: 'DEADLINE NOT ASSERTABLE', val: s.notAssertable, ...NEU3 }];
+    const supply = s.stock.filter(b => this.searchMatch(b.name, b.afloat ? 'AFLOAT' : 'ASHORE', b.blood, b.plasma, b.txa, b.tq, b.seal, b.issued)).map(b => ({ name: b.name, siting: b.afloat ? 'AFLOAT' : 'ASHORE', blood: b.blood, plasma: b.plasma, txa: b.txa, tq: b.tq, seal: b.seal, issued: b.issued + (b.blood <= 1 ? ' · DRAWN DOWN' : ''), bloodFg: b.blood <= 1 ? 'oklch(0.8 0.15 25)' : 'oklch(0.9 0.005 250)' }));
+    const fleet = s.fleet.filter(f => this.searchMatch(f.call, f.plat, f.base, f.state, f.carrying, f.target, f.sorties)).map(f => ({ call: f.call, plat: f.plat, base: f.base, state: f.state + (f.eta ? ' ' + f.eta + 'm' : ''), carrying: f.carrying || '—', target: f.target || '—', sorties: f.sorties, stateFg: f.state === 'LOST' ? 'oklch(0.75 0.15 25)' : f.state === 'IDLE' ? 'oklch(0.7 0.008 250)' : 'oklch(0.82 0.12 165)' }));
+    const lps = s.stock.map(b => {
+      const fl = s.fleet.filter(f => f.base === b.name);
+      const near = s.rows.slice(0, 40);
+      return { name: b.name, siting: b.afloat ? 'AFLOAT' : 'ASHORE', ready: fl.filter(f => f.state === 'IDLE').length, air: fl.filter(f => f.state === 'OUTBOUND' || f.state === 'RETURNING').length, sorties: fl.reduce((a, f) => a + f.sorties, 0), soonest: near.length ? near[0].cid + ' · ' + this.mmss(near[0].tRem) : '—' };
+    }).filter(b => this.searchMatch(b.name, b.siting, b.ready, b.air, b.sorties, b.soonest));
+    const subsectionRows = st.casTab === 'supply' ? supply : st.casTab === 'fleet' ? fleet : lps;
     return {
       casTiles,
       casIsFinal: fin,
@@ -7661,15 +7795,11 @@ class Component extends DCLogic {
         emptyTitle: fin ? (st.q ? 'NO MATCH IN THE RECORD' : 'NOTHING UNDER THIS FILTER') : st.q ? 'NO MATCH' : 'NO CASUALTIES YET',
         emptyWhy: fin
           ? (st.q ? 'No resolved casualty matches “' + st.q + '”.' : 'No casualty in this run falls under “' + fSel[1].toLowerCase() + '”. Press EVERY CASUALTY to see the whole cohort.')
-          : st.q ? 'Nothing on the open board matches “' + st.q + '”.' : 'The clock has not started, so nothing has been admitted.'
+          : st.q ? 'Nothing on the open board matches “' + st.q + '”.' : 'The clock has not started, so nothing has been admitted.',
+        subNoMatches: st.casTab !== 'board' && !!st.q && subsectionRows.length === 0,
+        subLabel: st.casTab === 'supply' ? 'SUPPLY' : st.casTab === 'fleet' ? 'FLEET' : 'LAUNCH POINT'
       },
-      supply: s.stock.map(b => ({ name: b.name, siting: b.afloat ? 'AFLOAT' : 'ASHORE', blood: b.blood, plasma: b.plasma, txa: b.txa, tq: b.tq, seal: b.seal, issued: b.issued + (b.blood <= 1 ? ' · DRAWN DOWN' : ''), bloodFg: b.blood <= 1 ? 'oklch(0.8 0.15 25)' : 'oklch(0.9 0.005 250)' })),
-      fleet: s.fleet.map(f => ({ call: f.call, plat: f.plat, base: f.base, state: f.state + (f.eta ? ' ' + f.eta + 'm' : ''), carrying: f.carrying || '—', target: f.target || '—', sorties: f.sorties, stateFg: f.state === 'LOST' ? 'oklch(0.75 0.15 25)' : f.state === 'IDLE' ? 'oklch(0.7 0.008 250)' : 'oklch(0.82 0.12 165)' })),
-      lps: s.stock.map(b => {
-        const fl = s.fleet.filter(f => f.base === b.name);
-        const near = s.rows.filter(r => true).slice(0, 40);
-        return { name: b.name, siting: b.afloat ? 'AFLOAT' : 'ASHORE', ready: fl.filter(f => f.state === 'IDLE').length, air: fl.filter(f => f.state === 'OUTBOUND' || f.state === 'RETURNING').length, sorties: fl.reduce((a, f) => a + f.sorties, 0), soonest: near.length ? near[0].cid + ' · ' + this.mmss(near[0].tRem) : '—' };
-      })
+       supply, fleet, lps
     };
   }
   boardRow(r, CLS, s) {

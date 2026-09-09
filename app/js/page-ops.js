@@ -41,6 +41,7 @@
       return `<div class="b-wall">${head}<div style="padding:10px 20px 24px">${P.slot('opsSlot')}</div></div>`;
     }
     P.release();
+    D().searchContext('Search wall records', 'wall records');
 
     if (!L) return `<div class="b-wall">${head}
       <div class="b-h">NO RUN IS LOADED IN THIS PAGE YET</div></div>`;
@@ -93,7 +94,16 @@
   function board(L) {
     const MIN = D().MIN;
     const SHOW = 5;
-    const rows = L.timed.slice(0, SHOW).map(r => {
+    const found = L.timed.filter(r => {
+      const c = r.c;
+      const stale = (L.now - c.tPinged) > 2;
+      const d = P.droneOf(L.A, c.assignedTo);
+      const asset = c.treated ? 'delivered' : d ? P.call(d) : stale ? 'withheld' :
+        r.unreachable ? 'no asset unreachable' : 'queued';
+      return D().matches(D().casId(c), r.site && r.site.b.name, c.unitName,
+        asset, r.left, r.slack, 'deadline casualty');
+    });
+    const rows = found.slice(0, SHOW).map(r => {
       const c = r.c;
       const breach = r.unreachable || (r.slack !== null && r.slack < 0);
       const stale = (L.now - c.tPinged) > 2;
@@ -109,12 +119,15 @@
         ${slack}
         <span class="as">${esc(asset)}</span></div>`;
     }).join('');
-    const rest = L.timed.length - Math.min(SHOW, L.timed.length);
+    const rest = found.length - Math.min(SHOW, found.length);
+    const empty = D().query()
+      ? D().noMatches('casualties')
+      : '<div class="b-bfoot">No casualty is inside a deadline this system holds.</div>';
     return `<div class="b-h">DEADLINE BOARD &middot; BY TIME REMAINING</div>
       <div class="b-board">
         <div class="b-bhd"><span>CASUALTY</span><span>SITE</span>
           <span class="r">DEADLINE</span><span class="r">SLACK</span><span class="r">ASSET</span></div>
-        ${rows || '<div class="b-bfoot">No casualty is inside a deadline this system holds.</div>'}
+        ${rows || empty}
         ${rest > 0 ? `<div class="b-bfoot">+ ${rest} more open, further out</div>` : ''}
       </div>`;
   }

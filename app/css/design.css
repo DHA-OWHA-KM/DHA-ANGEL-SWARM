@@ -196,6 +196,23 @@
   border-radius:var(--d-r-btn); background:var(--d-panel-2);
   border:1px solid var(--d-line-lift); width:250px;
   font:400 11px var(--d-mono); color:var(--d-t7) }
+.d-search-wrap{ position:relative; display:flex; align-items:center }
+.d-search input{ min-width:0; width:100%; border:0; outline:0; padding:0;
+  background:transparent; color:var(--d-t2); font:inherit }
+.d-search:focus-within{ border-color:var(--d-cyan-2);
+  box-shadow:0 0 0 2px color-mix(in oklch, var(--d-cyan-2) 22%, transparent) }
+.d-search input::placeholder{ color:var(--d-t7); opacity:1 }
+.d-search input[aria-disabled="true"]{ cursor:not-allowed }
+.d-search button{ border:0; padding:0 1px; background:transparent; color:var(--d-t5);
+  font:600 16px/1 var(--d-mono); cursor:pointer }
+.d-search-block{ position:absolute; z-index:5; left:0; top:calc(100% + 7px);
+  width:max-content; max-width:430px; padding:7px 9px; border:1px solid var(--d-amb-mark);
+  border-radius:var(--d-r-btn); background:var(--d-panel); color:var(--d-amb);
+  font:500 9.5px/1.35 var(--d-mono); box-shadow:0 8px 22px #0008 }
+.d-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+.d-no-match{ margin:16px 22px; padding:18px; border:1px dashed var(--d-line-hard);
+  color:var(--d-t5); font:400 11px/1.5 var(--d-mono); text-align:center }
 .d-fpcon{ font:600 10px var(--d-mono); letter-spacing:.09em; padding:7px 11px;
   border-radius:var(--d-r-btn); background:var(--d-amb-chip); color:oklch(0.9 0.06 75) }
 .d-auth{ font:600 10px var(--d-mono); letter-spacing:.08em; padding:6px 11px;
