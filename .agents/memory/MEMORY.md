@@ -1,1 +1,0 @@
-- [Canvas navigation icon paints](canvas-navigation-icon-paints.md) — verify nav colors in the served app; inline canvas SVG paints cannot rely on theme custom properties.

@@ -96,7 +96,7 @@ function drawTheater(cv, th, view) {
      is also the whole of the fallback: the module clears this flag the moment
      it withdraws, and the next frame is drawn here again with no other change
      anywhere. */
-  if (window.__ANGEL_T3D && window.__ANGEL_T3D.live()) return;
+  if (window.__ANGEL_T3D && window.__ANGEL_T3D.active()) return;
   /* The globe (js/theater3d.js) is a fourth scale above this one and it mounts
      into the same stage. The same one early return is the whole of the
      handover in that direction too: when it withdraws, the next frame is

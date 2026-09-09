@@ -947,10 +947,10 @@
     if (!booted) return false;
     try { var g = gb(); return !!(g && g.ready && g.ready()); } catch (e) { return false; }
   }
-  function globeOff(silent, holdFrame) {
+  function globeOff() {
     globeWanted = false;
     var g = gb();
-    if (g && g.unmount) { try { g.unmount(silent, holdFrame); } catch (e) { /* already down */ } }
+    if (g && g.unmount) { try { g.unmount(); } catch (e) { /* already down */ } }
   }
   function globeOn() {
     var g = gb();
@@ -1394,14 +1394,13 @@
          is arriving mounts into a stage nothing else is holding. Theatre is
          masked before the globe is removed and revealed only after its
          renderer reports a painted frame, so repeated scale switching cannot
-         expose its empty mount or transient loading card. The globe also
-         retains its outgoing frame behind that mask until Theatre paints. */
+         expose its empty mount or transient loading card. */
       var leavingGlobeForTheatre = globeWanted && s === 'THEATRE';
       if (leavingGlobeForTheatre) {
         showFrameBlackout();
         maskFrameFor(s);
       }
-      if (globeWanted) globeOff(true, leavingGlobeForTheatre);
+      if (globeWanted) globeOff();
       try { W.setMapScope(s); }
       catch (e) {
         if (leavingGlobeForTheatre) revealFrame();

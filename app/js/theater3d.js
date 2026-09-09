@@ -1080,9 +1080,6 @@ const CSS = `
   grid-column:1; grid-row:1; min-width:0; min-height:0;
   border:1px solid var(--line); border-radius:11px}
 body.theater3d #mapTheater{display:none}
-/* Overlap the fallback and GPU host so startup cannot collapse the GPU row. */
-.viewport[data-pane="DASHBOARD"] #mapTheater{grid-column:1;grid-row:1}
-body:not(.theater3d) #t3Host{visibility:hidden;pointer-events:none}
 #t3Canvas{position:absolute; inset:0; outline:none}
 #t3Canvas canvas{outline:none}
 
@@ -1221,7 +1218,6 @@ function guard(where, fn) {
    argument, so there is no card: the map simply reverts, and the console
    carries the diagnosis for whoever is debugging it. */
 function withdraw() {
-  document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
   if (T3._ro) { try { T3._ro.disconnect(); } catch (e) { /* already gone */ } T3._ro = null; }
   if (T3.deck) { try { T3.deck.finalize(); } catch (e) { /* already torn down */ } }
   T3.deck = null;
@@ -2408,12 +2404,8 @@ function mount(stage) {
        surface has actually painted, and the host reads it to decide whether it
        is still showing a loading state or a map. */
     onAfterRender: guard('the first frame', () => {
-      const layers = T3.deck && T3.deck.props.layers;
-      if (!layers || !layers.length || layers.some(layer => !layer.isLoaded) || T3.w <= 2 || T3.h <= 2) return;
       if (!T3.live) {
         T3.live = true;
-        document.body.classList.add('theater3d');
-        document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
         /* HOW LONG THIS MACHINE TAKES TO PUT THIS MAP ON THE SCREEN. Measured
            rather than assumed, because it is what decides below whether the
            GPU context can be given back while the operator is elsewhere. */
@@ -2445,6 +2437,7 @@ function mount(stage) {
   bindPointer(cvHost);
   syncObliqueControl();
   paintFurniture();
+  document.body.classList.add('theater3d');
   T3.mounted = true;
   T3.live = false;
   T3.mountedAt = performance.now();
@@ -2732,7 +2725,6 @@ function frame() {
    the pane and already correct, so there is nothing to take away and nothing
    to explain on screen. The readiness panel records why. */
 function withhold(why) {
-  document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
   T3.withheld = why;
   T3_DEAD = true;
   try { ANGEL.setStatus('theaterGPU', 'withheld', why); } catch (e) { /* registry gone */ }
@@ -4413,29 +4405,19 @@ function gbMount() {
   return true;
 }
 
-function gbUnmount(silent, holdFrame) {
+function gbUnmount() {
   if (GB.raf) { try { cancelAnimationFrame(GB.raf); } catch (e) { /* nothing to cancel */ } }
   GB.raf = 0; GB.on = false; GB.live = false; GB.fly = null; GB.handing = false; GB.fade = 1;
   if (GB.ro) { try { GB.ro.disconnect(); } catch (e) { /* gone */ } GB.ro = null; }
   /* A canvas the document still holds keeps its backing store; sizing it to
      nothing before it is dropped hands that memory straight back, which is
      this renderer's whole equivalent of releasing a GPU context. */
-  // Retain only the painted surface while Theatre starts; its animation is stopped.
-  if (holdFrame && GB.host && !T3.withheld && !T3_DEAD) {
-    GB.host.setAttribute('data-globe-transition', '');
-    GB.host.style.zIndex = '4';
-    GB.host.style.pointerEvents = 'none';
-    if (GB.tip) GB.tip.style.display = 'none';
-  } else {
-    if (GB.cv) { try { GB.cv.width = GB.cv.height = 0; } catch (e) { /* gone */ } }
-    if (GB.host) { try { GB.host.remove(); } catch (e) { /* gone */ } }
-  }
+  if (GB.cv) { try { GB.cv.width = GB.cv.height = 0; } catch (e) { /* gone */ } }
+  if (GB.host) { try { GB.host.remove(); } catch (e) { /* gone */ } }
   GB.host = null; GB.cv = null; GB.ctx = null; GB.tip = null;
   document.body.classList.remove('theaterGlobe');
   try { if (typeof APP !== 'undefined') APP._paneForce = true; } catch (e) { /* contained */ }
-  if (!silent) {
-    try { if (typeof render === 'function') render(); } catch (e) { /* host in trouble */ }
-  }
+  try { if (typeof render === 'function') render(); } catch (e) { /* host in trouble */ }
 }
 
 /* The contract the host docks against. Every name here is read by
@@ -4452,7 +4434,7 @@ window.__ANGEL_GLOBE = {
   dead: () => GB.dead,
   note: () => GB.note || '',
   mount: () => { try { return gbMount(); } catch (e) { gbFatal('opening the globe', e); return false; } },
-  unmount: (silent, holdFrame) => { try { gbUnmount(silent, holdFrame); } catch (e) { /* already down */ } return true; },
+  unmount: () => { try { gbUnmount(); } catch (e) { /* already down */ } return true; },
   /* The host registers what to do when the operator has zoomed past the
      bottom of this scale. Called once, at the end of the flight, with the
      scale to hand to and the operation that was flown to. */

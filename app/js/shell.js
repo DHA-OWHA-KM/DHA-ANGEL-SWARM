@@ -57,12 +57,11 @@
     feed:  '<circle cx="5" cy="6" r="2.4" fill="oklch(0.72 0.14 210)"/><circle cx="5" cy="12" r="2.4" fill="oklch(0.72 0.14 210)"/><circle cx="5" cy="18" r="2.4" fill="oklch(0.5 0.09 210)"/><path d="M10 6h11M10 12h11M10 18h7" stroke="oklch(0.68 0.12 210)" stroke-width="2.2" stroke-linecap="round"/>',
     term:  '<rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
     wall:  '<rect x="2" y="4" width="20" height="13" rx="2" fill="oklch(0.32 0.07 200)" stroke="oklch(0.68 0.13 200)" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="oklch(0.68 0.13 200)" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.5 9 9l3 3.5L15 7l3.5 6.5" stroke="oklch(0.85 0.16 200)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
-    shield:'<path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.12 75)" stroke="oklch(0.72 0.16 75)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.93 0.1 75)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    shield:'<path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.12 300)" stroke="oklch(0.72 0.16 300)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.93 0.1 300)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
     chat:  '<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-4H5.5A2.5 2.5 0 0 1 3 14.5v-8Z" fill="oklch(0.4 0.12 330)" stroke="oklch(0.72 0.16 330)" stroke-width="1.4"/><path d="m12 7 1.1 2.6L15.7 11l-2.6 1.1L12 14.7l-1.1-2.6L8.3 11l2.6-1.1L12 7Z" fill="oklch(0.93 0.11 330)"/>',
     map:   '<path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20V6.5Z" fill="oklch(0.28 0.05 210)" stroke="oklch(0.7 0.13 210)" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="oklch(0.7 0.13 210)" stroke-width="1.4"/>'
   };
-  const svg = k => '<svg' + (k === 'shield' ? ' class="evidence-nav-icon"' : '') +
-    ' width="17" height="17" viewBox="0 0 24 24" fill="none">' + ICON[k] + '</svg>';
+  const svg = k => '<svg width="17" height="17" viewBox="0 0 24 24" fill="none">' + ICON[k] + '</svg>';
 
   const S = { page: 'dash' };
   const esc = s => String(s == null ? '' : s)

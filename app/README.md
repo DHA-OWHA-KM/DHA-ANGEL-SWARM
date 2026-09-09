@@ -15,7 +15,7 @@ For the file-by-file detail of every source file here — what each module actua
 | `index.html` | The design build, and the surface the demonstration is given on: the canvas document carrying every screen's markup, driven by the runtime in `support.js` and reading its figures through `angel-engine.js`. |
 | `design.html` | A byte-identical copy of `index.html`, kept under the name the design canvas addresses it by. |
 | `console.html` | The analyst console: loads the modules in `js/` directly and is the surface the real map, terminal, evidence and wall panes live on. `index.html` mounts it in a same-origin frame where a real pane is needed. |
-| `selftest.html` | An offline page that loads the shipped engine as plain scripts and runs browser assertions against it with nothing mocked, including the reference result every document quotes. |
+| `selftest.html` | An offline page that loads the shipped engine as plain scripts and runs 118 assertions against it with nothing mocked, including the reference result every document quotes. |
 | `angel-engine.js` | Runs the engine headlessly once, end to end, records its ledgers, and exposes `buildRun()` and a memoised `snapshot()` so the canvas can seek to any minute. It computes no outcome of its own. |
 | `angel-map.js` | Draws no map. It docks the console in a same-origin iframe over the slot the design draws, so the three real renderers keep their own cameras while React rewrites the page around them. |
 | `angel-ppg.js` | The live photoplethysmogram element: advances a 100 Hz sample clock and paints the 500-sample window that is the model's actual input tensor. Nothing is interpolated. |
