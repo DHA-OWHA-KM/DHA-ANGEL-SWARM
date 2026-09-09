@@ -1221,6 +1221,7 @@ function guard(where, fn) {
    argument, so there is no card: the map simply reverts, and the console
    carries the diagnosis for whoever is debugging it. */
 function withdraw() {
+  document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
   if (T3._ro) { try { T3._ro.disconnect(); } catch (e) { /* already gone */ } T3._ro = null; }
   if (T3.deck) { try { T3.deck.finalize(); } catch (e) { /* already torn down */ } }
   T3.deck = null;
@@ -1229,7 +1230,6 @@ function withdraw() {
   const host = document.getElementById('t3Host');
   if (host) { host.innerHTML = ''; host.remove(); }
   document.querySelectorAll('.t3Furn').forEach(el => el.remove());
-  document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
   T3.live = false;
   if (typeof APP !== 'undefined') APP._paneForce = true;
   try { if (typeof render === 'function') render(); } catch (e) { /* host in trouble */ }
@@ -2732,9 +2732,9 @@ function frame() {
    the pane and already correct, so there is nothing to take away and nothing
    to explain on screen. The readiness panel records why. */
 function withhold(why) {
+  document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
   T3.withheld = why;
   T3_DEAD = true;
-  document.querySelectorAll('[data-globe-transition]').forEach(el => el.remove());
   try { ANGEL.setStatus('theaterGPU', 'withheld', why); } catch (e) { /* registry gone */ }
 }
 
@@ -4420,9 +4420,7 @@ function gbUnmount(silent, holdFrame) {
   /* A canvas the document still holds keeps its backing store; sizing it to
      nothing before it is dropped hands that memory straight back, which is
      this renderer's whole equivalent of releasing a GPU context. */
-  /* Retain only the last painted surface while Theatre starts; animation and
-     interaction are already stopped. The first loaded Theatre frame removes
-     this transition surface. */
+  // Retain only the painted surface while Theatre starts; its animation is stopped.
   if (holdFrame && GB.host && !T3.withheld && !T3_DEAD) {
     GB.host.setAttribute('data-globe-transition', '');
     GB.host.style.zIndex = '4';

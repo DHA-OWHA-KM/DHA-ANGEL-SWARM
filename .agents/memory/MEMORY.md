@@ -1,0 +1,1 @@
+- [Globe-to-Theatre handoff](globe-theatre-handoff.md) — preserve the outgoing painted Globe until Theatre has loaded and painted; keep the three-renderer contract coordinated.

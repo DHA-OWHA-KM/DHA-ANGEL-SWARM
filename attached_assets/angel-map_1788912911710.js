@@ -1329,10 +1329,9 @@
         fire();
         return ok;
       }
-      /* Keep the outgoing painted globe in place until Theatre has loaded its
-         layers and painted. This prevents an empty or partially rendered pane
-         without hiding the entire map frame behind an unrelated blackout. */
-      if (globeWanted) globeOff(true, s === 'THEATRE');
+      /* Leaving the globe is the globe coming down first, so the scale that
+         is arriving mounts into a stage nothing else is holding. */
+      if (globeWanted) globeOff(true, s === 'THEATRE'); // Keep the outgoing frame until Theatre paints.
       try { W.setMapScope(s); } catch (e) { return false; }
       fire();
       return true;
