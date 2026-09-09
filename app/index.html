@@ -50,6 +50,8 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 .context-search button:focus-visible{outline:2px solid oklch(0.75 0.12 210);outline-offset:1px}
 .context-search-note{font:600 8.5px/1.35 'IBM Plex Mono',monospace;color:oklch(0.86 0.1 75);max-width:260px}
 .context-no-match{border:1px dashed oklch(0.34 0.012 250);border-radius:5px;background:oklch(0.19 0.009 250);padding:16px;text-align:center;color:oklch(0.65 0.008 250);font:600 9.5px/1.45 'IBM Plex Mono',monospace;letter-spacing:.08em}
+[data-map-indicator-option]:focus-visible{position:relative;z-index:1;outline:2px solid oklch(0.94 0.02 210);outline-offset:-3px}
+[data-map-indicator-option][aria-pressed="true"]:focus-visible{outline-color:oklch(0.18 0.015 240)}
 @keyframes authorityVeilIn{from{opacity:0}to{opacity:1}}
 @keyframes authorityPanelIn{0%{opacity:0;transform:translateY(-18px) scale(.975)}62%{opacity:1;transform:translateY(3px) scale(1.004)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes authorityLineIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
@@ -128,9 +130,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:{{ posture.clockDot }};flex:none"></span><span style="font-size:9px;line-height:1.2;color:oklch(0.86 0.02 250)">{{ posture.clockLabel }}</span></div>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N3 · BOTH TOLLS, PERMANENTLY, ON THE RAIL.
-     ====================================================================
+     --------------------------------------------------------------------
      The rail is the one thing on screen at every destination, so it is where
      the comparison belongs if the comparison is never to be absent. Under
      the posture block, because posture is what is true of the system and
@@ -357,9 +359,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <span style="font:400 9.5px 'IBM Plex Mono',monospace;letter-spacing:.06em;color:oklch(0.58 0.008 250);flex:none">{{ dash.stamp }}</span>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -374,7 +376,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -488,9 +490,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <span onClick="{{ setGroupDl }}" style="font-size:9.5px;font-weight:600;padding:6px 11px;border-radius:4px;background:{{ grp.dl.bg }};color:{{ grp.dl.fg }};cursor:pointer">{{ grp.dlLabel }}</span>
 </div></div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -505,7 +507,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -686,9 +688,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ isDec }}" hint-placeholder-val="{{ false }}">
 <div style="padding:18px 20px 26px">
 <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:11px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Decisions</span><span style="font-size:11.5px;color:oklch(0.63 0.008 250)">The one screen where a human is required, and the record of why.</span></div>
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -703,7 +705,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -827,9 +829,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;gap:7px;align-items:center;flex:none;font-family:'IBM Plex Mono',monospace"><span style="font:700 9.5px 'IBM Plex Mono',monospace;letter-spacing:.07em;padding:7px 12px;border-radius:4px;border:1px solid oklch(0.36 0.012 250);color:oklch(0.86 0.006 250);cursor:pointer">EXPORT FOR IO</span></div>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -844,7 +846,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -914,9 +916,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ isTty }}" hint-placeholder-val="{{ false }}">
 <div style="padding:18px 20px 26px">
 <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:13px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Analyst Terminal</span><span style="font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.05em;color:oklch(0.6 0.008 250)">{{ ttyHead }}</span></div>
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -931,7 +933,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1032,9 +1034,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:4px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.9 0.11 300);flex:none">✦ TRAINED MODEL · CRI-Net</span>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1049,7 +1051,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1171,9 +1173,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;gap:3px;font-family:'IBM Plex Mono',monospace"><sc-for list="{{ opsTabs }}" as="t" hint-placeholder-count="2"><span onClick="{{ t.on }}" style="display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:7px 12px;border-radius:4px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.icon }}{{ t.label }}</span></sc-for></div>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1188,7 +1190,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1240,9 +1242,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ isEv }}" hint-placeholder-val="{{ false }}">
 <div style="padding:18px 20px 26px">
 <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:13px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Evidence</span><span style="font-size:11.5px;color:oklch(0.63 0.008 250)">Prove it.</span></div>
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1257,7 +1259,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1404,9 +1406,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="padding:18px 20px 26px">
 <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:13px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">War Game</span><span style="font-size:11.5px;color:oklch(0.63 0.008 250)">Vary the force. See what survives.</span></div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1421,7 +1423,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1554,9 +1556,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Ask ANGEL</span><span style="font:400 9.5px 'IBM Plex Mono',monospace;letter-spacing:.06em;color:oklch(0.6 0.008 250)">{{ chatEmpty.head }}</span></div>
 <span title="No GGUF is shipped with this build. Answers are computed from the run record or quoted verbatim from the reference corpus." style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:4px;background:oklch(0.24 0.04 165);border:1px solid oklch(0.4 0.07 165);font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.07em;color:oklch(0.86 0.08 165);flex:none">NO LANGUAGE MODEL · NOTHING HERE IS GENERATED</span>
 </div>
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1571,7 +1573,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1620,9 +1622,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </sc-if>
 
 <sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}">
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      THE THEATER MAP IS THE PAGE.
-     ====================================================================
+     --------------------------------------------------------------------
      No page padding, no card frame, no side column: the map surface runs
      from the navigation rail's edge to the right of the screen and from
      under the command bar to the bottom of it. Its height is measured off
@@ -1642,9 +1644,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      rewrites eight times a second. `contain:paint` on this container and on
      every panel over it stops the browser walking the whole design document
      to composite a frame that only changed inside the map.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div id="angelMapRoot" style="position:relative;z-index:2;height:{{ mapHeight }};overflow:hidden;contain:layout paint;pointer-events:none">
-<x-import component-from-global-scope="angel-map" from="./angel-map.js?v=5" height="100%" hint-size="100%,100%"></x-import>
+<x-import component-from-global-scope="angel-map" from="./angel-map.js?v=7" height="100%" hint-size="100%,100%"></x-import>
 
 <div style="position:absolute;left:0;top:0;right:0;bottom:0;padding:12px;display:flex;flex-direction:column;gap:10px;pointer-events:none;z-index:5">
 <div id="angelMapHeadCard" style="pointer-events:auto;flex:none;border-radius:6px;border:1px solid oklch(0.34 0.012 250);background:oklch(0.1 0.008 250 / .66);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(11px);box-shadow:0 10px 30px oklch(0.05 0 0 / .45);padding:8px 11px;display:flex;flex-direction:column;gap:8px;contain:paint">
@@ -1653,15 +1655,21 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;gap:5px;font-family:'IBM Plex Mono',monospace;flex:none">
 <sc-for list="{{ scopes }}" as="t" hint-placeholder-count="3"><span onClick="{{ t.on }}" style="display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:600;letter-spacing:.08em;padding:5px 9px;border-radius:4px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.icon }}{{ t.label }}</span></sc-for>
 </div>
+<sc-if value="{{ showIndicatorPreview }}" hint-placeholder-val="{{ false }}">
+<div data-map-indicator-preview role="group" aria-label="Comparison indicator preview" style="display:flex;align-items:center;gap:0;font-family:'IBM Plex Mono',monospace;flex:none;border:1px solid oklch(0.34 0.012 250);border-radius:4px;overflow:hidden;background:oklch(0.14 0.008 250 / .82)">
+<span style="font-size:8px;letter-spacing:.1em;padding:6px 8px;color:oklch(0.64 0.008 250);border-right:1px solid oklch(0.34 0.012 250)">INDICATOR</span>
+<sc-for list="{{ indicatorOptions }}" as="p" hint-placeholder-count="3"><button type="button" data-map-indicator-option aria-pressed="{{ p.pressed }}" onClick="{{ p.on }}" title="{{ p.title }}" style="appearance:none;margin:0;font:600 8.5px 'IBM Plex Mono',monospace;letter-spacing:.05em;padding:6px 8px;cursor:pointer;white-space:nowrap;border:0;border-right:1px solid oklch(0.3 0.012 250);background:{{ p.bg }};color:{{ p.fg }}">{{ p.label }}</button></sc-for>
+</div>
+</sc-if>
 <div style="display:flex;gap:5px;row-gap:5px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;flex:1 1 auto;min-width:0">
 <sc-for list="{{ tools }}" as="t" hint-placeholder-count="6"><span onClick="{{ t.on }}" style="font-size:9.5px;font-weight:600;letter-spacing:.06em;padding:6px 11px;border-radius:4px;cursor:pointer;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.fg }}" style-hover="border-color:oklch(0.46 0.02 250);color:oklch(0.96 0.005 250)">{{ t.label }}</span></sc-for>
 </div>
 <span style="font:400 9px 'IBM Plex Mono',monospace;letter-spacing:.07em;color:oklch(0.62 0.008 250);flex:none">{{ mapMeta }}</span>
 <span onClick="{{ toggleStrip }}" title="Collapse this bar" style="font-size:11px;font-weight:700;line-height:1;padding:5px 8px;border-radius:3px;flex:none;cursor:pointer;background:oklch(0.24 0.012 250 / .85);color:oklch(0.82 0.006 250);font-family:'IBM Plex Mono',monospace">{{ stripMark }}</span>
 </div>
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1676,7 +1684,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -1858,9 +1866,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N3 · THE ROUTE-STAGE STRIP.
-     ====================================================================
+     --------------------------------------------------------------------
      WHAT THE SELECTED SORTIE DID, STOP BY STOP, AND WHERE IT IS NOW.
 
      It is a SIBLING of the panel layer, not a child of the panel row, and
@@ -1883,7 +1891,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      the one being flown NOW, and not yet reached. Size, weight, opacity, a
      teal ring and a teal bar under the live column, all out of tokens this
      application already owns.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <sc-if value="{{ rsOn }}" hint-placeholder-val="{{ false }}">
 <div id="angelRouteSlot" style="position:absolute;left:{{ rsLeft }};right:{{ rsRight }};bottom:{{ rsBottom }};z-index:4;display:flex;justify-content:center;pointer-events:none">
 <div id="angelRouteStrip" style="pointer-events:auto;max-width:100%;min-width:0;border-radius:6px;border:1px solid oklch(0.34 0.012 250);background:oklch(0.1 0.008 250 / .78);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(11px);box-shadow:0 10px 30px oklch(0.05 0 0 / .5);padding:8px 11px 9px;display:flex;flex-direction:column;gap:7px;contain:paint;overflow:hidden">
@@ -1942,9 +1950,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
 <div style="padding:18px 20px 26px">
 <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Authority &amp; Policy</span><span style="font-size:11.5px;color:oklch(0.63 0.008 250)">Who decides, who answers for it, and where a machine-learning claim is and is not made.</span></div>
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -1959,7 +1967,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -2067,9 +2075,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <span style="font:400 9.5px 'IBM Plex Mono',monospace;letter-spacing:.07em;color:oklch(0.6 0.008 250);flex:none">{{ srcMeta }}</span>
 </div>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N2 · THE ONE COMPARISON LINE.
-     ====================================================================
+     --------------------------------------------------------------------
      Byte-identical on every destination that carries it. It holds no logic
      and no figure of its own: every number, colour and word comes out of
      cmpVals(), which is also where the three honest states live — not
@@ -2084,7 +2092,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      IT WRAPS AS WHOLE THINGS OR NOT AT ALL. Each arm group is flex:none with
      nowrap inside it, so a narrow window breaks BETWEEN the arms or before
      the clause and never through a count and the arm that owns it.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;row-gap:6px;min-height:28px;margin:0 0 13px;font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;color:oklch(0.55 0.008 250);flex:none">{{ cmp.head }}</span>
 <sc-if value="{{ cmp.pair }}" hint-placeholder-val="{{ true }}">
@@ -2256,9 +2264,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 </sc-if>
 
-<!-- ====================================================================
+<!-- --------------------------------------------------------------------
      N3 · THE GUIDED WALKTHROUGH.
-     ====================================================================
+     --------------------------------------------------------------------
      OFF UNTIL SOMEBODY ASKS FOR IT. walk.on is false until the Settings row
      turns it on, so this element does not exist for anyone who has not
      switched it on, and a judge who takes the keyboard cannot land in it.
@@ -2272,7 +2280,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      elsewhere in this file: the panel ground, the deploy sheet's edge, the
      RESET chip's border and fill, and the teal the primary action is drawn
      in everywhere else.
-     ==================================================================== -->
+     -------------------------------------------------------------------- -->
 <sc-if value="{{ walk.on }}" hint-placeholder-val="{{ false }}">
 <div id="angelWalkBar" style="position:fixed;left:calc(50% + 123px);transform:translateX(-50%);bottom:{{ walk.bottom }};z-index:38;display:flex;align-items:center;gap:14px;width:max-content;max-width:min(580px,calc(100vw - 300px));padding:9px 11px 9px 14px;border-radius:6px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.4 0.06 165);box-shadow:0 14px 40px oklch(0.05 0 0 / .45);font-family:'IBM Plex Mono',monospace">
 <span style="font-size:8.5px;letter-spacing:.11em;white-space:nowrap;flex:none;color:{{ walk.stepFg }}">{{ walk.step }}</span>
@@ -2515,7 +2523,7 @@ const mk = n => (MARKS[n] ? MARKS[n]() : null);
 
 const REF_DEFS = [{"k":"COMMAND, AUTHORITY AND DELEGATION","n":"6 REFERENCES","rows":[{"id":"ATP 4-02.2 (2019)","t":"Medical Evacuation","use":"Precedence categories. URGENT is one hour to a surgical capability; this is the deadline this system holds against."},{"id":"CJCSI 3110.03F","t":"Logistics Supplement to the Joint Strategic Campaign Plan","use":"Cited for framing on class VIII distribution priority in a contested theater."},{"id":"DoDD 3000.09 (2023)","t":"Autonomy in Weapon Systems","use":"Cited to state the boundary: this is not a weapon system and the directive does not apply. Retained because reviewers ask."},{"id":"JP 1, Vol 1 (2023)","t":"Joint Warfighting — command relationships and the exercise of authority","use":"Framing for who may delegate an allocation decision and who remains answerable for it."},{"id":"JP 3-0 (2022)","t":"Joint Campaigns and Operations","use":"Standing-authority construct: pre-delegated action inside a commander’s stated intent."},{"id":"JP 4-02 (2018)","t":"Joint Health Services","use":"Roles of care, the theater evacuation policy, and the medical command lanes this system dispatches inside."}]},{"k":"CLINICAL BASIS FOR THE DEADLINE","n":"8 REFERENCES","rows":[{"id":"Convertino et al. (2016)","t":"Compensatory reserve for early and accurate prediction of haemodynamic compromise","use":"The published basis for the CRI estimate shown on Sensor & Model."},{"id":"CoTCCC / JTS","t":"Tranexamic acid administration window","use":"The three-hour TXA window, and why a late TXA sortie is scored as no benefit."},{"id":"CoTCCC Guidelines (current)","t":"Tactical Combat Casualty Care, MARCH sequence","use":"Responder capability sets: buddy aid, combat lifesaver, medic."},{"id":"Eastridge et al. (2012), J Trauma","t":"Death on the battlefield (2001–2011): implications for the future of combat casualty care","use":"The survivable-death denominator. Haemorrhage as the leading potentially survivable cause."},{"id":"Holcomb et al. (2015), JAMA","t":"PROPPR: transfusion of plasma, platelets and red cells in a 1:1:1 vs 1:1:2 ratio","use":"Cited for the ratio assumption behind the plasma payload."},{"id":"JTS CPG ID 18 (2019)","t":"Damage Control Resuscitation in Prolonged Field Care","use":"Whole-blood-first resuscitation; the payload preference order used by the allocator."},{"id":"JTS CPG ID 51 (2020)","t":"Damage Control Resuscitation, Role 2/3","use":"Definition of the resuscitation endpoint the survival model resolves against."},{"id":"JTS CPG ID 79 (2020)","t":"Prehospital Blood Transfusion","use":"Who may transfuse, under what supervision, and the record required afterwards."}]},{"k":"BLOOD PRODUCT, COLD CHAIN AND CUSTODY","n":"6 REFERENCES","rows":[{"id":"21 CFR 606","t":"Current Good Manufacturing Practice for Blood and Blood Components","use":"Why a unit off temperature is destroyed and not returned to stock."},{"id":"21 CFR 610.53","t":"Dating periods for licensed biological products","use":"Shelf life applied to whole blood and plasma in the ledger."},{"id":"AABB Standards, 34th ed.","t":"Standards for Blood Banks and Transfusion Services","use":"1–6 °C storage and the 30-minute rule that drives the cold-chain clock."},{"id":"AR 40-3 / ASBP policy","t":"Medical, Dental and Veterinary Care — blood program","use":"Low-titer O whole blood as the forward product of record."},{"id":"DoDI 6480.04 (2020)","t":"Armed Services Blood Program Operational Procedures","use":"Custody, labelling and reporting for every unit this system issues."},{"id":"JTS CPG ID 21 (2018)","t":"Blood Product Cold Chain Management","use":"The ambient-decay curve used for a unit in transit at 31 °C."}]},{"k":"AI GOVERNANCE AND ASSURANCE","n":"6 REFERENCES","rows":[{"id":"DoD Ethical Principles for AI (2021)","t":"Responsible, equitable, traceable, reliable, governable","use":"The five properties the audit chain and the ✦ marking policy are built to evidence."},{"id":"DoD RAI Strategy and Implementation Pathway (2022)","t":"Responsible AI implementation","use":"Requirement that every model claim names its model, its inputs and its uncertainty."},{"id":"DoDD 5000.87","t":"Operation of the Software Acquisition Pathway","use":"How a system like this would be fielded and re-tested after a model change."},{"id":"DoDI 8510.01","t":"Risk Management Framework for DoD Systems","use":"Accreditation path for a system that runs disconnected at the edge."},{"id":"NIST AI RMF 1.0 (2023)","t":"AI Risk Management Framework — Govern, Map, Measure, Manage","use":"Structure of the model card on Sensor & Model."},{"id":"OMB M-24-10","t":"Advancing Governance, Innovation and Risk Management for Agency Use of AI","use":"Cited for framing on rights- and safety-impacting use; DoD national-security systems are carved out."}]},{"k":"AIRSPACE, PLATFORM AND SPECTRUM","n":"5 REFERENCES","rows":[{"id":"AR 95-23","t":"Unmanned Aircraft System Flight Regulations","use":"Operator currency and the manned-unmanned separation this exercise assumes."},{"id":"ATP 3-52.1 / AFTTP 3-2.78","t":"Multi-Service TTP for Airspace Control","use":"Deconfliction assumptions for unmanned lift at low altitude."},{"id":"JP 3-30 (2023)","t":"Joint Air Operations — airspace control","use":"Why a sortie is planned inside an airspace coordinating measure and not around it."},{"id":"JP 6-01","t":"Joint Electromagnetic Spectrum Management Operations","use":"The SATCOM-denied window and the last-known-good plan behaviour."},{"id":"Manufacturer published data","t":"TRV-150C · Soaring M25 · FVR-90 performance envelopes","use":"Radius, ferry range and payload figures. No estimate is substituted for a published figure."}]},{"k":"LAW OF ARMED CONFLICT","n":"4 REFERENCES","rows":[{"id":"AP I (1977), Arts. 8 and 10","t":"Protection of the wounded, sick and shipwrecked","use":"Triage on medical grounds only. The allocator may not rank a casualty by anything else."},{"id":"CJCSI 5810.01E","t":"Implementation of the DoD Law of War Program","use":"Requirement for legal review of the allocation policy before fielding."},{"id":"DoD Law of War Manual (2023 rev.)","t":"§ 7.3 — care of the wounded and sick","use":"Legal review basis for a machine ordering medical resource without a human in the loop."},{"id":"GC I (1949), Arts. 12 and 15","t":"Amelioration of the Condition of the Wounded and Sick in Armed Forces in the Field","use":"The obligation to search for and collect the wounded without delay."}]},{"k":"MODELS, CORPUS AND DATA","n":"4 REFERENCES","rows":[{"id":"Corpus manifest","t":"161 passages · 499 sentences · JP 4-02, ATP 4-02.2, JTS CPGs, CoTCCC","use":"The complete retrieval corpus. Nothing outside it is quoted."},{"id":"Qwen2.5 Technical Report (2024)","t":"Qwen2.5-0.5B-Instruct","use":"Retained because the wllama runtime ships for an operator who supplies their own GGUF. NO LANGUAGE MODEL IS LOADED IN THIS BUILD and nothing here is generated prose."},{"id":"Reimers and Gurevych (2019)","t":"Sentence-BERT — sentence embeddings using Siamese BERT networks","use":"all-MiniLM-L6-v2. Ships in app/models and runs the analyst console\u2019s doctrine view; the doctrine surfaces in this application score by term overlap and do not call it."},{"id":"Run definition","t":"Seed, casualty stream, common random numbers across both arms","use":"On Run Setup. Both arms draw the same survival numbers, so the difference is the allocation and nothing else."}]}];
 
-/* ==========================================================================
+/* --------------------------------------------------------------------------
    THE ARMS HAVE COLOURS, AND THEY ARE DECLARED ONCE.
 
    Until this existed the arms were told apart by position and by a teal label
@@ -2549,8 +2557,8 @@ const REF_DEFS = [{"k":"COMMAND, AUTHORITY AND DELEGATION","n":"6 REFERENCES","r
    DOWN: ANGEL SWARM, then CURRENT — TRIAGE & PROXIMITY, then NO FORWARD
    DELIVERY. ANGEL SWARM is drawn first everywhere — left column, top row —
    without exception.
-   ========================================================================== */
-/* ==========================================================================
+   -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
    N3 · THE REHEARSED PATH, WRITTEN DOWN ONCE.
 
    The guided walkthrough NAVIGATES BETWEEN DESTINATIONS AND DOES NOTHING
@@ -2567,7 +2575,7 @@ const REF_DEFS = [{"k":"COMMAND, AUTHORITY AND DELEGATION","n":"6 REFERENCES","r
    The order is the order the brief is given in: the answer, the battle, where
    the remainder came from, the result as a board, and then the evidence that
    the engine underneath it is the one being asserted.
-   ========================================================================== */
+   -------------------------------------------------------------------------- */
 const WALK = [
   { page: 'dash', name: 'Command Overview',
     cap: 'The answer before you press anything. 35 dead of survivable wounds with nothing flown forward, 34 under today\u2019s tasking, 23 under ANGEL SWARM.' },
@@ -2652,7 +2660,7 @@ const ARM = {
        bar:   'oklch(0.68 0.17 25)' }      /* deaths are red on ALL THREE arms */
 };
 
-/* ==========================================================================
+/* --------------------------------------------------------------------------
    THE WAR GAME — THE SENSITIVITY HARNESS, FINALLY REACHABLE.
 
    app/js/mc.worker.js has been able to do this since the day it was written.
@@ -2693,7 +2701,7 @@ const ARM = {
    is a real property of the two allocators and not a thumb on the scale, but
    it is the one point on this screen where the curves are not answering the
    same question, so the lever card says so before the sweep is run.
-   ========================================================================== */
+   -------------------------------------------------------------------------- */
 
 /* THE SCENARIO'S FORCE TABLE USED TO BE RESTATED HERE AND IT IS NOT ANY MORE.
    The restatement was a stated liability — three launch points and one outage
@@ -4578,9 +4586,9 @@ class Component extends DCLogic {
       ]
     };
   }
-  /* ======================================================================
+  /* ----------------------------------------------------------------------
      ASK ANGEL — THE ROUTER
-     ======================================================================
+     ----------------------------------------------------------------------
      WHAT WENT WRONG. "How many casualties were in the last run" came back
      with a passage about blood cold-chain storage, badged as retrieval at
      similarity 0.586. Two faults, both measured:
@@ -4615,7 +4623,7 @@ class Component extends DCLogic {
      terms and a score of 0.55 keeps 21 of 22 of set A and admits 0 of 24 of
      set B. 0.55 is chosen off a plateau — every floor from 0.550 to 0.650
      gives the identical result on both sets — rather than off a cliff.
-     ====================================================================== */
+     ---------------------------------------------------------------------- */
 
   /* Colour and wording of the three non-refusal badges. A run figure is
      arithmetic over the record and is NOT a model output, so it does not
@@ -4708,16 +4716,16 @@ class Component extends DCLogic {
       cite: 'Refused for want of evidence · neither the run record nor the corpus answers this' };
   }
 
-  /* ======================================================================
+  /* ----------------------------------------------------------------------
      THE RUN-FACT TABLE
-     ======================================================================
+     ----------------------------------------------------------------------
      Every figure below is read off the frame the engine published for this
      minute, or off the closed casualty record. Nothing is written down here
      and nothing is estimated. Each rule is narrow enough that a REFERENCE
      question falls through it to the corpus — 'how long can whole blood
      stay out of refrigeration' must not be caught by the blood rule, so
      the blood rules require a quantity or a place to be asked for.
-     ====================================================================== */
+     ---------------------------------------------------------------------- */
   chatRunAnswer(q, l, s, F, K) {
     const st = this.state, fin = st.t >= 180;
     const AS = 'ANGEL SWARM', BS = 'Current — triage & proximity';
@@ -4916,9 +4924,9 @@ class Component extends DCLogic {
 
     return null;
   }
-  /* ======================================================================
+  /* ----------------------------------------------------------------------
      THEATER MAP — the design's chrome over the application's own renderers
-     ======================================================================
+     ----------------------------------------------------------------------
      NOTHING IN THIS FUNCTION DRAWS A MAP. window.ANGELMAP is app/angel-map.js,
      which mounts ANGEL SWARM's three real renderers — app/js/theater.js for
      the combatant command, app/js/geo.js with app/js/map.js for the flat
@@ -4936,7 +4944,7 @@ class Component extends DCLogic {
 
      EVERY FIGURE BELOW IS READ OUT OF THE RUNNING ENGINE AT THE MOMENT IT IS
      DRAWN. None is written down here, and every death figure is red.
-     ====================================================================== */
+     ---------------------------------------------------------------------- */
   mapVals(s) {
     const st = this.state;
     const M = window.ANGELMAP;
@@ -5145,6 +5153,23 @@ class Component extends DCLogic {
     const rollT = synced ? roll : null;
     const rec = up ? M.record() : null;
     const can = up ? M.tools() : [];
+    const showIndicatorPreview = !!(up && sc === '2d' && M.comparing());
+    const selectedIndicator = showIndicatorPreview && typeof M.comparisonIndicator === 'function'
+      ? M.comparisonIndicator() : 'tactical';
+    const indicatorOptions = [
+      ['tactical', 'A COMPACT', 'Compact tactical label'],
+      ['edge', 'B EDGE TAB', 'Map-edge tab'],
+      ['inline', 'C INLINE', 'Minimal inline identifier']
+    ].map(([k, label, title]) => ({
+      label, title,
+      pressed: String(selectedIndicator === k),
+      on: () => {
+        if (typeof M.setComparisonIndicator === 'function') M.setComparisonIndicator(k);
+        this.forceUpdate();
+      },
+      bg: selectedIndicator === k ? 'oklch(0.86 0.025 240)' : 'transparent',
+      fg: selectedIndicator === k ? 'oklch(0.18 0.015 240)' : 'oklch(0.72 0.008 250)'
+    }));
 
     /* ---- the scale chips ------------------------------------------------
        THE GPU CHIP IS NOT DRAWN UNTIL THAT RENDERER SAYS IT IS RUNNING.
@@ -5612,9 +5637,9 @@ class Component extends DCLogic {
     const pnL = panels.filter(p => p.side === 'L').sort((a, b) => b.ord - a.ord);
     const pnR = panels.filter(p => p.side === 'R').sort((a, b) => b.ord - a.ord);
 
-    /* ==================================================================== *
+    /* -------------------------------------------------------------------- *
      * THE ROUTE-STAGE STRIP                                                *
-     * ==================================================================== *
+     * -------------------------------------------------------------------- *
        WHAT A SORTIE ACTUALLY DID, STOP BY STOP, AND WHERE IT IS RIGHT NOW.
 
        A route line on the picture says where an aircraft went. It cannot say
@@ -5929,6 +5954,8 @@ class Component extends DCLogic {
         fg: sc === k ? 'oklch(0.95 0.02 165)' : 'oklch(0.74 0.008 250)'
       })),
       tools,
+      showIndicatorPreview,
+      indicatorOptions,
       toolCount: mounting ? 'THE CONTROLS APPEAR WHEN THE RENDERER IS DRAWING'
         : tools.length + ' CONTROL' + (tools.length === 1 ? '' : 'S') + ' IN THIS SCALE',
       scopeNote: mounting
@@ -6909,7 +6936,7 @@ class Component extends DCLogic {
     };
   }
 
-  /* ======================================================================
+  /* ----------------------------------------------------------------------
      THE HEADLINE, ON THE FIRST SCREEN.
 
      The whole argument of this application is three numbers: 35 soldiers die
@@ -6931,7 +6958,7 @@ class Component extends DCLogic {
      It says RESOLVES TO, not "result", while the clock is at zero. The run
      has not been watched yet. Nothing here is hidden from the operator that
      the engine does not already know. */
-  /* ======================================================================
+  /* ----------------------------------------------------------------------
      THE ONE COMPARISON LINE, AND WHY IT IS A VALUE BAG AND NOT A SENTENCE.
 
      THE FAILURE THIS FIXES WAS NOT ON THE SCREEN, IT WAS IN THE ROOM. Away
@@ -6984,8 +7011,8 @@ class Component extends DCLogic {
      value bag behind it is still read, and a key that is absent in one
      branch binds as nothing while a key that is null clobbers an earlier
      builder. Both branches below return the full shape.
-     ====================================================================== */
-  /* ======================================================================
+     ---------------------------------------------------------------------- */
+  /* ----------------------------------------------------------------------
      THE WALKTHROUGH BAR, AND THE THREE THINGS IT IS NOT ALLOWED TO DO.
 
      IT DOES NOT RENDER A SCREEN. Every value below is a caption, a label or
@@ -7006,7 +7033,7 @@ class Component extends DCLogic {
      EVERY KEY IS RETURNED IN BOTH STATES, for the same reason cmpVals() does
      it: an absent key binds as nothing, a null key clobbers an earlier
      builder, and this bag is spread last.
-     ====================================================================== */
+     ---------------------------------------------------------------------- */
   walkVals() {
     const st = this.state;
     const base = {
@@ -7152,7 +7179,7 @@ class Component extends DCLogic {
     }) };
   }
 
-  /* ======================================================================
+  /* ----------------------------------------------------------------------
      TWO THINGS THE OPERATOR COULD NOT SEE.
 
      1. THAT THE CLOCK WAS MOVING. Away from the Theater Map the only evidence

@@ -224,6 +224,20 @@
   }
   const ORDER = ['zoomOut', 'zoomIn', 'fit', 'legend', 'layersAll', 'sideBySide'];
 
+  function indicatorPreview() {
+    if (scopeNow() !== '2D' || !comparing()) return '';
+    const selected = document.documentElement.dataset.cmpIndicator || 'tactical';
+    const button = (kind, letter, label, title) =>
+      `<button type="button" data-cmp-indicator="${kind}"
+        aria-pressed="${selected === kind}" title="${title}"><b>${letter}</b> ${label}</button>`;
+    return `<div class="cmpIndicatorPreview cmpIndicatorPreviewBar" role="group"
+      aria-label="Comparison indicator preview"><span>INDICATOR PREVIEW</span>
+      ${button('tactical', 'A', 'COMPACT', 'Compact tactical label')}
+      ${button('edge', 'B', 'EDGE TAB', 'Map-edge tab')}
+      ${button('inline', 'C', 'INLINE', 'Minimal inline identifier')}
+      <output aria-live="polite"></output></div>`;
+  }
+
   P.act('mapScope', el => {
     const s = el.dataset.mscope;
     if (!s) return;
@@ -292,7 +306,7 @@
     }).join('');
 
     return `${head(L)}
-      <div class="m-bar">${seg}<div class="m-tools">${row}</div></div>
+      <div class="m-bar">${seg}${indicatorPreview()}<div class="m-tools">${row}</div></div>
       <div class="m-note">${note(here, can)}</div>
       <div class="m-stage m-${esc(want)}">${P.slot('mapSlot')}</div>
       ${figures(L, want)}`;

@@ -28,6 +28,32 @@
 .m-tool.on{ background:var(--d-teal-sel); border-color:var(--d-teal-line);
   color:var(--d-teal-nav-t) }
 
+/* In the dedicated map destination the preview belongs with the controls.
+   Keep the original stage copy as a CSS-only fallback for a browser that has
+   an older cached page-map script: the stage begins above the clipped visible
+   area here, so the fallback sits just below the pane labels at the right. */
+body.d-map-focus.compare #dDock .cmpIndicatorPreview:not(.cmpIndicatorPreviewBar){
+  display:flex; left:auto; right:12px; top:200px;
+}
+body.d-map-focus:has(.cmpIndicatorPreviewBar) #dDock
+  .cmpIndicatorPreview:not(.cmpIndicatorPreviewBar){display:none}
+.cmpIndicatorPreview.cmpIndicatorPreviewBar{
+  position:static; inset:auto; z-index:auto; display:flex; height:28px;
+  flex:0 0 auto; transform:none;
+}
+.cmpIndicatorPreviewBar>span{color:oklch(0.74 0.03 210)}
+.cmpIndicatorPreviewBar button{height:28px; padding-inline:8px}
+
+/* The docked comparison already has a center divider. The inherited colored
+   outer-edge hairlines read as an unexplained blue selection outline beside
+   the left furniture, so they do not belong on this destination. */
+body.d-map-focus.compare #dDock #stage::before,
+body.d-map-focus.compare #dDock #stage::after{display:none}
+
+/* The dedicated map page already exposes its detail and layer controls. The
+   role-level fold button has no additional content to reveal here. */
+body.d-map-focus #dDock #cqMissionMore{display:none !important}
+
 /* ---- what this renderer is -------------------------------------------- */
 .m-note{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
   padding:10px 22px 0; font-size:12px; color:var(--d-t6); max-width:1180px }

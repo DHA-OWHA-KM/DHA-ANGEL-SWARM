@@ -15,7 +15,7 @@
      beats the `:root` block css/app.css still carries as a floor for a
      document that somehow loses the attribute. See THEME_CONTRACT.md. -->
 <link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=7">
 <!-- Loaded after the shell stylesheet on purpose: css/polish.css is the
      cross-cutting pass that reconciles the panes contributed by separate
      authors, and it needs to win on equal specificity. build.py does not
@@ -102,16 +102,15 @@
    the label sticking out from behind the banner.
 
    So the pair drops below the banner, both together, in compare view only.
-   The banner's own height is what sets the two numbers: it is 88px tall at
-   1280–1440 and 56px at 1500 and above, and it grows to 142px at 1280 once
-   ANGEL SWARM is deployed and the arm figures appear in it. 160 and 100
-   clear the worst case at each end with 8px to spare. Verified with every
-   absolutely positioned box over #stage enumerated and pairwise
-   intersected: zero overlaps at 1280, 1440 and 1920, deployed and not.
+   The banner can grow to 142px when ANGEL SWARM is deployed, and the docked
+   map can keep its 108px form even on a wide browser because its content
+   column is narrower than the viewport. A stable 160px offset clears both
+   forms with room to spare instead of guessing from viewport width. Verified
+   by enumerating the positioned boxes over #stage and intersecting them at
+   the supported widths, deployed and standby, with both legend states.
    Single-map view is untouched — arm B's tag is display:none there and
    arm A's stays at top:10px. */
-body.compare .paneTag{top:160px}
-@media (min-width:1460px){ body.compare .paneTag{top:100px} }
+body.compare .paneTag{top:168px}
 </style>
 </head>
 <body data-theme="console-dark">
@@ -676,6 +675,16 @@ try{var t=localStorage.getItem('angel.theme');
 
       <div class="paneTag a"><i></i><b id="sbALabel">ANGEL SWARM</b><em>physiological deadlines · receiver-aware · cold-chain in the loop</em></div>
       <div class="paneTag b"><i></i><b>CURRENT — TRIAGE & PROXIMITY</b><em>sorted by triage category, nearest airframe · one stop per sortie</em></div>
+      <div class="cmpIndicatorPreview" role="group" aria-label="Comparison indicator preview">
+        <span>PREVIEW</span>
+        <button type="button" data-cmp-indicator="tactical" aria-pressed="true"
+                title="Compact tactical label"><b>A</b> COMPACT</button>
+        <button type="button" data-cmp-indicator="edge" aria-pressed="false"
+                title="Map-edge tab"><b>B</b> EDGE TAB</button>
+        <button type="button" data-cmp-indicator="inline" aria-pressed="false"
+                title="Minimal inline identifier"><b>C</b> INLINE</button>
+        <output aria-live="polite">COMPACT TACTICAL LABEL</output>
+      </div>
 
       <div class="missCompare bad" id="missCompare"></div>
 
@@ -1716,6 +1725,7 @@ try{var t=localStorage.getItem('angel.theme');
 <script src="js/db.js"></script>
 <script src="js/film_inline.js"></script>
 <script src="js/map-layout-state.js"></script>
+<script src="js/comparison-indicators.js"></script>
 <script src="js/app.js"></script>
 <script type="module" src="js/device.js"></script>
 <!-- The cross-cutting layer: command palette, one keyboard guard in front of

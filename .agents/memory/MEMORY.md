@@ -2,3 +2,5 @@
 - [Navigation hover treatment](navigation-hover-treatment.md) — the approved menu feedback is a soft surface fade with a clearly brighter, slightly saturated icon.
 - [Map layout emphasis](map-layout-emphasis.md) — treat side-by-side as the emphasized comparison mode; Single is the neutral dark state.
 - [Browser checks after cold load](browser-checks-cold-load.md) — wait for destination-specific ready content before testing map lifecycle; the rail appears much earlier.
+- [Embedded map controls](embedded-map-controls.md) — validate Theater Map UI on the launch surface; its host owns controls while the embedded frame owns renderer state.
+- [Comparison indicator spacing](comparison-indicator-spacing.md) — pane labels need complete contours and visible gutters; split-attached clipping reads as broken.

@@ -247,21 +247,116 @@ body.compare #hudInset{display:none}
 
 /* ---- pane identity: unmistakable which half you are looking at -------- */
 .paneTag{
-  position:absolute; top:10px; display:flex; align-items:center; gap:8px;
-  border-radius:9px; padding:8px 12px 8px 12px; pointer-events:none;
-  backdrop-filter:blur(4px); border:1px solid transparent;
+  position:absolute; top:10px; display:flex; align-items:center; gap:7px;
+  min-height:24px; max-width:calc(50% - 24px); padding:5px 8px;
+  pointer-events:none; border:1px solid transparent;
+  backdrop-filter:blur(4px);
 }
-.paneTag b{font:800 15px/1 var(--sans); letter-spacing:.14em}
+.paneTag b{font:800 10px/1.15 var(--mono); letter-spacing:.08em; white-space:nowrap}
 .paneTag em{font:500 9.5px/1.3 var(--sans); font-style:normal; letter-spacing:.01em; opacity:.72; max-width:250px}
-.paneTag i{width:5px; height:26px; border-radius:3px; display:inline-block}
-.paneTag.a{left:12px; background:rgba(6,32,22,.90); border-color:rgba(49,214,138,.55); color:#8effc4}
-.paneTag.a i{background:var(--angel); box-shadow:0 0 14px rgba(49,214,138,.8)}
+.paneTag i{width:3px; height:13px; display:inline-block; flex:none}
+.paneTag.a{left:12px; background:rgba(6,24,18,.86); border-color:rgba(49,214,138,.38); color:#8effc4}
+.paneTag.a i{background:var(--angel)}
 .paneTag.b{left:calc(50% + 12px); display:none; background:rgba(38,18,6,.90);
-           border-color:rgba(240,129,63,.55); color:#ffc79a}
-.paneTag.b i{background:var(--current); box-shadow:0 0 14px rgba(240,129,63,.8)}
+            border-color:rgba(240,129,63,.38); color:#ffc79a}
+.paneTag.b i{background:var(--current)}
 body.compare .paneTag.b{display:flex}
+body.compare #stage .paneTag{
+  width:200px; height:32px; min-height:32px; padding:0 12px;
+  gap:0; justify-content:center; box-sizing:border-box;
+}
+body.compare #stage .paneTag b{
+  display:block; width:100%; font-size:8px; line-height:1;
+  letter-spacing:.04em; text-align:center; white-space:nowrap;
+}
+body.compare #stage .paneTag i{
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+}
+body.compare .paneTag.a{left:auto; right:calc(50% + 12px)}
+body.compare .paneTag.b{left:calc(50% + 12px)}
 body.standby .paneTag.a{background:rgba(34,26,6,.90); border-color:rgba(255,179,64,.55); color:#ffd89a}
-body.standby .paneTag.a i{background:var(--warn); box-shadow:0 0 14px rgba(255,179,64,.8)}
+body.standby .paneTag.a i{background:var(--warn)}
+
+.cmpIndicatorPreview{
+  position:absolute; top:10px; left:12px; z-index:8; display:none;
+  height:24px; align-items:center; overflow:hidden; border-radius:4px;
+  border:1px solid rgba(150,190,225,.2); background:rgba(6,12,19,.9);
+  backdrop-filter:blur(5px); color:#71869b; pointer-events:auto;
+}
+body.compare .cmpIndicatorPreview{display:flex}
+.cmpIndicatorPreview>span,.cmpIndicatorPreview output{
+  padding:0 7px; font:700 8px/1 var(--mono); letter-spacing:.09em;
+}
+.cmpIndicatorPreview output{
+  position:absolute; width:1px; height:1px; padding:0; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap; clip-path:inset(50%);
+}
+.cmpIndicatorPreview button{
+  height:24px; padding:0 6px; border:0; border-left:1px solid rgba(150,190,225,.15);
+  background:transparent; color:#7f95ab; font:700 8px/1 var(--mono); cursor:pointer;
+  letter-spacing:.04em;
+}
+.cmpIndicatorPreview button b{font-size:9px}
+.cmpIndicatorPreview button:hover{color:#e6eef6; background:rgba(150,190,225,.1)}
+.cmpIndicatorPreview button[aria-pressed="true"]{background:#b9cadb; color:#091019}
+.cmpIndicatorPreview button:focus-visible{
+  position:relative; z-index:1; outline:2px solid #fff; outline-offset:-3px;
+}
+.cmpIndicatorPreview button[aria-pressed="true"]:focus-visible{outline-color:#091019}
+body.light .cmpIndicatorPreview{background:rgba(255,255,255,.95); border-color:rgba(30,60,90,.16)}
+body.light .cmpIndicatorPreview button:focus-visible{outline-color:#091019}
+
+/* A — a compact tactical plate. */
+html[data-cmp-indicator="tactical"] .paneTag{border-radius:3px}
+
+/* B — an inset, modern map-edge capsule. It keeps the visual relationship
+   with the center split without touching it or looking clipped by it. */
+html[data-cmp-indicator="edge"] body.compare #stage .paneTag{
+  height:32px; min-height:32px; padding:0 12px; gap:0;
+  border-width:1px; border-style:solid; border-radius:999px;
+  background:linear-gradient(180deg,rgba(12,22,29,.94),rgba(7,14,20,.88));
+  backdrop-filter:blur(8px);
+  box-shadow:0 7px 18px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.055);
+}
+html[data-cmp-indicator="edge"] body.compare .paneTag.a{
+  left:auto; right:calc(50% + 12px);
+}
+html[data-cmp-indicator="edge"] body.compare .paneTag.b{left:calc(50% + 12px)}
+html[data-cmp-indicator="edge"] .paneTag i{
+  width:6px; height:6px; border-radius:50%;
+  box-shadow:0 0 0 3px rgba(255,255,255,.045);
+}
+
+/* C — only a color rule and type, with no container. A small text shadow
+   preserves legibility over both pale coastlines and dark terrain. */
+html[data-cmp-indicator="inline"] .paneTag{
+  gap:6px; min-height:20px; padding:3px 4px; border:0; border-radius:0;
+  background:transparent !important; backdrop-filter:none;
+  text-shadow:0 1px 2px #02070b,0 0 5px #02070b;
+}
+html[data-cmp-indicator="inline"] .paneTag i{width:12px; height:2px}
+html[data-cmp-indicator="inline"] body.light .paneTag{text-shadow:0 1px 2px #fff,0 0 5px #fff}
+
+/* High-density and genuinely narrow map views still have only CSS pixels
+   available. Keep labels as compact identifiers instead of allowing a
+   desktop-width plate to become an almost full-pane banner. */
+@media (max-width:900px){
+  body.compare #stage .paneTag{
+    width:132px; height:36px; min-height:36px; padding:0 10px;
+  }
+  body.compare #stage .paneTag b{
+    max-width:92px; white-space:normal;
+    font-size:8px; line-height:1.15; letter-spacing:.04em;
+  }
+  html[data-cmp-indicator="edge"] body.compare #stage .paneTag{
+    height:36px; min-height:36px; padding:0 10px; border-radius:10px;
+  }
+  html[data-cmp-indicator="inline"] body.compare #stage .paneTag{
+    height:32px; min-height:32px; padding:0 4px;
+  }
+  html[data-cmp-indicator="inline"] body.compare #stage .paneTag b{max-width:104px}
+}
+
 /* a coloured hairline down each half so the split is never ambiguous */
 body.compare #stage::before,body.compare #stage::after{
   content:''; position:absolute; top:0; bottom:0; width:3px; z-index:3; pointer-events:none;

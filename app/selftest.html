@@ -142,6 +142,7 @@
 <script src="./js/mc.worker.js"></script>
 <script src="./js/map-layout-state.js"></script>
 <script src="./js/context-search-state.js"></script>
+<script src="./js/comparison-indicators.js"></script>
 
 <script type="module">
 window.onmessage = null;   /* mc.worker.js installs a worker handler; not wanted on a page */
@@ -255,7 +256,7 @@ const statPrint = a => JSON.stringify(a.stats);
    is evaluated. That cost belongs in the report, so it is measured here. */
 let FIXTURE_MS = Math.round(performance.now() - T_FIX0);
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('DETERMINISM AND COMMON RANDOM NUMBERS',
       'The same seed must produce the same battle, and all three arms must fight it.');
 
@@ -289,7 +290,7 @@ test('the responder tier drawn for a casualty is reproducible from its own store
   eq(bad, 0, 'casualties whose stored uniform does not reproduce their tier');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('OPT-IN OBSERVED FLIGHT VARIABILITY',
       'Short-flight telemetry may vary travel time only when explicitly enabled; it must not rewrite platform facts or range.');
 
@@ -407,7 +408,7 @@ test('angel-engine separates and identifies deterministic observed-mode runs', (
      'observed mode did not change any committed arrival time');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('THE REFERENCE RESULT',
       'seed 42 · JOA CORAL · capability deployed. The figure every document and every film quotes.');
 
@@ -429,7 +430,7 @@ test('the engine adapter reports the same sortie counts as the raw engine', () =
      [REF.A.stats.sorties, REF.B.stats.sorties, 0].join('/'), 'adapter sortie counts disagree');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('CONSERVATION AND PHYSICAL INVARIANTS',
       'Nobody is counted twice, nobody vanishes, and no aircraft is in two places at once.');
 
@@ -475,7 +476,7 @@ test('ARM C flies zero sorties on every one of the seven joint operating areas',
 test('the escalation queue never exceeds the engine cap of 400 entries', () =>
   ok(REF.A.queue.length <= 400, 'proposal queue overran its cap', '<= 400', String(REF.A.queue.length)));
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('THE PHYSIOLOGICAL DEADLINE',
       'A delivery inside the deadline is a save; a delivery past it is a sortie.');
 
@@ -521,7 +522,7 @@ test('the untreated survival function depends on triage class alone', () => {
      '0.06/0.42/0.995/0.02');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('PAYLOAD RULES, COLD CHAIN AND THE RECEIVER',
       'A unit of blood nobody on scene can hang is a unit destroyed, and the engine has to say so.');
 
@@ -577,7 +578,7 @@ test('no stock line ever goes negative in either arm', () => {
   eq(bad, 0, 'negative stock lines');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('RANGE GATING',
       'Combat radius is quoted at full payload. What can actually be reached is a function of the load carried.');
 
@@ -615,7 +616,7 @@ test('coverage scoring counts only the aircraft whose launch point can actually 
   eq(c.reachN, able, 'reachN disagrees with a direct recount');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('TRIAGE PRECEDENCE IN THE CONTROL ARM',
       'ARM B sorts by triage category. These assertions drive allocateCurrentMethod() directly.');
 
@@ -664,7 +665,7 @@ test('a DELAYED casualty — one rank below — is chained onto an IMMEDIATE sor
   eq(dispatchCase('IMMEDIATE', 'DELAYED').join(' , '), '9001+9002',
      'the gate is not the documented lead-rank + 1'));
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('THE AUDIT CHAIN — SHA-256 (FIPS 180-4)',
       'The chain is only worth something if an investigating officer can recompute it and catch an alteration.');
 
@@ -728,7 +729,7 @@ test('the chain is append-only: every entry\'s prev is its predecessor\'s hash',
   eq(bad, 0, 'broken links');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('THE SEEKABLE SNAPSHOT',
       'snapshot(run, t) is a pure fold of the run\'s ledgers. It must never walk backwards.');
 
@@ -778,7 +779,7 @@ test('the datalink outage the scenario schedules is reported by the fold at the 
   eq([E.snapshot(BUILT, 92).commsDown, E.snapshot(BUILT, 60).commsDown].join('|'), 'true|false');
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('ALL SEVEN JOINT OPERATING AREAS',
       'The engine has always carried seven. Each one must build and produce a non-degenerate result.');
 
@@ -827,7 +828,7 @@ for (const s of SCEN) {
   });
 }
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('COMMANDER\'S LEVERS AND THE MONTE CARLO PATH',
       'applyLever() mutates the force after the casualty stream is fixed, so a sweep measures the lever and not its own noise.');
 
@@ -904,7 +905,7 @@ test('a real Monte Carlo worker loads the shipped engine off disk', async () => 
   } finally { w.terminate(); }
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('DIRECTIONAL SANITY',
       'The claims this prototype makes out loud, asserted against the run rather than against a slide.');
 
@@ -928,7 +929,7 @@ test('the two arms differ in outcome only because they allocate differently', ()
      ' A=' + REF.A.stats.survivableDeaths + ' B=' + REF.B.stats.survivableDeaths);
 });
 
-/* ========================================================================== */
+/* -------------------------------------------------------------------------- */
 group('MAP LAYOUT HIGHLIGHT',
       'Comparison is the emphasized map mode; the single-map layout stays visually neutral.');
 
@@ -965,7 +966,7 @@ test('returning to Single clears Side by side from every mirrored control', () =
      'a mirrored highlight survived the layout change');
 });
 
-/* ======================================================== contextual search */
+/* -------------------------------------------------------- contextual search */
 group('CONTEXTUAL SCREEN SEARCH',
       'Screen filtering is scoped, reset on destination changes, and unavailable throughout an active mission.');
 
@@ -1600,6 +1601,148 @@ test('the primary route blocks and narrates the full active-mission countdown li
   await primaryType(frame, olderHash);
   ok(!doc.querySelector('.context-no-match') && doc.body.textContent.indexOf(olderHash) >= 0,
      'an older audit match was capped out before contextual filtering');
+});
+
+/* -------------------------------------------------------------------------- */
+group('COMPARISON PANE INDICATOR PREVIEW',
+      'The temporary A, B and C treatments switch together without touching map state.');
+
+function comparisonIndicatorFixture() {
+  const root = document.createElement('div');
+  const control = document.createElement('div');
+  control.innerHTML =
+    '<button data-cmp-indicator="tactical"></button>' +
+    '<button data-cmp-indicator="edge"></button>' +
+    '<button data-cmp-indicator="inline"></button><output></output>';
+  return { root, control };
+}
+
+test('all three named treatments can be selected', () => {
+  const f = comparisonIndicatorFixture();
+  ['tactical', 'edge', 'inline'].forEach(kind => {
+    eq(syncComparisonIndicatorPreview(f.root, f.control, kind), true);
+    eq(f.root.dataset.cmpIndicator, kind);
+    eq(f.control.querySelectorAll('[aria-pressed="true"]').length, 1);
+    eq(f.control.querySelector('[data-cmp-indicator="' + kind + '"]').getAttribute('aria-pressed'), 'true');
+  });
+});
+
+test('the selector reports each treatment by its full preview name', () => {
+  const f = comparisonIndicatorFixture();
+  const names = [];
+  ['tactical', 'edge', 'inline'].forEach(kind => {
+    syncComparisonIndicatorPreview(f.root, f.control, kind);
+    names.push(f.control.querySelector('output').textContent);
+  });
+  eq(names.join('|'), 'COMPACT TACTICAL LABEL|MAP-EDGE TAB|MINIMAL INLINE IDENTIFIER');
+});
+
+test('a toolbar selection updates every visible preview control together', () => {
+  const a = comparisonIndicatorFixture(), b = comparisonIndicatorFixture();
+  a.control.className = 'cmpIndicatorPreview';
+  b.control.className = 'cmpIndicatorPreview';
+  document.body.append(a.control, b.control);
+  b.control.querySelector('[data-cmp-indicator="edge"]').click();
+  eq(a.control.querySelector('[data-cmp-indicator="edge"]').getAttribute('aria-pressed'), 'true');
+  eq(b.control.querySelector('[data-cmp-indicator="edge"]').getAttribute('aria-pressed'), 'true');
+  eq(document.documentElement.dataset.cmpIndicator, 'edge');
+  a.control.remove(); b.control.remove();
+});
+
+test('boxed pane labels contain both full arm names', async () => {
+  const frame = document.createElement('iframe');
+  frame.style.cssText = 'position:fixed;left:-2000px;top:0;width:1025px;height:120px;visibility:hidden';
+  document.body.append(frame);
+  const loaded = new Promise((resolve, reject) => {
+    frame.onload = resolve;
+    frame.onerror = () => reject(new Error('indicator CSS fixture did not load'));
+  });
+  frame.srcdoc = '<!doctype html><html data-theme="console-dark" data-cmp-indicator="tactical"><head>' +
+    '<base href="' + new URL('.', location.href) + '">' +
+    '<link rel="stylesheet" href="./css/theme.css">' +
+    '<link rel="stylesheet" href="./css/app.css?v=7">' +
+    '<link rel="stylesheet" href="./css/fonts.css">' +
+    '</head><body class="compare" data-theme="console-dark">' +
+    '<div id="stage" style="position:relative;width:100vw;height:120px">' +
+    '<div class="paneTag a"><i></i><b>ANGEL SWARM</b></div>' +
+    '<div class="paneTag b"><i></i><b>CURRENT — TRIAGE &amp; PROXIMITY</b></div>' +
+    '</div></body></html>';
+  await loaded;
+  try {
+    const doc = frame.contentDocument;
+    for (const viewport of [{ width:1025, pane:200 }, { width:443, pane:132 }]) {
+      frame.style.width = viewport.width + 'px';
+      await new Promise(resolve => frame.contentWindow.requestAnimationFrame(
+        () => frame.contentWindow.requestAnimationFrame(resolve)));
+      for (const kind of ['tactical', 'edge']) {
+        doc.documentElement.dataset.cmpIndicator = kind;
+        for (const pane of doc.querySelectorAll('.paneTag')) {
+          const label = pane.querySelector('b');
+          const textBox = label.getBoundingClientRect();
+          const range = doc.createRange();
+          range.selectNodeContents(label);
+          const textRects = Array.from(range.getClientRects());
+          const bounds = pane.getBoundingClientRect();
+          const style = getComputedStyle(pane);
+          eq(Math.round(bounds.width), viewport.pane,
+            kind + ' fixture uses production pane width at ' + viewport.width + 'px');
+          const innerRight = bounds.right - parseFloat(style.paddingRight) -
+            parseFloat(style.borderRightWidth);
+          const innerLeft = bounds.left + parseFloat(style.paddingLeft) +
+            parseFloat(style.borderLeftWidth);
+          const innerBottom = bounds.bottom - parseFloat(style.paddingBottom) -
+            parseFloat(style.borderBottomWidth);
+          const innerTop = bounds.top + parseFloat(style.paddingTop) +
+            parseFloat(style.borderTopWidth);
+          ok(textRects.length > 0, kind + ' renders text rectangles');
+          for (const text of textRects) {
+            ok(text.left >= innerLeft - 0.01,
+              kind + ' keeps ' + pane.textContent.trim() + ' inside its left edge');
+            ok(text.right <= innerRight + 0.01,
+              kind + ' keeps ' + pane.textContent.trim() + ' inside its right edge');
+            ok(text.top >= innerTop - 0.01,
+              kind + ' keeps ' + pane.textContent.trim() + ' inside its top edge');
+            ok(text.bottom <= innerBottom + 0.01,
+              kind + ' keeps ' + pane.textContent.trim() + ' inside its bottom edge');
+          }
+          const textTop = Math.min(...textRects.map(rect => rect.top));
+          const textBottom = Math.max(...textRects.map(rect => rect.bottom));
+          const textCenter = (textTop + textBottom) / 2;
+          const paneCenter = (bounds.top + bounds.bottom) / 2;
+          ok(Math.abs(textCenter - paneCenter) <= 0.51,
+            kind + ' vertically centers ' + pane.textContent.trim(),
+            'within 0.51px', Math.abs(textCenter - paneCenter));
+          ok(Math.abs((textBox.top + textBox.bottom) / 2 - paneCenter) <= 0.51,
+            kind + ' centers the label box for ' + pane.textContent.trim());
+        }
+      }
+    }
+    frame.style.width = '1025px';
+    doc.documentElement.dataset.cmpIndicator = 'tactical';
+    await new Promise(resolve => frame.contentWindow.requestAnimationFrame(resolve));
+    const probePane = doc.querySelector('.paneTag.b');
+    const probeLabel = probePane.querySelector('b');
+    probeLabel.textContent += ' — DELIBERATELY TOO LONG FOR THIS LABEL';
+    const probeRange = doc.createRange();
+    probeRange.selectNodeContents(probeLabel);
+    const probeBounds = probePane.getBoundingClientRect();
+    const probeStyle = getComputedStyle(probePane);
+    const probeInnerRight = probeBounds.right - parseFloat(probeStyle.paddingRight) -
+      parseFloat(probeStyle.borderRightWidth);
+    ok(Array.from(probeRange.getClientRects()).some(rect => rect.right > probeInnerRight),
+      'rendered-text guard detects deliberate nowrap overflow');
+  } finally {
+    frame.remove();
+  }
+});
+
+test('changing the indicator leaves comparison and camera state untouched', () => {
+  const f = comparisonIndicatorFixture();
+  const mapState = { mapView: 'COMPARE', mapMode: '2D', zoom: 1.5, cx: 42, cy: 19 };
+  const before = JSON.stringify(mapState);
+  syncComparisonIndicatorPreview(f.root, f.control, 'edge');
+  syncComparisonIndicatorPreview(f.root, f.control, 'inline');
+  eq(JSON.stringify(mapState), before);
 });
 
 /* ------------------------------------------------------------------ webcrypto */

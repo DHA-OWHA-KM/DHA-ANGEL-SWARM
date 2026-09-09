@@ -62,7 +62,7 @@
 (function () {
   'use strict';
 
-  var FRAME_SRC = './console.html';
+  var FRAME_SRC = './console.html?v=7';
 
   /* ---- the dock ---------------------------------------------------------
      One frame, one box, created on first arrival at the Theater Map and kept
@@ -298,6 +298,13 @@
     '#g3Counts{display:none!important}',
     '#g3Wrap .g3Right{display:none!important}',
     '#missCompare{display:none!important}',
+    /* Comparison identity is controlled by the visible design header. The
+       frame's own preview sits beneath that header and cannot be reached, so
+       it is suppressed along with the inherited edge hairlines and role-level
+       fold control that have no job in this embedded layout. */
+    '.cmpIndicatorPreview{display:none!important}',
+    'html body #stage::before,html body #stage::after{display:none!important}',
+    'html body #cqMissionMore{display:none!important}',
 
     /* ---- AND ONE CLOCK, WHICH IS WHY THE BAR IS BACK -------------------
        The transport went the way of the count row and for the same reason,
@@ -1053,6 +1060,28 @@
   }
   function comparing() { var a = A(); return !!(a && a.mapView === 'COMPARE'); }
 
+  var INDICATOR_KINDS = { tactical: true, edge: true, inline: true };
+  function comparisonIndicator() {
+    if (!booted) return 'tactical';
+    try {
+      var k = W.document.documentElement.dataset.cmpIndicator;
+      return INDICATOR_KINDS[k] ? k : 'tactical';
+    } catch (e) { return 'tactical'; }
+  }
+  function setComparisonIndicator(kind) {
+    if (!booted || !INDICATOR_KINDS[kind]) return false;
+    try {
+      var root = W.document.documentElement;
+      root.dataset.cmpIndicator = kind;
+      if (typeof W.syncComparisonIndicatorPreview === 'function') {
+        W.document.querySelectorAll('.cmpIndicatorPreview').forEach(function (control) {
+          W.syncComparisonIndicatorPreview(root, control, kind);
+        });
+      }
+      fire();
+      return true;
+    } catch (e) { return false; }
+  }
   /* ---- THE THEATRE PICTURE HAS TWO RENDERERS AND ONE BUS ------------------
      zoomAnyMap('THEATRE') moves APP.theaterView — the camera of the canvas
      map. Where theater3d.js came up that canvas is asleep and the picture on
@@ -1220,7 +1249,7 @@
   setInterval(function () {
     if (!booted || clk.t == null) return;
     try {
-      var a = W.APP;
+        var a = W.APP, D = a.deploy;
       if (!a.running) return;
       var quiet = (W.performance || performance).now() - clk.at;
       /* THE PAUSE ANNOUNCES ITSELF ONCE. Stopping the run re-renders the page
@@ -1349,6 +1378,8 @@
     layersAll: function () { var r = layersAll(); fire(); return r; },
     anyLayerOff: anyLayerOff,
     comparing: comparing,
+    comparisonIndicator: comparisonIndicator,
+    setComparisonIndicator: setComparisonIndicator,
     roll: roll,
     record: record,
     figures: figures,
