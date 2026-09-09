@@ -1180,6 +1180,60 @@ test('the shipped shell filters, shows no-match, hides unsuitable screens, and c
      'alternate navigation did not synchronize the shell destination');
 });
 
+test('the shipped shell preserves composed search text through a live repaint', async () => {
+  const frame = await consoleFrame();
+  const w = frame.contentWindow, doc = frame.contentDocument, A = w.APP;
+  w.resetSim(false);
+  while (!A.finished) {
+    w.stepSim();
+    A.tView = A.t;
+    if (w.DSHELL.live().open.length) break;
+  }
+  A.running = false; A.finished = true;
+  w.DSHELL.go('cas');
+  w.DSHELL.paint();
+
+  const field = doc.getElementById('dContextSearch');
+  const firstId = doc.querySelector('.pa-row .pa-id .n').textContent.split('·')[0].trim();
+  const composed = firstId.toLowerCase();
+  field.focus();
+  field.dispatchEvent(new frame.contentWindow.CompositionEvent('compositionstart', {
+    bubbles:true, data:''
+  }));
+  field.value = composed;
+  field.setSelectionRange(composed.length, composed.length);
+  field.dispatchEvent(new frame.contentWindow.InputEvent('input', {
+    bubbles:true, inputType:'insertCompositionText', data:composed, isComposing:true
+  }));
+
+  const composingField = doc.getElementById('dContextSearch');
+  const caret = composingField.selectionStart;
+  w.DSHELL.paint();
+  eq(doc.getElementById('dContextSearch'), composingField,
+     'a live repaint replaced the search input during composition');
+  eq(doc.activeElement, composingField,
+     'a live repaint blurred the search input during composition');
+  eq(composingField.selectionStart, caret,
+     'a live repaint moved the search caret during composition');
+
+  composingField.dispatchEvent(new frame.contentWindow.CompositionEvent('compositionend', {
+    bubbles:true, data:composed
+  }));
+  composingField.dispatchEvent(new frame.contentWindow.InputEvent('input', {
+    bubbles:true, inputType:'insertFromComposition', data:composed, isComposing:false
+  }));
+  await new Promise(resolve => setTimeout(resolve, 20));
+
+  eq(w.DSHELL.query(), composed, 'the committed composed value did not become the search query');
+  ok(doc.querySelector('.pa-row') &&
+     doc.querySelector('.pa-row').textContent.indexOf(firstId) >= 0,
+     'the committed composed value did not retain its matching record');
+  eq(doc.activeElement, composingField,
+     'committing composed text blurred or replaced the search input');
+  eq(composingField.selectionStart, composed.length,
+     'committing composed text moved the search caret');
+});
+
 test('the shipped shell blocks the complete countdown lifecycle and unlocks after reset or completion', async () => {
   const frame = await consoleFrame();
   const w = frame.contentWindow, doc = frame.contentDocument, A = w.APP;
