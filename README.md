@@ -2,11 +2,11 @@
 
 ANGEL SWARM tasks autonomous medical resupply aircraft — whole blood, TXA, freeze-dried plasma — against wounded soldiers' **physiological deadlines** rather than by triage category and proximity. It is a decision and allocation layer, not an aircraft and not a command system: it decides which airframe flies to which casualty, and when.
 
-The whole thing is one static binary and a folder. It installs nothing, writes nothing outside its own directory, originates no outbound request, and opens exactly one socket — the loopback HTTP port that lets a browser construct a Web Worker. Two trained networks ship and run on the CPU already in the endpoint. No language model weights ship, no inference endpoint is called, and nothing on any screen is generated prose.
+The runnable package is one platform launcher **plus the adjacent `app/` folder**. It installs nothing, writes nothing outside its own directory, originates no outbound request, and opens exactly one socket — the loopback HTTP port that lets a browser construct a Web Worker. Two trained networks ship and run on the CPU already in the endpoint. No language model weights ship, no inference endpoint is called, and nothing on any screen is generated prose.
 
 > `UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
 >
-> **Version:** v1.0, 8 September 2026
+> **Version:** v1.1, 9 September 2026
 > **AOR in the shipped scenarios:** PACOM and EUCOM — seven theatres, `PACOM_CORAL` by default
 > **Default posture:** NOT DEPLOYED, on purpose — press **Deploy** to hand tasking authority to the system mid-fight
 > **Author:** Junayd S. Park, DHA Office of Warfighter Health Advantage · Team DHA RESCUE · NDIA Hackathon 2026
@@ -47,21 +47,21 @@ Three arms are run against one world, under common random numbers, so they fight
 | **B** | CURRENT — TRIAGE & PROXIMITY | **34** | 38 |
 | **C** | NO FORWARD DELIVERY | **35** | 0 |
 
-**Conditions: seed 42, PACOM_CORAL, capability deployed.** That is one draw, and one draw is not a claim. Over **200 paired replications in each of seven theatres — 1,400 paired battles** — ANGEL SWARM wins **all seven**, every 95% interval excluding zero. It produced more dead in **6 of 1,400 battles (0.43%)**, and **never by more than one**.
+**Conditions: seed 42, PACOM_CORAL, capability deployed.** That is one draw, and one draw is not a claim. Over **200 paired replications in each of seven theatres — 1,400 paired battles** — ANGEL SWARM wins **all seven**, every 95% interval excluding zero. It produced more dead in **5 of 1,400 battles (0.36%)**, and **never by more than one**.
 
 | Theatre | ANGEL | Current | Mean diff | 95% interval | Worse |
 |---|---|---|---|---|---|
 | PACOM CORAL | 24.23 | 29.14 | −4.905 | −5.215 … −4.595 | 0 / 200 |
 | PACOM TIMBER | 14.98 | 19.61 | −4.630 | −4.920 … −4.340 | 0 / 200 |
-| PACOM BASALT | 39.81 | 44.37 | −4.555 | −4.853 … −4.257 | 1 / 200 |
-| EUCOM GRANITE | 33.91 | 38.36 | −4.445 | −4.749 … −4.141 | 1 / 200 |
-| EUCOM AMBER | 37.16 | 40.73 | −3.565 | −3.812 … −3.318 | 0 / 200 |
-| PACOM MARINER | 12.70 | 15.90 | −3.210 | −3.460 … −2.960 | 0 / 200 |
-| EUCOM FJORD | 16.75 | 18.61 | −1.865 | −2.045 … −1.685 | 4 / 200 |
+| PACOM BASALT | 39.79 | 44.37 | −4.575 | −4.872 … −4.278 | 1 / 200 |
+| PACOM MARINER | 12.69 | 15.90 | −3.215 | −3.464 … −2.966 | 0 / 200 |
+| EUCOM GRANITE | 33.90 | 38.36 | −4.460 | −4.765 … −4.155 | 1 / 200 |
+| EUCOM AMBER | 37.11 | 40.73 | −3.620 | −3.872 … −3.368 | 0 / 200 |
+| EUCOM FJORD | 16.73 | 18.61 | −1.875 | −2.053 … −1.697 | 3 / 200 |
 
 The control arm is given **perfect triage**, which no human achieves. EUCOM FJORD is the weakest theatre and it still wins; at seed 42 alone FJORD gives ARM A 16 against ARM B 15, which is one draw from a distribution whose interval does not touch zero. **Quote the interval, not the seed.**
 
-Full method, per-theatre effect sizes and the reproduction commands: [`Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`](Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md). Every figure above was re-measured on the shipped v6.5 engine.
+Full method, per-theatre effect sizes and the reproduction commands: [`Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`](Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md). Every figure above was re-measured on the current shipped engine.
 
 ---
 
@@ -83,7 +83,7 @@ Everything needed to run the system, verify its numbers and read the case for it
 | [`START-HERE.md`](START-HERE.md) | The orientation document: how to run it, the first five minutes, what to test, and what is deliberately not claimed. Read this one first. |
 | [`CHECKSUMS-REPO.txt`](CHECKSUMS-REPO.txt) | SHA-256 of every tracked file at its path in this repository. |
 
-**Repository weight: ~183 MB, 255 files.** Nothing approaches GitHub's 50 MB per-file warning; the largest tracked file is `app/vendor/duckdb/duckdb-eh.wasm` at 34.0 MB. **Git LFS is deliberately not used** — LFS stores pointer text at the file's path, and a reviewer who downloads a ZIP of an LFS repository gets an application that does not run, with no error explaining why. The reasoning is in [`Documentation/GITHUB-PREP.md`](Documentation/GITHUB-PREP.md), decision 5.
+**Current tracked tree: 291 files totaling approximately 192.4 MiB, measured 9 September 2026.** Nothing approaches GitHub's 50 MB per-file warning; the largest tracked file is `app/vendor/duckdb/duckdb-eh.wasm` at 34.0 MB. **Git LFS is deliberately not used** — LFS stores pointer text at the file's path, and a reviewer who downloads a ZIP of an LFS repository gets an application that does not run, with no error explaining why. The reasoning is in [`Documentation/GITHUB-PREP.md`](Documentation/GITHUB-PREP.md), decision 5.
 
 ---
 
@@ -93,10 +93,10 @@ Five things run. All five are in `app/`, all five are served by the same launche
 
 | Artifact | Path served | What it is |
 |---|---|---|
-| **Operations console** | `/` → [`app/index.html`](app/index.html) | The design build. Thirteen destinations down the left rail, four role profiles, the answer on the first screen. This is what opens when you double-click the binary. |
+| **Operations console** | `/` → [`app/index.html`](app/index.html) | The design build. Fourteen destinations down the left rail, four role profiles, the answer on the first screen. This is what opens when you double-click the binary. |
 | **Analyst console** | `/console.html` → [`app/console.html`](app/console.html) | The full analyst shell: the DuckDB SQL console, the doctrine retrieval view over the complete 161-passage corpus, and the raw engine panes. |
-| **Design build** | `/design.html` → [`app/design.html`](app/design.html) | An alternate shell over the same engine, byte-identical to `index.html` in this build. |
-| **Engine self-test** | `/selftest.html` → [`app/selftest.html`](app/selftest.html) | **118 assertions against the shipped engine**, in your own browser, offline, in under a second. Nothing is mocked. Last run: 118 passed, 0 failed. |
+| **Design build** | `/design.html` → [`app/design.html`](app/design.html) | A shipped alternate shell over the same engine. It is maintained separately from `index.html`; do not assume the two files are byte-identical. |
+| **Engine self-test** | `/selftest.html` → [`app/selftest.html`](app/selftest.html) | Offline checks against the shipped engine and host UI, including determinism, common random numbers, scenario coverage, the War Game path and standalone RESUPPLY TRACK behavior. Nothing is mocked; read the live summary rather than a copied total. |
 | **Telemetry emitter** | `cotsim-*` | Not served — a separate binary. Emits Cursor on Target over UDP at a configurable device count and rate, so the ingest path is driven from outside the program. |
 
 Two decks and two films ship alongside them:
@@ -166,7 +166,9 @@ Works, and serves `.wasm` with the correct MIME type on Python 3.11+. You lose t
 ### Verifying the claims
 
 ```bash
-# 118 assertions against the shipped engine — open in the browser with a server running
+
+
+# Run the offline engine and host-UI coverage; use its live summary.
 open http://127.0.0.1:8787/selftest.html
 
 # Re-derive the seven-theatre win table from the same engine files.
@@ -194,9 +196,13 @@ shasum -a 256 -c CHECKSUMS-REPO.txt
 
 Watch the INGEST chip go LIVE. Then **stop the emitter**: the chip goes LINK STALE after six seconds and LINK DOWN after fifteen, and the tasking layer carries on using the last reading it holds. That behaviour is the concept.
 
+Device names are deliberately precise here: **Sempulse Halo (example), CipherOx CRI M1 (reference). BATDOK-J is separate, and is only a plausible producer/interface for a translated feed.** ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1 or BATDOK-J. Nothing here claims compatibility, military fielding, FDA status or a completed integration. The exercised source is `cotsim`, speaking the prototype's non-ratified medical CoT extension.
+
 ### Optional: the Mission brief prose pane
 
-One pane's second half uses a small language model this repository **does not redistribute**. `./get-model.sh` (or `.\get-model.ps1`) fetches Qwen2.5-0.5B-Instruct — Apache-2.0, ~400 MB — into `app/models/llm.gguf`, once, over the internet. If you do not run it nothing breaks: the pane says the model is not installed and still shows every figure and every doctrinal passage it would have used. See [`GET-MODEL.md`](GET-MODEL.md).
+Ask ANGEL does **not** require Qwen. Its run-state answers are computed, its doctrine answers quote retrieved passages verbatim, and its refusal rules remain available in the normal no-language-model build.
+
+Qwen2.5-0.5B-Instruct is an optional dependency only for the generated prose in the second half of the **Mission brief** pane. This repository does **not redistribute** those weights. `./get-model.sh` (or `.\get-model.ps1`) fetches the Apache-2.0, ~400 MB GGUF into `app/models/llm.gguf`, once, over the internet. If you do not run it nothing breaks: the pane says the model is not installed and still shows every figure and every doctrinal passage it would have used. See [`GET-MODEL.md`](GET-MODEL.md) for installation, offline-use, verification and removal instructions, and [`app/models/README.md`](app/models/README.md) for the model inventory.
 
 ---
 
@@ -204,7 +210,7 @@ One pane's second half uses a small language model this repository **does not re
 
 ```
   ┌────────────────────────────────────────────────────────────────────────┐
-  │  cotsim / a real wearable feed                                         │
+  │  cotsim / a prospective wearable or edge feed                          │
   │      Cursor on Target over UDP, medical values in a <detail> extension │
   └───────────────────────────────┬────────────────────────────────────────┘
                                   │  receive-only · off by default · loopback
@@ -279,7 +285,7 @@ Four role profiles change what the interface offers you on arrival — never wha
 
 **Human on the loop, not in the way.** A person is asked before a sortie launches whenever the system is not confident. Everything else launches under standing authority — and every decision is written down.
 
-**The comparison follows you.** An ANGEL SWARM figure never appears in this application without the CURRENT — TRIAGE & PROXIMITY figure beside it, at the same size — under twelve screen titles and on the navigation rail, whatever destination is open. Before the comparison is readable it says so in words rather than printing a number it cannot stand behind.
+**The comparison follows you.** An ANGEL SWARM figure never appears in this application without the CURRENT — TRIAGE & PROXIMITY figure beside it, at the same size — under thirteen screen titles and on the navigation rail, whatever destination is open. Before the comparison is readable it says so in words rather than printing a number it cannot stand behind.
 
 ---
 
@@ -289,7 +295,7 @@ Four role profiles change what the interface offers you on arrival — never wha
 
 **The layer below — the airframes already exist and already fly themselves.** In May 2026 the 44th Medical Brigade, XVIII Airborne Corps, completed an operational validation of autonomous Class VIII aerial resupply using Soaring M25 aircraft. The aircraft are autonomous and fielded; the rule that decides which aircraft flies to which casualty is bought by no program in the portfolio. NAVAIR PMA-263 fields the TRV-150 through the Unmanned Logistics Systems–Air line, and the Marine Corps TRUAS variant has reached initial operational capability; its published behaviour is automated launch, waypoint navigation, automated landing and payload release. It flies the mission it is given. ANGEL SWARM produces the mission it is given. This system's airframe parameters are set **at or below** published performance for the TRV-150C, the Soaring M25 and the FVR-90 — it does not assume a better aircraft than the one that exists.
 
-**The layer beside — sensing and documentation is being competed now.** DIU announced the AI-Assisted Triage and Treatment Tool on 25 February 2026 (PROJ00628); its stated scope is digital triage, patient assessment and documentation, and it does not buy allocation or tasking of evacuation and resupply assets. ANGEL SWARM consumes what that program produces and produces an aircraft assignment — two adjacent buys, zero overlap. TATRC's MEDRAS portfolio funds autonomous transport, documentation and treatment across sixteen projects; **allocation is not a category in that portfolio.** Project Crimson demonstrated refrigerated FVR-90 whole-blood delivery to field medics at Project Convergence 2022, with BATDOK at the medic edge — prior art this work builds on, and four years old.
+**The layer beside — sensing and documentation is being competed now.** DIU announced the AI-Assisted Triage and Treatment Tool on 25 February 2026 (PROJ00628); its stated scope is digital triage, patient assessment and documentation, and it does not buy allocation or tasking of evacuation and resupply assets. ANGEL SWARM consumes what that program produces and produces an aircraft assignment — two adjacent buys, zero overlap. TATRC's MEDRAS portfolio funds autonomous transport, documentation and treatment across sixteen projects; **allocation is not a category in that portfolio.** Project Crimson demonstrated refrigerated FVR-90 whole-blood delivery to field medics at Project Convergence 2022, with BATDOK at the medic edge — historical prior art, not evidence of an ANGEL SWARM integration with BATDOK-J.
 
 **The layer above — the host is already designated.** On 9 March 2026 the Deputy Secretary of Defense designated the Maven Smart System a program of record and moved its administration to the CDAO MSS Program Office; the FY27 request funds third-party vendors to develop and field applications on MSS. ANGEL SWARM is an application for that pipeline, not a parallel C2 system, and Open DAGIR's OTA mechanism is the named path for onboarding an outside capability without owning the data beneath it. CDAO's Agent Network, announced June 2026, is architecturally the same object: bounded agents that deliver decision options to a commander in seconds and make no targeting or strike decisions. Its published operating partners are EUCOM, INDOPACOM and SOUTHCOM, and its published use cases do not include medical logistics. **ANGEL SWARM is an Agent Network-class capability for the medical lane** — a lane to be filled, not a program to be displaced.
 
@@ -309,6 +315,7 @@ Four role profiles change what the interface offers you on arrival — never wha
 Honest boundaries, stated here so no reviewer has to find them.
 
 - **CoT is ingested, not emitted.** The telemetry listener is receive-only, off by default, and bound to loopback unless explicitly opened. It adds a track consumer, not a new interface. An emit path is the obvious next step and is not claimed today.
+- **No named-device integration is claimed.** Sempulse Halo (example), CipherOx CRI M1 (reference). BATDOK-J remains a separate plausible producer/interface. No integration with any real one of them has been tested; compatibility, military fielding, FDA status and completed integration are not claimed.
 - **CRI-Net's estimate does not reach the allocator in this build.** The deadlines the tasking runs on come from the scenario's own physiology model. The Sensor & Model screen says so, and closing that loop is named in the documents as the next piece of work.
 - **The exported health resources are FHIR-shaped, not conformance-tested,** and every exported resource carries that tag. The word "compliant" is not used anywhere.
 - **STANAG 4586 is a target interface, not an implemented one.**
@@ -324,11 +331,11 @@ Sources, with a URL and a date for every claim above: [`Documentation/COMPLEMENT
 ## Engineering notes
 
 - **Zero runtime dependencies in the launcher.** `src/go.mod` declares no requirements. The binary is `embed` plus the standard library. It builds offline on Go 1.24 in seconds.
-- **Everything the browser needs is vendored.** DuckDB-WASM, ONNX Runtime Web, wllama, deck.gl, ECharts, CodeMirror and µPlot sit in `app/vendor/` at the exact files the application loads. `node_modules/` is not in this repository and is not needed to run it.
+- **Everything the browser needs is vendored.** DuckDB-WASM, ONNX Runtime Web, wllama, deck.gl, ECharts, CodeMirror and µPlot sit in `app/vendor/` at the exact files the application loads. `node_modules/` is not in this repository and is not needed to run it. The Mission brief loads the vendored wllama WebAssembly runtime dynamically only when the optional local `app/models/llm.gguf` is present; there is no separate runtime package to install and no page-level library setup to add.
 - **The globe is Canvas 2-D, not WebGL, on purpose.** It holds no graphics context, so it cannot be the thing that evicts one of the two contexts the tactical maps do hold.
 - **The engine is loaded verbatim by four different callers** — the self-test page, the Monte Carlo worker, the design adapter and `winprob.mjs`. There is no harness variant of the simulation that could quietly disagree with the shipped one.
 - **The decision log is hash-chained**, and the self-test asserts both the chain and its tamper-evidence.
-- **Reproducibility of the binaries was measured, not assumed.** A Go 1.24.7 rebuild produced a launcher within 1.0% of the shipped linux-x64 size and a `cotsim` within 2.4%; the rebuilt launcher served `app/`, the application booted with zero page errors and the self-test returned 118 passed / 0 failed. They are not byte-identical to the shipped binaries because Go embeds build metadata — expected, and recorded in [`Documentation/GITHUB-PREP.md`](Documentation/GITHUB-PREP.md) §2.1.
+- **Reproducibility of the binaries was measured, not assumed.** A historical Go 1.24.7 rebuild produced a launcher within 1.0% of the shipped linux-x64 size and a `cotsim` within 2.4%; the rebuilt launcher served `app/`, the application booted with zero page errors. That dated result is retained as historical evidence rather than represented as the current self-test total. Rebuilds are not byte-identical to shipped binaries because Go embeds build metadata — expected, and recorded in [`Documentation/GITHUB-PREP.md`](Documentation/GITHUB-PREP.md) §2.1.
 - **Known open defect in the drawing layer.** The instrumented network verification run records 22 console errors, all of them unsubstituted template expressions painted into SVG attributes (`{{ z.x }}`, `{{ b.rx }}` and similar). They do not affect any figure and do not reach the engine, but they are real and they are in [`Documentation/verification/security-and-sbom/verification.md`](Documentation/verification/security-and-sbom/verification.md) rather than buried.
 - **`Documentation/winprob.mjs` and `Documentation/verification/winprob.mjs` are byte-identical.** The `verification/` copy is the documented one.
 
@@ -352,7 +359,7 @@ Four steps, one loop, all of it on the endpoint.
 
 | | Step | What happens | Where |
 |---|---|---|---|
-| **01** | **SENSE** | Compensatory reserve arrives off a wearable, carried on Cursor on Target — the feed TAK and ATAK already move. No reachback required. | `app/js/telemetry.js`, `src/cmd/angelswarm/telemetry.go` |
+| **01** | **SENSE** | Compensatory reserve can arrive from a prospective wearable or edge producer, carried on Cursor on Target. The prototype receives its documented extension; it does not establish that a named device emits it. No reachback required. | `app/js/telemetry.js`, `src/cmd/angelswarm/telemetry.go` |
 | **02** | **PREDICT** | CRI-Net reads five seconds of photoplethysmogram at 100 Hz and estimates when the body can no longer compensate — and **declines to answer** when the signal is too poor to trust. Held-out MAE 0.069 against 0.159 for heart rate alone, on 70 subjects in no training window. | `app/models/ppg_cri.onnx`, `app/angel-ppg.js` |
 | **03** | **TASK** | The deadline sets the order: whoever runs out first is served first. Payload matched to the wound, cold chain enforced, a person asked only when the system is not confident. | `app/js/optimizer.js` |
 | **04** | **PROVE** | The same battle is fought twice — once this way, once the way it is done today, same casualties, same aircraft, same seed — and scored on one number: dead of wounds that could have been survived. | `app/js/sim.js`, `app/js/mc.worker.js` |
@@ -363,7 +370,7 @@ The reason this is fast is that none of it leaves the machine. There is no infer
 
 ## Module operating manual
 
-Thirteen destinations run down the left rail. Two of the thirteen carry an AI mark; the other eleven do not, and that is what makes the mark mean something.
+Fourteen destinations run down the left rail. Two of the fourteen carry an AI mark; the other twelve do not, and that is what makes the mark mean something. **Resupply Tracking** is a standalone synthetic capability demonstration with immutable tracker-only fixtures and a deterministic clock. It does not call a model, read or project engine tasking, scenarios, casualties, host playback, run snapshots, fleet history or Arm B ledgers, alter an assignment, or change an outcome.
 
 | # | Destination | What it does |
 |---|---|---|
@@ -373,19 +380,26 @@ Thirteen destinations run down the left rail. Two of the thirteen carry an AI ma
 | 4 | **Decisions** | The hash-chained decision record — what was tasked, why, and under whose authority. |
 | 5 | **Analyst Terminal** | DuckDB SQL console over the run, plus the doctrine view. |
 | 6 | **Sensor & Model** *(AI)* | CRI-Net's card: parameters, validation, the uncertainty channel and the refusal behaviour. Also states plainly that its estimate does not reach the allocator in this build. |
-| 7 | **Ops Center Wall** | The result as a board, readable across a room. |
-| 8 | **Evidence** | Where the deaths that remain came from. |
-| 9 | **War Game** | Five-lever paired Monte Carlo with common random numbers. Reports the confidence interval **and** the number of replications where the system did worse. |
-| 10 | **Ask ANGEL** *(AI)* | Answers questions about the run from the run's own record, badged `RUN RECORD · COMPUTED, NOT GENERATED`; quotes doctrine verbatim; and where it can do neither, says so and lists what it can be asked instead. |
-| 11 | **Authority & Policy** | The policy argument, the films, and the DoDD 3000.09 exclusion in its own words. |
-| 12 | **Data Sources** | Every model's parameters, validation, file path and licence, read from the models' own metadata; the named list of what is **not** a model; and the ten data-product exports. |
-| 13 | **Settings** | Scenario, role, display, the guided walkthrough (off by default) and the engine self-test. |
+| 7 | **Resupply Tracking** | A standalone synthetic capability demonstration with immutable tracker-only commitments, nominal phases plus diverted, aborted, lost, deadline-miss, cold-chain-failure and delivered fixtures, deterministic seek, play/pause, tracker-owned normal/8× playback toggle (`SPEED ×8` / `SPEED ×1`), reroute and exception controls, a synthetic margin-sorted queue, Canvas 2D schematic and Arm B scheduled-push comparison state. The speed toggle changes only the tracker's deterministic clock, never host playback or engine state. Names, times, routes and payloads are synthetic fixtures and cannot be treated as operational output. It does not project engine state or modify outcomes. `Send to medic's ATAK` opens an informational, future-only modal; the page makes no request and emits nothing. |
+| 8 | **Ops Center Wall** | The result as a board, readable across a room. |
+| 9 | **Evidence** | Where the deaths that remain came from. |
+| 10 | **War Game** | Opens on the selected operation/scenario and its force assumptions. Sweep fleet size, launch points, datalink outage, triage error, or responder qualification/mix (the qualified receiver on scene, not rank/MOS) over 20, 30 or 40 paired battles per setting, using deterministic seeds from 1000. Results report the paired gap, 95% CI and better/tied/worse record. |
+| 11 | **Ask ANGEL** *(AI)* | Works without Qwen: answers questions about the run from computed run state, badged `RUN RECORD · COMPUTED, NOT GENERATED`; retrieves and quotes doctrine verbatim; and applies refusal rules where it can do neither, listing what it can be asked instead. Optional Qwen generation belongs to Mission brief, not this chatbot. |
+| 12 | **Authority & Policy** | The policy argument, the films, and the DoDD 3000.09 exclusion in its own words. |
+| 13 | **Data Sources** | Every model's parameters, validation, file path and licence, read from the models' own metadata; the named list of what is **not** a model; and the ten data-product exports. |
+| 14 | **Settings** | Scenario, role, display, the guided walkthrough (off by default) and the engine self-test. |
 
 `Ctrl-K` (`Cmd-K`) searches every view, every action, every casualty and the doctrine library. `?` lists the keyboard shortcuts.
+
+**War Game operating contract.** Select the operation in Settings or on the map, choose nominal published platform timing or observed-flight variability, open War Game, choose one lever, include at least two of its displayed scenario-derived settings, and choose a supported battle count before running the sweep. The setting cards are the actual planner controls: they show the airframe counts, launch-point counts, outage durations, error rates, or responder mixes that will be tested. Each included setting alters one shared world before either arm is built; both arms receive the same altered casualty, force, stock and random inputs. Triage error is the deliberate exception: it changes only **CURRENT — TRIAGE & PROXIMITY**, because ANGEL SWARM does not consume triage category. Declared method differences remain visible: ANGEL SWARM has telementoring and ANGEL-only in-flight abort/hold logic; CURRENT — TRIAGE & PROXIMITY does not.
+
+Progress is completed paired battles, not an estimate. Successful completion terminates the pool and publishes the full study. Cancel, scenario changes, load failures, the worker handshake timeout, protocol mismatch and runtime errors terminate every worker, discard every partial row and publish no finding. A completed result is bound to the operation/scenario, lever, included settings, seed range, variability mode and control mode; changing scenario or variability invalidates it and regenerates the labels. To reproduce a result, restore those displayed inputs and included setting cards, select the displayed 20/30/40 count (seeds 1000 through 1000 + count − 1), and run the same lever again.
 
 ---
 
 ## Provenance and AI marking
+
+> **Repository authorship disclosure:** Of the original ANGEL SWARM solution, **15% was created with Replit and 85% was self-created by the initial originator, Junayd S. Park**. This statement describes creation of the project’s original solution only. It does not attribute authorship of vendored libraries, models, fonts, data, or any other third-party component to Replit or to Junayd S. Park; those components retain their own provenance, authorship, and licences as recorded in the SBOM.
 
 The standing rule on this project is that **what is presented must be true**, and the interface enforces it structurally: every figure a calculation produced carries **exactly one** mark, and the two marks are never allowed to blur.
 
@@ -404,7 +418,7 @@ Nothing that is not a set of learned weights may borrow the AI styling. Only fou
 | Licence | **NOASSERTION** — trained in this repository, no licence file written | **Apache-2.0** |
 | Provenance | Synthetic cohort. Waveform morphology follows the published response of the peripheral pulse to central volume loss; no patient data was used. | Obtained via npm `@lat.md/embed-minilm-fp16`, then converted and dynamically quantised to int8 here — **not** from huggingface.co, which was unreachable from the build sandbox. That package is not in `package-lock.json`, so its integrity hash cannot be produced from this repository. **An open supply-chain item.** |
 
-No language model is loaded in the shipped build, so nothing in the interface is generated prose — every figure is computed from the run's own state. The optional Qwen fetch is the one exception and it is opt-in, marked, and not redistributed here.
+No language model is loaded in the shipped build, so nothing in the interface is generated prose — every figure is computed from the run's own state. Ask ANGEL still provides its computed run-state answers, refusal rules and retrieved doctrine quotations. The optional Qwen2.5-0.5B-Instruct fetch is the one exception: it enables marked Mission brief prose, is opt-in, and is not redistributed here.
 
 **One thing we would rather tell you than have you find.** On two surfaces — Analyst Terminal → DOCTRINE, and Ask ANGEL's doctrine answers — the similarity score shown is produced by term overlap over an eleven-passage inline reference set, and the badge above it names the sentence encoder. The encoder is real, it ships, and it does run the doctrine view in `app/console.html` over the full 161-passage corpus — but not those two panels. The score is honest and its floor was measured; the label names the wrong machine. It is recorded as **R-11** in the security document.
 
@@ -420,13 +434,27 @@ The full assessment is [`Documentation/ANGEL-SWARM-SECURITY-AND-ATO.md`](Documen
 
 | Property | Measurement |
 |---|---|
-| **Zero egress** | Instrumented runs record **zero off-origin requests** across all thirteen destinations and all four map scales. No tile server, no basemap key, no font CDN, no telemetry beacon, no analytics. |
+| **Zero egress** | The preceding thirteen-destination release recorded **zero off-origin requests** across every destination and all four map scales. Resupply Tracking is built without a request path; the fourteen-destination release check remains the authority for the combined surface. No tile server, no basemap key, no font CDN, no telemetry beacon, no analytics. |
 | **One socket** | With no `-cot` flag the launcher opens exactly one: the loopback HTTP port on 127.0.0.1. It never originates an outbound request. Unplug the network and behaviour is identical. |
 | **Receive-only ingest** | The CoT listener parses and never replies. Datagrams over 8192 bytes are dropped unread. It binds 127.0.0.1 unless `-cot` **and** `-cot-external` are both passed — two flags, not one. |
 | **No filesystem reach** | Nothing is written outside the folder you copied. Nothing is installed. No registry key, no launch agent, no service. |
 | **Browser storage** | Audited. The application holds no credential and no persistent identity. |
 | **Supply chain** | Every shipped component hashed off disk and graded in a CycloneDX 1.6 SBOM, validated with `ajv` against the CycloneDX project's own schema. |
 | **Tamper-evidence** | The decision record is SHA-256 hash-chained, and the self-test asserts that breaking the chain is detected. |
+
+
+### Resupply Tracking does not widen that boundary
+
+The tracker owns immutable synthetic fixtures and its own deterministic clock. Its theatre
+sketch is Canvas 2D, uses no map service, and adds no dependency, socket or request.
+The ATAK control is deliberately informational and future-only: **no BATDOK-J, ATAK,
+TAK Server, Marti REST or CoT-emission integration exists, and nothing is transmitted.
+CoT is ingested, not emitted.** All tracker names, times, routes and payloads are
+synthetic demonstration fixtures and cannot be treated as operational output. A
+future outbound delivery event would be a new external interface and trust boundary,
+would expose casualty location and aircraft intent as targeting data, and would require
+deployment-specific endpoint validation, mutual authentication, replay/staleness
+controls, authorization, audit and an EMSEC decision before fielding.
 | **Secrets** | The tree was scanned for API keys, access and bearer tokens, passwords, PEM private-key headers, AWS key IDs, Slack `xox*` and GitHub `ghp_*` tokens, and OpenAI `sk-*` tokens. **No credential, key, token or secret was found.** Two `AKIA`-shaped matches are coincidental substrings inside base64 payloads (`app/data/doctrine.json`, `app/js/sqlwasm.js`) and are documented as false positives. No personal or organisational email address appears anywhere in the source or documents. |
 
 ### What is open — the risk register
@@ -453,7 +481,7 @@ Full analysis: [`Documentation/ANGEL-SWARM-IL5-deployment-cost-impact-analysis.m
 **Prepared for:** DHA / PACOM J4 program leadership, comptroller, and the supporting ISSM
 **Decision sought:** Go / no-go and budget approval for fielding out of the single-folder prototype configuration into a DoW Cloud Computing SRG **Impact Level 5** environment as an **MVP**, hosted as a capability inside an already-authorised platform
 **Classification ceiling priced:** CUI, **including PHI**, on IL5. IL6 (SIPR / Secret) is explicitly out of scope
-**Date:** September 2026, revised against the shipped v6.5 build on 8 September 2026
+**Date:** September 2026, revised for repository v1.1 on 9 September 2026
 
 ### The four MVP levers
 
@@ -501,12 +529,19 @@ DoDI 8510.01 · DoD Cloud Computing SRG · NIST SP 800-37, 800-53 Rev. 5, 800-17
 
 ## Scope, honestly
 
+The Resupply Tracking destination changes no number. It displays standalone
+synthetic tracker-only fixtures — not an existing tasking decision or casualty
+clock; **23 against 34 is produced by allocation, not by the display.** It does
+not model medic behaviour and no improvement in outcome is attributed to tracking.
+The reference result remains **23 / 34 / 35 survivable deaths on 20 / 38 / 0
+sorties** at seed 42, PACOM CORAL, deployed.
+
 - **This is a hackathon prototype on synthetic data.** The casualty stream is generated by `createWorld(seed)` from a seeded PRNG. No real casualty, unit or operation appears anywhere.
 - **It has never processed protected health information,** and none of the privacy, clinical-governance or records-retention work that PHI would trigger has begun.
 - **It is not accredited.** No ATO, no IATT, no interim authorisation of any kind.
 - **It is not clinically validated.** The physiological deadline model is a demonstration model traceable to published Joint Trauma System guidance; it is not clinical authority and is not a basis for treatment or flight decisions.
 - **The doctrine passages are summaries written for this prototype** with their source publications named. They are not extracts, and operational use requires the actual publication.
-- **The Monte Carlo reports the number of replications where the system did worse**, because that number is the one worth knowing. Six of 1,400, never by more than one, four of the six in EUCOM FJORD — which still wins on its interval. Seed 42 in FJORD is one of the six and it is left in the scenario list rather than hidden.
+- **The Monte Carlo reports the number of replications where the system did worse**, because that number is the one worth knowing. Five of 1,400, never by more than one, three of the five in EUCOM FJORD — which still wins on its interval. Seed 42 in FJORD is one of the five and it is left in the scenario list rather than hidden.
 
 ---
 
@@ -517,7 +552,9 @@ DoDI 8510.01 · DoD Cloud Computing SRG · NIST SP 800-37, 800-53 Rev. 5, 800-17
 | [`app/`](app/) | **The application.** Everything the launcher serves. |
 | [`app/index.html`](app/index.html) | The single-page console. `console.html` and `design.html` are alternate shells. |
 | [`app/js/`](app/js/) | Engine and interface modules. `sim.js` and `optimizer.js` are the simulation core the self-test and `winprob.mjs` load verbatim. |
-| [`app/selftest.html`](app/selftest.html) | 118 assertions against the shipped engine. |
+| [`app/selftest.html`](app/selftest.html) | Offline engine and host-UI checks with a live summary; coverage includes determinism, common random numbers, scenarios, War Game worker behavior and RESUPPLY TRACK. |
+| [`app/js/resupply-track.js`](app/js/resupply-track.js) | Standalone synthetic tracker fixtures, deterministic clock and route-stage display. |
+| [`app/angel-resupply-track.js`](app/angel-resupply-track.js) | Shell adapter for the Resupply Tracking destination; no transmission or new trust boundary. |
 | [`app/css/`](app/css/), [`app/fonts/`](app/fonts/) | Four themes; eleven vendored woff2 faces so no paint reaches `fonts.googleapis.com`. |
 | [`app/models/`](app/models/) | CRI-Net and MiniLM ONNX, with model cards beside them. |
 | [`app/vendor/`](app/vendor/) | Vendored runtime: DuckDB-WASM, ONNX Runtime Web, wllama, deck.gl, ECharts, CodeMirror, µPlot. |
@@ -535,7 +572,7 @@ DoDI 8510.01 · DoD Cloud Computing SRG · NIST SP 800-37, 800-53 Rev. 5, 800-17
 
 ### Differences from the v6.5 package
 
-This repository is the v6.5 package, restructured and renumbered for publication as v1.0. **No application logic was modified** — the only edits inside files the application loads are comments and one label in the dependency table. The changes are:
+This repository began as the v6.5 package, restructured and renumbered for publication as v1.0. Repository v1.1 adds the documented Resupply Tracking destination while preserving the frozen engine and explicit no-outbound-interface boundary. The original publication changes were:
 
 | Change | Why |
 |---|---|

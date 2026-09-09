@@ -1,6 +1,6 @@
 # Doctrinal terminology audit
 
-**ANGEL SWARM — Version 1.0 · 8 September 2026.** First issued 8 September 2026; adoption record added 8 September 2026; occurrence counts re-measured against the shipped build on 8 September 2026, and re-measured again the same day after the analyst console was swept — see §4a.
+**ANGEL SWARM — Version 1.1 · 9 September 2026.** First issued 8 September 2026; resupply-tracking terms added 9 September 2026. The adoption record and occurrence counts below retain their original measurement dates — see §4a.
 Prepared for a terminology overhaul of the solution, its documents and its film.
 **This document is authoritative for naming across the application, every
 shipped document and both films.** §4a records what was actually adopted, and
@@ -139,7 +139,7 @@ missions."*
 | Class VIII (for blood) | **Imprecise** | **Class VIIIB** | DoDI 5101.15, eff. 29 Sep 2023, Sec 1.1 |
 | "cold chain" (85 occurrences) | **Not doctrinal vocabulary** | "1–6 °C storage requirement"; the container is the **Golden Hour Container** | Not found in DoDI 6480.04, AFI 44-105, ATP 4-02.1, FM 4-02.1, JTS CPG 21, JTS CPG 82 |
 | Golden Hour (as capability authority) | **Misapplied** | Keep as *problem framing only* — it is a 60-minute **evacuation** mandate | 2009 SecDef mandate, via Kotwal, *JAMA Surg* 2016;151(1):15–24 |
-| CRI | **Product term, not the Army term** | **CRM — Compensatory Reserve Measurement** for the physiology; keep CRI only when naming the FDA-cleared device | Convertino et al., *Mil Med* 2025;190(Suppl 2):371–378 |
+| CRI | **Product term, not the Army term** | **CRM — Compensatory Reserve Measurement** for the physiology; keep CRI only when naming **CipherOx CRI M1 (reference)** | Convertino et al., *Mil Med* 2025;190(Suppl 2):371–378 |
 | "nobody could administer" | **Sound, but do not attribute the gate to rank or MOS** | Gate is the **Unit Medical Director** under local protocol | JTS CPG ID 82, 30 Oct 2020 |
 
 ### 4a. What was actually adopted, and why one recommendation was overruled
@@ -188,6 +188,20 @@ names."* That is both accurate and harder to argue with.
 ---
 
 ### Definitions to adopt verbatim
+
+**Resupply track** — a standalone, time-indexed synthetic demonstration of
+tracker-owned commitments: phase, route, estimate, deadline and delivery state.
+It is not a projection of engine tasking, scenarios, casualties, host playback,
+run snapshots, fleet history or Arm B ledgers; it is not flight control, shipment
+custody, operational output or a new allocation decision.
+
+**Tasked · Rigging · Launched · In transit · Terminal · Delivered** — the six display phases used by the tracker. They are application state labels, not claimed as doctrinal terms. **Terminal** means the final approach/delivery segment; it does not mean the casualty's clinical state and must not be used without that context.
+
+**Margin** — physiological deadline minus recomputed time to delivery, displayed as a signed duration and never clamped at zero. It operationalizes the time-to-blood urgency supported by JTS Clinical Practice Guideline ID 18; the arithmetic and the phase names are product conventions, not quotations from that guideline.
+
+**DTG** — date-time group. On this synthetic demonstration it identifies the
+displayed synthetic fixture time; it is not evidence of an operational message,
+run record or transmission.
 
 **Class VIIIA** — "Medical consumable supplies not including blood and blood
 products." (DoDD 5101.09E, 29 Sep 2015 w/ Ch 2)
@@ -270,6 +284,11 @@ normal vital signs"* (Convertino et al., *Mil Med* 2025).
 - **Do not present "speedball" as doctrine.** It appears undefined and
   parenthetically in JTS CPG ID 91 (*"Blood resupply/Speedball"*) and in no ATP
   or FM.
+- **Do not call Arm B tasking a scheduled push.** The frozen engine's CURRENT —
+  TRIAGE & PROXIMITY method remains casualty-triggered. Resupply Tracking has a
+  standalone synthetic scheduled-push comparison fixture for Arm B; that fixture
+  is not engine-derived, is not a ledger event, and is not an Arm B per-casualty
+  commitment or a reclassification of the comparator.
 - **Do not present "platinum ten minutes" as US military doctrine.** Civilian
   EMS lineage; absent from TCCC guidelines and JTS CPGs.
 - **Do not state that blood administration requires TCCC Tier 3 or above.** No
@@ -278,15 +297,20 @@ normal vital signs"* (Convertino et al., *Mil Med* 2025).
   the Unit Medical Director under local protocol — which means "can administer"
   is a *local* property, not a fixed property of a role. The model simplifies
   here and should say so.
-- **Do not describe CRM/CRI as fielded or accepted.** Honest wording: *an
-  FDA-cleared, USAISR-developed monitoring technology under active Army field
-  evaluation*. It appears in no JTS CPG and not in the TCCC Guidelines of
+- **Do not describe CRM/CRI as fielded or accepted.** **CipherOx CRI M1 is the
+  reference device** for the compensatory-reserve concept in this package,
+  not an ANGEL SWARM component or an integration. It appears in no JTS CPG and
+  not in the TCCC Guidelines of
   01 May 2026, whose shock trigger remains *"altered mental status in the
   absence of brain injury and/or weak or absent radial pulse."*
-- **The FDA clearance is narrow.** 510(k) K173929, CipherOx CRI M1, Flashback
-  Technologies, 24 July 2018 — indicated for *"adults (19-36 years old) in the
-  supine position under non-motion conditions and without cardiovascular
-  disease."*
+- **Keep the device roles separate.** **Sempulse Halo (example)** is a wearable
+  source; **CipherOx CRI M1 (reference)** anchors the compensatory-reserve
+  concept; **BATDOK-J** is the plausible producer/interface. ANGEL SWARM has
+  not tested an integration with any real Sempulse Halo, CipherOx CRI M1, or
+  BATDOK-J. Do not turn those names into a compatibility, military-fielding,
+  regulatory-status, or completed-integration claim. The receive-only CoT
+  listener is off by default, and its prototype medical detail extension is
+  not a ratified profile.
 - **TCCC's first phase is now "Care Under Fire/Threat"**, per the TCCC
   Guidelines of 01 May 2026. Plain "Care Under Fire" is dated.
 
@@ -336,5 +360,4 @@ Blood Transfusion*, 30 Oct 2020 · JTS CPG ID 91 *Prolonged Casualty Care*,
 Surg* 2016;151(1):15–24 · Eastridge et al., *J Trauma Acute Care Surg*
 2012;73(6 Suppl 5) · Convertino et al., *Mil Med* 2025;190(Suppl 2):371–378 ·
 Jenkins et al., *Shock* 2014;41 Suppl 1:3–12 · Jenkins, Robbins & Lunday, *Ann
-Oper Res* 2018;271:641–678 · FDA 510(k) K173929, 24 Jul 2018 · DTIC AD1133454 ·
-DTIC AD1088639
+Oper Res* 2018;271:641–678 · DTIC AD1133454 · DTIC AD1088639

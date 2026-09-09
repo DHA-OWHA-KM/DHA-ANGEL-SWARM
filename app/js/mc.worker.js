@@ -192,6 +192,8 @@ function replicate(cfg) {
   const a = A.stats, b = B.stats;
   PARAMS.START_SENSITIVITY = _sens; PARAMS.START_OVERTRIAGE = _over;
   return {
+    scenario: cfg.scenario,
+    lever: cfg.lever,
     seed: cfg.seed,
     value: cfg.value == null ? null : cfg.value,
     observedFlightVariability: !!cfg.observedFlightVariability,

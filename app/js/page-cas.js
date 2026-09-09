@@ -41,9 +41,8 @@
   const S = { tab: 'CASUALTIES', grp: 'LOCATION', all: false };
 
   const WINDOW_MIN = 60;                       /* the width of the board      */
-  const BAR_MAX = 44;                          /* a bar stops here so the      */
-                                               /* marker and the note beside   */
-                                               /* it stay on the board         */
+  const BAR_MAX = 44;                          /* reserve a bounded annotation */
+                                               /* lane beside the timeline     */
   const STALE_MIN = 2;                         /* as page-dash reads it       */
   const CAP = 6;                               /* rows drawn per group        */
 
@@ -154,6 +153,10 @@
 
     return head + tabs + tiles + `<div class="pa-pad">${board(L, visibleOpen, rowById)}</div>`;
   };
+  /* The browser regression renders representative states through the same
+     function as the live board instead of maintaining a lookalike fixture. */
+  if (new URL(location.href).searchParams.get('casualty-layout-selftest') === '1')
+    window.DPAGES.cas.renderRow = row;
 
   function casualtyMatches(L, c, r) {
     const need = (c.needs || []).map(k => NEED[k] || k);
@@ -181,8 +184,10 @@
 
     const pend = pending(L).length;
     return `<div class="pa-board">
-        <div class="pa-ruler"><span>NOW</span><span>+10</span><span>+20</span>
-          <span>+30</span><span>+40</span><span>+50 MIN</span></div>
+        <div class="pa-ruler"><div></div><div class="pa-ruler-lanes">
+          <div class="pa-ruler-ticks"><span>NOW</span><span>+10</span><span>+20</span>
+            <span>+30</span><span>+40</span><span>+50 MIN</span></div><div></div>
+        </div></div>
         ${body || `<div class="pa-more" style="padding-left:26px">Nothing is open. No casualty is inside a deadline this system holds.</div>`}
         <div class="pa-foot">
           <span class="t">${hidden ? hidden + ' further ' + (hidden === 1 ? 'casualty' : 'casualties') + ' not drawn' : 'Every open casualty is drawn'}
@@ -294,11 +299,23 @@
 
   function track(L, c, r) {
     const esc = D().esc, MIN = D().MIN;
+    const layout = (bars, deadline, note, deadlineClass, noteClass) =>
+      `<div class="pa-bars">${bars}</div><div class="pa-meta">
+        ${deadline ? `<span class="pa-t${deadlineClass ? ' ' + deadlineClass : ''}">${deadline}</span>` : ''}
+        ${note ? `<span class="pa-note${noteClass ? ' ' + noteClass : ''}">${note}</span>` : ''}
+      </div>`;
+    const resolved = c.treated || c.outcome;
+    const resolution = () => [
+      c.treated ? 'treated' : 'untreated',
+      c.outcome === 'DIED' ? 'died' : c.outcome === 'SAVED' ? 'survived' : 'outcome pending'
+    ].join(' · ');
 
     /* No deadline in the simulation, so none is drawn. */
     if (!r) {
-      return `<div class="pa-bar dim" style="width:10%">
-        <span class="pa-note dim" style="left:calc(100% + 8px)">no deadline asserted &middot; not time-critical &middot; ${esc(c.cls)} triage</span></div>`;
+      return layout('<div class="pa-bar dim" style="width:10%"></div>', '',
+        `no deadline asserted &middot; not time-critical &middot; ${
+          resolved ? esc(resolution()) : `untreated &middot; ${esc(c.cls)} triage`}`,
+        '', c.outcome === 'DIED' ? 'bad' : 'dim');
     }
 
     const left = Math.max(0, r.left);
@@ -309,6 +326,12 @@
     const kind = expectant ? 'dim' : breach || left <= 20 ? 'red' : left <= 45 ? 'amb' : 'dim';
     const tCls = expectant ? '' : breach || left <= 20 ? 'bad' : left <= 45 ? 'warn' : '';
 
+    if (resolved) {
+      const died = c.outcome === 'DIED';
+      return layout(`<div class="pa-bar ${died ? 'red' : 'dim'}" style="width:${w}"></div>`,
+        `T-${Math.round(left)}`, esc(resolution()), died ? 'bad' : '', died ? 'bad' : 'dim');
+    }
+
     /* What is true about the reading, said as a reading and not as a policy. */
     const age = Math.round(L.now - c.tPinged);
     const tail = [];
@@ -316,10 +339,11 @@
     if (expectant) tail.push('outside the survivable cohort');
 
     if (r.unreachable) {
-      return `<div class="pa-bar ${expectant ? 'dim' : 'red'}" style="width:${w}">
-        ${wide ? `<span class="pa-inbar${expectant ? '' : ' bad'}">NO LAUNCH POINT REACHES THIS POSITION</span>` : ''}
-        <span class="pa-t ${tCls}">T-${Math.round(left)}</span>
-        ${tail.length ? `<span class="pa-note dim">${esc(tail.join(' &middot; '))}</span>` : ''}</div>`;
+      const bars = `<div class="pa-bar ${expectant ? 'dim' : 'red'}" style="width:${w}">
+        ${wide ? `<span class="pa-inbar${expectant ? '' : ' bad'}">NO LAUNCH POINT REACHES THIS POSITION</span>` : ''}</div>`;
+      return layout(bars, `T-${Math.round(left)}`,
+        esc(['no launch point reaches this position'].concat(tail).join(' · ')),
+        tCls, expectant ? 'dim' : 'bad');
     }
 
     const d = c.assignedTo != null
@@ -328,22 +352,23 @@
 
     if (breach) {
       const over = Math.min(BAR_MAX, r.eta);
-      return `<div class="pa-bar red" style="width:${w}">
-          ${wide ? '<span class="pa-inbar bad">NOTHING REACHES THIS BAR</span>' : ''}
-          <span class="pa-t bad">T-${Math.round(left)}</span></div>
-        <div class="pa-bar none" style="width:${pct(Math.max(0, over - left) / WINDOW_MIN)};margin-left:56px">
-          ${(over - left) >= 14 ? `<span class="pa-inbar bad">${esc(who)} ARRIVES ${MIN(r.eta)}</span>` : ''}
-          <span class="pa-t bad">MISS &minus;${Math.abs(Math.round(r.slack))}</span></div>`;
+      const bars = `<div class="pa-bar red" style="width:${w}">
+          ${wide ? '<span class="pa-inbar bad">NOTHING REACHES THIS BAR</span>' : ''}</div>
+        <div class="pa-bar none" style="width:${pct(Math.max(0, over - left) / WINDOW_MIN)}">
+          ${(over - left) >= 14 ? `<span class="pa-inbar bad">${esc(who)} ARRIVES ${MIN(r.eta)}</span>` : ''}</div>`;
+      return layout(bars, `T-${Math.round(left)} &middot; MISS &minus;${Math.abs(Math.round(r.slack))}`,
+        `${esc(who || 'assigned response')} arrives ${MIN(r.eta)}`, 'bad', 'bad');
     }
 
     const fill = Math.max(0, Math.min(1, r.eta / Math.max(left, 0.1)));
     const note = [(r.slack >= 0 ? '+' : '\u2212') + Math.abs(Math.round(r.slack)) + ' slack',
-                  c.assignedTo != null ? 'tasked' : 'not tasked'].concat(tail).join(' · ');
-    return `<div class="pa-bar ${kind}" style="width:${w}">
+                  c.assignedTo != null ? 'tasked' : 'not tasked',
+                  'untreated'].concat(tail).join(' · ');
+    const bars = `<div class="pa-bar ${kind}" style="width:${w}">
       <div class="pa-fill" style="width:${(fill * 100).toFixed(1)}%">
-        ${wide ? `<span>${esc(who)} &middot; ${MIN(r.eta)}</span>` : ''}</div>
-      <span class="pa-t ${tCls}">T-${Math.round(left)}</span>
-      <span class="pa-note${expectant || stale(L, c) ? ' dim' : ''}">${esc(note)}</span></div>`;
+        ${wide ? `<span>${esc(who)} &middot; ${MIN(r.eta)}</span>` : ''}</div></div>`;
+    return layout(bars, `T-${Math.round(left)}`, esc(note), tCls,
+      expectant || stale(L, c) ? 'dim' : '');
   }
 
   /* ======================================================================

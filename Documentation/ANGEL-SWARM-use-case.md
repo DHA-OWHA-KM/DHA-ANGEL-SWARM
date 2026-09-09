@@ -6,7 +6,7 @@
 
 **UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY**
 
-*Use case document · Version 1.0 · 8 September 2026*
+*Use case document · Version 1.1 · 9 September 2026*
 
 ---
 
@@ -14,7 +14,7 @@
 
 ANGEL SWARM tasks autonomous medical resupply aircraft against wounded soldiers' **physiological deadlines** — how long each casualty has before they die of their wounds — rather than against the nearest available airframe and a best guess at who needs it most — the practice everywhere today, which no doctrine actually names.
 
-In the reference run of the shipped prototype — joint operations area CORAL, PACOM, seed 42, 125 casualties, 180 minutes — ANGEL SWARM ended the engagement with **23 dead of wounds that were medically survivable**, against **34** for the current triage and proximity baseline running on the same casualty stream, the same aircraft and the same blood. Across all triage categories, 31 dead against 42.
+In the reference run of the shipped prototype — joint operations area CORAL, PACOM, seed 42, 125 casualties, 180 minutes — ANGEL SWARM ended the engagement with **23 dead of wounds that were medically survivable**, against **34** for CURRENT — TRIAGE & PROXIMITY running on the same casualty stream, the same aircraft and the same blood. Across all triage categories, 31 dead against 42.
 
 **Eleven fewer dead of survivable wounds. The target is zero.**
 
@@ -49,7 +49,7 @@ Two specific failures matter here:
 
 ### 1.4 What exists, and what does not
 
-The airframes exist and are programs of record. Casualty detection and assessment from an uncrewed platform is a crowded field with well-funded competitors. Blood packaging and aerial delivery of blood products have validated guidance behind them. Wearable physiological monitoring reaches the commander's common operating picture today.
+The airframes exist and are programs of record. Casualty detection and assessment from an uncrewed platform is a crowded field with well-funded competitors. Blood packaging and aerial delivery of blood products have validated guidance behind them. Wearable physiological monitoring can feed a tactical picture; **Sempulse Halo is an example monitor, CipherOx CRI M1 is the compensatory-reserve reference, and BATDOK-J is a separate plausible producer/interface.** That is an architectural distinction, not a claim that ANGEL SWARM has tested any of them.
 
 What does not exist is the layer that consumes all of that and decides **which aircraft flies to which casualty, in what order, carrying what**. Swarm tasking frameworks exist — for strike, ISR and counter-drone. They have never been applied to medicine.
 
@@ -80,9 +80,9 @@ From there, tasking becomes a constrained routing and allocation problem. ANGEL 
 
 Contention between aircraft resolves by auction on total route value, which is how fielded swarm tasking frameworks already resolve it.
 
-**The baseline it is measured against is what is done today: current triage and proximity.** A unit calls for resupply, a standard medical bundle leaves an aid station or forward arming and refuelling point on the next available airframe, casualties are sequenced by triage category, each sortie serves one destination, and the bundle carries the clinically indicated item, because the dispatcher does not know who is standing next to the casualty.
+**The baseline it is measured against is what is done today: CURRENT — TRIAGE & PROXIMITY.** A unit calls for resupply, a standard medical bundle leaves an aid station or forward arming and refuelling point on the next available airframe, casualties are sequenced by triage category, each sortie serves one destination, and the bundle carries the clinically indicated item, because the dispatcher does not know who is standing next to the casualty.
 
-That baseline has no doctrinal name, and the absence is the point. Doctrine names the function — medical regulating, which covers patients and bed space rather than materiel (JP 4-02). It names the cell that performs it, the evacuation precedence categories (ATP 4-02.2, Table 2-1), the nine-line request format and the launch authority. It does not name the rule that decides which aircraft serves which casualty; that is left to unit standing operating procedure. The operations-research literature has to construct the baseline rather than cite it, describing current practice as a *"myopic policy, which tasks the closest-available MEDEVAC unit to service an incoming request"* and attributing it to no publication. It is called *current triage and proximity* throughout this document because that is what it does, not because doctrine calls it anything.
+That baseline has no doctrinal name, and the absence is the point. Doctrine names the function — medical regulating, which covers patients and bed space rather than materiel (JP 4-02). It names the cell that performs it, the evacuation precedence categories (ATP 4-02.2, Table 2-1), the nine-line request format and the launch authority. It does not name the rule that decides which aircraft serves which casualty; that is left to unit standing operating procedure. The operations-research literature has to construct the baseline rather than cite it, describing current practice as a *"myopic policy, which tasks the closest-available MEDEVAC unit to service an incoming request"* and attributing it to no publication. It is called **CURRENT — TRIAGE & PROXIMITY** throughout this document because that is what it does, not because doctrine calls it anything.
 
 It is emphatically **not** a Class VIII push. A push is anticipatory — preconfigured, scheduled, sent before anyone asks, and explicitly a substitute for requisitioning *"until line item requisition procedures can be established"* (JP 4-02.1, Ch II; FM 4-02.1, §4-8a). Nothing in either arm of this run is a push: both are triggered by a casualty on the board. What ANGEL SWARM performs has a doctrinal name of its own — **emergency movement of Class VIII, blood, and blood products**, a named MEDEVAC primary task (ATP 4-02.2, Ch 2, Sec IV). The baseline arm gets the same fleet, the same stock, the same casualty stream and the same multi-stop routing. The only difference between the two arms is judgment.
 
@@ -254,7 +254,7 @@ The system did not require a human to be the dispatcher. It did require a human 
 
 200 paired replications in **each of the seven theatres the engine carries**, run against the shipped engine in the exact configuration the application itself uses. Reproduce with `winprob.mjs <SCENARIO> 200`, which ships in `documents/`.
 
-> **ANGEL SWARM wins all seven theatres. Every 95% interval excludes zero. Across 1,400 paired battles it produced more dead in 6 — 0.43% — and never by more than one.**
+> **ANGEL SWARM wins all seven theatres. Every 95% interval excludes zero. Across 1,400 paired battles it produced more dead in 5 — 0.36% — and never by more than one.**
 
 The reference theatre, PACOM CORAL:
 
@@ -265,7 +265,7 @@ The reference theatre, PACOM CORAL:
 | Cohen's d_z | **−2.19** |
 | Replications where ANGEL SWARM was worse | **0 of 200** (1 tie) |
 
-The full seven-theatre table is `ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`. **The weakest theatre is EUCOM FJORD** — a compressed laydown where distance stops discriminating between casualties, so a deadline sort has less to work with. It still wins: mean **−1.865**, interval −2.045 … −1.685, better on **173 of 200** battles. Four of the six adverse battles anywhere are in FJORD, and seed 42 is one of them. **One battle is not a theatre.** Quote the interval, not the seed.
+The full seven-theatre table is `ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`. **The weakest theatre is EUCOM FJORD** — a compressed laydown where distance stops discriminating between casualties, so a deadline sort has less to work with. It still wins: mean **−1.875**, interval −2.053 … −1.697, better on **174 of 200** battles. Three of the five adverse battles anywhere are in FJORD, and seed 42 is one of them. **One battle is not a theatre.** Quote the interval, not the seed.
 
 **No p-value is claimed, deliberately.** The replications come from a deterministic program that can be run as many times as compute allows. A p-value computed over them would measure the compute budget, not the strength of the evidence. Saying so is more useful than printing a number that would not survive a knowledgeable reader.
 
@@ -273,7 +273,7 @@ The full seven-theatre table is `ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`. **The wea
 
 The single most decision-relevant output of the whole prototype is not the headline number. It is which input moves it.
 
-The prototype now carries **five levers on a War Game screen**, each swept as a paired Monte Carlo against the shipped engine, and each applied to the shared world **after the casualty stream is fixed and before either arm is built** — so every lever moves the force for **both** arms.
+War Game opens on the selected operation/scenario and its scenario-specific force assumptions. It carries five levers, each swept as a paired Monte Carlo against the shipped engine and applied to the same altered world after the casualty stream is fixed and before either arm is built.
 
 | Lever | What it varies |
 |---|---|
@@ -281,13 +281,15 @@ The prototype now carries **five levers on a War Game screen**, each swept as a 
 | **Launch points** | How many sites are sited |
 | **Datalink outage** | How long every denial window lasts |
 | **Triage error** | The START over- and under-triage rates |
-| **Responder qualification** | How many on scene can give blood |
+| **Responder qualification/mix** | The receiver-on-scene mix: how many can administer the required product |
 
-**Launch points dominate the geometry, and responder qualification dominates everything.** Where an aircraft can start from moves the result more than how many aircraft there are; and who is standing next to the casualty when it lands moves it more than either.
+The UI supports **20, 30 or 40 paired battles per setting**, using deterministic contiguous seeds from **1000**. It runs either nominal published platform timing or the shipped observed-flight variability profile. Common random numbers keep ANGEL SWARM and **CURRENT — TRIAGE & PROXIMITY** in the same altered world at each seed. Triage error is the one asymmetric lever: it changes only CURRENT — TRIAGE & PROXIMITY, because ANGEL SWARM does not consume triage category. Declared method differences also remain: ANGEL SWARM has telementoring and ANGEL-only in-flight abort/hold logic; CURRENT — TRIAGE & PROXIMITY does not.
+
+**Launch points dominate the geometry, and responder qualification/mix dominates everything.** Where an aircraft can start from moves the result more than how many aircraft there are; and who is standing next to the casualty when it lands moves it more than either.
 
 The responder lever, measured at five points, 30 paired seeds each:
 
-| Medics on scene | ANGEL SWARM | CURRENT — T&P | Gap |
+| Qualified receivers on scene | ANGEL SWARM | CURRENT — TRIAGE & PROXIMITY | Gap |
 |---|---|---|---|
 | 1 in 10 | 23.5 | 27.7 | 4.2 |
 | 2 in 10 | 22.9 | 27.3 | 4.4 |
@@ -296,6 +298,8 @@ The responder lever, measured at five points, 30 paired seeds each:
 | 5 in 10 | 20.9 | 26.2 | 5.4 |
 
 **Both arms improve monotonically, and the gap widens — 4.2 to 5.4.** Putting a trained receiver on the ground is worth *more* under deadline tasking than under triage and proximity, because a delivery that arrives in time is only worth something if somebody present can give it. **The two investments compound.** That is a finding about force design the tool produces as a by-product of being able to run the counterfactual at all, and it points at basing and at training rather than at buying more airframes.
+
+A sweep is all-or-nothing. Progress counts completed paired battles; cancellation terminates every worker and retains no partial findings. Worker load, handshake timeout, protocol mismatch and engine/runtime failure do the same. Completed results bind the scenario, lever settings, seed range, variability and control mode to the paired gap, 95% confidence interval and better/tied/worse counts. Changing scenario or variability invalidates those results and regenerates their labels. To reproduce one, restore the displayed scenario and variability mode, select the displayed lever and 20/30/40 count, and rerun the displayed seed range beginning at 1000.
 
 ---
 
@@ -317,9 +321,9 @@ This section exists because the concept is only worth anything if the claims sur
 
 **Some findings are structural and unflattering.** 27 of 125 casualties were reachable by one aircraft or none. The most common cause of survivable death was receiver capability, not tasking. An optimizer that cannot fix the dominant cause of death in its own reference run should say so, and this one does.
 
-**Reported, not suppressed:** across 1,400 paired battles in seven theatres, **6 produced one more death under ANGEL SWARM** — 0.43%, and never worse by more than one. Four of the six are in EUCOM FJORD, and seed 42 in FJORD is one of them. The theatre still wins on its interval. Both the finding and the seed are in the tool and in `ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`.
+**Reported, not suppressed:** across 1,400 paired battles in seven theatres, **5 produced one more death under ANGEL SWARM** — 0.36%, and never worse by more than one. Three of the five are in EUCOM FJORD, and seed 42 in FJORD is one of them. The theatre still wins on its interval. Both the finding and the seed are in the tool and in `ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`.
 
-**The engine asserts its own reference result.** `app/selftest.html` ships in the package and runs **118 assertions against the shipped engine**, in the browser, offline, with nothing mocked — determinism and common random numbers, the reference result, the conservation invariants, the physiological deadline, payload and cold chain and receiver tier, range gating, triage precedence, the SHA-256 audit chain and its tamper-evidence, the seekable snapshot, all seven theatres, the levers and the Monte Carlo path, and directional sanity. **118 pass, in 861 ms.**
+**The engine asserts its own reference result.** `app/selftest.html` ships in the package and checks the engine and host UI in the browser, offline, with nothing mocked. Coverage includes determinism and common random numbers, the reference result, conservation, physiological deadlines, payload/cold-chain/receiver constraints, range gating, CURRENT — TRIAGE & PROXIMITY precedence, the audit chain, seekable snapshots, every scenario, levers, the War Game worker path, directional sanity and Resupply Tracking. Its live summary is authoritative; this document does not hardcode a check total.
 
 ---
 
@@ -332,7 +336,7 @@ The deadline comes from a network trained from scratch for this prototype.
 - **1-D convolutional network, 104,162 parameters**, reading **5 seconds of photoplethysmogram at 100 Hz** and emitting an estimate of compensatory reserve **and its own variance**, from two heads under a Gaussian negative log-likelihood objective.
 - Trained on 62,400 windows from 240 synthetic subjects. **Validated on 70 subjects that appear in no training window** — the split is by person, not by window.
 - **Held-out mean absolute error 0.069**, against **0.159 for heart rate alone**. It is **2.3× better than rate**, which is the point: roughly a seventh of subjects are chronotropic non-responders or paradoxical and a further sixth are blunted, mirroring beta blockade, high vagal tone and the paradoxical bradycardia of severe haemorrhage. A rate-based rule misclassifies exactly the people it most needs to catch.
-- It **mirrors the operating principle of CipherOx CRM, FDA 510(k) K173929**. It is not that device and makes no claim to be.
+- It **mirrors the operating principle represented here by CipherOx CRI M1 (reference)**. It is not that device and makes no claim to be.
 
 **The calibrated trust gate is the part that matters clinically.** Thresholds were measured on 8,000 fresh windows, so the network declares when it should not be believed:
 
@@ -364,7 +368,7 @@ A deterministic discrete-event simulation of both arms over shared world state: 
 - **Analytical console.** An in-browser columnar database over 11 tables of the run's own data, both arms under a discriminator, with a SQL editor and validated presets — including an as-of join from each delivery to the telemetry immediately preceding it.
 - **Monte Carlo workbench.** 200 paired replications across web workers running the shipped engine, with the pairing benefit quantified, driven from a five-lever War Game screen.
 - **Data products.** A FHIR-shaped bundle of **4,151 resources** — 125 Patient, 3,985 Observation, 21 ServiceRequest, 20 Procedure, **zero dangling references** — the decision record with full 64-hex SHA-256 digests, the run result as JSON and CSV, five JSON Schemas that validate offline under ajv 8 draft 2020-12, and a data catalogue naming five products, two consumed feeds, and the vertical path point of injury → OMDS → MHS GENESIS. The caveat **FHIR-SHAPED, NOT CONFORMANCE-TESTED** appears in five places including `meta.tag` on every single resource, so it cannot be lost by copying one file out of the bundle.
-- **An engine self-test that ships.** 118 assertions against the shipped engine, in the browser, offline. See §6.
+- **A self-test that ships.** Browser-offline coverage of the engine and host UI, including determinism, common random numbers, scenarios, War Game worker behavior and standalone RESUPPLY TRACK behavior. Use its live summary; see §6.
 - **Casualty flow.** A fixed-layout Sankey that is byte-identical between runs so the two arms compare directly, a Kaplan-Meier survival curve with proper right-censoring, and a deadline-versus-arrival scatter on a true diagonal.
 - **Tactical map.** **Four scales on one page** — a canvas-2D orthographic **GLOBE** carrying 34,416 vertices of world coastline and international boundary, a north-up **THEATRE** chart of the whole combatant command, a flat **TACTICAL 2D** map of the operation's ground, and a pitched GPU **TACTICAL 3D** view where time remaining is drawn as vertical columns. All four are anchored to the joint operations area's real coordinates, with casualty symbology whose pulse period encodes time-to-deadline. Zooming past the bottom of the globe's range flies the rest of the way in and hands the view down to the tactical sheet — to the operation under the camera, or, over open ocean, to nothing, with a caption saying so. The globe holds no GPU context; TACTICAL 2D and 3D are hardware-accelerated and degrade honestly, in that no hardware acceleration means the 3-D view is removed rather than shown broken. On the two tactical scales a route-stage strip opens along the bottom on a click — on a casualty, or on an aircraft — and shows that sortie's stops with the stage it is flying now highlighted; it is closed until asked for.
 
@@ -378,21 +382,46 @@ Everything above rests on a physiological reading reaching the tasking layer. Un
 
 | Tier | What it is | State |
 |---|---|---|
-| **Edge** | The monitor on the soldier. | Fielded, and not ours. Consumed, not duplicated. |
-| **Tactical network** | Cursor on Target over TAK / ATAK / BATDOK — the feed the force already carries. | **Built. Described below.** |
+| **Edge** | The monitor on the soldier — Sempulse Halo (example); CipherOx CRI M1 (reference). | Not ours. A prospective input, not a tested integration. |
+| **Tactical network** | Cursor on Target over TAK / ATAK; BATDOK-J is a separate plausible producer/interface. | **The generic receive path is built. Described below.** |
 | **Enterprise** | Maven Smart System or the War Data Platform — fleet state, theatre stock, the cross-joint-operations-area picture, the audit archive. | Integration work, when reachback exists. |
 
 **The tactical and enterprise tiers are layers, not alternatives.** The tasking decision is made on the tactical tier and does not wait for the enterprise one.
 
 **What is built.** The launcher accepts **Cursor on Target (CoT) over UDP** — the message format TAK already carries across tactical networks — parses the medical detail out of the `<detail>` extension, and republishes it to the browser over **Server-Sent Events**. Where a live reading exists for a casualty it supersedes the simulated one, writing the same fields the tasking already reads. Everything downstream — the deadline, the trust gate, the tasking order, the inspector — is untouched, which is the property that makes this an acquisition path rather than a second simulation.
 
-**What it does not claim.** The medical values ride in a `<detail>` extension. CoT detail is open by design and this is that extension mechanism used as intended, but **it is not a ratified medical CoT schema** and nothing here should be read as one. Nor is any integration claimed. AFRL's **BATDOK** aggregates physiological monitors on a medic's end-user device and integrates with **ATAK**; Sempulse's **Halo** ships pre-integrated with both. Flashback Technologies' **CipherOx CRI M1** is a real, FDA-cleared compensatory-reserve monitor (De Novo DEN160020). **We have integrated with none of them.** The claim is narrower and it is the one that matters: a wearable that already reaches ATAK or BATDOK reaches ANGEL SWARM with nothing new on the soldier, because what is accepted is the format their ecosystem already carries.
+**What it does not claim.** The medical values ride in a `<detail>` extension. CoT detail is open by design and this is that extension mechanism used as intended, but **it is not a ratified medical CoT schema** and nothing here should be read as one. The device roles are deliberately distinct: **Sempulse Halo (example)** is an example wearable, **CipherOx CRI M1 (reference)** is the compensatory-reserve reference, and **BATDOK-J** is a separate plausible producer/interface at the medic edge. **ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1, or BATDOK-J.** No compatibility, military fielding, regulatory status or completed integration is claimed. The implemented claim is narrower: the launcher can receive the prototype's documented CoT `<detail>` dialect.
 
 **The security posture, stated plainly.** The listener is **off unless `-cot :6969` is passed**. When enabled it binds `127.0.0.1` unless **`-cot-external` is also passed** — two flags, not one, to put a socket on a real interface. It is **receive-only**: it parses, it never replies, and it never originates a packet. The parser is bounded — a datagram over 8,192 bytes is dropped unread. With no listener running, behaviour is bit-identical to the build that had no ingest path at all: seed 42 in fair mode is still 23 against 34, the full sweep across four themes and four roles is clean, and there are zero off-origin requests.
 
 **A device emitter ships alongside it.** `cotsim` stands in for the wearables, emitting CoT at a realistic cadence with a compensatory reserve that falls the way a bleeding casualty's does. It is **not a device driver** and it is **not a claim that any monitor speaks this dialect today**. It exists so that the acquisition path is exercised by a real socket from outside the program rather than by the simulation reading its own memory.
 
 **Measured.** 125 devices, approximately 62 messages per second, over 14,000 messages, **0 dropped**. Link state degrades honestly and was verified by killing the emitter mid-run: **LIVE → STALE at 6 seconds → DOWN at 15 seconds**. At DOWN the live readings expire and the tasking layer carries on with the link gone — the behaviour the whole concept rests on, and which until now there was no way to demonstrate, because there was no link to pull.
+
+
+### 7.6 Resupply Tracking — a standalone synthetic demonstration
+
+**What is built.** Resupply Tracking owns immutable synthetic demonstration
+commitments and its own deterministic clock. It shows nominal phases plus diverted,
+aborted, lost, deadline-miss, cold-chain-failure and delivered fixtures, with
+seek, play/pause, a tracker-owned normal/8× playback toggle (`SPEED ×8` /
+`SPEED ×1`), reroute and exception controls, a synthetic margin-sorted queue, Canvas 2D
+schematic and an Arm B scheduled-push comparison state. It is not a projection of
+engine tasking, scenarios, casualties, host playback, run snapshots, fleet history
+or Arm B ledgers; no model runs on this path. The speed toggle changes only the
+tracker's deterministic clock, never host playback or engine state.
+
+All tracker names, times, routes and payloads are synthetic demonstration fixtures
+and cannot be treated as operational output. The tracker changes no engine state or
+outcome. Its local schematic adds no external map, dependency, socket or request.
+`Send to medic's ATAK` opens an informational, future-only modal and emits nothing.
+**No BATDOK-J, ATAK, TAK Server, Marti REST or CoT-emission integration exists;
+“CoT is ingested, not emitted” remains true.**
+
+Release verification is responsible for checking the standalone controls,
+exceptional states, Arm B comparison state, responsive layout, keyboard operation,
+no new requests and the unchanged engine result. This section does not turn those
+checks into evidence until they have been run and recorded.
 
 ---
 
@@ -474,11 +503,13 @@ Ordered by what actually blocks progress, not by what is most interesting to bui
 
 **2. Real physiology.** CRI-Net is trained on synthetic waveforms. The next step is not a bigger network; it is the same architecture and the same calibrated trust gate trained and validated on real waveform data from instrumented human subjects, with the refusal thresholds re-measured on that data. The training and calibration code ships so that this is a re-run rather than a rewrite.
 
-**3. Integration with the real picture.** The tactical tier now exists: the application accepts Cursor on Target over UDP and the tasking layer consumes what arrives (§7.5). What remains is validation against real feeds rather than an emitter — a fielded monitor reaching ATAK or BATDOK, pointed at the same port — and then the enterprise tier: fleet state, theatre stock and the cross-joint-operations-area picture from Maven Smart System or the War Data Platform, with the audit chain mirrored to a platform archive. Those two tiers are layers, not alternatives; the tasking decision is made on the tactical one and does not wait for the enterprise one. None of these interfaces are speculative; the data already reaches the commander and nothing currently acts on it.
+**3. Integration with the real picture.** The tactical tier now exists: the application accepts Cursor on Target over UDP and the tasking layer consumes what arrives (§7.5). What remains is validation against real feeds rather than the synthetic emitter — including the separately identified Sempulse Halo (example), CipherOx CRI M1 (reference), and BATDOK-J as a plausible producer/interface — and then the enterprise tier: fleet state, theatre stock and the cross-joint-operations-area picture from Maven Smart System or the War Data Platform, with the audit chain mirrored to a platform archive. Those two tiers are layers, not alternatives; the tasking decision is made on the tactical one and does not wait for the enterprise one. As §7.5 states, no integration with any real named device has been tested.
+
+**3a. Outbound delivery status, future only.** A fielded program could serialize the existing assignment, route, estimate and deadline as a CoT delivery event for an ATAK map. That path is **not implemented in this release**. It would create a new outbound interface and an eighth trust boundary; require deployment-specific validation of TAK Server, multicast or Marti endpoints rather than assuming defaults; and require mutual authentication, authorization, anti-replay and stale-event handling, audit, data minimization and an EMSEC decision. A casualty grid paired with an inbound aircraft is targeting data. TLS can protect a link; it does not conceal the emission pattern. BATDOK-J remains a record-of-care system and is not modified to carry this tactical object.
 
 **4. Integration with the airframes.** The tasking layer emits routes and manifests. Fielding requires the message interface to autonomous resupply platforms already under contract, and the flight-following and cold-chain telemetry return path that makes in-flight re-tasking real rather than modelled.
 
-**5. Force design analysis, which is available now.** The sensitivity result — launch points and responder qualification dominate, and the two compound — is a study that can be run today, in this tool, against real theatre geometry, real basing options and real medic densities. That is the cheapest and highest-value next step in the list, and it requires no new technology at all.
+**5. Force design analysis, which is available now.** The sensitivity result — launch points and responder qualification/mix dominate, and the two compound — is a study that can be run today, in this tool, against real theatre geometry, real basing options and real qualified-receiver densities. That is the cheapest and highest-value next step in the list, and it requires no new technology at all.
 
 **6. Field experimentation.** Run the tasking layer against a live casualty-play exercise with instrumented mannequins and real airframes. The measured claim then becomes about the world rather than about a model.
 

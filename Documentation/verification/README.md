@@ -8,12 +8,12 @@ The reviewer's checklist: what can be checked in this package without taking any
 
 ### 1. The engine
 
-Open `app/selftest.html` in any browser, offline. It runs 118 assertions against the shipped engine — the same `app/js/sim.js` and `app/js/optimizer.js` the application runs — with nothing mocked. Among them is the reference result quoted in every document in this package:
+Open `app/selftest.html` in any browser, offline. It checks the shipped engine and host UI with nothing mocked. Coverage includes determinism and common random numbers, the reference result, conservation and physical constraints, every scenario, lever and War Game worker behavior, the audit chain and standalone RESUPPLY TRACK behavior. Use the page's live summary rather than a copied total. Among the checks is the reference result quoted in every document in this package:
 
 > seed 42 · JOA CORAL · capability deployed
 > 23 / 34 / 35 survivable deaths on 20 / 38 / 0 sorties
 
-A red row would be a real disagreement between what this engine does and what this package claims it does. There are none.
+A red row is a real disagreement between what this engine does and what this package claims it does; inspect the live page for current status.
 
 ### 2. The seven-theatre result
 
@@ -23,13 +23,24 @@ A red row would be a real disagreement between what this engine does and what th
 node Documentation/verification/winprob.mjs PACOM_CORAL 200
 ```
 
-It reproduces `Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9` exactly: seven theatres won from seven, every 95% interval excluding zero, adverse in 6 of 1,400 battles and never by more than one.
+It reproduces `Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9` exactly: seven theatres won from seven, every 95% interval excluding zero, adverse in 5 of 1,400 battles and never by more than one.
 
 ### 3. The network claim
 
-Pull the network cable, or switch off the adapter, and run the application. Nothing changes. Every basemap in it is either computed from the scenario's elevation field or drawn from coastline data that ships inside the build; there is no tile server and no request ever leaves the machine. Instrumented runs measure zero off-origin requests across all thirteen destinations and all four map scales.
+Pull the network cable, or switch off the adapter, and run the application. Nothing changes. Every basemap in it is either computed from the scenario's elevation field or drawn from coastline data that ships inside the build; there is no tile server and no request ever leaves the machine. Current verification covers all fourteen destinations and all four map scales; use a fresh instrumented run for the exact request and console totals of the tracked commit.
 
-### 4. The bill of materials
+### 4. War Game reproducibility and failure behavior
+
+1. Select an operation/scenario in Settings and choose nominal timing or observed-flight variability.
+2. Open War Game and confirm its operation and force context match that selection.
+3. Choose fleet size, launch points, datalink outage, triage error, or responder qualification/mix; include at least two of the displayed scenario-derived setting cards; choose 20, 30 or 40 paired battles per included setting; run the sweep.
+4. Confirm the completed provenance block records the scenario, lever settings, contiguous seed range from 1000, variability/control mode and declared telementoring plus ANGEL-only abort/hold differences. Each setting must show its paired gap, 95% CI and better/tied/worse record.
+5. Repeat with the same inputs. Because the seeds and engine are deterministic, the result must reproduce. Both arms receive the same altered world/common random numbers; triage error affects only **CURRENT — TRIAGE & PROXIMITY** because ANGEL does not consume triage category.
+6. Change scenario and confirm the prior result disappears and scenario/force labels regenerate. During another sweep, cancel it and confirm progress stops, workers terminate and no partial finding remains.
+
+Worker load failure, handshake/job timeout, protocol mismatch and runtime failure use the same all-or-nothing path: every worker is terminated, an explicit error is shown, and no partial result is retained.
+
+### 5. The bill of materials
 
 `Documentation/ANGEL-SWARM-SBOM-validation.txt` records the validation actually performed on `Documentation/ANGEL-SWARM-SBOM.json` — CycloneDX 1.6, validated with ajv against the CycloneDX project's own schema. Every component digest in it was measured off disk.
 
@@ -48,19 +59,19 @@ The six screenshots below are the instrumented captures held in `security-and-sb
 
 ![The engine self-test, top of page](security-and-sbom/selftest.png)
 
-*`selftest.png` — the head of `app/selftest.html`, evidencing the summary strip (118 passed, 0 failed, 118 total, 1,046 ms, ALL ASSERTIONS PASSED) and the first two assertion groups. The reference result is asserted here rather than asserted in a slide: ARM A 23 survivable deaths, ARM B 34, ARM C 35, on 20 / 38 / 0 sorties, out of a 125-casualty battle.*
+*`selftest.png` — a historical capture of the head of `app/selftest.html` and its first assertion groups. The live page, not the captured summary, is authoritative. The reference result is asserted here rather than asserted in a slide: ARM A 23 survivable deaths, ARM B 34, ARM C 35, on 20 / 38 / 0 sorties, out of a 125-casualty battle.*
 
 ![The engine self-test, whole page](security-and-sbom/selftest-full.png)
 
-*`selftest-full.png` — the same page captured top to bottom (1600 × 5,697 px), evidencing that all fourteen assertion groups pass and that no group has been cropped out of the shorter captures: determinism and common random numbers, the reference result, conservation and physical constraints, the physiological deadline, payload rules and cold chain, range setting, triage precedence in the control arm, the audit chain, the seekable snapshot, all seven joint operating areas, the commander's levers and the Monte Carlo path, and directional sanity.*
+*`selftest-full.png` — a historical top-to-bottom capture showing the then-present groups: determinism and common random numbers, the reference result, conservation and physical constraints, physiological deadlines, payload/cold-chain/range rules, CURRENT — TRIAGE & PROXIMITY precedence, the audit chain, seekable snapshots, scenarios, levers, the Monte Carlo path and directional sanity. Run the live page for current coverage and status.*
 
 ![The engine self-test, foot of page](security-and-sbom/selftest-bottom.png)
 
-*`selftest-bottom.png` — the foot of the page on a re-run (118 passed, 0 failed, 893 ms), evidencing the lever and Monte Carlo assertions, the six directional-sanity assertions, and the WHAT THIS PAGE IS NOT panel that states the page is not a clinical validation and not an accreditation artefact. The footer records the run: 2026-08-28 17:45:19Z, against `js/sim.js`, `js/optimizer.js`, `js/mc.worker.js` and `angel-engine.js`, offline, in that tab only.*
+*`selftest-bottom.png` — a historical capture of the lever, Monte Carlo and directional-sanity groups, plus the WHAT THIS PAGE IS NOT panel stating that the page is not a clinical validation or accreditation artefact. Run the live page for current status.*
 
 ![The lever assertions](security-and-sbom/selftest-levers.png)
 
-*`selftest-levers.png` — intended as the lever-group capture, and evidencing those assertions: the fleet, launch-point, comms, triage-accuracy and medic levers each move the outcome, more combat medics reduces survivable deaths in **both** arms and widens the gap, and a real Monte Carlo worker loads the shipped engine off disk. **This file is byte-identical to `selftest-bottom.png`** — same SHA and same 143,360 bytes — so it is the same capture under a second name rather than an independent one.*
+*`selftest-levers.png` — intended as the lever-group capture: fleet, launch-point, datalink, triage-error and responder qualification/mix behavior, plus a real Monte Carlo worker loading the shipped engine off disk. **This file is byte-identical to `selftest-bottom.png`**, so it is the same capture under a second name rather than independent evidence.*
 
 ![Settings, the engine self-test row](security-and-sbom/settings-row.png)
 
@@ -68,8 +79,8 @@ The six screenshots below are the instrumented captures held in `security-and-sb
 
 ![Settings, whole page](security-and-sbom/settings-full.png)
 
-*`settings-full.png` — the whole Settings destination captured top to bottom, evidencing the run parameters the documents quote: seed 42, 180 min at 0.25 min steps, 125 casualties in stream, 7 airframes per arm, the 58% buddy aid / 32% combat lifesaver / 10% combat medic responder mix, and all seven joint operating areas across two combatant commands with JOA CORAL selected. The fixed left rail and command bar appear twice because the page's fixed chrome is re-rendered where the full-height capture was stitched.*
+*`settings-full.png` — a historical full Settings capture showing the reference run parameters and selected operation. The fixed left rail and command bar appear twice because the page's fixed chrome is re-rendered where the full-height capture was stitched; use live Settings and War Game context labels for current scenario assumptions.*
 
 ## What is not here, deliberately
 
-The working screenshot archives from the development sessions — roughly 95 MB of intermediate captures. They prove nothing a reader cannot verify directly by the four steps above, and they would treble the size of this package.
+The working screenshot archives from the development sessions — roughly 95 MB of intermediate captures. They prove nothing a reader cannot verify directly by the five checks above, and they would treble the size of this package.

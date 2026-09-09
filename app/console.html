@@ -8,14 +8,14 @@
      on every load, the launcher answers 404, and the console opens on an
      error in an application whose first claim is that it never reaches for
      anything it does not carry. -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='1.6 1.04 20.8 20.8'%3E%3Crect x='1.6' y='1.04' width='20.8' height='20.8' rx='4.4' fill='%230b1119'/%3E%3Cg fill='%23f05653'%3E%3Cpath d='M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z'/%3E%3Cpath d='M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z'/%3E%3Cpath d='M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;1.6 1.04 20.8 20.8&quot;%3E%3Crect x=&quot;1.6&quot; y=&quot;1.04&quot; width=&quot;20.8&quot; height=&quot;20.8&quot; rx=&quot;4.4&quot; fill=&quot;%230b1119&quot;/%3E%3Cg fill=&quot;%23f05653&quot;%3E%3Cpath d=&quot;M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z&quot;/%3E%3Cpath d=&quot;M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z&quot;/%3E%3Cpath d=&quot;M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z&quot;/%3E%3C/g%3E%3C/svg%3E">
 <!-- THE TOKENS. Four themes, one contract, declared four times. It is loaded
      FIRST so that css/app.css and every pane stylesheet after it resolve
      against real values, and it wins on specificity anyway — `body[data-theme]`
      beats the `:root` block css/app.css still carries as a floor for a
      document that somehow loses the attribute. See THEME_CONTRACT.md. -->
 <link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/app.css?v=7">
+<link rel="stylesheet" href="css/app.css?v=10">
 <!-- Loaded after the shell stylesheet on purpose: css/polish.css is the
      cross-cutting pass that reconciles the panes contributed by separate
      authors, and it needs to win on equal specificity. build.py does not
@@ -69,6 +69,7 @@
 <link rel="stylesheet" href="css/pages-b.css">
 <link rel="stylesheet" href="css/pages-a.css">
 <link rel="stylesheet" href="css/page-map.css">
+<script src="./js/nav-shine.js"></script>
 <!-- THE COMPARE PANE TAGS, AFTER THE CONTROL ARM WAS RENAMED. Last in the
      head on purpose: it has to win the equal-specificity tie against
      css/app.css, which is where .cmpTag lives.
@@ -130,7 +131,7 @@ try{var t=localStorage.getItem('angel.theme');
 }catch(e){/* storage denied; the markup default stands and nothing flashes */}
 </script>
 
-<!-- ============ icon defs · Tabler 24-grid, carried from mock-G-mark1 ============ -->
+<!-- ------------ icon defs · Tabler 24-grid, carried from mock-G-mark1 ------------ -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-drop" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(0.72 0.72) scale(0.94)"> <path d="M10.708 2.372a2.382 2.382 0 0 0 -.71 .686l-4.892 7.26c-1.981 3.314 -1.22 7.466 1.767 9.882c2.969 2.402 7.286 2.402 10.254 0c2.987 -2.416 3.748 -6.569 1.795 -9.836l-4.919 -7.306c-.722 -1.075 -2.192 -1.376 -3.295 -.686z" /></g></symbol>
 <symbol id="i-dead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> <path d="M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5" /> <path d="M10 17v3" /> <path d="M14 17v3" /> <path d="M8 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M14 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></symbol>
@@ -249,7 +250,7 @@ try{var t=localStorage.getItem('angel.theme');
 
 <div class="band">UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY<span class="bandRight" id="bandRight">SCENARIO</span></div>
 
-<!-- ======================== THE CONSOLE SHELL ========================
+<!-- ------------------------ THE CONSOLE SHELL ------------------------
      Five strips of chrome and two icon rails, to the approved mock-I1
      geometry (THEME_CONTRACT.md, "Console layout"):
 
@@ -265,9 +266,9 @@ try{var t=localStorage.getItem('angel.theme');
      across two rows instead of one wrapping row, and the twenty-one
      destinations that were on the 196px word rail are now the icon rail on
      the left, with their labels as hover tooltips. Nothing was deleted.
-     ================================================================= -->
+     ----------------------------------------------------------------- -->
 
-<!-- ============================ APP ROW (30px) ============================ -->
+<!-- ---------------------------- APP ROW (30px) ---------------------------- -->
 <header id="cmdbar">
   <!-- The wordmark is the way home. Every console a person has used has one,
        and reloading used to drop them on whatever view was last stored with
@@ -365,7 +366,7 @@ try{var t=localStorage.getItem('angel.theme');
           title="Model &amp; sources"><svg class="ic16"><use href="#i-book"/></svg></button>
 </header>
 
-<!-- ============================ TOOL ROW (32px) =========================== -->
+<!-- ---------------------------- TOOL ROW (32px) --------------------------- -->
 <!-- The object you are looking at on the left, the instruments for looking at
      it on the right. Every control in here already existed; the map tools and
      the transport were on the old command bar or floating over the map. -->
@@ -450,7 +451,7 @@ try{var t=localStorage.getItem('angel.theme');
      below close up when it is not there. -->
 <div id="decbar" aria-label="What needs your decision"></div>
 
-<!-- ============================ SHELL ============================ -->
+<!-- ---------------------------- SHELL ---------------------------- -->
 <div id="shell">
 
   <!-- ------------------------- NAV RAIL ------------------------- -->
@@ -461,7 +462,7 @@ try{var t=localStorage.getItem('angel.theme');
        is not DOM order; it is set as a flexbox `order` by the role engine in
        js/app.js from the same table. See ROLE_CONTRACT.md. -->
   <nav id="rail">
-    <!-- ==================================================================
+    <!-- ------------------------------------------------------------------
          THE RAIL IS A LIST OF THINGS, NOT A LIST OF ARGUMENTS.
 
          Through v3.1 this rail carried twenty-three destinations and better
@@ -483,7 +484,7 @@ try{var t=localStorage.getItem('angel.theme');
          are still built and still reachable — through "Show every
          destination" at the foot of this rail, through the command palette,
          and from the after-action report, which is where an argument belongs.
-         ================================================================== -->
+         ------------------------------------------------------------------ -->
 
     <a class="navItem big" data-view="DECIDE">
       <span class="ni"><svg class="ic"><use href="#i-target"/></svg></span>
@@ -573,7 +574,7 @@ try{var t=localStorage.getItem('angel.theme');
   <main id="views">
 
 
-  <!-- ========================== DASHBOARD =========================== -->
+  <!-- -------------------------- DASHBOARD --------------------------- -->
   <section class="viewport" data-pane="DASHBOARD">
     <div class="pane">
       <div class="paneHead">
@@ -610,7 +611,7 @@ try{var t=localStorage.getItem('angel.theme');
            no deck.gl bundle, anything thrown — it never appears and the canvas
            map above is what the operator gets, which is why there is nothing
            for this onerror to remove. -->
-      <script type="module" src="js/theater3d.js" onerror="window.__ANGEL_T3D=null"></script>
+      <script type="module" src="js/theater3d.js?v=3" onerror="window.__ANGEL_T3D=null"></script>
     </div>
 
       <div class="sysbar bad" id="dbStatus"></div>
@@ -657,7 +658,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ========================== MISSION ========================== -->
+  <!-- -------------------------- MISSION -------------------------- -->
   <section class="viewport" data-pane="MISSION">
 
     <div id="stage">
@@ -675,16 +676,6 @@ try{var t=localStorage.getItem('angel.theme');
 
       <div class="paneTag a"><i></i><b id="sbALabel">ANGEL SWARM</b><em>physiological deadlines · receiver-aware · cold-chain in the loop</em></div>
       <div class="paneTag b"><i></i><b>CURRENT — TRIAGE & PROXIMITY</b><em>sorted by triage category, nearest airframe · one stop per sortie</em></div>
-      <div class="cmpIndicatorPreview" role="group" aria-label="Comparison indicator preview">
-        <span>PREVIEW</span>
-        <button type="button" data-cmp-indicator="tactical" aria-pressed="true"
-                title="Compact tactical label"><b>A</b> COMPACT</button>
-        <button type="button" data-cmp-indicator="edge" aria-pressed="false"
-                title="Map-edge tab"><b>B</b> EDGE TAB</button>
-        <button type="button" data-cmp-indicator="inline" aria-pressed="false"
-                title="Minimal inline identifier"><b>C</b> INLINE</button>
-        <output aria-live="polite">COMPACT TACTICAL LABEL</output>
-      </div>
 
       <div class="missCompare bad" id="missCompare"></div>
 
@@ -743,7 +734,7 @@ try{var t=localStorage.getItem('angel.theme');
   </section>
 
 
-  <!-- =========================== COMPARE ============================ -->
+  <!-- --------------------------- COMPARE ---------------------------- -->
   <section class="viewport" data-pane="COMPARE">
     <div class="cmpWrap">
       <div class="cmpTop">
@@ -800,7 +791,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ========================= CASUALTIES ========================= -->
+  <!-- ------------------------- CASUALTIES ------------------------- -->
   <section class="viewport" data-pane="CASUALTIES">
     <div class="pane">
       <div class="paneHead">
@@ -841,7 +832,7 @@ try{var t=localStorage.getItem('angel.theme');
   </section>
 
 
-  <!-- =========================== UNITS & C2 =========================== -->
+  <!-- --------------------------- UNITS & C2 --------------------------- -->
   <section class="viewport" data-pane="UNITS">
     <div class="pane">
       <div class="paneHead">
@@ -888,7 +879,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ============================ FLEET ============================ -->
+  <!-- ---------------------------- FLEET ---------------------------- -->
   <section class="viewport" data-pane="FLEET">
     <div class="pane">
       <div class="paneHead">
@@ -919,8 +910,8 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- =========================== SUPPLY =========================== -->
-  <!-- ========================= LAUNCH POINTS =========================
+  <!-- --------------------------- SUPPLY --------------------------- -->
+  <!-- ------------------------- LAUNCH POINTS -------------------------
        A launch point is a thing in the world — it has aircraft, blood, a
        cold chain and a reach. Until v3.2 there was no page for one, which is
        why "no launch point close enough" read as an abstraction rather than
@@ -938,7 +929,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ======================= AFTER-ACTION REPORT ======================
+  <!-- ----------------------- AFTER-ACTION REPORT ----------------------
        Everything that argues rather than shows. Seven destinations used to
        carry this and a reader had to visit all seven to assemble one claim.
        Rendered by js/page-afteraction.js into #aarBody. -->
@@ -982,7 +973,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- =========================== TASKING =========================== -->
+  <!-- --------------------------- TASKING --------------------------- -->
   <section class="viewport" data-pane="TASKING">
     <div class="pane">
       <div class="paneHead">
@@ -1019,8 +1010,8 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ============================ AUDIT ============================ -->
-  <!-- =========================== STANDARD ===========================
+  <!-- ---------------------------- AUDIT ---------------------------- -->
+  <!-- --------------------------- STANDARD ---------------------------
        The argument page, and the one a presenter stands in front of. It is
        built as a headline, one orienting sentence, four sourced callouts and
        three numbered beats — the shape DECIDE already uses — because the
@@ -1128,7 +1119,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ============================== ROI ============================= -->
+  <!-- ------------------------------ ROI ----------------------------- -->
   <section class="viewport" data-pane="ROI">
     <div class="pane">
       <div class="paneHead">
@@ -1146,7 +1137,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ============================ STREAM ============================ -->
+  <!-- ---------------------------- STREAM ---------------------------- -->
   <section class="viewport" data-pane="STREAM">
     <div class="pane">
       <div class="paneHead">
@@ -1206,7 +1197,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- =========================== SENSOR =========================== -->
+  <!-- --------------------------- SENSOR --------------------------- -->
   <!-- Rendered entirely by js/device.js. If the model fails to load, this
        pane says so plainly rather than showing an empty frame. -->
   <section class="viewport" data-pane="SENSOR">
@@ -1221,7 +1212,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ========================== DOCTRINE ========================== -->
+  <!-- -------------------------- DOCTRINE -------------------------- -->
   <!-- Rendered entirely by js/doctrine.js. A sentence encoder embeds the
        question and the answer is quoted verbatim from a corpus shipped in
        this folder — the module generates no text, so it cannot invent a
@@ -1242,7 +1233,7 @@ try{var t=localStorage.getItem('angel.theme');
     <script type="module" src="js/doctrine.js" onerror="document.querySelectorAll('[data-view=\'DOCTRINE\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'DOCTRINE\']');if(s)s.remove()"></script>
   </section>
 
-  <!-- ========================== MISSION BRIEF ========================== -->
+  <!-- -------------------------- MISSION BRIEF -------------------------- -->
   <!-- A language model with no permission to know anything. js/copilot.js
        assembles the figures from the live run, the SQL aggregate over that
        run and the retrieved doctrine passages, hands that block to a 0.5B
@@ -1272,7 +1263,7 @@ try{var t=localStorage.getItem('angel.theme');
        as a navigation alias — see app.js — so every catalogue entry,
        shortcut and link that names it still lands somewhere real. -->
 
-  <!-- ========================== ANALYSIS ========================== -->
+  <!-- -------------------------- ANALYSIS -------------------------- -->
   <section class="viewport" data-pane="ANALYSIS">
     <div class="pane">
       <div class="paneHead">
@@ -1336,7 +1327,7 @@ try{var t=localStorage.getItem('angel.theme');
   </section>
 
 
-  <!-- ========================= CASUALTY FLOW ========================= -->
+  <!-- ------------------------- CASUALTY FLOW ------------------------- -->
   <!-- Rendered entirely by js/charts.js: a Sankey of the cohort from triage
        category to outcome, six synchronised time series over the mission
        clock, a Kaplan-Meier survival curve with the Golden Hour marked, and
@@ -1348,7 +1339,7 @@ try{var t=localStorage.getItem('angel.theme');
     <script type="module" src="js/charts.js" onerror="document.querySelectorAll('[data-view=\'FLOW\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'FLOW\']');if(s)s.remove()"></script>
   </section>
 
-  <!-- ========================== CONFIDENCE ========================== -->
+  <!-- -------------------------- CONFIDENCE -------------------------- -->
   <!-- Rendered entirely by js/montecarlo.js: the same simulation run a few
        hundred times on different seeds across Web Workers, reported as a
        paired difference distribution with a confidence interval, an effect
@@ -1362,7 +1353,7 @@ try{var t=localStorage.getItem('angel.theme');
     <script type="module" src="js/montecarlo.js" onerror="document.querySelectorAll('[data-view=\'CONFIDENCE\']').forEach(function(e){e.remove()});var s=document.querySelector('[data-pane=\'CONFIDENCE\']');if(s)s.remove()"></script>
   </section>
 
-  <!-- =========================== DATA / SQL =========================== -->
+  <!-- --------------------------- DATA / SQL --------------------------- -->
   <!-- This pane used to be a second, complete SQL console: schema browser,
        saved queries, editor, run button and result grid, over an in-page
        SQLite. The analytical console two entries above it is the same product
@@ -1392,7 +1383,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ==================== ANALYTICAL CONSOLE (DuckDB) ====================
+  <!-- -------------------- ANALYTICAL CONSOLE (DuckDB) --------------------
        The pane is empty on purpose: js/data2.js builds it on first view and
        leaves it alone if the engine could not start, so a machine without
        Web Workers or WebAssembly simply never sees a console rather than
@@ -1403,7 +1394,7 @@ try{var t=localStorage.getItem('angel.theme');
     <script type="module" src="js/data2.js"></script>
   </section>
 
-  <!-- ==================== ROLE-PURPOSED PANES ===================== -->
+  <!-- -------------------- ROLE-PURPOSED PANES --------------------- -->
   <!-- Two destinations that exist only inside a role profile. Neither has a
        renderer here. Each carries a header the shell owns and one mount
        element whose id is fixed by ROLE_CONTRACT.md, so the module that
@@ -1436,7 +1427,7 @@ try{var t=localStorage.getItem('angel.theme');
     </div>
   </section>
 
-  <!-- ========================== SETTINGS ========================== -->
+  <!-- -------------------------- SETTINGS -------------------------- -->
   <section class="viewport" data-pane="SETTINGS">
     <div class="pane">
       <div class="paneHead">
@@ -1574,7 +1565,7 @@ try{var t=localStorage.getItem('angel.theme');
   </nav>
 </div>
 
-<!-- ========================= FOOT RIBBON (26px) ========================= -->
+<!-- ------------------------- FOOT RIBBON (26px) ------------------------- -->
 <!-- Readouts, not a status bar of prose. Each cell is a quantity the operator
      would otherwise have to open a pane to read, and every one of them comes
      from the live run — js/app.js fills them in syncFoot() on the same tick
@@ -1602,7 +1593,7 @@ try{var t=localStorage.getItem('angel.theme');
      reflowed the bar the moment it opened. Filled by buildOpMenu(). -->
 <div id="opMenu" class="opMenu" role="listbox" aria-label="Operations" hidden></div>
 
-<!-- ======================== DEPLOY MODAL ========================= -->
+<!-- ------------------------ DEPLOY MODAL ------------------------- -->
 <div id="deployModal" data-phase="READY">
   <div class="modalCard deployCard">
     <div class="modalHead">
@@ -1645,7 +1636,7 @@ try{var t=localStorage.getItem('angel.theme');
   </div>
 </div>
 
-<!-- ========================= RUN REPORT ========================== -->
+<!-- ------------------------- RUN REPORT -------------------------- -->
 <div id="runModal">
   <div class="modalCard runCard">
     <div class="modalHead">
@@ -1662,7 +1653,7 @@ try{var t=localStorage.getItem('angel.theme');
   </div>
 </div>
 
-<!-- ============================ MODAL ============================ -->
+<!-- ---------------------------- MODAL ---------------------------- -->
 <div id="modal">
   <div class="modalCard">
     <div class="modalHead">
@@ -1725,7 +1716,6 @@ try{var t=localStorage.getItem('angel.theme');
 <script src="js/db.js"></script>
 <script src="js/film_inline.js"></script>
 <script src="js/map-layout-state.js"></script>
-<script src="js/comparison-indicators.js"></script>
 <script src="js/app.js"></script>
 <script type="module" src="js/device.js"></script>
 <!-- The cross-cutting layer: command palette, one keyboard guard in front of
@@ -1760,6 +1750,9 @@ try{var t=localStorage.getItem('angel.theme');
 <script src="js/page-afteraction.js"></script>
 <script src="js/inspector.js"></script>
 <script src="js/context-search-state.js"></script>
+<script src="js/fpcon-state.js"></script>
+<script src="js/resupply-track.js"></script>
+<script src="angel-resupply-track.js"></script>
 <script src="js/shell.js"></script>
 <script src="js/page-dash.js"></script>
 <script src="js/page-tty.js"></script>
@@ -1770,5 +1763,6 @@ try{var t=localStorage.getItem('angel.theme');
 <script src="js/page-dec.js"></script>
 <script src="js/page-feed.js"></script>
 <script src="js/page-map.js"></script>
+<script src="js/page-track.js"></script>
 </body>
 </html>

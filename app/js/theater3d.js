@@ -3051,7 +3051,7 @@ const GB = {
   w: 0, h: 0, dpr: 1, ro: null,
   lon: 128, lat: 16, R: 0, Rmin: 1, Rmax: 1,
   idleSpin: 0, lastTouch: 0,
-  drag: null, moved: 0,
+  drag: null, moved: 0, bindAbort: null, gestureSelections: 0,
   hits: [], hover: null, sel: null,
   raf: 0, live: false, mountedAt: 0, dead: false, note: '',
   /* frames is every animation frame this loop was handed; paints is the subset
@@ -3059,7 +3059,7 @@ const GB = {
      saved, and it is also where a stutter hides, so both are reported. */
   frames: 0, fpsAt: 0, fps: 0, drawMs: 0, paints: 0, tickAt: 0,
   fly: null, handoffFn: null, handing: false, fade: 1, offTarget: false,
-  _key: '', _stat: null, _statAt: 0, _statT: -1, _placedRects: [], _drawn: 0, _emit: 0
+  _key: '', _theaterKey: '', _mode: '', _stat: null, _statAt: 0, _statT: -1, _placedRects: [], _drawn: 0, _emit: 0
 };
 
 /* joaStatus() walks a synthetic casualty stream for every operation the
@@ -3267,7 +3267,8 @@ function gbTheatreKm(key) {
 }
 
 function gbFitLimits() {
-  GB.Rmin = Math.min(GB.w, GB.h) * 0.44;
+  const compact = document.documentElement.getAttribute('data-globe-mode') === 'compact';
+  GB.Rmin = Math.min(GB.w, GB.h) * (compact ? 0.39 : 0.44);
   /* Far enough in to reach a tactical sector — about eighty kilometres across
      the frame — which is where the handoff below has already happened. */
   GB.Rmax = GB.w / (2 * Math.sin(40 / GB_EARTH_KM));
@@ -3716,6 +3717,7 @@ function gbFrame() {
    headquarters mark where the command sits. */
 function gbDrawOperations(ctx, closeness) {
   const activeKey = (typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM';
+  const compact = document.documentElement.getAttribute('data-globe-mode') === 'compact';
   const showText = closeness > 0.22;
   const rows = gbStatuses();
   for (const key of Object.keys(THEATERS)) {
@@ -3798,7 +3800,7 @@ function gbDrawOperations(ctx, closeness) {
         }
       }
       /* The name of the command itself, once, under its own operations. */
-      if (!showText && near && joa === th.joas[0]) {
+      if (!compact && !showText && near && joa === th.joas[0]) {
         ctx.textAlign = 'center';
         ctx.font = 'bold 10px ui-monospace,Menlo,monospace';
         gbLabel(ctx, th.name, x, y - 16, gbRGBA(TK('m-ao'), 1), 10);
@@ -3863,6 +3865,14 @@ function gbChrome(ctx, kmAcross, ins, sun) {
   const w = GB.w, h = GB.h;
   try { window.__MAP_CHROME = []; } catch (e) { /* contained */ }
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  if (document.documentElement.getAttribute('data-globe-mode') === 'compact') {
+    ctx.save();
+    ctx.font = '700 9px ui-monospace,Menlo,monospace';
+    ctx.fillStyle = gbRGBA(C.ink, 0.82);
+    ctx.fillText((typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM', 8, 14);
+    ctx.restore();
+    return;
+  }
 
   /* The scale bar. On a sphere it is only honest near the middle of the disc,
      which is where it is measured and where it says it applies. */
@@ -3992,6 +4002,15 @@ function gbLoop() {
 const GB_SPIN_DEG_PER_MS = 0.055 / 16.7;
 function gbTick() {
   const now = performance.now();
+  const theaterKey = (typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM';
+  /* The selected theater and the painted-scene cache are different state.
+     Sharing _key with gbSceneKey() made each animation frame look like a
+     theater change, so gbReset() refreshed lastTouch forever and idle rotation
+     could never begin. */
+  if (GB._theaterKey !== theaterKey) {
+    GB._theaterKey = theaterKey;
+    gbReset();
+  }
   /* Elapsed since the last tick, clamped: a tab that was in the background for
      a minute must not come back with the earth spun a quarter turn, and a
      browser that hands out a zero or a negative delta must not stall it. */
@@ -4179,21 +4198,63 @@ function gbHandoff(tgt) {
 
 /* ------------------------------------------------------------- interaction */
 function gbBind(el) {
+  /* Every mount gets one listener lifetime. In particular, the stage zoom
+     controls and window-level gesture finishers must not survive a remount. */
+  if (GB.bindAbort) {
+    try { GB.bindAbort.abort(); } catch (e) { /* already stopped */ }
+  }
+  GB.bindAbort = typeof AbortController === 'function' ? new AbortController() : null;
+  const opts = GB.bindAbort ? { signal: GB.bindAbort.signal } : false;
+  const listen = (node, name, fn, extra) => {
+    const o = extra ? Object.assign({}, extra, GB.bindAbort ? { signal: GB.bindAbort.signal } : {}) : opts;
+    node.addEventListener(name, fn, o);
+  };
   const touch = () => { GB.lastTouch = performance.now(); };
-  el.addEventListener('pointerdown', gbGuard('the globe pointer', ev => {
+  const finish = gbGuard('the globe pointer', (ev, cancelled) => {
+    const drag = GB.drag;
+    if (!drag || (ev && ev.pointerId != null && ev.pointerId !== drag.id)) return;
+    const releaseMoved = ev && ev.clientX != null ?
+      Math.hypot(ev.clientX - drag.sx, ev.clientY - drag.sy) : 0;
+    GB.drag = null;
+    GB.moved = 0;
+    if (ev) {
+      try { el.releasePointerCapture(ev.pointerId); } catch (e) { /* not captured */ }
+    }
+    if (cancelled || drag.dragged || releaseMoved > 7 || GB.fly) return;
+    /* Selection belongs to the original press, not to wherever a tiny release
+       jitter happened to land. This also makes one gesture one selection. */
+    const hit = drag.hit;
+    if (hit && typeof selectJoa === 'function') {
+      GB.sel = hit.joa.key;
+      GB.gestureSelections++;
+      gbTip(null);
+      selectJoa(hit.joa.key);
+    }
+  });
+  listen(el, 'pointerdown', gbGuard('the globe pointer', ev => {
     touch();
     if (GB.fly) return;
-    GB.drag = { x: ev.clientX, y: ev.clientY };
+    const r = el.getBoundingClientRect();
+    GB.drag = {
+      id: ev.pointerId, sx: ev.clientX, sy: ev.clientY,
+      x: ev.clientX, y: ev.clientY, dragged: false,
+      hit: gbPick(ev.clientX - r.left, ev.clientY - r.top)
+    };
     GB.moved = 0;
     try { el.setPointerCapture(ev.pointerId); } catch (e) { /* not captured */ }
   }));
-  el.addEventListener('pointermove', gbGuard('the globe pointer', ev => {
+  listen(el, 'pointermove', gbGuard('the globe pointer', ev => {
     const r = el.getBoundingClientRect();
-    if (GB.drag) {
+    if (GB.drag && ev.pointerId === GB.drag.id) {
       touch();
+      const fromStartX = ev.clientX - GB.drag.sx, fromStartY = ev.clientY - GB.drag.sy;
+      GB.moved = Math.hypot(fromStartX, fromStartY);
+      /* Do not move the camera at all inside the click tolerance. Once intent
+         is a deliberate drag, consume from the press origin exactly once. */
+      if (!GB.drag.dragged && GB.moved <= 7) return;
       const dx = ev.clientX - GB.drag.x, dy = ev.clientY - GB.drag.y;
+      GB.drag.dragged = true;
       GB.drag.x = ev.clientX; GB.drag.y = ev.clientY;
-      GB.moved += Math.abs(dx) + Math.abs(dy);
       GB.lon = ((GB.lon - dx / GB.R * R2D + 540) % 360) - 180;
       GB.lat = Math.max(-85, Math.min(85, GB.lat + dy / GB.R * R2D));
       gbDropStaleSel();
@@ -4205,40 +4266,35 @@ function gbBind(el) {
     el.style.cursor = hit ? 'pointer' : 'grab';
     gbTip(hit, x, y);
   }));
-  const up = gbGuard('the globe pointer', ev => {
-    if (!GB.drag) return;
-    const wasDrag = GB.moved > 5;
-    GB.drag = null;
-    try { el.releasePointerCapture(ev.pointerId); } catch (e) { /* not captured */ }
-    if (wasDrag || GB.fly) return;
-    const r = el.getBoundingClientRect();
-    const hit = gbPick(ev.clientX - r.left, ev.clientY - r.top);
-    /* The same contract both theatre renderers use, called by name. */
-    if (hit && typeof selectJoa === 'function') { GB.sel = hit.joa.key; gbTip(null); selectJoa(hit.joa.key); }
-  });
-  el.addEventListener('pointerup', up);
-  el.addEventListener('pointercancel', up);
-  el.addEventListener('pointerleave', gbGuard('the globe pointer', () => {
+  listen(el, 'pointerup', ev => finish(ev, false));
+  listen(el, 'pointercancel', ev => finish(ev, true));
+  listen(el, 'lostpointercapture', ev => finish(ev, true));
+  /* Capture can fail (or be revoked by browser chrome). Window finishers make
+     release outside the canvas deterministic; bubbling duplicates are no-ops. */
+  listen(window, 'pointerup', ev => finish(ev, false));
+  listen(window, 'pointercancel', ev => finish(ev, true));
+  listen(window, 'blur', () => finish(null, true));
+  listen(el, 'pointerleave', gbGuard('the globe pointer', () => {
     GB.hover = null; gbTip(null);
   }));
-  el.addEventListener('wheel', gbGuard('the globe zoom', ev => {
+  listen(el, 'wheel', gbGuard('the globe zoom', ev => {
     ev.preventDefault();
     touch();
     if (GB.fly) return;
     gbZoom(Math.exp(-ev.deltaY * (ev.deltaMode === 1 ? 0.05 : 0.0016)));
   }), { passive: false });
-  el.addEventListener('dblclick', gbGuard('the globe reset', ev => {
+  listen(el, 'dblclick', gbGuard('the globe reset', ev => {
     ev.preventDefault(); gbReset();
   }));
   /* The stage's own zoom pad drives this camera as well as the other two, so
      one press of that element moves whichever renderer is on screen. */
   document.querySelectorAll('#theaterStage [data-thzoom]').forEach(el2 =>
-    el2.addEventListener('click', gbGuard('the globe zoom control', () => {
+    listen(el2, 'click', gbGuard('the globe zoom control', () => {
       if (!GB.on) return;
       const k = el2.dataset.thzoom;
       if (k === 'fit') gbReset(); else gbZoom(k === 'in' ? 1.45 : 1 / 1.45);
     })));
-  el.addEventListener('keydown', gbGuard('the globe keys', ev => {
+  listen(el, 'keydown', gbGuard('the globe keys', ev => {
     if (ev.key === '+' || ev.key === '=') gbZoom(1.45);
     else if (ev.key === '-' || ev.key === '_') gbZoom(1 / 1.45);
     else if (ev.key === '0') gbReset();
@@ -4271,7 +4327,11 @@ function gbReset() {
   GB.R = GB.Rmin; GB.fade = 1;
   const th = THEATERS[(typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM'];
   if (th) { GB.lon = (th.lon0 + th.lon1) / 2; GB.lat = (th.lat0 + th.lat1) / 2; }
-  GB.lastTouch = performance.now();
+  /* The compact command-card Globe is ambient operational context, not a
+     dormant map waiting for input, so its native spin begins on the first
+     live ticks. The dedicated Theater Map retains the normal idle delay. */
+  const compact = document.documentElement.getAttribute('data-globe-mode') === 'compact';
+  GB.lastTouch = performance.now() - (compact ? 3600 : 0);
 }
 function gbPick(x, y) {
   let best = null, bd = 24;
@@ -4331,6 +4391,12 @@ const GB_CSS = `
    has already given its GPU context back and the canvas map takes its own
    early return, so this only stops a hidden element from taking layout. */
 body.theaterGlobe #t3Host, body.theaterGlobe #mapTheater{display:none!important}
+html[data-globe-mode="compact"] #theaterStage,
+html[data-globe-mode="compact"] #gbHost{position:absolute!important;inset:0!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;grid-template-columns:1fr!important}
+html[data-globe-mode="compact"] .thHead,
+html[data-globe-mode="compact"] #theaterStage .thHint,
+html[data-globe-mode="compact"] #theaterStage .thStats,
+html[data-globe-mode="compact"] #theaterStage .thZoom{display:none!important}
 `;
 let GB_CSS_IN = false;
 function gbInjectCSS() {
@@ -4343,6 +4409,8 @@ function gbInjectCSS() {
 
 function gbMeasure() {
   if (!GB.cv) return;
+  const mode = document.documentElement.getAttribute('data-globe-mode') === 'compact' ? 'compact' : 'normal';
+  const modeChanged = GB._mode !== mode;
   let r = GB.cv.getBoundingClientRect();
   /* If the canvas has not been stretched — a stylesheet that did not load, a
      replaced-element rule lost to something more specific — the host's own box
@@ -4353,11 +4421,29 @@ function gbMeasure() {
   }
   if (!(r.width > 2 && r.height > 2)) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  if (Math.abs(r.width - GB.w) < 0.5 && Math.abs(r.height - GB.h) < 0.5 && dpr === GB.dpr) return;
+  if (Math.abs(r.width - GB.w) < 0.5 && Math.abs(r.height - GB.h) < 0.5 && dpr === GB.dpr && GB._mode === mode) return;
   GB.w = r.width; GB.h = r.height; GB.dpr = dpr;
+  GB._mode = mode;
   GB.cv.width = Math.round(r.width * dpr);
   GB.cv.height = Math.round(r.height * dpr);
   gbFitLimits();
+  /* A compact slot can be measured once under the full-pane geometry before
+     its host mode arrives. Merely lowering Rmin then preserves that inherited
+     radius, which leaves only the top of an oversized globe in the card.
+     Compact is a fitted overview: every real card resize fits the whole
+     sphere again, and only the first compact measurement recentres the camera
+     on the selected combatant command. */
+  if (mode === 'compact') {
+    GB.R = GB.Rmin;
+    if (modeChanged) {
+      const th = THEATERS[(typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM'] || THEATERS.PACOM;
+      if (th) {
+        GB.lon = (th.lon0 + th.lon1) / 2;
+        GB.lat = (th.lat0 + th.lat1) / 2;
+      }
+      GB.lastTouch = performance.now() - 3600;
+    }
+  }
 }
 
 function gbMount() {
@@ -4384,8 +4470,10 @@ function gbMount() {
   stage.insertBefore(host, stage.firstChild);
 
   GB.host = host;
-  GB.cv = document.getElementById('gbCanvas');
-  GB.tip = document.getElementById('gbTip');
+  /* Resolve inside the host just created. A retained handoff frame can briefly
+     contain the prior IDs; it must never become the next mount's owner. */
+  GB.cv = host.querySelector('#gbCanvas');
+  GB.tip = host.querySelector('#gbTip');
   GB.ctx = GB.cv.getContext('2d');
   if (!GB.ctx) { try { host.remove(); } catch (e) { /* gone */ } return false; }
 
@@ -4416,6 +4504,11 @@ function gbMount() {
 function gbUnmount(silent, holdFrame) {
   if (GB.raf) { try { cancelAnimationFrame(GB.raf); } catch (e) { /* nothing to cancel */ } }
   GB.raf = 0; GB.on = false; GB.live = false; GB.fly = null; GB.handing = false; GB.fade = 1;
+  GB.drag = null; GB.moved = 0;
+  if (GB.bindAbort) {
+    try { GB.bindAbort.abort(); } catch (e) { /* already stopped */ }
+    GB.bindAbort = null;
+  }
   if (GB.ro) { try { GB.ro.disconnect(); } catch (e) { /* gone */ } GB.ro = null; }
   /* A canvas the document still holds keeps its backing store; sizing it to
      nothing before it is dropped hands that memory straight back, which is
@@ -4462,14 +4555,26 @@ window.__ANGEL_GLOBE = {
   /* For the probe and for anyone debugging this from a console. */
   stats: () => ({
     on: GB.on, live: GB.live, fps: GB.fps, drawMs: +GB.drawMs.toFixed(2),
-    paints: GB.paints,
-    lon: +GB.lon.toFixed(4), lat: +GB.lat.toFixed(4), R: Math.round(GB.R),
+    paints: GB.paints, frames: GB.frames,
+    lon: +GB.lon.toFixed(4), lat: +GB.lat.toFixed(4), cx: +GB.lon.toFixed(4), cy: +GB.lat.toFixed(4),
+    R: Math.round(GB.R), Rmin: Math.round(GB.Rmin),
+    idleFor: Math.round(performance.now() - GB.lastTouch),
+    dragging: !!GB.drag, compact: document.documentElement.getAttribute('data-globe-mode') === 'compact',
+    theater: (typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM',
+    bounds: (() => { const t = THEATERS[(typeof APP !== 'undefined' && APP.theaterKey) || 'PACOM'] || THEATERS.PACOM; return { lon0: t.lon0, lon1: t.lon1, lat0: t.lat0, lat1: t.lat1 }; })(),
     w: Math.round(GB.w), h: Math.round(GB.h),
     kmAcross: Math.round(gbKmAcross()), flying: !!GB.fly, fade: +GB.fade.toFixed(2),
     coastRings: GB_COAST ? GB_COAST.length : 0, borderRuns: GB_BORDER ? GB_BORDER.length : 0,
     verts: GB_VERTS, drawn: GB._drawn, emitted: GB._emit,
-    labels: GB._placedRects.length
+    labels: GB._placedRects.length, selected: GB.sel || null,
+    gestureSelections: GB.gestureSelections
   }),
+  /* Canvas coordinates of a currently visible operation. Browser regression
+     coverage uses this only to send native pointer gestures to the real mark. */
+  hitPoint: k => {
+    const h = GB.hits.find(x => x && x.joa && x.joa.key === k);
+    return h ? { x: h.x, y: h.y } : null;
+  },
   /* Every label box this scale drew, in canvas pixels, for the verification
      pass that asserts nothing landed under the page's own panels. */
   placedRects: () => GB._placedRects.slice(),
@@ -4477,6 +4582,32 @@ window.__ANGEL_GLOBE = {
   zoom: f => { gbZoom(f); return true; },
   reset: () => { gbReset(); return true; },
   spinTo: (lon, lat) => { GB.lon = lon; GB.lat = lat; GB.lastTouch = performance.now(); gbDropStaleSel(); return true; },
+  /* Deterministic probes for the shipped browser regression page. Headless
+     Chromium throttles the clock inside a nested iframe even when its box is
+     visible, so waiting twenty wall-clock seconds can advance this renderer's
+     performance clock by less than three. These probes execute the exact
+     production tick and handoff paths with their clocks moved past the
+     threshold; they do not replace either path in normal operation. */
+  probeIdleSpin: () => {
+    const lon = GB.lon, touch = GB.lastTouch, tick = GB.tickAt;
+    GB.lastTouch = performance.now() - 3600;
+    GB.tickAt = performance.now() - 17;
+    gbTick();
+    const moved = GB.lon !== lon;
+    GB.lastTouch = touch; GB.tickAt = tick;
+    return moved;
+  },
+  probeHandoff: k => {
+    const old = GB.sel;
+    GB.sel = k || GB.sel;
+    const tgt = gbTarget();
+    if (!tgt) { GB.sel = old; return false; }
+    gbHandoff(tgt);
+    if (!GB.fly) { GB.sel = old; return false; }
+    GB.fly.t0 = performance.now() - GB.fly.ms - 1;
+    gbTick();
+    return !GB.fly;
+  },
   /* THE OPERATIONS LIST BESIDE THE MAP IS A SELECTION THIS SCALE HAS TO KNOW
      ABOUT. Clicking an operation on the globe already sets it; clicking the same
      operation in the list beside the map used to set it only in the page, and

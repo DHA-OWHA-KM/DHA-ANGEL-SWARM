@@ -27,6 +27,7 @@
      issues an automatic /favicon.ico request that 404s in the console. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;1.6 1.04 20.8 20.8&quot;%3E%3Crect x=&quot;1.6&quot; y=&quot;1.04&quot; width=&quot;20.8&quot; height=&quot;20.8&quot; rx=&quot;4.4&quot; fill=&quot;%230b1119&quot;/%3E%3Cg fill=&quot;%23f05653&quot;%3E%3Cpath d=&quot;M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z&quot;/%3E%3Cpath d=&quot;M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z&quot;/%3E%3Cpath d=&quot;M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z&quot;/%3E%3C/g%3E%3C/svg%3E">
 <script src="./support.js"></script>
+<script src="./js/nav-shine.js"></script>
 </head>
 <body>
 <x-dc>
@@ -38,70 +39,106 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 .app-nav-menu>div svg{transition:filter .22s ease-in-out}
 .app-nav-menu>div:is(:hover,:focus-visible){background:oklch(0.225 0.014 250)!important}
 .app-nav-menu>div[data-selected="true"]{background:oklch(0.26 0.03 165)!important}
-.app-nav-menu>div:is(:hover,:focus-visible) svg{filter:brightness(1.5) saturate(1.18)}
+.app-nav-menu>div:is(:hover,:focus-visible) svg:not(.nav-shine-copy){filter:brightness(1.5) saturate(1.18)}
 .app-nav-menu>div:focus-visible{outline:2px solid oklch(0.78 0.01 250);outline-offset:-2px}
-@media (prefers-reduced-motion:reduce){.app-nav-menu>div,.app-nav-menu>div svg{transition:none}}
+.evidence-shine-icon{position:relative;display:grid;place-items:center;flex:none;width:17px;height:17px;overflow:hidden;clip-path:polygon(50% 2%,92% 20%,92% 54%,82% 76%,65% 91%,50% 98%,35% 91%,18% 76%,8% 54%,8% 20%)}
+.evidence-shine-icon svg{display:block}
+.evidence-shine-bar{position:absolute;z-index:2;top:-6px;left:-8px;width:3px;height:29px;background:#fff;transform:rotate(28deg);opacity:0;pointer-events:none}
+.evidence-nav-item:hover .evidence-shine-bar{animation:evidenceIconShine 2.4s linear infinite}
+@keyframes evidenceIconShine{0%{left:-8px;opacity:1}38%{left:22px;opacity:1}39%,100%{left:22px;opacity:0}}
+.nav-shine-icon{position:relative;display:grid;place-items:center;flex:none}
+.nav-shine-icon>svg{grid-area:1/1}
+.app-nav-menu>div .nav-shine-copy{position:absolute;inset:0;z-index:2;filter:brightness(0) saturate(100%) invert(1);clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:0;pointer-events:none}
+.app-nav-menu>div:hover .nav-shine-copy{animation:navIconShine 2.4s linear infinite}
+@keyframes navIconShine{0%{clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:1}38%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:1}39%,100%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:0}}
+.brand-shine-icon{position:relative;display:grid;place-items:center;flex:none}
+.brand-shine-icon>svg{grid-area:1/1}
+.brand-shine-copy{position:absolute;inset:0;z-index:2;filter:brightness(0) saturate(100%) invert(1);clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:0;pointer-events:none;animation:brandIconShine 2.4s linear infinite}
+@keyframes brandIconShine{0%{clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:1}38%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:1}39%,100%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:0}}
+.cas-board{overflow:hidden}
+.cas-board-axis{display:grid;grid-template-columns:286px minmax(0,1fr);padding:9px 22px 8px 0;border-bottom:1px solid oklch(0.27 0.01 250);background:oklch(0.185 0.01 250);font:400 8.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.55 0.008 250)}
+.cas-board-axis-lanes,.cas-row-track{display:grid;grid-template-columns:minmax(80px,1fr) minmax(150px,34%);gap:10px;min-width:0}
+.cas-board-axis-ticks{display:flex;min-width:0}.cas-board-axis-ticks>span{width:16.6%}
+.cas-board-row{display:flex;align-items:center;min-height:56px;overflow:hidden}
+.cas-row-id{width:286px;padding:8px 14px;display:flex;flex:none;flex-direction:column;gap:2px;min-width:0;box-sizing:border-box}
+.cas-row-id>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cas-row-track{flex:1;align-items:center;padding:7px 22px 7px 0;min-width:0}
+.cas-row-bars{display:flex;align-items:center;min-width:0;overflow:hidden}
+.cas-row-bar{max-width:100%;min-width:24px;box-sizing:border-box}
+.cas-row-meta{display:flex;flex-direction:column;gap:3px;min-width:0;overflow:hidden}
+.cas-row-meta>span{min-width:0;overflow-wrap:anywhere}
+@media(max-width:900px){.cas-board-axis{grid-template-columns:220px minmax(0,1fr);padding-right:14px}.cas-row-id{width:220px}.cas-board-axis-lanes,.cas-row-track{grid-template-columns:minmax(70px,1fr) minmax(120px,42%);gap:8px}.cas-row-track{padding-right:14px}}
+.classification-banner{position:relative;box-sizing:border-box;padding:3px 12px;display:grid;place-items:center;background:oklch(0.42 0.13 145);color:oklch(0.97 0.015 145);border-bottom:1px solid oklch(0.67 0.16 145);font:700 8px/1.2 'IBM Plex Mono',monospace;letter-spacing:.12em}
+.classification-notice{text-align:center}
+.classification-stamp{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:oklch(0.91 0.045 145);white-space:nowrap}
+@media (max-width:760px){.classification-banner{display:flex;flex-direction:column;gap:0;padding:2px 8px}.classification-notice{width:100%}.classification-stamp{position:static;transform:none;align-self:flex-end;text-align:right}}
+@media (prefers-reduced-motion:reduce){.app-nav-menu>div,.app-nav-menu>div svg{transition:none}.evidence-nav-item:hover .evidence-shine-bar{animation:none;left:7px;opacity:1}.app-nav-menu>div:hover .nav-shine-copy{animation:none;clip-path:polygon(58% 100%,73% 100%,23% 0%,8% 0%);opacity:1}.brand-shine-copy{animation:none;clip-path:polygon(58% 100%,73% 100%,23% 0%,8% 0%);opacity:1}}
 </style></helmet>
 
 <div style="min-height:100vh;background:oklch(0.17 0.01 250);color:oklch(0.92 0.005 250)">
 
-<div style="background:oklch(0.2 0.012 250);color:oklch(0.68 0.008 250);font:600 9px 'IBM Plex Mono',monospace;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.29 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">{{ joaStamp }}</span></div>
+<div class="classification-banner"><span class="classification-notice">UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span class="classification-stamp">{{ joaStamp }}</span></div>
 
 <div style="display:grid;grid-template-columns:246px 1fr;align-items:start">
 
 <div style="background:oklch(0.145 0.01 250);border-right:1px solid oklch(0.28 0.01 250);padding:0 0 22px;position:sticky;top:0;height:100vh;overflow-y:auto">
-<div style="padding:16px 15px 17px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;gap:11px;align-items:center">
+<button type="button" class="brand-home" onClick="{{ go.dash }}" onKeyDown="{{ nav.dash.key }}" aria-label="ANGEL SWARM home — Command Overview" style="box-sizing:border-box;width:100%;padding:16px 15px 17px;border:0;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;gap:11px;align-items:center;background:transparent;color:inherit;text-align:left;cursor:pointer;font-family:inherit">
 <svg width="32" height="32" viewBox="0 0 24 24" fill="oklch(0.66 0.19 25)" style="flex:none"><path d="M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z"/><path d="M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z"/><path d="M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z"/></svg>
 <div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 13px 'IBM Plex Mono',monospace;color:oklch(0.96 0.005 250);letter-spacing:.05em">ANGEL SWARM</span><span style="font:400 8px/1.45 'IBM Plex Mono',monospace;color:oklch(0.55 0.008 250);letter-spacing:.05em">DHA · PHYSIOLOGICAL-DEADLINE BLOOD ALLOCATION</span></div>
-</div>
+</button>
 
 <div class="app-nav-menu" style="padding:12px 9px 0;display:flex;flex-direction:column;gap:1px">
-<div data-selected="{{ nav.dash.selected }}" onClick="{{ go.dash }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
+<div data-selected="{{ nav.dash.selected }}" onClick="{{ go.dash }}" style="display:flex;order:1;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dash.fg }};flex:1">Command Overview</span></div>
 
-<div data-selected="{{ nav.map.selected }}" onClick="{{ go.map }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.map.bg }}">
+<div data-selected="{{ nav.map.selected }}" onClick="{{ go.map }}" style="display:flex;order:2;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.map.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z" fill="oklch(0.36 0.06 195)" stroke="oklch(0.66 0.11 195)" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 4v13M15 6.5v13" stroke="oklch(0.66 0.11 195)" stroke-width="1.4"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.map.fg }};flex:1">Theater Map</span></div>
 
-<div data-selected="{{ nav.cas.selected }}" onClick="{{ go.cas }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.cas.bg }}">
+<div data-selected="{{ nav.cas.selected }}" onClick="{{ go.cas }}" style="display:flex;order:5;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.cas.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.5 2.8c0 5.8-8.5 11.3-8.5 11.3Z" fill="oklch(0.62 0.19 25)"/><path d="M4 12.6h4l1.6-3 2.6 5.4 1.8-2.4H20" stroke="oklch(0.97 0.02 25)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.cas.fg }};flex:1">Live Casualties</span>
 <sc-if value="{{ badge.cas }}" hint-placeholder-val="{{ true }}"><span style="font:600 9.5px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.4 0.13 25);color:oklch(0.96 0.02 25)">{{ badge.cas }}</span></sc-if></div>
 
-<div data-selected="{{ nav.dec.selected }}" onClick="{{ go.dec }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dec.bg }}">
+<div data-selected="{{ nav.dec.selected }}" onClick="{{ go.dec }}" style="display:flex;order:4;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dec.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 21V11m0 0L5 4m7 7 7-7" stroke="oklch(0.8 0.15 75)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="4" r="2.6" fill="oklch(0.85 0.15 75)"/><circle cx="5" cy="4" r="2.6" fill="oklch(0.55 0.1 75)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dec.fg }};flex:1">Decisions</span>
 <sc-if value="{{ badge.dec }}" hint-placeholder-val="{{ true }}"><span style="font:700 9.5px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:{{ badge.decBg }};color:{{ badge.decFg }}">{{ badge.dec }}</span></sc-if></div>
 
-<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}">
+<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:none;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.tty.fg }};flex:1">Analyst Terminal</span></div>
 
-<div data-selected="{{ nav.sensor.selected }}" onClick="{{ go.sensor }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.sensor.bg }}">
+<div data-selected="{{ nav.sensor.selected }}" onClick="{{ go.sensor }}" style="display:flex;order:7;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.sensor.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M2 12h3.5l2-5.5 3 11 2.5-7 2 4h6.5" stroke="oklch(0.82 0.15 300)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.sensor.fg }};flex:1">Sensor &amp; Model</span>
 <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.88 0.11 300)">✦ AI</span></div>
 
-<div data-selected="{{ nav.ops.selected }}" onClick="{{ go.ops }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ops.bg }}">
+<div data-selected="{{ nav.track.selected }}" role="button" tabindex="0" onClick="{{ go.track }}" onKeyDown="{{ nav.track.key }}" style="display:flex;order:8;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.track.bg }}">
+<svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 2.4c.8 0 1.4.6 1.4 1.4v4.6l7.6 4.3v2.1l-7.6-2.2v3.9l2.4 1.9v1.6L12 18.8l-3.8 1.2v-1.6l2.4-1.9v-3.9L3 14.8v-2.1l7.6-4.3V3.8c0-.8.6-1.4 1.4-1.4Z" fill="oklch(0.8 0.14 165)"/><path d="M12 5.4v12.6" stroke="oklch(0.3 0.05 165)" stroke-width="1.4"/></svg>
+<span style="font-size:12.5px;font-weight:600;color:{{ nav.track.fg }};flex:1">Resupply Tracking</span></div>
+
+<div data-selected="{{ nav.ops.selected }}" onClick="{{ go.ops }}" style="display:flex;order:3;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ops.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2" y="4" width="20" height="13" rx="2" fill="oklch(0.32 0.07 200)" stroke="oklch(0.68 0.13 200)" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="oklch(0.68 0.13 200)" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.5 9 9l3 3.5L15 7l3.5 6.5" stroke="oklch(0.85 0.16 200)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ops.fg }};flex:1">Ops Center Wall</span></div>
 
-<div data-selected="{{ nav.ev.selected }}" role="button" tabindex="0" onClick="{{ go.ev }}" onKeyDown="{{ nav.ev.key }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ev.bg }}">
-<svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.12 300)" stroke="oklch(0.72 0.16 300)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.93 0.1 300)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="evidence-nav-item" data-selected="{{ nav.ev.selected }}" role="button" tabindex="0" onClick="{{ go.ev }}" onKeyDown="{{ nav.ev.key }}" style="display:flex;order:9;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ev.bg }}">
+<span class="evidence-shine-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.12 300)" stroke="oklch(0.72 0.16 300)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.93 0.1 300)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="evidence-shine-bar" aria-hidden="true"></span></span>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ev.fg }};flex:1">Evidence</span></div>
 
-<div data-selected="{{ nav.wargame.selected }}" onClick="{{ go.wargame }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.wargame.bg }}">
+<div data-selected="{{ nav.wargame.selected }}" onClick="{{ go.wargame }}" style="display:flex;order:6;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.wargame.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="8" width="5.6" height="12" rx="1.2" fill="oklch(0.62 0.13 300)"/><rect x="14.4" y="4" width="5.6" height="16" rx="1.2" fill="oklch(0.38 0.08 300)"/><path d="M3 20.8h18" stroke="oklch(0.88 0.1 300)" stroke-width="1.6"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.wargame.fg }};flex:1">War Game</span></div>
-<div data-selected="{{ nav.chat.selected }}" onClick="{{ go.chat }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.chat.bg }}">
+<div data-selected="{{ nav.chat.selected }}" onClick="{{ go.chat }}" style="display:flex;order:10;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.chat.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-4H5.5A2.5 2.5 0 0 1 3 14.5v-8Z" fill="oklch(0.4 0.12 330)" stroke="oklch(0.72 0.16 330)" stroke-width="1.4"/><path d="m12 7 1.1 2.6L15.7 11l-2.6 1.1L12 14.7l-1.1-2.6L8.3 11l2.6-1.1L12 7Z" fill="oklch(0.93 0.11 330)"/></svg>
-<span style="font-size:12.5px;font-weight:600;color:{{ nav.chat.fg }};flex:1">Ask ANGEL</span>
+<span style="font-size:12.5px;font-weight:600;color:{{ nav.chat.fg }};flex:1">Ask Angel</span>
 <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.88 0.11 300)">✦ AI</span></div>
 
 </div>
 
 <div class="app-nav-menu" style="margin:14px 9px 0;padding:12px 0 0;border-top:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:1px">
+<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:12px;color:{{ nav.tty.fg }}">Analyst Terminal</span></div>
 <div data-selected="{{ nav.auth.selected }}" onClick="{{ go.auth }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.auth.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="10" width="16" height="10" rx="2" fill="oklch(0.55 0.11 85)"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="oklch(0.75 0.13 85)" stroke-width="2"/></svg><span style="font-size:12px;color:{{ nav.auth.fg }}">Authority &amp; Policy</span></div>
 <div data-selected="{{ nav.data.selected }}" onClick="{{ go.data }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.data.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><ellipse cx="12" cy="5.5" rx="7.5" ry="3" fill="oklch(0.62 0.11 220)"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13" stroke="oklch(0.62 0.11 220)" stroke-width="1.6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" stroke="oklch(0.78 0.12 220)" stroke-width="1.6"/></svg><span style="font-size:12px;color:{{ nav.data.fg }};flex:1">Data Sources</span><sc-if value="{{ badge.data }}" hint-placeholder-val="{{ true }}"><span style="font:600 9px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.38 0.1 75);color:oklch(0.94 0.06 75)">{{ badge.data }}</span></sc-if></div>
 <div data-selected="{{ nav.setup.selected }}" onClick="{{ go.setup }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.setup.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="3.4" fill="oklch(0.7 0.03 250)"/><path d="M12 2.5v3.2M12 18.3v3.2M21.5 12h-3.2M5.7 12H2.5M18.7 5.3l-2.3 2.3M7.6 16.4l-2.3 2.3M18.7 18.7l-2.3-2.3M7.6 7.6 5.3 5.3" stroke="oklch(0.6 0.02 250)" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:{{ nav.setup.fg }}">Settings</span></div>
@@ -496,8 +533,8 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 </sc-if>
 
-<div style="border-radius:6px;border:1px solid oklch(0.3 0.012 250);background:oklch(0.155 0.008 250);overflow:hidden">
-<div style="display:flex;padding:9px 22px 8px 286px;border-bottom:1px solid oklch(0.27 0.01 250);background:oklch(0.185 0.01 250);font:400 8.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.55 0.008 250)"><span style="width:16.6%">{{ cas.ax1 }}</span><span style="width:16.6%">{{ cas.ax2 }}</span><span style="width:16.6%">{{ cas.ax3 }}</span><span style="width:16.6%">{{ cas.ax4 }}</span><span style="width:16.6%">{{ cas.ax5 }}</span><span style="width:16.6%">{{ cas.ax6 }}</span></div>
+<div class="cas-board" style="border-radius:6px;border:1px solid oklch(0.3 0.012 250);background:oklch(0.155 0.008 250)">
+<div class="cas-board-axis"><div></div><div class="cas-board-axis-lanes"><div class="cas-board-axis-ticks"><span>{{ cas.ax1 }}</span><span>{{ cas.ax2 }}</span><span>{{ cas.ax3 }}</span><span>{{ cas.ax4 }}</span><span>{{ cas.ax5 }}</span><span>{{ cas.ax6 }}</span></div><div></div></div></div>
 
 <sc-if value="{{ cas.hasRows }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
@@ -509,17 +546,16 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ g.open }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
 <div>
-<div onClick="{{ r.open }}" style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:56px;font-family:'IBM Plex Mono',monospace;cursor:pointer;background:{{ r.rowBg }}">
-<div style="width:286px;padding:0 14px;display:flex;flex-direction:column;gap:2px;border-left:3px solid {{ r.clsColor }}"><span style="font-size:11px;font-weight:600;color:oklch(0.95 0.005 250)">{{ r.head }}</span><span style="font-size:9px;color:oklch(0.62 0.008 250)">{{ r.meta }}</span></div>
-<div style="flex:1;padding-right:22px;height:100%;display:flex;align-items:center;min-width:0">
+<div class="cas-board-row" onClick="{{ r.open }}" style="border-bottom:1px solid oklch(0.21 0.01 250);font-family:'IBM Plex Mono',monospace;cursor:pointer;background:{{ r.rowBg }}">
+<div class="cas-row-id" style="border-left:3px solid {{ r.clsColor }}"><span style="font-size:11px;font-weight:600;color:oklch(0.95 0.005 250)">{{ r.head }}</span><span style="font-size:9px;color:oklch(0.62 0.008 250)">{{ r.meta }}</span></div>
+<div class="cas-row-track"><div class="cas-row-bars">
 <sc-if value="{{ r.hasBar }}" hint-placeholder-val="{{ true }}">
-<div style="width:{{ r.barW }};height:22px;border-radius:2px;background:{{ r.barBg }};border-right:3px solid {{ r.clsColor }};position:relative;display:flex;align-items:center;min-width:24px">
+<div class="cas-row-bar" style="width:{{ r.barW }};height:22px;border-radius:2px;background:{{ r.barBg }};border-right:3px solid {{ r.clsColor }};display:flex;align-items:center">
 <sc-if value="{{ r.hasTransit }}" hint-placeholder-val="{{ true }}"><div style="width:{{ r.transitW }};height:100%;background:oklch(0.42 0.09 165);display:flex;align-items:center;padding-left:7px;overflow:hidden"><span style="font-size:8.5px;font-weight:600;color:oklch(0.95 0.02 165);letter-spacing:.03em;white-space:nowrap">{{ r.transitLabel }}</span></div></sc-if>
-<span style="position:absolute;left:calc(100% + 7px);font-size:10px;font-weight:700;color:{{ r.tFg }};white-space:nowrap">{{ r.tLabel }}</span>
-<span style="position:absolute;left:calc(100% + 52px);font-size:9.5px;color:{{ r.slackFg }};white-space:nowrap">{{ r.slackLabel }}</span>
-</div></sc-if>
-<sc-if value="{{ r.noBar }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;letter-spacing:.06em;color:oklch(0.58 0.008 250)">{{ r.noBarLabel }}</span></sc-if>
-</div></div>
+</div></sc-if></div><div class="cas-row-meta">
+<sc-if value="{{ r.hasBar }}" hint-placeholder-val="{{ true }}"><span style="font-size:10px;font-weight:700;color:{{ r.tFg }}">{{ r.tLabel }}</span><span style="font-size:9.5px;line-height:1.25;color:{{ r.slackFg }}">{{ r.slackLabel }}</span></sc-if>
+<sc-if value="{{ r.noBar }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;line-height:1.25;letter-spacing:.06em;color:oklch(0.58 0.008 250)">{{ r.noBarLabel }}</span></sc-if>
+</div></div></div>
 <sc-if value="{{ r.expanded }}" hint-placeholder-val="{{ false }}">
 <div id="casRecCard" style="scroll-margin-top:96px;border-bottom:1px solid oklch(0.24 0.01 250);background:oklch(0.185 0.012 250);padding:14px 22px 18px;display:flex;flex-direction:column;gap:11px">
 
@@ -6080,6 +6116,7 @@ class Component extends DCLogic {
       bd: neutral ? 'oklch(0.3 0.012 250)' : 'oklch(0.38 0.06 ' + linkHue + ')',
       rows: [
         { k: 'TRANSPORT', v: 'Cursor on Target over UDP · receive-only' },
+        { k: 'DEVICE', v: 'Sempulse Halo (example) · CipherOx CRI M1 (reference)' },
         /* NAMING THE SYSTEM ON THE OTHER END, AND NAMING WHAT HAS NOT BEEN
            DONE IN THE SAME BREATH. A reviewer who works in military medicine
            asks "produced by what" inside the first minute, and "some wearable
@@ -7421,7 +7458,7 @@ class Component extends DCLogic {
        of it has to sit left of the verdict printed beside it. The axis over
        the board is relabelled to match, so the ticks still mean what they
        say. */
-    const barPct = Math.max(4, Math.min(80, span / win * 100));
+    const barPct = Math.max(4, Math.min(100, span / win * 100));
     const transit = r.reach != null && span > 0.01 ? Math.max(6, Math.min(100, r.reach / span * 100)) : 0;
     const RED = 'oklch(0.82 0.15 25)', TEAL = 'oklch(0.8 0.11 165)', NEU = 'oklch(0.7 0.008 250)';
     const car = r.car;

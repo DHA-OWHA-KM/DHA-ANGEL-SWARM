@@ -26,10 +26,13 @@
 <!-- Shared, deliberately small state primitives for the primary console's
      contextual search.  This must precede the inline application below. -->
 <script src="./js/context-search-state.js"></script>
+<script src="./js/resupply-track.js"></script>
+<script src="./js/fpcon-state.js"></script>
 <!-- Same inline data: icon app/index.html uses — without it the browser
      issues an automatic /favicon.ico request that 404s in the console. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;1.6 1.04 20.8 20.8&quot;%3E%3Crect x=&quot;1.6&quot; y=&quot;1.04&quot; width=&quot;20.8&quot; height=&quot;20.8&quot; rx=&quot;4.4&quot; fill=&quot;%230b1119&quot;/%3E%3Cg fill=&quot;%23f05653&quot;%3E%3Cpath d=&quot;M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z&quot;/%3E%3Cpath d=&quot;M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z&quot;/%3E%3Cpath d=&quot;M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z&quot;/%3E%3C/g%3E%3C/svg%3E">
 <script src="./support.js"></script>
+<script src="./js/nav-shine.js"></script>
 </head>
 <body>
 <x-dc>
@@ -40,83 +43,155 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 .app-nav-menu>div{position:relative;transition:background-color .22s ease-in-out}
 .app-nav-menu>div svg{transition:filter .22s ease-in-out}
 .app-nav-menu>div:not([data-selected="true"]):is(:hover,:focus-visible){background:oklch(0.225 0.014 250)!important}
-.app-nav-menu>div:not([data-selected="true"]):is(:hover,:focus-visible) svg{filter:brightness(1.5) saturate(1.18)}
+.app-nav-menu>div:not([data-selected="true"]):is(:hover,:focus-visible) svg:not(.nav-shine-copy){filter:brightness(1.5) saturate(1.18)}
 .app-nav-menu>div:focus-visible{outline:2px solid oklch(0.78 0.01 250);outline-offset:-2px}
+.brand-home{box-sizing:border-box;width:100%;padding:16px 15px 17px;border:0;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;gap:11px;align-items:center;background:transparent;color:inherit;text-align:left;cursor:pointer;font-family:inherit}
+.brand-home:hover{background:oklch(0.18 0.012 250)}
+.brand-home:focus-visible{outline:2px solid oklch(0.78 0.01 250);outline-offset:-3px}
+.evidence-shine-icon{position:relative;display:grid;place-items:center;flex:none;width:17px;height:17px;overflow:hidden;clip-path:polygon(50% 2%,92% 20%,92% 54%,82% 76%,65% 91%,50% 98%,35% 91%,18% 76%,8% 54%,8% 20%)}
+.evidence-shine-icon svg{display:block}
+.evidence-shine-bar{position:absolute;z-index:2;top:-6px;left:-8px;width:3px;height:29px;background:#fff;transform:rotate(28deg);opacity:0;pointer-events:none}
+.evidence-nav-item:hover .evidence-shine-bar{animation:evidenceIconShine 2.4s linear infinite}
+@keyframes evidenceIconShine{0%{left:-8px;opacity:1}38%{left:22px;opacity:1}39%,100%{left:22px;opacity:0}}
+.nav-shine-icon{position:relative;display:grid;place-items:center;flex:none}
+.nav-shine-icon>svg{grid-area:1/1}
+.app-nav-menu>div .nav-shine-copy{position:absolute;inset:0;z-index:2;filter:brightness(0) saturate(100%) invert(1);clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:0;pointer-events:none}
+.app-nav-menu>div:hover .nav-shine-copy{animation:navIconShine 2.4s linear infinite}
+@keyframes navIconShine{0%{clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:1}38%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:1}39%,100%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:0}}
+.brand-shine-icon{position:relative;display:grid;place-items:center;flex:none}
+.brand-shine-icon>svg{grid-area:1/1}
+.brand-shine-copy{position:absolute;inset:0;z-index:2;filter:brightness(0) saturate(100%) invert(1);clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:0;pointer-events:none;animation:brandIconShine 2.4s linear infinite}
+@keyframes brandIconShine{0%{clip-path:polygon(-20% 100%,-5% 100%,-55% 0%,-70% 0%);opacity:1}38%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:1}39%,100%{clip-path:polygon(170% 100%,185% 100%,135% 0%,120% 0%);opacity:0}}
+.cmd62-death .num{color:var(--d-red)!important}.cmd62-death .lab{color:var(--d-red-t)!important}
+.cmd62-table-head{grid-template-columns:minmax(150px,1fr) 68px 68px 70px 70px;font-size:7.5px}.cmd62-table-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmd62-row{grid-template-columns:minmax(150px,1fr) 68px 68px 70px 70px}
+.cmd62-kpi{display:grid;grid-template-rows:26px 31px minmax(24px,auto);align-content:start;min-height:101px;box-sizing:border-box;position:relative;overflow:hidden}.cmd62-kpi .lab{display:flex;align-items:flex-start;min-height:26px;line-height:1.35}.cmd62-kpi .num{display:flex;align-items:center;min-height:31px;white-space:nowrap;word-break:keep-all}.cmd62-kpi .unit{display:block;min-height:24px;line-height:1.35}.cmd62-kpi:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--kpi-accent,oklch(0.46 0.02 250))}.cmd62-kpi.kpi-risk,.cmd62-kpi.kpi-outcome{--kpi-accent:oklch(0.62 0.19 25)}.cmd62-kpi.kpi-deadline,.cmd62-kpi.kpi-authority{--kpi-accent:oklch(0.78 0.14 75)}.cmd62-kpi.kpi-lift{--kpi-accent:oklch(0.68 0.14 165)}.cmd62-kpi.kpi-supply{--kpi-accent:oklch(0.70 0.13 210)}.cmd62-kpi.kpi-risk:not(.alert):not(.wait),.cmd62-kpi.kpi-outcome:not(.alert):not(.wait){background:linear-gradient(145deg,oklch(0.205 0.018 25),oklch(0.20 0.012 250) 62%)}.cmd62-kpi.kpi-deadline:not(.alert):not(.wait),.cmd62-kpi.kpi-authority:not(.alert):not(.wait){background:linear-gradient(145deg,oklch(0.205 0.016 75),oklch(0.20 0.012 250) 62%)}.cmd62-kpi.kpi-lift:not(.alert):not(.wait){background:linear-gradient(145deg,oklch(0.205 0.018 165),oklch(0.20 0.012 250) 62%)}.cmd62-kpi.kpi-supply:not(.alert):not(.wait){background:linear-gradient(145deg,oklch(0.205 0.018 210),oklch(0.20 0.012 250) 62%)}.cmd62-kpi.kpi-deadline:not(.alert):not(.wait) .num,.cmd62-kpi.kpi-authority:not(.alert):not(.wait) .num{color:oklch(0.90 0.07 75)}.cmd62-kpi.kpi-lift:not(.alert):not(.wait) .num{color:oklch(0.86 0.12 165)}.cmd62-kpi.kpi-supply:not(.alert):not(.wait) .num{color:oklch(0.86 0.10 210)}.cmd62-grid>.cmd62-card:first-child{border-top:2px solid oklch(0.54 0.14 25)}.cmd62-grid>.cmd62-card:first-child>header{background:linear-gradient(90deg,oklch(0.215 0.027 25),oklch(0.20 0.012 250) 72%)}.cmd62-grid>.cmd62-card:first-child .cmd62-label{color:oklch(0.75 0.07 25)}.cmd62-grid>.cmd62-card:nth-child(2){border-top:2px solid oklch(0.68 0.12 75)}.cmd62-grid>.cmd62-card:nth-child(2)>header{background:linear-gradient(90deg,oklch(0.215 0.03 75),oklch(0.20 0.012 250) 72%)}.cmd62-grid>.cmd62-card:nth-child(2) .cmd62-label{color:oklch(0.84 0.09 75)}.cmd62-readiness>.cmd62-card{position:relative}.cmd62-readiness>.cmd62-card:first-child{border-top:2px solid oklch(0.62 0.12 165)}.cmd62-readiness>.cmd62-card:first-child>header{background:linear-gradient(90deg,oklch(0.212 0.025 165),oklch(0.20 0.012 250) 76%)}.cmd62-readiness>.cmd62-card:first-child .cmd62-label,.cmd62-readiness>.cmd62-card:first-child .cmd62-stat{color:oklch(0.82 0.11 165)}.cmd62-readiness>.cmd62-card:nth-child(2){border-top:2px solid oklch(0.64 0.12 210)}.cmd62-readiness>.cmd62-card:nth-child(2)>header{background:linear-gradient(90deg,oklch(0.212 0.026 210),oklch(0.20 0.012 250) 76%)}.cmd62-readiness>.cmd62-card:nth-child(2) .cmd62-label,.cmd62-readiness>.cmd62-card:nth-child(2) .cmd62-stat{color:oklch(0.82 0.10 210)}.cmd62-readiness>.cmd62-card:nth-child(3){border-top:2px solid oklch(0.62 0.13 300)}.cmd62-readiness>.cmd62-card:nth-child(3)>header{background:linear-gradient(90deg,oklch(0.212 0.026 300),oklch(0.20 0.012 250) 76%)}.cmd62-readiness>.cmd62-card:nth-child(3) .cmd62-label,.cmd62-readiness>.cmd62-card:nth-child(3) .cmd62-stat{color:oklch(0.84 0.10 300)}.cmd62-route{position:relative;overflow:hidden}.cmd62-route:before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:oklch(0.58 0.10 210)}.cmd62-route:nth-child(1):before{background:oklch(0.62 0.13 300)}.cmd62-route:nth-child(2):before{background:oklch(0.70 0.14 300)}.cmd62-route:nth-child(3):before{background:oklch(0.66 0.15 330)}.cmd62-route:nth-child(4):before{background:oklch(0.66 0.12 210)}.cmd62-route:nth-child(1) i,.cmd62-route:nth-child(2) i{color:oklch(0.84 0.10 300)}.cmd62-route:nth-child(3) i{color:oklch(0.88 0.11 330)}.cmd62-kpi:focus-visible,.cmd62-card button:focus-visible,.cmd62-route:focus-visible{outline:2px solid oklch(0.92 0.10 210);outline-offset:2px;z-index:2}@media(max-width:760px){.cmd62-kpi{grid-template-rows:auto auto auto;min-height:0}.cmd62-kpi .lab,.cmd62-kpi .num,.cmd62-kpi .unit{min-height:0}}
 .context-search{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;background:oklch(0.22 0.012 250);border:1px solid oklch(0.31 0.012 250);flex:1 1 190px;min-width:150px;max-width:310px}
+.cas-board{overflow:hidden}
+.cas-board-axis{display:grid;grid-template-columns:286px minmax(0,1fr);padding:9px 22px 8px 0;border-bottom:1px solid oklch(0.27 0.01 250);background:oklch(0.185 0.01 250);font:400 8.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.55 0.008 250)}
+.cas-board-axis-lanes,.cas-row-track{display:grid;grid-template-columns:minmax(80px,1fr) minmax(150px,34%);gap:10px;min-width:0}
+.cas-board-axis-ticks{display:flex;min-width:0}.cas-board-axis-ticks>span{width:16.6%}
+.cas-board-row{display:flex;align-items:center;min-height:56px;overflow:hidden}
+.cas-row-id{width:286px;padding:8px 14px;display:flex;flex:none;flex-direction:column;gap:2px;min-width:0;box-sizing:border-box}
+.cas-row-id>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cas-row-track{flex:1;align-items:center;padding:7px 22px 7px 0;min-width:0}
+.cas-row-bars{display:flex;align-items:center;min-width:0;overflow:hidden}
+.cas-row-bar{max-width:100%;min-width:24px;box-sizing:border-box}
+.cas-row-meta{display:flex;flex-direction:column;gap:3px;min-width:0;overflow:hidden}
+.cas-row-meta>span{min-width:0;overflow-wrap:anywhere}
+@media(max-width:900px){.cas-board-axis{grid-template-columns:220px minmax(0,1fr);padding-right:14px}.cas-row-id{width:220px}.cas-board-axis-lanes,.cas-row-track{grid-template-columns:minmax(70px,1fr) minmax(120px,42%);gap:8px}.cas-row-track{padding-right:14px}}
 .context-search input{border:0;background:transparent;outline:none;font:400 10.5px 'IBM Plex Mono',monospace;color:oklch(0.9 0.005 250);width:100%;min-width:0}
 .context-search input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
 .context-search:focus-within{border-color:oklch(0.65 0.1 210);box-shadow:0 0 0 2px oklch(0.65 0.1 210 / .22)}
 .context-search button{border:0;background:transparent;color:oklch(0.72 0.008 250);cursor:pointer;font:700 16px/1 'IBM Plex Mono',monospace;padding:0 2px}
 .context-search button:focus-visible{outline:2px solid oklch(0.75 0.12 210);outline-offset:1px}
 .context-search-note{font:600 8.5px/1.35 'IBM Plex Mono',monospace;color:oklch(0.86 0.1 75);max-width:260px}
+.fpcon-chip{font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.09em;padding:6px 10px;border-radius:4px;white-space:nowrap}
+.fpcon-options{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:13px 15px}
+.fpcon-option{display:flex;align-items:center;gap:8px;min-width:0;padding:10px;border-radius:4px;cursor:pointer;text-align:left;font-family:'IBM Plex Mono',monospace}
+.fpcon-option[aria-checked="false"]{opacity:.7}.fpcon-option[aria-checked="true"]{box-shadow:inset 0 0 0 1px currentColor}
+.fpcon-option:hover{opacity:1}.fpcon-option:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.fpcon-option-dot{width:8px;height:8px;flex:none;border-radius:50%}
+.fpcon-option b,.fpcon-option small{display:block}.fpcon-option b{font-size:9px;line-height:1.25;letter-spacing:.05em}.fpcon-option small{margin-top:3px;font:400 9px 'IBM Plex Sans',sans-serif;opacity:.8}
+@media(max-width:1000px){.fpcon-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .context-no-match{border:1px dashed oklch(0.34 0.012 250);border-radius:5px;background:oklch(0.19 0.009 250);padding:16px;text-align:center;color:oklch(0.65 0.008 250);font:600 9.5px/1.45 'IBM Plex Mono',monospace;letter-spacing:.08em}
+.cmd62{padding:18px 22px 28px;max-width:1540px}.cmd62-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:14px}.cmd62-kicker{font:700 8px var(--d-mono);letter-spacing:.16em;color:var(--d-teal-t);margin-bottom:5px}.cmd62 h1{margin:0;color:var(--d-t1);font-size:23px;font-weight:600;letter-spacing:-.02em}.cmd62-sub{margin:5px 0 0;color:var(--d-t5);font-size:11px}.cmd62-stamp{font:400 9px var(--d-mono);color:var(--d-t6);white-space:nowrap}.cmd62-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}.cmd62-kpi{display:flex;flex-direction:column;gap:7px;min-height:74px;padding:11px 12px;background:var(--d-panel);border:1px solid var(--d-line-hard);border-radius:var(--d-r-card);text-align:left;cursor:pointer;color:inherit}.cmd62-kpi:hover,.cmd62-route:hover{border-color:var(--d-cyan-2);background:var(--d-panel-2)}.cmd62-kpi.alert{background:var(--d-red-bg);border-color:var(--d-red-line)}.cmd62-kpi.wait{background:var(--d-amb-bg);border-color:var(--d-amb-line)}.cmd62-kpi .lab{font:400 8px var(--d-mono);letter-spacing:.1em;color:var(--d-t6)}.cmd62-kpi.alert .lab{color:var(--d-red-t)}.cmd62-kpi.wait .lab{color:var(--d-amb)}.cmd62-kpi .num{font:600 25px var(--d-mono);line-height:1;color:var(--d-t1)}.cmd62-kpi.alert .num{color:var(--d-red)}.cmd62-kpi.wait .num{color:var(--d-amb)}.cmd62-kpi .unit{font:400 9px var(--d-mono);color:var(--d-t6);line-height:1.3}.cmd62-band{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:10px 12px;margin-bottom:12px;background:var(--d-panel);border:1px solid var(--d-line-hard);font:400 10px/1.45 var(--d-mono);color:var(--d-t5)}.cmd62-band strong{color:var(--d-amb);font-size:9px;letter-spacing:.12em}.cmd62-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.75fr);gap:12px}.cmd62-card{background:var(--d-panel);border:1px solid var(--d-line-hard);border-radius:var(--d-r-card);overflow:hidden}.cmd62-card.hot{border-color:var(--d-red-line)}.cmd62-card.auth{border-color:var(--d-amb-line)}.cmd62-card>header{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 13px;border-bottom:1px solid var(--d-line)}.cmd62-card.hot>header{background:var(--d-red-bg)}.cmd62-card.auth>header{background:var(--d-amb-bg)}.cmd62-card h2{margin:0;font-size:12px;font-weight:600;color:var(--d-t1)}.cmd62-label{font:700 8px var(--d-mono);letter-spacing:.14em;color:var(--d-t7);display:block;margin-bottom:3px}.cmd62-action{border:0;background:none;padding:2px;color:var(--d-cyan);font:600 9px var(--d-mono);cursor:pointer}.cmd62-table-head,.cmd62-row{display:grid;grid-template-columns:minmax(170px,1.4fr) 72px 72px 76px 74px;gap:8px;align-items:center}.cmd62-table-head{padding:8px 13px;border-bottom:1px solid var(--d-line-soft);font:400 8px var(--d-mono);letter-spacing:.08em;color:var(--d-t7)}.cmd62-row{width:100%;padding:10px 13px;border:0;border-bottom:1px solid var(--d-line-soft);background:transparent;color:var(--d-t3);text-align:left;cursor:pointer;font:400 10px var(--d-mono)}.cmd62-row:hover{background:var(--d-raise)}.cmd62-row.breach{background:var(--d-red-row)}.cmd62-row b{display:block;color:var(--d-t1)}.cmd62-row small{display:block;margin-top:2px;color:var(--d-t6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cmd62-red{color:var(--d-red);font-weight:700}.cmd62-ok{color:var(--d-teal-2);font-weight:600}.cmd62-zero{padding:22px 14px;color:var(--d-t6);font:400 10px/1.5 var(--d-mono)}.cmd62-zero b{display:block;color:var(--d-t3);font-weight:700;margin-bottom:5px}.cmd62-authbody,.cmd62-body{padding:14px;display:flex;flex-direction:column;gap:10px}.cmd62-authbody strong{font-size:18px;line-height:1.3;font-weight:500;color:var(--d-t1)}.cmd62-meta{font:600 9px/1.45 var(--d-mono);color:var(--d-amb)}.cmd62-reasons{padding:9px;background:var(--d-panel-2);font:400 9.5px/1.5 var(--d-mono);color:var(--d-amb)}.cmd62-primary{padding:9px 11px;border:0;border-radius:var(--d-r-btn);background:var(--d-amb-mark);color:oklch(.2 .03 75);font:700 10px var(--d-mono);cursor:pointer}.cmd62-readiness{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}.cmd62-stat{font:600 24px var(--d-mono);color:var(--d-t1)}.cmd62-copy{font:400 9.5px/1.45 var(--d-mono);color:var(--d-t6)}.cmd62-list{margin-top:4px;border-top:1px solid var(--d-line-soft)}.cmd62-list div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--d-line-soft);font:400 9.5px var(--d-mono)}.cmd62-list span:last-child{color:var(--d-t3);text-align:right}.cmd62-warn{color:var(--d-amb)!important}.cmd62-routes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.cmd62-route{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--d-line-hard);background:var(--d-panel);color:var(--d-t3);cursor:pointer;text-align:left}.cmd62-route b{display:block;font-size:10.5px}.cmd62-route small{display:block;margin-top:3px;font:400 8.5px var(--d-mono);color:var(--d-t6)}.cmd62-route i{color:var(--d-cyan);font:400 15px var(--d-mono);font-style:normal}.cmd62 button:focus-visible{outline:2px solid var(--d-cyan-hi);outline-offset:2px}@media(max-width:1250px){.cmd62-kpis{grid-template-columns:repeat(3,1fr)}.cmd62-grid{grid-template-columns:1fr}.cmd62-readiness{grid-template-columns:repeat(2,1fr)}.cmd62-routes{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.cmd62{padding:14px 12px 24px}.cmd62-head{align-items:flex-start;flex-direction:column}.cmd62-kpis,.cmd62-readiness,.cmd62-routes{grid-template-columns:1fr}.cmd62-table-head{display:none}.cmd62-row{grid-template-columns:1fr 1fr}.cmd62-row>span:first-of-type{grid-column:1/-1}.cmd62-band{align-items:flex-start;flex-direction:column}}
 [data-map-indicator-option]:focus-visible{position:relative;z-index:1;outline:2px solid oklch(0.94 0.02 210);outline-offset:-3px}
 [data-map-indicator-option][aria-pressed="true"]:focus-visible{outline-color:oklch(0.18 0.015 240)}
+.cmd62{--d-panel:oklch(0.20 0.012 250);--d-panel-2:oklch(0.22 0.012 250);--d-line:oklch(0.28 0.01 250);--d-line-soft:oklch(0.24 0.01 250);--d-line-hard:oklch(0.30 0.012 250);--d-raise:oklch(0.26 0.01 250);--d-t1:oklch(0.96 0.005 250);--d-t2:oklch(0.92 0.005 250);--d-t3:oklch(0.88 0.006 250);--d-t4:oklch(0.78 0.006 250);--d-t5:oklch(0.68 0.008 250);--d-t6:oklch(0.60 0.008 250);--d-t7:oklch(0.55 0.008 250);--d-red:oklch(0.82 0.15 25);--d-red-t:oklch(0.78 0.06 25);--d-red-line:oklch(0.38 0.09 25);--d-red-bg:oklch(0.22 0.035 25);--d-red-row:oklch(0.21 0.03 25);--d-amb:oklch(0.86 0.10 75);--d-amb-mark:oklch(0.78 0.14 75);--d-amb-line:oklch(0.42 0.10 75);--d-amb-bg:oklch(0.26 0.06 75);--d-teal-t:oklch(0.78 0.05 165);--d-teal-2:oklch(0.80 0.11 165);--d-cyan:oklch(0.78 0.12 210);--d-cyan-2:oklch(0.72 0.14 210);--d-cyan-hi:oklch(0.85 0.10 210);--d-mono:'IBM Plex Mono',monospace;--d-r-card:5px;--d-r-btn:4px}
+.cmd62-tabcard{display:flex;flex-direction:column;min-width:0;min-height:264px;border-top:0!important}.cmd62-tabcard>.cmd62-tabhead{align-items:stretch!important;padding:0!important;background:var(--d-panel)!important}.cmd62-tabs{display:flex;width:100%}.cmd62-tab{--tab-accent:oklch(0.6 0.1 250);--tab-text:var(--d-t5);--tab-wash:oklch(0.212 0.022 250);position:relative;flex:1;border:0;border-top:2px solid var(--tab-accent);border-right:1px solid var(--d-line);padding:11px 13px 10px;background:linear-gradient(90deg,var(--tab-wash),var(--d-panel) 82%);color:var(--tab-text);text-align:left;font:700 8px var(--d-mono);letter-spacing:.14em;cursor:pointer}.cmd62-tab:last-child{border-right:0}#command-globe-tab{--tab-accent:oklch(0.64 0.12 210);--tab-text:oklch(0.80 0.09 210);--tab-wash:oklch(0.212 0.026 210)}#command-machine-tab{--tab-accent:oklch(0.62 0.13 300);--tab-text:oklch(0.82 0.09 300);--tab-wash:oklch(0.212 0.026 300)}#command-globe-tab[aria-selected="true"]{--tab-wash:oklch(0.225 0.038 210);color:oklch(0.90 0.09 210);box-shadow:inset 0 -2px oklch(0.64 0.12 210)}#command-machine-tab[aria-selected="true"]{--tab-wash:oklch(0.225 0.038 300);color:oklch(0.90 0.09 300);box-shadow:inset 0 -2px oklch(0.62 0.13 300)}.cmd62-tab:hover{--tab-wash:oklch(0.225 0.032 250)}#command-globe-tab:hover{--tab-wash:oklch(0.225 0.035 210)}#command-machine-tab:hover{--tab-wash:oklch(0.225 0.035 300)}.cmd62-tabpanel{display:flex;flex:1;min-width:0;min-height:218px}.cmd62-tabpanel>.cmd62-body{width:100%}.cmd62-globe-slot{position:relative;width:100%;height:218px;min-height:218px;background:oklch(0.165 0.018 270);overflow:hidden}.cmd62-globe-slot angel-map{display:block;width:100%;height:100%;min-height:218px}.cmd62-globe-state{position:absolute;inset:0;display:grid;place-items:center;padding:18px;text-align:center;font:600 9px/1.6 var(--d-mono);letter-spacing:.1em;color:oklch(0.76 0.08 300);pointer-events:none}.cmd62-globe-gate{display:flex;width:100%;min-width:0;min-height:218px;border:0;padding:26px;background:#000;color:oklch(.96 .005 250);cursor:pointer;text-align:left}.cmd62-globe-gate-inner{display:flex;width:100%;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;border:1px solid oklch(.32 .012 250);padding:22px}.cmd62-globe-gate-inner>*{max-width:100%;overflow-wrap:anywhere}.cmd62-globe-gate-kicker{font:700 8px var(--d-mono);letter-spacing:.16em;color:var(--d-red)}.cmd62-globe-gate strong{font:600 clamp(17px,2.2vw,24px)/1.15 var(--d-mono);letter-spacing:-.025em}.cmd62-globe-gate-copy{max-width:54ch;font:400 10px/1.55 var(--d-mono);color:oklch(.7 .008 250)}.cmd62-globe-gate-route{margin-top:4px;font:700 9px var(--d-mono);letter-spacing:.1em;color:var(--d-cyan)}.cmd62-globe-gate:hover .cmd62-globe-gate-inner{border-color:var(--d-cyan-2);background:oklch(.15 .01 250)}.cmd62-globe-gate:focus-visible{outline:2px solid var(--d-cyan-hi);outline-offset:-4px}@media(max-width:760px){.cmd62-tabcard{min-height:264px}.cmd62-globe-slot,.cmd62-globe-slot angel-map{height:218px;min-height:218px}.cmd62-globe-gate{padding:8px}.cmd62-globe-gate-inner{gap:8px;padding:10px}.cmd62-globe-gate strong{font-size:14px}.cmd62-globe-gate-route{letter-spacing:.04em}}
+.classification-banner{position:relative;box-sizing:border-box;padding:3px 12px;display:grid;place-items:center;background:oklch(0.42 0.13 145);color:oklch(0.97 0.015 145);border-bottom:1px solid oklch(0.67 0.16 145);font:700 8px/1.2 'IBM Plex Mono',monospace;letter-spacing:.12em}
+.classification-notice{text-align:center}
+.classification-stamp{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:oklch(0.91 0.045 145);white-space:nowrap}
+@media (max-width:760px){.classification-banner{display:flex;flex-direction:column;gap:0;padding:2px 8px}.classification-notice{width:100%}.classification-stamp{position:static;transform:none;align-self:flex-end;text-align:right}}
+.application-bar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid oklch(0.28 0.01 250);background:oklch(0.185 0.01 250);position:sticky;top:0;z-index:6}
+.application-bar-context,.application-bar-actions{display:flex;align-items:center;min-width:0}
+.application-bar-context{gap:10px}
+.application-bar-actions{gap:10px;justify-content:flex-end;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace}
+@media(max-width:1100px){.application-bar{grid-template-columns:minmax(0,1fr) auto}.application-bar-context{grid-column:1/-1}.application-bar-actions{grid-column:1;grid-row:2;justify-content:flex-start}.application-bar>.decision-toast,.application-bar>.decision-bell{grid-column:2;grid-row:2;justify-self:end}}
+@media(max-width:620px){.application-bar>.decision-toast,.application-bar>.decision-bell{grid-column:1/-1;grid-row:3;justify-self:end}}
+@keyframes decisionToastLifecycle{0%{opacity:0;transform:translateX(18px)}5%,88%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(18px)}}
+@keyframes pendingPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.58;transform:scale(.76)}}
+@keyframes pendingBellGlow{0%,100%{box-shadow:0 0 0 0 rgb(255 0 0/.1)}50%{box-shadow:0 0 0 4px rgb(255 0 0/.32)}}
+.decision-toast,.decision-bell{box-sizing:border-box;display:inline-flex;align-items:center;flex:none;cursor:pointer;font-family:'IBM Plex Mono',monospace}
+.decision-toast{max-width:360px;gap:9px;padding:6px 10px;border-radius:5px;background:#f00;border:1px solid #f00;color:#fff;box-shadow:0 7px 18px oklch(0.08 0.02 250/.32);animation:decisionToastLifecycle 5s cubic-bezier(.2,.8,.2,1) both}
+.decision-toast-copy{min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left;font-weight:700}
+.decision-toast-copy strong{font-size:9px;font-weight:700;line-height:1.2;letter-spacing:.11em}
+.decision-toast-copy span{font-size:8px;font-weight:700;line-height:1.25;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.decision-bell{position:relative;justify-content:center;width:32px;height:32px;padding:0;border-radius:5px;background:#f00;border:1px solid #f00;color:#fff;animation:pendingBellGlow 1.45s ease-in-out infinite}
+.decision-bell-pip{position:absolute;right:-5px;top:-6px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#fff;border:2px solid #f00;color:#f00;font:700 8px 'IBM Plex Mono',monospace}
+.decision-bell-pip:before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid #f00;animation:pendingPulse 1.45s ease-in-out infinite}
+.decision-toast:is(:hover,:focus-visible),.decision-bell:is(:hover,:focus-visible){border-color:#f00;outline:2px solid #fff;outline-offset:2px;background:#f00}
+@media(max-width:760px){.decision-toast{max-width:230px}}
 @keyframes authorityVeilIn{from{opacity:0}to{opacity:1}}
 @keyframes authorityPanelIn{0%{opacity:0;transform:translateY(-18px) scale(.975)}62%{opacity:1;transform:translateY(3px) scale(1.004)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes authorityLineIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@media (prefers-reduced-motion:reduce){.authority-veil,.authority-panel,.authority-line{animation:none!important}.app-nav-menu>div,.app-nav-menu>div svg{transition:none}}
+@media (prefers-reduced-motion:reduce){.decision-toast,.decision-bell,.decision-bell-pip:before,.authority-veil,.authority-panel,.authority-line{animation:none!important}.app-nav-menu>div,.app-nav-menu>div svg{transition:none}.evidence-nav-item:hover .evidence-shine-bar{animation:none;left:7px;opacity:1}.app-nav-menu>div:hover .nav-shine-copy{animation:none;clip-path:polygon(58% 100%,73% 100%,23% 0%,8% 0%);opacity:1}.brand-shine-copy{animation:none;clip-path:polygon(58% 100%,73% 100%,23% 0%,8% 0%);opacity:1}}
 </style></helmet>
 
 <div style="min-height:100vh;background:oklch(0.17 0.01 250);color:oklch(0.92 0.005 250)">
 
-<div style="background:oklch(0.2 0.012 250);color:oklch(0.68 0.008 250);font:600 9px 'IBM Plex Mono',monospace;letter-spacing:.15em;padding:7px 18px;display:flex;justify-content:space-between;border-bottom:1px solid oklch(0.29 0.01 250)"><span>UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span style="color:oklch(0.56 0.008 250)">{{ joaStamp }}</span></div>
+<div class="classification-banner"><span class="classification-notice">UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY</span><span class="classification-stamp">{{ joaStamp }}</span></div>
 
 <div style="display:grid;grid-template-columns:246px 1fr;align-items:start">
 
 <div style="background:oklch(0.145 0.01 250);border-right:1px solid oklch(0.28 0.01 250);padding:0 0 22px;position:sticky;top:0;height:100vh;overflow-y:auto">
-<div style="padding:16px 15px 17px;border-bottom:1px solid oklch(0.25 0.01 250);display:flex;gap:11px;align-items:center">
+<button type="button" class="brand-home" aria-label="ANGEL SWARM home — Command Overview" onClick="{{ go.dash }}" onKeyDown="{{ nav.dash.key }}">
 <svg width="32" height="32" viewBox="0 0 24 24" fill="oklch(0.66 0.19 25)" style="flex:none"><path d="M11.36 4.24Q12 3.27 12.64 4.24L15.88 9.14Q16.51 10.11 15.39 9.83L13.13 9.28Q12 9.01 10.87 9.28L8.61 9.83Q7.49 10.11 8.12 9.14Z"/><path d="M5.76 13.74Q6.4 12.77 7.04 13.74L10.28 18.64Q10.91 19.61 9.79 19.33L7.53 18.78Q6.4 18.51 5.27 18.78L3.01 19.33Q1.89 19.61 2.52 18.64Z"/><path d="M16.96 13.74Q17.6 12.77 18.24 13.74L21.48 18.64Q22.11 19.61 20.99 19.33L18.73 18.78Q17.6 18.51 16.47 18.78L14.21 19.33Q13.09 19.61 13.72 18.64Z"/></svg>
 <div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 13px 'IBM Plex Mono',monospace;color:oklch(0.96 0.005 250);letter-spacing:.05em">ANGEL SWARM</span><span style="font:400 8px/1.45 'IBM Plex Mono',monospace;color:oklch(0.55 0.008 250);letter-spacing:.05em">DHA · PHYSIOLOGICAL-DEADLINE BLOOD ALLOCATION</span></div>
-</div>
+</button>
 
 <div class="app-nav-menu" style="padding:12px 9px 0;display:flex;flex-direction:column;gap:1px">
-<div data-selected="{{ nav.dash.selected }}" onClick="{{ go.dash }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
+<div data-selected="{{ nav.dash.selected }}" onClick="{{ go.dash }}" style="display:flex;order:1;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dash.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dash.fg }};flex:1">Command Overview</span></div>
 
-<div data-selected="{{ nav.map.selected }}" onClick="{{ go.map }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.map.bg }}">
+<div data-selected="{{ nav.map.selected }}" onClick="{{ go.map }}" style="display:flex;order:2;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.map.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z" fill="oklch(0.36 0.06 195)" stroke="oklch(0.66 0.11 195)" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 4v13M15 6.5v13" stroke="oklch(0.66 0.11 195)" stroke-width="1.4"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.map.fg }};flex:1">Theater Map</span></div>
 
-<div data-selected="{{ nav.cas.selected }}" onClick="{{ go.cas }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.cas.bg }}">
+<div data-selected="{{ nav.cas.selected }}" onClick="{{ go.cas }}" style="display:flex;order:5;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.cas.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.5 2.8c0 5.8-8.5 11.3-8.5 11.3Z" fill="oklch(0.62 0.19 25)"/><path d="M4 12.6h4l1.6-3 2.6 5.4 1.8-2.4H20" stroke="oklch(0.97 0.02 25)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.cas.fg }};flex:1">Live Casualties</span>
 <sc-if value="{{ badge.cas }}" hint-placeholder-val="{{ true }}"><span style="font:600 9.5px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.4 0.13 25);color:oklch(0.96 0.02 25)">{{ badge.cas }}</span></sc-if></div>
 
-<div data-selected="{{ nav.dec.selected }}" onClick="{{ go.dec }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dec.bg }}">
+<div data-selected="{{ nav.dec.selected }}" onClick="{{ go.dec }}" style="display:flex;order:4;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.dec.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 21V11m0 0L5 4m7 7 7-7" stroke="oklch(0.8 0.15 75)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="4" r="2.6" fill="oklch(0.85 0.15 75)"/><circle cx="5" cy="4" r="2.6" fill="oklch(0.55 0.1 75)"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.dec.fg }};flex:1">Decisions</span>
 <sc-if value="{{ badge.dec }}" hint-placeholder-val="{{ true }}"><span style="font:700 9.5px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:{{ badge.decBg }};color:{{ badge.decFg }}">{{ badge.dec }}</span></sc-if></div>
 
-<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}">
+<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:none;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.tty.fg }};flex:1">Analyst Terminal</span></div>
 
-<div data-selected="{{ nav.sensor.selected }}" onClick="{{ go.sensor }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.sensor.bg }}">
+<div data-selected="{{ nav.sensor.selected }}" onClick="{{ go.sensor }}" style="display:flex;order:7;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.sensor.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M2 12h3.5l2-5.5 3 11 2.5-7 2 4h6.5" stroke="oklch(0.82 0.15 300)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.sensor.fg }};flex:1">Sensor &amp; Model</span>
 <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.88 0.11 300)">✦ AI</span></div>
 
-<div data-selected="{{ nav.ops.selected }}" onClick="{{ go.ops }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ops.bg }}">
+<div data-selected="{{ nav.track.selected }}" role="button" tabindex="0" onClick="{{ go.track }}" onKeyDown="{{ nav.track.key }}" style="display:flex;order:8;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.track.bg }}">
+<svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 2.4c.8 0 1.4.6 1.4 1.4v4.6l7.6 4.3v2.1l-7.6-2.2v3.9l2.4 1.9v1.6L12 18.8l-3.8 1.2v-1.6l2.4-1.9v-3.9L3 14.8v-2.1l7.6-4.3V3.8c0-.8.6-1.4 1.4-1.4Z" fill="oklch(0.8 0.14 165)"/><path d="M12 5.4v12.6" stroke="oklch(0.3 0.05 165)" stroke-width="1.4"/></svg>
+<span style="font-size:12.5px;font-weight:600;color:{{ nav.track.fg }};flex:1">Resupply Tracking</span></div>
+
+<div data-selected="{{ nav.ops.selected }}" onClick="{{ go.ops }}" style="display:flex;order:3;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ops.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2" y="4" width="20" height="13" rx="2" fill="oklch(0.32 0.07 200)" stroke="oklch(0.68 0.13 200)" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="oklch(0.68 0.13 200)" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.5 9 9l3 3.5L15 7l3.5 6.5" stroke="oklch(0.85 0.16 200)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ops.fg }};flex:1">Ops Center Wall</span></div>
 
-<div data-selected="{{ nav.ev.selected }}" role="button" tabindex="0" onClick="{{ go.ev }}" onKeyDown="{{ nav.ev.key }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ev.bg }}">
-<svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.1 75)" stroke="oklch(0.72 0.14 75)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.94 0.08 75)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="evidence-nav-item" data-selected="{{ nav.ev.selected }}" role="button" tabindex="0" onClick="{{ go.ev }}" onKeyDown="{{ nav.ev.key }}" style="display:flex;order:9;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.ev.bg }}">
+<span class="evidence-shine-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.1 75)" stroke="oklch(0.72 0.14 75)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.94 0.08 75)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="evidence-shine-bar" aria-hidden="true"></span></span>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.ev.fg }};flex:1">Evidence</span></div>
 
-<div data-selected="{{ nav.wargame.selected }}" onClick="{{ go.wargame }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.wargame.bg }}">
+<div data-selected="{{ nav.wargame.selected }}" onClick="{{ go.wargame }}" style="display:flex;order:6;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.wargame.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="8" width="5.6" height="12" rx="1.2" fill="oklch(0.72 0.17 250)"/><rect x="14.4" y="4" width="5.6" height="16" rx="1.2" fill="oklch(0.54 0.15 250)"/><path d="M3 20.8h18" stroke="oklch(0.92 0.1 250)" stroke-width="1.6"/></svg>
 <span style="font-size:12.5px;font-weight:600;color:{{ nav.wargame.fg }};flex:1">War Game</span></div>
-<div data-selected="{{ nav.chat.selected }}" onClick="{{ go.chat }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.chat.bg }}">
+<div data-selected="{{ nav.chat.selected }}" onClick="{{ go.chat }}" style="display:flex;order:10;align-items:center;gap:10px;padding:8px 10px;border-radius:5px;cursor:pointer;background:{{ nav.chat.bg }}">
 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-4H5.5A2.5 2.5 0 0 1 3 14.5v-8Z" fill="oklch(0.4 0.12 330)" stroke="oklch(0.72 0.16 330)" stroke-width="1.4"/><path d="m12 7 1.1 2.6L15.7 11l-2.6 1.1L12 14.7l-1.1-2.6L8.3 11l2.6-1.1L12 7Z" fill="oklch(0.93 0.11 330)"/></svg>
-<span style="font-size:12.5px;font-weight:600;color:{{ nav.chat.fg }};flex:1">Ask ANGEL</span>
+<span style="font-size:12.5px;font-weight:600;color:{{ nav.chat.fg }};flex:1">Ask Angel</span>
 <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:oklch(0.3 0.08 300);border:1px solid oklch(0.46 0.12 300);font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.88 0.11 300)">✦ AI</span></div>
 
 </div>
 
 <div class="app-nav-menu" style="margin:14px 9px 0;padding:12px 0 0;border-top:1px solid oklch(0.25 0.01 250);display:flex;flex-direction:column;gap:1px">
+<div data-selected="{{ nav.tty.selected }}" onClick="{{ go.tty }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.tty.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:12px;color:{{ nav.tty.fg }}">Analyst Terminal</span></div>
 <div data-selected="{{ nav.auth.selected }}" onClick="{{ go.auth }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.auth.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="4" y="10" width="16" height="10" rx="2" fill="oklch(0.55 0.11 85)"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="oklch(0.75 0.13 85)" stroke-width="2"/></svg><span style="font-size:12px;color:{{ nav.auth.fg }}">Authority &amp; Policy</span></div>
 <div data-selected="{{ nav.data.selected }}" onClick="{{ go.data }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.data.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><ellipse cx="12" cy="5.5" rx="7.5" ry="3" fill="oklch(0.62 0.11 220)"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13" stroke="oklch(0.62 0.11 220)" stroke-width="1.6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" stroke="oklch(0.78 0.12 220)" stroke-width="1.6"/></svg><span style="font-size:12px;color:{{ nav.data.fg }};flex:1">Data Sources</span><sc-if value="{{ badge.data }}" hint-placeholder-val="{{ true }}"><span style="font:600 9px 'IBM Plex Mono',monospace;padding:1px 5px;border-radius:8px;background:oklch(0.38 0.1 75);color:oklch(0.94 0.06 75)">{{ badge.data }}</span></sc-if></div>
 <div data-selected="{{ nav.setup.selected }}" onClick="{{ go.setup }}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;cursor:pointer;background:{{ nav.setup.bg }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="3.4" fill="oklch(0.7 0.03 250)"/><path d="M12 2.5v3.2M12 18.3v3.2M21.5 12h-3.2M5.7 12H2.5M18.7 5.3l-2.3 2.3M7.6 16.4l-2.3 2.3M18.7 18.7l-2.3-2.3M7.6 7.6 5.3 5.3" stroke="oklch(0.6 0.02 250)" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:{{ nav.setup.fg }}">Settings</span></div>
@@ -186,10 +261,10 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 
 <div style="min-width:0">
-<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid oklch(0.28 0.01 250);background:oklch(0.185 0.01 250);position:sticky;top:0;z-index:6">
-<div style="display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 340px">
+<div class="application-bar">
+<div class="application-bar-context">
 <sc-if value="{{ search.show }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 190px"><div class="context-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="10.5" cy="10.5" r="6.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2"/><path d="m15.5 15.5 4.5 4.5" stroke="oklch(0.6 0.008 250)" stroke-width="2.2" stroke-linecap="round"/></svg><label style="display:contents"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{{ search.label }}</span><input id="contextSearch" type="search" autocomplete="off" value="{{ q }}" onBeforeInput="{{ blockQ }}" onChange="{{ onQ }}" aria-label="{{ search.label }}" aria-disabled="{{ search.disabled }}" placeholder="{{ search.placeholder }}"/></label><sc-if value="{{ search.hasQ }}" hint-placeholder-val="{{ false }}"><button onClick="{{ clearQ }}" type="button" aria-label="Clear screen search">×</button></sc-if></div><sc-if value="{{ search.blocked }}" hint-placeholder-val="{{ false }}"><span class="context-search-note" role="status" aria-live="polite">{{ search.blockedNote }}</span></sc-if></div></sc-if>
-<span style="font:600 9.5px 'IBM Plex Mono',monospace;letter-spacing:.09em;padding:6px 10px;border-radius:4px;background:oklch(0.3 0.07 75);color:oklch(0.9 0.06 75)">FPCON BRAVO</span>
+<span class="fpcon-chip" style="background:{{ fpcon.bg }};border:1px solid {{ fpcon.line }};color:{{ fpcon.text }}">FPCON {{ fpcon.key }}</span>
 
 <!-- MISSION IN PROGRESS.  Away from the Theater Map there was no way to tell
      the clock was moving: the T+ readout is 8.5px in the far corner and the
@@ -201,7 +276,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </span>
 </sc-if>
 </div>
-<div style="display:flex;gap:10px;align-items:center;font-family:'IBM Plex Mono',monospace;flex:none">
+<div class="application-bar-actions">
 <sc-if value="{{ pa.showSpeed }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:2px;align-items:center;padding:3px;border-radius:5px;background:oklch(0.22 0.012 250);border:1px solid oklch(0.31 0.012 250)">
 <span style="font-size:8px;letter-spacing:.09em;color:oklch(0.52 0.008 250);padding:0 6px 0 4px">SPEED</span>
 <sc-for list="{{ speeds }}" as="s" hint-placeholder-count="4"><span onClick="{{ s.on }}" style="font-size:8.5px;font-weight:700;letter-spacing:.05em;padding:5px 7px;border-radius:3px;cursor:pointer;background:{{ s.bg }};color:{{ s.fg }}">{{ s.label }}</span></sc-for>
@@ -211,39 +286,19 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      Decisions screen when one was raised, the first you knew of it was the
      after-action count of what you had missed.  This is a live alert that goes
      to the Decisions board, and it carries the tally after the fact. -->
-<sc-if value="{{ alert.show }}" hint-placeholder-val="{{ true }}">
-<span onClick="{{ go.dec }}" title="{{ alert.title }}" style="display:inline-flex;align-items:center;gap:7px;cursor:pointer;font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.07em;padding:7px 12px;border-radius:4px;background:{{ alert.bg }};border:1px solid {{ alert.edge }};color:{{ alert.fg }}">
-<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 16.2a.7.7 0 0 0 .64 1h13.92a.7.7 0 0 0 .64-1L18 12.6V9a6 6 0 0 0-6-6Z" fill="{{ alert.glyph }}"/><path d="M9.7 19.4a2.4 2.4 0 0 0 4.6 0" stroke="{{ alert.glyph }}" stroke-width="1.9" stroke-linecap="round"/></svg>
-<sc-if value="{{ alert.count }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:{{ alert.pipBg }};color:{{ alert.pipFg }};font-size:10px;font-weight:700">{{ alert.count }}</span></sc-if>
-{{ alert.label }}
-</span>
-</sc-if>
 <span onClick="{{ pa.act }}" style="display:inline-flex;align-items:center;gap:6px;font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.07em;padding:8px 15px;border-radius:4px;cursor:pointer;background:{{ pa.btnBg }};color:{{ pa.btnFg }}">{{ pa.top }}</span>
 <sc-if value="{{ resetShow }}" hint-placeholder-val="{{ true }}"><span onClick="{{ askReset }}" style="font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.07em;padding:7px 12px;border-radius:4px;cursor:pointer;border:1px solid oklch(0.36 0.012 250);background:oklch(0.22 0.012 250);color:oklch(0.78 0.008 250)">RESET</span></sc-if>
 <span style="font-size:10px;font-weight:600;letter-spacing:.08em;padding:6px 10px;border-radius:4px;border:1px solid {{ posture.pillBorder }};color:{{ posture.pillFg }};background:{{ posture.pillBg }}">{{ posture.pill }}</span>
 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-size:12.5px;color:oklch(0.94 0.005 250);font-weight:600">{{ clock }}</span><span style="font-size:8.5px;color:oklch(0.58 0.008 250);letter-spacing:.06em">{{ tPlus }}</span></div>
-</div></div>
-
-<!-- A new human-authority task is an interruption, not a status chip. The
-     engine remains the source of truth: this exists only while s.pending
-     contains an open escalation. Its entrance runs once, then becomes still. -->
-<sc-if value="{{ interrupt.show }}" hint-placeholder-val="{{ false }}">
-<div class="authority-veil" style="position:fixed;inset:0;z-index:46;background:oklch(0.08 0.012 250 / .78);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:82px 24px 28px;animation:authorityVeilIn 180ms ease-out both">
-<div class="authority-panel" role="alertdialog" aria-modal="true" aria-labelledby="authority-title" aria-describedby="authority-copy" tabindex="0" style="width:620px;max-width:calc(100vw - 48px);border-radius:7px;overflow:hidden;background:oklch(0.185 0.014 250);border:1px solid oklch(0.61 0.16 25);box-shadow:0 26px 80px oklch(0.04 0.01 250 / .72),0 0 0 1px oklch(0.3 0.08 25);animation:authorityPanelIn 440ms cubic-bezier(.2,.8,.2,1) both">
-<div class="authority-line" style="height:4px;background:oklch(0.7 0.19 25);transform-origin:left;animation:authorityLineIn 620ms cubic-bezier(.2,.8,.2,1) 80ms both"></div>
-<div style="padding:20px 22px 18px;display:flex;gap:17px;align-items:flex-start">
-<div style="width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:oklch(0.29 0.08 25);border:1px solid oklch(0.55 0.15 25)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v9" stroke="oklch(0.9 0.15 25)" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="17.5" r="1.4" fill="oklch(0.9 0.15 25)"/></svg></div>
-<div style="min-width:0;flex:1">
-<div style="font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.16em;color:oklch(0.76 0.11 25);margin-bottom:7px">SIMULATION RUNNING · HUMAN AUTHORITY REQUIRED</div>
-<div id="authority-title" style="font:650 20px/1.2 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.96 0.008 250)">{{ interrupt.title }}</div>
-<div id="authority-copy" style="font:400 12px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.72 0.01 250);margin-top:8px">{{ interrupt.copy }}</div>
-<div style="display:flex;align-items:baseline;gap:9px;margin-top:14px;padding:10px 12px;border-radius:4px;background:oklch(0.24 0.05 25);border:1px solid oklch(0.4 0.1 25);font-family:'IBM Plex Mono',monospace"><span style="font-size:9px;font-weight:700;letter-spacing:.11em;color:oklch(0.72 0.08 25)">DECISION WINDOW REMAINING</span><span style="margin-left:auto;font-size:20px;font-weight:700;color:oklch(0.9 0.15 25)">{{ interrupt.remaining }}</span></div>
-<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px">
-<span onClick="{{ interrupt.review }}" role="button" tabindex="0" style="cursor:pointer;padding:10px 16px;border-radius:4px;background:oklch(0.72 0.15 75);color:oklch(0.18 0.03 75);font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.08em">REVIEW DECISIONS</span>
-<span onClick="{{ interrupt.dismiss }}" role="button" tabindex="0" style="cursor:pointer;padding:9px 14px;border-radius:4px;border:1px solid oklch(0.36 0.012 250);color:oklch(0.72 0.008 250);font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.07em">REMAIN ON THIS SCREEN</span>
-<span style="font:600 9px 'IBM Plex Mono',monospace;color:oklch(0.61 0.008 250);margin-left:auto">SIMULATED TIME CONTINUES</span>
-</div></div></div></div></div>
+</div>
+<sc-if value="{{ alert.show }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="{{ alert.className }}" onClick="{{ alert.open }}" title="{{ alert.title }}" aria-label="{{ alert.aria }}">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.4 16.2a.7.7 0 0 0 .64 1h13.92a.7.7 0 0 0 .64-1L18 12.6V9a6 6 0 0 0-6-6Z" fill="{{ alert.glyph }}"/><path d="M9.7 19.4a2.4 2.4 0 0 0 4.6 0" stroke="{{ alert.glyph }}" stroke-width="1.9" stroke-linecap="round"/></svg>
+<sc-if value="{{ alert.toast }}" hint-placeholder-val="{{ false }}"><span class="decision-toast-copy"><strong>{{ alert.label }}</strong><span>{{ alert.detail }}</span></span></sc-if>
+<sc-if value="{{ alert.bell }}" hint-placeholder-val="{{ true }}"><span class="decision-bell-pip">{{ alert.count }}</span></sc-if>
+</button>
 </sc-if>
+</div>
 
 <sc-if value="{{ deployOpen }}" hint-placeholder-val="{{ false }}">
 <div style="position:fixed;inset:0;z-index:40;background:oklch(0.1 0.01 250 / 0.78);display:flex;align-items:center;justify-content:center;padding:30px">
@@ -352,7 +407,39 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div></div>
 </sc-if>
 
-<sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isDash }}">
+<div class="cmd62">
+<div class="cmd62-head"><div><div class="cmd62-kicker">STATE · {{ dash62.status }}</div><h1>Command Overview</h1><p class="cmd62-sub">{{ dash62.sub }}</p></div><div class="cmd62-stamp">{{ dash62.stamp }}</div></div>
+<div class="cmd62-kpis">
+<button type="button" class="cmd62-kpi kpi-risk {{ dash62.riskClass }}" onClick="{{ dash62.openCas }}"><span class="lab">PROJECTED LATE / UNREACHABLE</span><span class="num">{{ dash62.risk }}</span><span class="unit">{{ dash62.riskUnit }}</span></button>
+<button type="button" class="cmd62-kpi kpi-deadline {{ dash62.tightClass }}" onClick="{{ dash62.openCas }}"><span class="lab">TIGHTEST DEADLINE</span><span class="num">{{ dash62.tight }}</span><span class="unit">{{ dash62.tightUnit }}</span></button>
+<button type="button" class="cmd62-kpi kpi-authority {{ dash62.decClass }}" onClick="{{ dash62.openDec }}"><span class="lab">PENDING AUTHORIZATION</span><span class="num">{{ dash62.decisions }}</span><span class="unit">{{ dash62.decUnit }}</span></button>
+<button type="button" class="cmd62-kpi kpi-lift {{ dash62.liftClass }}" onClick="{{ dash62.openFleet }}"><span class="lab">LIFT READY</span><span class="num">{{ dash62.lift }}</span><span class="unit">{{ dash62.liftUnit }}</span></button>
+<button type="button" class="cmd62-kpi kpi-supply {{ dash62.supplyClass }}" onClick="{{ dash62.openSupply }}"><span class="lab">FORWARD BLOOD / PLASMA</span><span class="num">{{ dash62.supply }}</span><span class="unit">{{ dash62.supplyUnit }}</span></button>
+<button type="button" class="cmd62-kpi cmd62-death kpi-outcome" onClick="{{ dash62.openEvidence }}"><span class="lab">{{ dash62.deathLabel }}</span><span class="num">{{ dash62.death }}</span><span class="unit">{{ dash62.deathUnit }}</span></button>
+</div>
+<sc-if value="{{ dash62.pre }}"><div class="cmd62-band"><span><strong>PRE-DEPLOYMENT</strong> {{ dash62.preText }}</span><button type="button" class="cmd62-action" onClick="{{ dash62.openEvidence }}">REVIEW EVIDENCE</button></div></sc-if>
+<div class="cmd62-grid">
+<section class="cmd62-card {{ dash62.riskPanelClass }}"><header><div><span class="cmd62-label">CASUALTY RISK</span><h2>Deadline exceptions</h2></div><button type="button" class="cmd62-action" onClick="{{ dash62.openCas }}">OPEN CASUALTY BOARD</button></header>
+<div class="cmd62-table-head"><span>CASUALTY / SITE</span><span>DEADLINE</span><span>ARRIVAL</span><span>SLACK</span><span>STATUS</span></div>
+<sc-if value="{{ dash62.hasRisk }}"><sc-for list="{{ dash62.risks }}" as="r" hint-placeholder-count="5"><button type="button" class="cmd62-row {{ r.cls }}" onClick="{{ r.open }}"><span><b>{{ r.cid }}</b><small>{{ r.meta }}</small></span><span>{{ r.deadline }}</span><span>{{ r.arrival }}</span><span class="{{ r.slackCls }}">{{ r.slack }}</span><span>{{ r.tasking }}</span></button></sc-for></sc-if>
+<sc-if value="{{ dash62.noRisk }}"><div class="cmd62-zero"><b>{{ dash62.riskEmptyTitle }}</b><span>{{ dash62.riskEmpty }}</span></div></sc-if>
+</section>
+<section class="cmd62-card {{ dash62.authPanelClass }}"><header><div><span class="cmd62-label">HUMAN AUTHORITY</span><h2>{{ dash62.decisionTitle }}</h2></div><button type="button" class="cmd62-action" onClick="{{ dash62.openDec }}">OPEN DECISIONS</button></header>
+<sc-if value="{{ dash62.hasDecision }}"><div class="cmd62-authbody"><span class="cmd62-meta">{{ dash62.decisionMeta }}</span><strong>{{ dash62.decisionSummary }}</strong><div class="cmd62-reasons">{{ dash62.decisionReasons }}</div><span class="cmd62-copy">{{ dash62.decisionStatus }}</span><button type="button" class="cmd62-primary" onClick="{{ dash62.openDec }}">{{ dash62.decisionAction }}</button></div></sc-if>
+<sc-if value="{{ dash62.noDecision }}"><div class="cmd62-zero"><b>NO OPEN ESCALATION</b><span>{{ dash62.noDecisionText }}</span><button type="button" class="cmd62-action" onClick="{{ dash62.openFeed }}">READ DECISION FEED</button></div></sc-if>
+</section>
+</div>
+<sc-if value="{{ dash62.noMatches }}"><div class="context-no-match" role="status">NO COMMAND OVERVIEW RECORDS MATCH “{{ q }}”</div></sc-if>
+<div class="cmd62-readiness">
+<section class="cmd62-card"><header><div><span class="cmd62-label">COVERAGE / TELEMETRY</span><h2>Casualty coverage</h2></div><button type="button" class="cmd62-action" onClick="{{ dash62.openCas }}">OPEN BOARD</button></header><div class="cmd62-body"><span class="cmd62-stat">{{ dash62.coverage }}</span><span class="cmd62-copy">{{ dash62.coverageText }}</span><div class="cmd62-list"><div><span>Open casualties</span><span>{{ dash62.openCount }}</span></div><div><span>Stale readings</span><span class="{{ dash62.staleClass }}">{{ dash62.stale }}</span></div></div><span class="cmd62-copy {{ dash62.staleClass }}">{{ dash62.staleText }}</span></div></section>
+<section class="cmd62-card"><header><div><span class="cmd62-label">NETWORK CONSTRAINTS</span><h2>Lift and forward supply</h2></div></header><div class="cmd62-body"><span class="cmd62-stat">{{ dash62.network }}</span><span class="cmd62-copy">airframes ready · {{ dash62.airborne }} airborne</span><div class="cmd62-list"><div><span>Whole blood</span><span>{{ dash62.blood }}</span></div><div><span>Plasma</span><span>{{ dash62.plasma }}</span></div><div><span>Launch points without stock</span><span class="{{ dash62.constraintClass }}">{{ dash62.constraints }}</span></div></div><div><button type="button" class="cmd62-action" onClick="{{ dash62.openSupply }}">SUPPLY</button><button type="button" class="cmd62-action" onClick="{{ dash62.openFleet }}">FLEET</button></div></div></section>
+<section class="cmd62-card cmd62-tabcard"><header class="cmd62-tabhead"><div class="cmd62-tabs" role="tablist" aria-label="Globe and machine action"><button id="command-globe-tab" type="button" class="cmd62-tab" role="tab" aria-selected="{{ dash62.globeSelected }}" aria-controls="{{ dash62.globeControls }}" tabindex="{{ dash62.globeTabIndex }}" onClick="{{ dash62.showGlobe }}" onKeyDown="{{ dash62.tabKey }}">GLOBE</button><button id="command-machine-tab" type="button" class="cmd62-tab" role="tab" aria-selected="{{ dash62.machineSelected }}" aria-controls="{{ dash62.machineControls }}" tabindex="{{ dash62.machineTabIndex }}" onClick="{{ dash62.showMachine }}" onKeyDown="{{ dash62.tabKey }}">MACHINE ACTION</button></div></header><sc-if value="{{ dash62.globeSelected }}"><div id="command-globe-panel" class="cmd62-tabpanel" role="tabpanel" aria-labelledby="command-globe-tab"><sc-if value="{{ dash62.globeGated }}"><button type="button" class="cmd62-globe-gate" aria-label="Scenario in progress. Open Theater Map to continue live playback." onClick="{{ dash62.openMap }}"><span class="cmd62-globe-gate-inner"><span class="cmd62-globe-gate-kicker">SCENARIO IN PROGRESS</span><strong>Continue on Theater Map</strong><span class="cmd62-globe-gate-copy">Live scenario playback is available on the dedicated operational map.</span><span class="cmd62-globe-gate-route">OPEN THEATER MAP →</span></span></button></sc-if><sc-if value="{{ dash62.globeAvailable }}"><div class="cmd62-globe-slot"><angel-map></angel-map><sc-if value="{{ dash62.globeWaiting }}"><div class="cmd62-globe-state" role="status">{{ dash62.globeState }}</div></sc-if></div></sc-if></div></sc-if><sc-if value="{{ dash62.machineSelected }}"><div id="command-machine-panel" class="cmd62-tabpanel" role="tabpanel" aria-labelledby="command-machine-tab"><div class="cmd62-body"><span class="cmd62-stat">{{ dash62.outbound }}</span><span class="cmd62-copy">active outbound tasking</span><div class="cmd62-list"><sc-for list="{{ dash62.outboundRows }}" as="x" hint-placeholder-count="3"><div><span>{{ x.tail }}</span><span>{{ x.detail }}</span></div></sc-for></div><span class="cmd62-copy">{{ dash62.outboundText }}</span><button type="button" class="cmd62-action" onClick="{{ dash62.openFeed }}">DECISION FEED</button></div></div></sc-if></section>
+</div>
+<nav class="cmd62-routes" aria-label="Operational tools"><button type="button" class="cmd62-route" onClick="{{ dash62.openFeed }}"><span><b>Decision Feed</b><small>Every action and outcome in order.</small></span><i>→</i></button><button type="button" class="cmd62-route" onClick="{{ dash62.openEvidence }}"><span><b>Evidence</b><small>Inspect comparison and provenance.</small></span><i>→</i></button><button type="button" class="cmd62-route" onClick="{{ dash62.openChat }}"><span><b>Ask ANGEL</b><small>Query live state or installed corpus.</small></span><i>→</i></button><button type="button" class="cmd62-route" onClick="{{ dash62.openMap }}"><span><b>Theater Map</b><small>Open the full operational picture.</small></span><i>→</i></button></nav>
+</div>
+</sc-if>
+<sc-if value="{{ isDashLegacy }}" hint-placeholder-val="{{ false }}">
 <div style="padding:18px 20px 26px">
 <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
 <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:21px;font-weight:600;color:oklch(0.96 0.005 250);letter-spacing:-.015em">Command Overview</span><span style="font-size:11.5px;color:oklch(0.63 0.008 250)">{{ dash.sub }}</span></div>
@@ -465,17 +552,6 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <span style="font-size:8.5px;line-height:1.5;color:oklch(0.55 0.008 250);padding-top:3px">First binding constraint, not the only one.</span>
 </div></div>
 
-<div onClick="{{ go.map }}" style="border-radius:6px;background:oklch(0.19 0.014 195);border:1px solid oklch(0.32 0.05 195);overflow:hidden;cursor:pointer">
-<div style="padding:10px 13px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;color:oklch(0.93 0.005 250)">{{ dash.mapTitle }}</span><span style="font:400 9px 'IBM Plex Mono',monospace;color:oklch(0.7 0.06 195)">{{ dash.mapMeta }}</span></div>
-<div style="height:104px;position:relative;background:oklch(0.16 0.014 195);border-top:1px solid oklch(0.28 0.03 195)">
-<svg viewBox="0 0 92 118" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
-<sc-for list="{{ mini.threats }}" as="z" hint-placeholder-count="2"><circle cx="{{ z.x }}" cy="{{ z.y }}" r="{{ z.r }}" fill="oklch(0.45 0.14 25 / 0.14)" stroke="oklch(0.6 0.16 25 / 0.5)" stroke-width="0.6" stroke-dasharray="2 2"/></sc-for>
-<sc-for list="{{ mini.bases }}" as="b" hint-placeholder-count="3"><rect x="{{ b.rx }}" y="{{ b.ry }}" width="4" height="4" fill="oklch(0.8 0.12 195)"/></sc-for>
-<sc-for list="{{ mini.cas }}" as="c" hint-placeholder-count="12"><circle cx="{{ c.x }}" cy="{{ c.y }}" r="1.5" fill="{{ c.fill }}"/></sc-for>
-<sc-for list="{{ mini.air }}" as="a" hint-placeholder-count="4"><circle cx="{{ a.x }}" cy="{{ a.y }}" r="2" fill="none" stroke="oklch(0.9 0.14 165)" stroke-width="0.9"/></sc-for>
-</svg>
-<span style="position:absolute;right:10px;bottom:8px;font:700 9px 'IBM Plex Mono',monospace;letter-spacing:.07em;color:oklch(0.8 0.08 195)">OPEN THEATER MAP →</span>
-</div></div>
 </div></div>
 </div>
 </sc-if>
@@ -534,8 +610,8 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 </sc-if>
 
-<div style="border-radius:6px;border:1px solid oklch(0.3 0.012 250);background:oklch(0.155 0.008 250);overflow:hidden">
-<div style="display:flex;padding:9px 22px 8px 286px;border-bottom:1px solid oklch(0.27 0.01 250);background:oklch(0.185 0.01 250);font:400 8.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;color:oklch(0.55 0.008 250)"><span style="width:16.6%">{{ cas.ax1 }}</span><span style="width:16.6%">{{ cas.ax2 }}</span><span style="width:16.6%">{{ cas.ax3 }}</span><span style="width:16.6%">{{ cas.ax4 }}</span><span style="width:16.6%">{{ cas.ax5 }}</span><span style="width:16.6%">{{ cas.ax6 }}</span></div>
+<div class="cas-board" style="border-radius:6px;border:1px solid oklch(0.3 0.012 250);background:oklch(0.155 0.008 250)">
+<div class="cas-board-axis"><div></div><div class="cas-board-axis-lanes"><div class="cas-board-axis-ticks"><span>{{ cas.ax1 }}</span><span>{{ cas.ax2 }}</span><span>{{ cas.ax3 }}</span><span>{{ cas.ax4 }}</span><span>{{ cas.ax5 }}</span><span>{{ cas.ax6 }}</span></div><div></div></div></div>
 
 <sc-if value="{{ cas.hasRows }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
@@ -547,17 +623,16 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <sc-if value="{{ g.open }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
 <div>
-<div onClick="{{ r.open }}" style="display:flex;align-items:center;border-bottom:1px solid oklch(0.21 0.01 250);height:56px;font-family:'IBM Plex Mono',monospace;cursor:pointer;background:{{ r.rowBg }}">
-<div style="width:286px;padding:0 14px;display:flex;flex-direction:column;gap:2px;border-left:3px solid {{ r.clsColor }}"><span style="font-size:11px;font-weight:600;color:oklch(0.95 0.005 250)">{{ r.head }}</span><span style="font-size:9px;color:oklch(0.62 0.008 250)">{{ r.meta }}</span></div>
-<div style="flex:1;padding-right:22px;height:100%;display:flex;align-items:center;min-width:0">
+<div class="cas-board-row" onClick="{{ r.open }}" style="border-bottom:1px solid oklch(0.21 0.01 250);font-family:'IBM Plex Mono',monospace;cursor:pointer;background:{{ r.rowBg }}">
+<div class="cas-row-id" style="border-left:3px solid {{ r.clsColor }}"><span style="font-size:11px;font-weight:600;color:oklch(0.95 0.005 250)">{{ r.head }}</span><span style="font-size:9px;color:oklch(0.62 0.008 250)">{{ r.meta }}</span></div>
+<div class="cas-row-track"><div class="cas-row-bars">
 <sc-if value="{{ r.hasBar }}" hint-placeholder-val="{{ true }}">
-<div style="width:{{ r.barW }};height:22px;border-radius:2px;background:{{ r.barBg }};border-right:3px solid {{ r.clsColor }};position:relative;display:flex;align-items:center;min-width:24px">
+<div class="cas-row-bar" style="width:{{ r.barW }};height:22px;border-radius:2px;background:{{ r.barBg }};border-right:3px solid {{ r.clsColor }};display:flex;align-items:center">
 <sc-if value="{{ r.hasTransit }}" hint-placeholder-val="{{ true }}"><div style="width:{{ r.transitW }};height:100%;background:oklch(0.42 0.09 165);display:flex;align-items:center;padding-left:7px;overflow:hidden"><span style="font-size:8.5px;font-weight:600;color:oklch(0.95 0.02 165);letter-spacing:.03em;white-space:nowrap">{{ r.transitLabel }}</span></div></sc-if>
-<span style="position:absolute;left:calc(100% + 7px);font-size:10px;font-weight:700;color:{{ r.tFg }};white-space:nowrap">{{ r.tLabel }}</span>
-<span style="position:absolute;left:calc(100% + 52px);font-size:9.5px;color:{{ r.slackFg }};white-space:nowrap">{{ r.slackLabel }}</span>
-</div></sc-if>
-<sc-if value="{{ r.noBar }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;letter-spacing:.06em;color:oklch(0.58 0.008 250)">{{ r.noBarLabel }}</span></sc-if>
-</div></div>
+</div></sc-if></div><div class="cas-row-meta">
+<sc-if value="{{ r.hasBar }}" hint-placeholder-val="{{ true }}"><span style="font-size:10px;font-weight:700;color:{{ r.tFg }}">{{ r.tLabel }}</span><span style="font-size:9.5px;line-height:1.25;color:{{ r.slackFg }}">{{ r.slackLabel }}</span></sc-if>
+<sc-if value="{{ r.noBar }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;line-height:1.25;letter-spacing:.06em;color:oklch(0.58 0.008 250)">{{ r.noBarLabel }}</span></sc-if>
+</div></div></div>
 <sc-if value="{{ r.expanded }}" hint-placeholder-val="{{ false }}">
 <div id="casRecCard" style="scroll-margin-top:96px;border-bottom:1px solid oklch(0.24 0.01 250);background:oklch(0.185 0.012 250);padding:14px 22px 18px;display:flex;flex-direction:column;gap:11px">
 
@@ -727,9 +802,9 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="padding:11px 15px;background:oklch(0.26 0.06 75);display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:10px;align-items:baseline"><span style="font:700 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;color:oklch(0.94 0.07 75)">{{ dec.chip }}</span><span style="font:400 9.5px 'IBM Plex Mono',monospace;color:oklch(0.84 0.05 75)">{{ dec.eid }}</span></div><span style="font:400 9.5px 'IBM Plex Mono',monospace;color:oklch(0.86 0.05 75)">{{ dec.raised }} · {{ dec.elapsed }} ELAPSED</span></div>
 <div style="padding:13px 15px 15px;display:flex;flex-direction:column;gap:13px">
 <div style="display:flex;flex-direction:column;gap:5px;font-family:'IBM Plex Mono',monospace">
-<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:oklch(0.96 0.005 250)">{{ dec.summary }}</span><span style="font-size:10px;color:oklch(0.88 0.08 75)">AUTHORITY LAPSES IN {{ dec.lapse }}</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:oklch(0.96 0.005 250)">{{ dec.summary }}</span><span style="font-size:10px;color:oklch(0.88 0.08 75)">RESPONSE WINDOW {{ dec.lapse }}</span></div>
 <div style="height:5px;border-radius:3px;background:oklch(0.27 0.012 250);overflow:hidden"><div style="height:100%;background:oklch(0.8 0.14 75);width:{{ dec.lapseW }}"></div></div>
-<span style="font-size:9px;color:oklch(0.62 0.008 250)">Failure to decide is recorded as a non-decision, with its cost.</span>
+<span role="status" style="font-size:9px;color:{{ dec.statusFg }}">{{ dec.status }}</span>
 </div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
@@ -758,8 +833,8 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-<div onClick="{{ decApprove }}" style="display:flex;justify-content:center;padding:13px;border-radius:5px;background:oklch(0.72 0.14 165);cursor:pointer"><span style="font:700 11px 'IBM Plex Mono',monospace;letter-spacing:.06em;color:oklch(0.17 0.03 165)">AUTHORISE A · COMMIT</span></div>
-<div onClick="{{ decHold }}" style="display:flex;justify-content:center;padding:13px;border-radius:5px;background:oklch(0.3 0.012 250);border:1px solid oklch(0.42 0.012 250);cursor:pointer"><span style="font:700 11px 'IBM Plex Mono',monospace;letter-spacing:.06em;color:oklch(0.88 0.006 250)">AUTHORISE B · HOLD</span></div>
+<button type="button" onClick="{{ decApprove }}" disabled="{{ dec.commitDisabled }}" style="display:flex;justify-content:center;padding:13px;border:0;border-radius:5px;background:{{ dec.commitBg }};cursor:{{ dec.commitCursor }}"><span style="font:700 11px 'IBM Plex Mono',monospace;letter-spacing:.06em;color:{{ dec.commitFg }}">AUTHORISE A · COMMIT</span></button>
+<button type="button" onClick="{{ decHold }}" style="display:flex;justify-content:center;padding:13px;border-radius:5px;background:oklch(0.3 0.012 250);border:1px solid oklch(0.42 0.012 250);cursor:pointer"><span style="font:700 11px 'IBM Plex Mono',monospace;letter-spacing:.06em;color:oklch(0.88 0.006 250)">AUTHORISE B · HOLD</span></button>
 </div>
 </div></div>
 </sc-if>
@@ -1025,6 +1100,10 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 </div>
 </sc-if>
 </div>
+</sc-if>
+
+<sc-if value="{{ isTrack }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="angel-resupply-track" from="./angel-resupply-track.js?v=1" height="auto" hint-size="100%,760px"></x-import>
 </sc-if>
 
 <sc-if value="{{ isSensor }}" hint-placeholder-val="{{ false }}">
@@ -1457,9 +1536,16 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 
 <div style="display:grid;grid-template-columns:1fr 320px;gap:12px;align-items:start;margin-bottom:13px">
 <div style="border-radius:6px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="padding:12px 14px;border-bottom:1px solid oklch(0.28 0.01 250);display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;font-family:'IBM Plex Mono',monospace">
+<sc-for list="{{ wg.context }}" as="c" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:8px;letter-spacing:.11em;color:oklch(0.55 0.008 250)">{{ c.k }}</span><span style="font-size:10px;line-height:1.45;color:oklch(0.86 0.006 250)">{{ c.v }}</span></div></sc-for>
+</div>
 <div style="padding:10px 14px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;font-weight:600;color:oklch(0.93 0.005 250)">What this lever moves</span><span style="font:400 9px 'IBM Plex Mono',monospace;letter-spacing:.07em;color:oklch(0.56 0.008 250)">{{ wg.leverName }}</span></div>
 <div style="padding:12px 14px 13px;display:flex;flex-direction:column;gap:10px">
 <span style="font-size:11.5px;line-height:1.6;color:oklch(0.86 0.006 250);text-wrap:pretty">{{ wg.note }}</span>
+<div style="display:flex;flex-direction:column;gap:7px;font-family:'IBM Plex Mono',monospace">
+<div style="display:flex;justify-content:space-between;gap:12px"><span style="font-size:8.5px;letter-spacing:.11em;color:oklch(0.55 0.008 250)">SETTINGS IN THIS SWEEP</span><span style="font-size:8.5px;color:oklch(0.62 0.008 250)">SELECT AT LEAST TWO</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ wg.settings }}" as="v" hint-placeholder-count="6"><div onClick="{{ v.on }}" style="display:flex;flex-direction:column;gap:2px;min-width:92px;padding:8px 10px;border-radius:4px;border:1px solid {{ v.edge }};background:{{ v.bg }};cursor:pointer"><span style="font-size:12px;font-weight:700;color:{{ v.fg }}">{{ v.value }}</span><span style="font-size:7.5px;letter-spacing:.08em;color:{{ v.subFg }}">{{ v.unit }}</span></div></sc-for></div>
+</div>
 <sc-if value="{{ wg.hasCaveat }}" hint-placeholder-val="{{ true }}">
 <div style="border-radius:5px;background:oklch(0.22 0.035 75);border:1px solid oklch(0.38 0.07 75);padding:11px 13px;display:flex;flex-direction:column;gap:6px">
 <span style="font:700 8.5px 'IBM Plex Mono',monospace;letter-spacing:.11em;color:oklch(0.86 0.1 75)">{{ wg.caveatHead }}</span>
@@ -1495,6 +1581,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px;font-weight:700;letter-spacing:.1em;color:oklch(0.86 0.1 165)">RUNNING THE SWEEP</span><span style="font-size:20px;font-weight:700;color:oklch(0.85 0.13 165)">{{ wg.pctDone }}</span></div>
 <div style="height:6px;border-radius:3px;background:oklch(0.26 0.012 250);overflow:hidden"><div style="height:100%;background:oklch(0.72 0.14 165);width:{{ wg.pctDone }}"></div></div>
 <span style="font-size:9.5px;color:oklch(0.7 0.008 250)">{{ wg.progress }} · both arms in every one</span>
+<div onClick="{{ wg.cancel }}" style="align-self:flex-start;padding:8px 12px;border-radius:4px;border:1px solid oklch(0.48 0.08 25);cursor:pointer;font-size:9px;font-weight:700;letter-spacing:.08em;color:oklch(0.86 0.09 25)">CANCEL SWEEP</div>
 </div>
 </sc-if>
 
@@ -1514,6 +1601,10 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 
 <sc-if value="{{ wgHas }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:12px">
+
+<div style="border-radius:6px;background:oklch(0.19 0.018 195);border:1px solid oklch(0.34 0.06 195);padding:13px 15px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;font-family:'IBM Plex Mono',monospace">
+<sc-for list="{{ wg.provenance }}" as="c" hint-placeholder-count="6"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:8px;letter-spacing:.11em;color:oklch(0.58 0.04 195)">{{ c.k }}</span><span style="font-size:9.5px;line-height:1.5;color:oklch(0.84 0.015 250)">{{ c.v }}</span></div></sc-for>
+</div>
 
 <div style="border-radius:6px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
 <div style="padding:10px 14px;border-bottom:1px solid oklch(0.28 0.01 250);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:12.5px;font-weight:600;color:oklch(0.93 0.005 250)">Survivable deaths at each setting · {{ wg.ranLabel }}</span><span style="font:400 9px 'IBM Plex Mono',monospace;letter-spacing:.07em;color:oklch(0.56 0.008 250)">{{ wg.stamp }}</span></div>
@@ -1646,7 +1737,7 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
      to composite a frame that only changed inside the map.
      -------------------------------------------------------------------- -->
 <div id="angelMapRoot" style="position:relative;z-index:2;height:{{ mapHeight }};overflow:hidden;contain:layout paint;pointer-events:none">
-<x-import component-from-global-scope="angel-map" from="./angel-map.js?v=7" height="100%" hint-size="100%,100%"></x-import>
+<x-import component-from-global-scope="angel-map" from="./angel-map.js?v=14" height="100%" hint-size="100%,100%"></x-import>
 
 <div style="position:absolute;left:0;top:0;right:0;bottom:0;padding:12px;display:flex;flex-direction:column;gap:10px;pointer-events:none;z-index:5">
 <div id="angelMapHeadCard" style="pointer-events:auto;flex:none;border-radius:6px;border:1px solid oklch(0.34 0.012 250);background:oklch(0.1 0.008 250 / .66);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(11px);box-shadow:0 10px 30px oklch(0.05 0 0 / .45);padding:8px 11px;display:flex;flex-direction:column;gap:8px;contain:paint">
@@ -1655,12 +1746,6 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:flex;gap:5px;font-family:'IBM Plex Mono',monospace;flex:none">
 <sc-for list="{{ scopes }}" as="t" hint-placeholder-count="3"><span onClick="{{ t.on }}" style="display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:600;letter-spacing:.08em;padding:5px 9px;border-radius:4px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.icon }}{{ t.label }}</span></sc-for>
 </div>
-<sc-if value="{{ showIndicatorPreview }}" hint-placeholder-val="{{ false }}">
-<div data-map-indicator-preview role="group" aria-label="Comparison indicator preview" style="display:flex;align-items:center;gap:0;font-family:'IBM Plex Mono',monospace;flex:none;border:1px solid oklch(0.34 0.012 250);border-radius:4px;overflow:hidden;background:oklch(0.14 0.008 250 / .82)">
-<span style="font-size:8px;letter-spacing:.1em;padding:6px 8px;color:oklch(0.64 0.008 250);border-right:1px solid oklch(0.34 0.012 250)">INDICATOR</span>
-<sc-for list="{{ indicatorOptions }}" as="p" hint-placeholder-count="3"><button type="button" data-map-indicator-option aria-pressed="{{ p.pressed }}" onClick="{{ p.on }}" title="{{ p.title }}" style="appearance:none;margin:0;font:600 8.5px 'IBM Plex Mono',monospace;letter-spacing:.05em;padding:6px 8px;cursor:pointer;white-space:nowrap;border:0;border-right:1px solid oklch(0.3 0.012 250);background:{{ p.bg }};color:{{ p.fg }}">{{ p.label }}</button></sc-for>
-</div>
-</sc-if>
 <div style="display:flex;gap:5px;row-gap:5px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;flex:1 1 auto;min-width:0">
 <sc-for list="{{ tools }}" as="t" hint-placeholder-count="6"><span onClick="{{ t.on }}" style="font-size:9.5px;font-weight:600;letter-spacing:.06em;padding:6px 11px;border-radius:4px;cursor:pointer;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.fg }}" style-hover="border-color:oklch(0.46 0.02 250);color:oklch(0.96 0.005 250)">{{ t.label }}</span></sc-for>
 </div>
@@ -2217,6 +2302,20 @@ a{color:oklch(0.74 0.1 210);text-decoration:none}a:hover{color:oklch(0.85 0.1 21
 <div style="display:grid;grid-template-columns:1fr 306px;gap:12px;align-items:start">
 <div style="display:flex;flex-direction:column;gap:12px">
 
+<div style="border-radius:6px;background:oklch(0.2 0.012 250);border:1px solid oklch(0.3 0.012 250);overflow:hidden">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 15px;border-bottom:1px solid oklch(0.28 0.01 250)">
+<div style="display:flex;flex-direction:column;gap:3px"><span id="primaryFpconTitle" style="font-size:12.5px;font-weight:600;color:oklch(0.93 0.005 250)">Force Protection Condition</span><span style="font-size:10.5px;color:oklch(0.64 0.008 250)">Operator-set force-protection status. This display setting does not change, pause, or restart the mission simulation.</span></div>
+<span style="font:700 8px 'IBM Plex Mono',monospace;letter-spacing:.09em;padding:3px 8px;border-radius:3px;background:oklch(0.26 0.012 250);color:oklch(0.8 0.006 250);flex:none">DISPLAY</span>
+</div>
+<div class="fpcon-options" role="radiogroup" aria-labelledby="primaryFpconTitle">
+<sc-for list="{{ fpcon.options }}" as="o" hint-placeholder-count="5">
+<button type="button" class="fpcon-option" role="radio" aria-checked="{{ o.checked }}" tabindex="{{ o.tab }}" data-primary-fpcon="{{ o.key }}" onClick="{{ o.on }}" onKeyDown="{{ o.keyDown }}" style="background:{{ o.bg }};border:1px solid {{ o.line }};color:{{ o.text }}">
+<span class="fpcon-option-dot" aria-hidden="true" style="background:{{ o.mark }}"></span><span><b>FPCON {{ o.key }}</b><small>{{ o.label }}</small></span>
+</button>
+</sc-for>
+</div>
+</div>
+
 <sc-for list="{{ setGroups }}" as="g" hint-placeholder-count="4">
 <div style="border-radius:6px;background:oklch(0.2 0.012 250);border:1px solid {{ g.border }};overflow:hidden">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 15px;border-bottom:1px solid oklch(0.28 0.01 250)">
@@ -2595,6 +2694,7 @@ const WALK = [
 const DESTINATION_SLUG = {
   dash: 'command-overview', cas: 'live-casualties', dec: 'decisions',
   feed: 'decision-feed', tty: 'analyst-terminal', sensor: 'sensor-model',
+  track: 'resupply-tracking',
   ops: 'ops-center', ev: 'evidence', wargame: 'war-game', chat: 'ask-angel',
   map: 'theater-map', data: 'data-products', auth: 'authority-policy',
   setup: 'settings'
@@ -2724,6 +2824,8 @@ let WG_BASES = [
   { name: 'FARP BRAVO', fleet: [['LIGHT', 1], ['HEAVY', 1]] }
 ];
 let WG_OUTAGE = 12;                   /* JOA CORAL — SATCOM DENIED, 12 min at T+88 */
+let WG_COMMS_AT = 88;
+let WG_COMMS_LABEL = 'SATCOM DENIED';
 const WG_SEED0  = 1000;               /* replication i flies seed WG_SEED0 + i, on both arms */
 
 /* Called whenever the engine is loaded or the scenario changes. Silent about
@@ -2735,6 +2837,8 @@ function wgSyncScenario(E, key) {
   if (!x) return;
   WG_BASES = x.bases.map(b => ({ name: b.name, fleet: b.fleet }));
   WG_OUTAGE = (x.comms && x.comms[0] && x.comms[0].dur) || 0;
+  WG_COMMS_AT = (x.comms && x.comms[0] && x.comms[0].at) || 0;
+  WG_COMMS_LABEL = (x.comms && x.comms[0] && x.comms[0].label) || 'NO SCHEDULED OUTAGE';
 }
 
 /* The same expression applyLever uses, so the count on the label is the count
@@ -2796,7 +2900,7 @@ const WG_LEVERS = {
     key: v => 'c' + Math.round(v * WG_OUTAGE),
     big: v => String(Math.round(v * WG_OUTAGE)), unit: 'MINUTES DENIED',
     tag: v => v === 0 ? 'clean spectrum' : wgX(v) + ' the scenario window',
-    note: 'Changes how long the link stays down. It still drops at T+88; only the length moves. Both arms fly through the same jamming.'
+    note: () => 'Changes how long the link stays down. ' + WG_COMMS_LABEL + ' still begins at T+' + WG_COMMS_AT + '; only its duration moves. Both arms fly through the same disruption.'
   },
   triage: {
     label: 'TRIAGE ERROR', mark: 'cas', hue: 25, base: 1,
@@ -2840,7 +2944,14 @@ const wgCI = a => {
   if (a.length < 2) return 0;
   const m = wgMean(a);
   const sd = Math.sqrt(a.reduce((s, x) => s + (x - m) * (x - m), 0) / (a.length - 1));
-  return 1.96 * sd / Math.sqrt(a.length);
+  /* Two-sided 95% Student-t interval. The UI supports 20, 30 and 40 paired
+     battles, where estimating variance and then using 1.96 would make the
+     interval systematically too narrow. This expansion is within 0.001 of
+     the tabulated critical values at those degrees of freedom. */
+  const df = a.length - 1, z = 1.959963984540054;
+  const t = z + (z * z * z + z) / (4 * df) +
+    (5 * Math.pow(z, 5) + 16 * Math.pow(z, 3) + 3 * z) / (96 * df * df);
+  return t * sd / Math.sqrt(a.length);
 };
 
 
@@ -2864,7 +2975,7 @@ class Component extends DCLogic {
     resOpen: false, resetOpen: false, casFilter: 'ALL',
     expand: null, showAll: false, casTab: 'board', ready: false, q: '', blockedAttempt: false,
     deployOpen: false, deploying: false, depOnline: 0, sel: [0, 1, 2],
-    role: 'COMMANDER', decisions: {}, extra: [],
+    role: 'COMMANDER', fpcon: window.FPCON.get(), decisions: {}, extra: [],
     filter: 'ALL', limit: 30, feedTab: 'dec',
     ttyTab: 'transcript', sql: 0, dq: 'How long can whole blood be out of refrigeration?',
     criT: 0, scen: 'slow', qual: 'clean',
@@ -2882,7 +2993,7 @@ class Component extends DCLogic {
     /* The war game. wgSweep holds a completed sweep; wgRanLever records
        which lever produced it, because the tab strip can be moved after a
        run and the results must keep saying what they are of. */
-    wgLever: 'fleet', wgSeeds: 30, wgRunning: false, wgDone: 0, wgTotal: 0,
+    wgLever: 'fleet', wgSeeds: 30, wgSettings: {}, wgRunning: false, wgDone: 0, wgTotal: 0,
     wgSweep: null, wgRanLever: null, wgError: null,
     /* WHICH OF THE SEVEN JOINT OPERATING AREAS THIS RUN IS FLOWN IN.
        sim.js has always carried four PACOM scenarios and three EUCOM ones and
@@ -2895,7 +3006,8 @@ class Component extends DCLogic {
        row sets walkOn; walkStep is the last step reached, so navigating away
        by the rail and back re-joins the path where it was left. */
     walkOn: false, walkStep: 0,
-    interruptOpen: false,
+    interruptOpen: false, decisionNotice: '',
+    dashCardTab: 'globe',
     cfg: { hitl: true, bar: 10, mode: 'fair', ingest: false, telementor: true, flightVariability: false }
   };
 
@@ -2903,6 +3015,24 @@ class Component extends DCLogic {
     history.replaceState({ ...(history.state || {}), angelDestination: this.state.page }, '', destinationURL(this.state.page));
     this._onPopState = () => this.navigate(destinationFromURL(), {}, false);
     window.addEventListener('popstate', this._onPopState);
+    this._onFpcon = () => {
+      const fpcon = window.FPCON.get();
+      if (this.state.fpcon !== fpcon) this.setState({ fpcon });
+    };
+    window.addEventListener('angel:fpcon-change', this._onFpcon);
+    this._onAngelMapHandoff = e => {
+      if (this.state.page !== 'dash') return;
+      const scope = e.detail && e.detail.scope === '3D' ? '3d' : '2d';
+      this.navigate('map', { scope });
+    };
+    window.addEventListener('angelmap:handoff', this._onAngelMapHandoff);
+    this._onAngelMapAvailable = () => {
+      if (this.state.page === 'dash' && this.state.dashCardTab === 'globe') {
+        this._commandGlobeAvailabilityHits = (this._commandGlobeAvailabilityHits || 0) + 1;
+        this.forceUpdate();
+      }
+    };
+    window.addEventListener('angelmap:available', this._onAngelMapAvailable);
     import('./angel-engine.js').then(E => {
       this.E = E;
       wgSyncScenario(E, this.state.scenario);
@@ -2918,6 +3048,20 @@ class Component extends DCLogic {
         const nt = Math.min(180, this.state.t + this.state.speed * 0.12);
         const done = nt >= 180;
         this.setState({ t: nt, running: !done, resOpen: done || this.state.resOpen }, () => this.checkPendingAttention());
+      }
+      else if (this._decisionWindows && this._decisionWindows.size) {
+        /* A real-time promise keeps counting while paused even when the shelf
+           is collapsed. Remove closed windows here and repaint once at the
+           boundary so stale controls cannot survive without another event. */
+        const now = Date.now(), decisions = this.state.decisions || {};
+        let closed = false;
+        for (const [id, w] of this._decisionWindows) {
+          if (decisions[id] || now >= w.until) {
+            this._decisionWindows.delete(id);
+            closed = true;
+          }
+        }
+        if (closed || this._decisionWindows.size) this.forceUpdate();
       }
       /* THE WAVEFORM IS NOT DRAWN FROM HERE ANY MORE. This interval used to
          push seven samples of a hand-rolled pulse into component state and
@@ -3014,6 +3158,27 @@ class Component extends DCLogic {
         enumerable: false
       });
     }
+    if (new URL(location.href).searchParams.get('command-globe-selftest') === '1') {
+      Object.defineProperty(window.ANGEL_DESIGN, 'commandGlobeFixture', {
+        enumerable: false,
+        value: {
+          instance: () => this,
+          availabilityHits: () => this._commandGlobeAvailabilityHits || 0,
+          probe: fake => {
+            const real = window.ANGELMAP, owned = this._dashMapScope;
+            try {
+              window.ANGELMAP = fake;
+              this._dashMapScope = null;
+              this.componentDidUpdate();
+              return this._dashMapScope;
+            } finally {
+              window.ANGELMAP = real;
+              this._dashMapScope = owned;
+            }
+          }
+        }
+      });
+    }
   }
 
   checkPendingAttention() {
@@ -3022,11 +3187,26 @@ class Component extends DCLogic {
     const pending = this.snap().pending || [];
     const known = this._knownPending || new Set();
     const fresh = pending.some(p => !known.has(p.id));
-    pending.forEach(p => known.add(p.id));
+    this._decisionWindows = this._decisionWindows || new Map();
+    const now = Date.now();
+    pending.forEach(p => {
+      known.add(p.id);
+      if (!this._decisionWindows.has(p.id)) this._decisionWindows.set(p.id, { proposal: p, firstSeen: now, until: now + 15000 });
+      else this._decisionWindows.get(p.id).proposal = p;
+    });
     this._knownPending = known;
-    if (fresh) this.setState({ interruptOpen: true });
+    if (fresh && this.state.page !== 'dec' && !this.state.interruptOpen) {
+      if (this._decisionToastTO) clearTimeout(this._decisionToastTO);
+      this.setState({ interruptOpen: true, decisionNotice: '' });
+      this._decisionToastTO = setTimeout(() => {
+        this._decisionToastTO = 0;
+        this.setState({ interruptOpen: false });
+      }, 5000);
+    }
   }
   componentWillUnmount() {
+    if (this._wgCancel) this._wgCancel('The sweep was stopped because the War Game screen closed.');
+    if (window.ANGELMAP && window.ANGELMAP.ready()) window.ANGELMAP.setScope('THEATRE');
     if (window.ANGEL_DESIGN && window.ANGEL_DESIGN.setScenario) delete window.ANGEL_DESIGN;
     if (this._opFix) { clearTimeout(this._opFix); this._opFix = 0; }
     if (this._scnFix) { clearTimeout(this._scnFix); this._scnFix = 0; }
@@ -3035,6 +3215,43 @@ class Component extends DCLogic {
     if (this._onVW) window.removeEventListener('resize', this._onVW);
     if (this._onKey) window.removeEventListener('keydown', this._onKey);
     if (this._onPopState) window.removeEventListener('popstate', this._onPopState);
+    if (this._onFpcon) window.removeEventListener('angel:fpcon-change', this._onFpcon);
+    if (this._onAngelMapHandoff) window.removeEventListener('angelmap:handoff', this._onAngelMapHandoff);
+    if (this._onAngelMapAvailable) window.removeEventListener('angelmap:available', this._onAngelMapAvailable);
+    if (this._decisionToastTO) { clearTimeout(this._decisionToastTO); this._decisionToastTO = 0; }
+  }
+
+  componentDidUpdate() {
+    const M = window.ANGELMAP;
+    /* A running mission belongs on the full Theater Map. Treat its overview
+       cover exactly like every other destination that does not own Globe, so
+       removing the slot also relinquishes renderer input and paint work. */
+    const wantsGlobe = this.state.page === 'dash' && this.state.dashCardTab === 'globe' &&
+      !this.state.running;
+    if (this.state.page === 'map') {
+      this._dashMapScope = null;
+      return;
+    }
+    if (!wantsGlobe) {
+      if (M && M.ready() && this._dashMapScope !== 'THEATRE') {
+        M.setScope('THEATRE');
+        if (M.scope() === 'THEATRE') this._dashMapScope = 'THEATRE';
+      }
+      return;
+    }
+    if (!M || !M.ready() || !M.readyGlobe()) {
+      return;
+    }
+    if (this._dashMapScope !== 'GLOBE' || M.scope() !== 'GLOBE') {
+      M.setScenario(this.state.scenario);
+      M.setScope('GLOBE');
+      if (M.scope() === 'GLOBE') {
+        this._dashMapScope = 'GLOBE';
+      } else {
+        return;
+      }
+    }
+    M.sync(this.state.t, this.state.deployed);
   }
 
   /* Both arms of a scenario are built together and held for the life of the
@@ -3047,6 +3264,7 @@ class Component extends DCLogic {
        restart with it too. Otherwise the first escalation in a second run can
        share an id with the previous run and be mistaken for one already seen. */
     this._knownPending = new Set();
+    this._decisionWindows = new Map();
     this.runD = this.E.buildRun({
       seed: 42, deployed: true, scenario,
       observedFlightVariability: !!observedFlightVariability
@@ -3066,6 +3284,7 @@ class Component extends DCLogic {
     return () => {
       const st = this.state;
       if (st.cfg.flightVariability === value || !this.E) return;
+      if (this._wgCancel) this._wgCancel('Flight variability changed while the sweep was running.');
       this.buildBoth(st.scenario, value);
       this.setState({
         cfg: { ...st.cfg, flightVariability: value },
@@ -3087,11 +3306,12 @@ class Component extends DCLogic {
   pickScenario(key) {
     return () => {
       if (this.state.scenario === key || !this.E) return;
+      if (this._wgCancel) this._wgCancel('The selected operation changed while the sweep was running.');
       wgSyncScenario(this.E, key);
       this.buildBoth(key);
       this.setState({ scenario: key, t: 0, running: false, resOpen: false,
                       expand: null, showAll: false, q: '', casFilter: 'ALL',
-                      thread: [], wgSweep: null, wgRanLever: null, wgError: null });
+                      thread: [], wgSettings: {}, wgSweep: null, wgRanLever: null, wgError: null });
       /* AND THE MAP GOES WITH IT. Two engines run here — this shell's, and
          app.js's own inside the map frame — and until now only one direction
          was wired: a globe handoff moved the shell, but picking a theatre on
@@ -3292,6 +3512,10 @@ class Component extends DCLogic {
   }
   navigate(page, patch = {}, push = true) {
     const next = DESTINATION_SLUG[page] ? page : 'dash';
+    if (next === 'dec') {
+      if (this._decisionToastTO) { clearTimeout(this._decisionToastTO); this._decisionToastTO = 0; }
+      patch = { ...patch, interruptOpen: false };
+    }
     if (next === this.state.page) {
       if (Object.keys(patch).length) this.setState(patch);
       return;
@@ -3329,12 +3553,13 @@ class Component extends DCLogic {
        because the reset dialog promises that nothing is kept and that promise
        is worth more than the thirty seconds of compute. */
     wgSweep: null, wgRanLever: null, wgRunning: false, wgDone: 0, wgTotal: 0, wgError: null,
-    thread: [], ask: '', interruptOpen: false
+    thread: [], ask: '', interruptOpen: false, decisionNotice: ''
   };
   resetRun() {
     this.depTotal = 0; this._fin = null; this._finKey = null;
     this._mapCatchAt = null; this._mapCatchN = 0;
     this._knownPending = new Set();
+    this._decisionWindows = new Map();
     this.navigate('dash', { ...this.COLD });
   }
 
@@ -3838,14 +4063,20 @@ class Component extends DCLogic {
     const NAV_OF = { feed: 'dec' };                              // a tab inside a destination keeps that destination lit
     const here = NAV_OF[st.page] || st.page;
     const navOf = k => here === k ? { bg: 'oklch(0.26 0.03 165)', fg: 'oklch(0.96 0.02 165)', selected: true } : { bg: 'transparent', fg: 'oklch(0.84 0.006 250)', selected: false };
-    const nav = {}; ['dash', 'cas', 'dec', 'feed', 'tty', 'sensor', 'ops', 'ev', 'wargame', 'chat', 'map', 'data', 'auth', 'setup'].forEach(k => nav[k] = navOf(k));
+    const nav = {}; ['dash', 'cas', 'dec', 'feed', 'tty', 'sensor', 'track', 'ops', 'ev', 'wargame', 'chat', 'map', 'data', 'auth', 'setup'].forEach(k => nav[k] = navOf(k));
     const go = {}; Object.keys(nav).forEach(k => go[k] = this.go(k));
+    nav.dash.key = e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); e.stopPropagation(); go.dash();
+      }
+    };
     nav.ev.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go.ev(); } };
+    nav.track.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go.track(); } };
     go.flightVariability = value => this.flightVariability(value);
     const roles = ['COMMANDER', 'LOGISTICIAN', 'SURGEON', 'ANALYST'].map(r => ({ label: r, ...seg(st.role === r, 165), on: () => this.navigate({ COMMANDER: 'dash', LOGISTICIAN: 'cas', SURGEON: 'sensor', ANALYST: 'tty' }[r], { role: r }) }));
     const speeds = [1, 2, 4, 10].map(v => ({ label: v + '×', ...seg(st.speed === v, 165), on: () => this.setState({ speed: v }) }));
 
-    if (!st.ready) return { nav, go, roles, speeds, clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
+    if (!st.ready) return { nav, go, roles, speeds, fpcon: this.fpconVals(), clock: '0000:00Z', tPlus: 'LOADING', isDash: false, isCas: false, isTrack: false, isStub: true, isWargame: false, wg: {}, wgTabs: [], wgPoints: [], track: { modalOpen: false }, stub: { title: 'ANGEL SWARM', sub: 'Building the run…' }, posture: this.posture(null), pa: { label: 'Loading', cta: '', kicker: '', sub: '', heroBg: 'oklch(0.2 0.012 250)', heroBorder: 'oklch(0.3 0.012 250)', btnBg: 'oklch(0.3 0.012 250)', btnFg: 'oklch(0.7 0 0)', chipBg: 'oklch(0.26 0.012 250)', chipFg: 'oklch(0.7 0 0)', chip: '…', top: '…', kickerFg: 'oklch(0.6 0 0)', subFg: 'oklch(0.6 0 0)', showSpeed: false, act: () => {} }, q: st.q, onQ: () => {}, badge: {}, deployOpen: false, deploying: false, deployReady: false, dep: {}, closeDeploy: () => {}, confirmDeploy: () => {}, resOpen: false, res: {}, closeRes: () => {}, openAnalysis: () => {}, resetOpen: false, resetShow: false, askReset: () => {}, cancelReset: () => {}, doReset: () => {}, reset: {}, ...this.cmpVals(null), ...this.walkVals() };
 
     const s = this.snap(), t = st.t;
     const zulu = 240 + t;
@@ -3853,7 +4084,7 @@ class Component extends DCLogic {
     const finished = t >= 180;
 
     return {
-      nav, go, roles, speeds, clock, tPlus: 'T+' + Math.floor(t) + ' MIN', s,
+      nav, go, roles, speeds, fpcon: this.fpconVals(), clock, tPlus: 'T+' + Math.floor(t) + ' MIN', s,
       /* The classification banner and the deploy sheet used to name JOA CORAL
          in the markup. They name whichever of the seven is flying now, read
          off the engine's WORLD — which is the same object every other screen
@@ -3877,15 +4108,7 @@ class Component extends DCLogic {
          blank. See alertVals() for the same two states in the top bar. */
       badge: { cas: s.open || null, data: s.commsDown ? 1 : null, ...this.decChip(s) },
       posture: this.posture(s), pa: this.primary(s, finished),
-      interrupt: {
-        show: !!st.interruptOpen && this.pendingFor(s).length > 0,
-        title: this.pendingFor(s).length === 1 ? 'A decision is waiting for you' : this.pendingFor(s).length + ' decisions are waiting for you',
-        copy: 'A newly escalated tasking is outside standing authority. The simulation is still running at your selected speed; review it before the eight-minute decision window expires.',
-        remaining: this.pendingFor(s).length ? this.mmss(Math.max(0, this.pendingFor(s)[0].tRaised + 8 - st.t)) : '00:00',
-        review: () => this.navigate('dec', { interruptOpen: false }),
-        dismiss: () => this.setState({ interruptOpen: false })
-      },
-      isDash: st.page === 'dash', isCas: st.page === 'cas',
+      isDash: st.page === 'dash', isCas: st.page === 'cas', isTrack: st.page === 'track',
       isDec: st.page === 'dec', isFeed: st.page === 'feed',
       isStub: false,
       stub: { title: { dec: 'Decision', feed: 'Decision Feed', tty: 'Analyst Terminal', sensor: 'Sensor & Model', ops: 'Ops Center Wall', ev: 'Evidence', chat: 'Ask ANGEL', map: 'Theater Map', auth: 'Authority & Policy', setup: 'Run Setup' }[st.page] || st.page, sub: 'Wiring in progress.' },
@@ -4295,17 +4518,41 @@ class Component extends DCLogic {
        the same bar twice and would invite the reader to read a rounding
        artefact as a plateau. The collapsed point names every multiplier that
        lands on it. */
-    const groups = [];
+    const allGroups = [];
     L.points.forEach(v => {
       const k = L.key(v);
-      const g = groups.find(x => x.k === k);
-      if (g) g.vals.push(v); else groups.push({ k, v, vals: [v] });
+      const g = allGroups.find(x => x.k === k);
+      if (g) g.vals.push(v); else allGroups.push({ k, v, vals: [v] });
     });
+    const configuredKeys = st.wgSettings && st.wgSettings[st.wgLever];
+    const selectedKeys = configuredKeys || allGroups.map(g => g.k);
+    const groups = allGroups.filter(g => selectedKeys.includes(g.k));
 
     const run = () => {
       if (this.state.wgRunning) return;
       const lever = this.state.wgLever, seeds = this.state.wgSeeds;
       const scenario = this.state.scenario;
+      const scenarioInfo = this.E && this.E.SCENARIO_LIST.find(x => x.key === scenario);
+      const variability = !!this.state.cfg.flightVariability;
+      const leverTreatment = lever === 'triage'
+        ? 'Triage error changes only CURRENT — TRIAGE & PROXIMITY because ANGEL SWARM does not consume triage category.'
+        : 'The selected lever changes the shared world identically for both arms.';
+      const runConfig = {
+        scenario,
+        scenarioName: scenarioInfo ? scenarioInfo.name : scenario,
+        theater: scenarioInfo ? scenarioInfo.theater : '',
+        force: scenarioInfo ? scenarioInfo.airframes + ' airframes at ' + scenarioInfo.launchPoints + ' launch points' : '',
+        lever,
+        leverLabel: WG_LEVERS[lever].label,
+        settings: groups.map(g => ({ value: g.v, values: g.vals.slice(), label: WG_LEVERS[lever].big(g.v) + ' ' + WG_LEVERS[lever].unit })),
+        battlesPerSetting: seeds,
+        seedStart: WG_SEED0,
+        seedEnd: WG_SEED0 + seeds - 1,
+        variability,
+        variabilityLabel: variability ? 'Observed flight variability · ' + (typeof OBSERVED_FLIGHT_VARIABILITY !== 'undefined' ? OBSERVED_FLIGHT_VARIABILITY.id : 'enabled') : 'Nominal published platform timing',
+        mode: lever === 'triage' ? 'realistic control triage at each selected error rate' : 'fair control with perfect triage',
+        differences: leverTreatment + ' ANGEL SWARM uses deadline/receiver/cold-chain/inventory tasking with telementoring and ANGEL-only in-flight abort/hold logic. CURRENT uses triage-and-proximity tasking without telementoring. Casualty stream, force, stock and paired random inputs are shared.'
+      };
       const total = groups.length * seeds, t0 = performance.now();
 
       /* One worker per core less one, left for the page. The whole claim of
@@ -4330,16 +4577,22 @@ class Component extends DCLogic {
       });
       const rows = groups.map(() => []);
       const workers = [];
+      const timeouts = this._wgTimeouts || { hello: 15000, job: 60000 };
       let done = 0, dead = false;
 
-      const fail = msg => {
+      const stop = (msg, cancelled) => {
         if (dead) return; dead = true;
         workers.forEach(w => { clearTimeout(w.__timer); w.terminate(); });
-        this.setState({ wgRunning: false, wgError: msg });
+        this._wgCancel = null;
+        this.setState({ wgRunning: false, wgDone: 0, wgTotal: 0,
+          wgSweep: null, wgRanLever: null,
+          wgError: (cancelled ? 'Sweep cancelled. ' : '') + msg + ' No partial findings were retained.' });
       };
+      const fail = msg => stop(msg, false);
       const finish = () => {
         if (dead) return; dead = true;
         workers.forEach(w => w.terminate());
+        this._wgCancel = null;
         const ms = performance.now() - t0;
         const points = groups.map((g, i) => {
           const rs = rows[i];
@@ -4358,8 +4611,8 @@ class Component extends DCLogic {
                    cas: wgMean(rs.map(r => r.casualties)) };
         });
          this.setState({ wgRunning: false, wgDone: total, wgRanLever: lever,
-           wgSweep: { lever, seeds, reps: total, ms, workers: N, points,
-                      observedFlightVariability: !!this.state.cfg.flightVariability } });
+            wgSweep: { ...runConfig, seeds, reps: total, ms, workers: N, points,
+                       observedFlightVariability: variability } });
       };
 
       const pump = w => {
@@ -4373,12 +4626,13 @@ class Component extends DCLogic {
         w.__idle = false; w.__job = job;
         w.__timer = setTimeout(() => fail(
           'A replication was sent to the worker and nothing came back within 60 seconds. ' +
-          'The message contract in js/mc.worker.js has changed; this screen is not guessing at a number.'), 60000);
+           'The message contract in js/mc.worker.js has changed; this screen is not guessing at a number.'), timeouts.job);
         w.postMessage({ type: 'run', id: job.id, cfg: job.cfg });
       };
 
       this.setState({ wgRunning: true, wgDone: 0, wgTotal: total, wgError: null,
                       wgSweep: null, wgRanLever: lever });
+      this._wgCancel = msg => stop(msg || 'The planner stopped outstanding worker jobs.', true);
 
       for (let i = 0; i < N; i++) {
         let w;
@@ -4387,7 +4641,7 @@ class Component extends DCLogic {
              so this resolves to /js/mc.worker.js — and it MUST be served from
              /js/, because the worker importScripts('sim.js','optimizer.js')
              relative to itself. Nothing is fetched from anywhere else. */
-          w = new Worker('js/mc.worker.js');
+          w = this._wgWorkerFactory ? this._wgWorkerFactory() : new Worker('js/mc.worker.js');
         } catch (e) {
           return fail('The browser refused to start a worker: ' + (e && e.message || e));
         }
@@ -4409,13 +4663,22 @@ class Component extends DCLogic {
              the cheapest possible guard against the two drifting apart. */
           if (m.result.id !== w.__job.id) return fail(
             'A worker returned result ' + m.result.id + ' for job ' + w.__job.id + '. The queue and the engine disagree about which replication this is.');
+          const r = m.result, cfg = w.__job.cfg;
+          const numeric = ['a','b','aTotal','bTotal','aSaved','bSaved','survivable','casualties',
+            'sortiesA','sortiesB','wastedA','wastedB','bloodA','bloodB','ms'];
+          if (r.scenario !== cfg.scenario || r.lever !== cfg.lever || r.seed !== cfg.seed ||
+              r.value !== cfg.value ||
+              r.observedFlightVariability !== !!cfg.observedFlightVariability ||
+              numeric.some(k => !Number.isFinite(r[k]) || r[k] < 0)) {
+            return fail('A worker returned an incomplete or mismatched replication. The result protocol no longer matches the run configuration.');
+          }
           rows[w.__job.gi].push(m.result);
           done++;
           if (done % 4 === 0 || done === total) this.setState({ wgDone: done });
           pump(w);
         };
         w.__timer = setTimeout(() => fail(
-          'A worker was asked to say hello and never answered. js/mc.worker.js is not loading on this origin.'), 15000);
+          'A worker was asked to say hello and never answered. js/mc.worker.js is not loading on this origin.'), timeouts.hello);
         w.postMessage({ type: 'hello' });
         workers.push(w);
       }
@@ -4423,6 +4686,7 @@ class Component extends DCLogic {
 
     /* ---- what the screen reads ------------------------------------------ */
     const sw = st.wgSweep;
+    const currentScenario = this.E && this.E.SCENARIO_LIST.find(x => x.key === st.scenario);
     const SL = sw ? WG_LEVERS[sw.lever] : L;
     const max = sw ? Math.max(1, ...sw.points.map(p => Math.max(p.a, p.b))) : 1;
     const RED = 'oklch(0.84 0.15 25)';          /* a death is red on both arms */
@@ -4442,8 +4706,8 @@ class Component extends DCLogic {
            of the screen. Everything below it is a curve, and a curve of this
            shape is the kind a reader mistakes for a capability trade study
            unless it is told plainly that it is not one. */
-        kicker: 'BOTH ARMS FIGHT THE SAME BATTLE',
-        framing: 'Every lever moves the force for both arms. Same aircraft, same launch points, same blood, same wounded. Only the tasking rule differs.',
+        kicker: 'SAME BATTLE · DECLARED DIFFERENCES',
+        framing: 'Both arms receive the same casualties, force, stock and paired random inputs. Force levers move that shared world; triage error deliberately changes only the current method, which consumes triage category.',
         framing2: 'Both arms fly. There is no no-drones case here; that comparison is on the run-complete card and on Evidence \u2192 COUNTERFACTUAL.',
         /* THE METHODS CLAIM IS NOT DELETED, IT IS FOLDED. A commander does not
            need to read how the lever is applied. A judge who challenges the
@@ -4452,13 +4716,39 @@ class Component extends DCLogic {
            is also where the run provenance went when the result stamp was cut
            back from REPLICATIONS / SEEDS PER POINT / SEEDS 1000-1029 / WORKERS
            to BATTLES / AT EACH SETTING. */
-        framing3: 'The lever is applied to the shared world after the casualty stream is fixed and before either arm is built, so at every setting the two arms are two ways of tasking one identical force over one identical set of wounded. The no-delivery case is not swept here because it flies no aircraft: every lever on this screen would leave it exactly where it was. Both arms are flown on the same numbered battles, on the same sim.js and optimizer.js the live run uses, off the main thread.',
+        framing3: 'Force levers are applied to the shared world after the casualty stream is fixed and before either arm is built. Triage error is the declared asymmetry: only CURRENT reads that category. The no-delivery case is not swept here because it flies no aircraft. Both arms use the same numbered battles on the same sim.js and optimizer.js the live run uses, off the main thread.',
         whyOpen: !!st.wgWhy,
         whyLabel: 'WHY THIS IS A FAIR TEST',
         whySign: st.wgWhy ? '\u2212' : '+',
         toggleWhy: () => this.setState({ wgWhy: !st.wgWhy }),
 
-        leverName: L.label, note: L.note, caveat: L.caveat || null, asym: L.asym || null,
+        leverName: L.label, note: typeof L.note === 'function' ? L.note() : L.note,
+        caveat: L.caveat || null, asym: L.asym || null,
+        settings: allGroups.map(g => {
+          const selected = selectedKeys.includes(g.k);
+          return {
+            value: L.big(g.v),
+            unit: (selected ? 'INCLUDED · ' : 'EXCLUDED · ') + L.unit,
+            on: () => {
+              if (st.wgRunning || (selected && selectedKeys.length <= 2)) return;
+              const next = selected ? selectedKeys.filter(k => k !== g.k) : selectedKeys.concat(g.k);
+              this.setState({ wgSettings: { ...(this.state.wgSettings || {}), [st.wgLever]: next } });
+            },
+            bg: selected ? 'oklch(0.28 0.055 165)' : 'oklch(0.22 0.01 250)',
+            edge: selected ? 'oklch(0.48 0.09 165)' : 'oklch(0.31 0.012 250)',
+            fg: selected ? 'oklch(0.94 0.04 165)' : 'oklch(0.58 0.008 250)',
+            subFg: selected ? 'oklch(0.72 0.05 165)' : 'oklch(0.48 0.008 250)'
+          };
+        }),
+        context: [
+          { k: 'OPERATION / SCENARIO', v: currentScenario ? currentScenario.name + ' · ' + currentScenario.key : st.scenario },
+          { k: 'FORCE CONTEXT', v: currentScenario
+              ? currentScenario.airframes + ' airframes · ' + currentScenario.launchPoints + ' launch points · ' + currentScenario.durationMin + ' minutes' +
+                ((currentScenario.comms && currentScenario.comms[0]) ? ' · ' + currentScenario.comms[0].label + ' at T+' + currentScenario.comms[0].at + ' for ' + currentScenario.comms[0].dur + ' minutes' : ' · no scheduled datalink outage')
+              : 'Loading scenario force assumptions' },
+          { k: 'DETERMINISTIC BATTLES', v: st.wgSeeds + ' per setting · seeds ' + WG_SEED0 + '–' + (WG_SEED0 + st.wgSeeds - 1) },
+          { k: 'FLIGHT VARIABILITY', v: st.cfg.flightVariability ? 'Observed-flight profile enabled' : 'Nominal published platform timing' }
+        ],
         /* THE CAVEAT HEADING IS THE LEVER'S NOW, not the template's. It was
            hardcoded to "THE MULTIPLIER IS NOT THE FORCE", which is exactly
            right for the fleet lever and meaningless for a lever whose points
@@ -4478,7 +4768,8 @@ class Component extends DCLogic {
           bg: st.wgSeeds === v ? 'oklch(0.3 0.06 165)' : 'oklch(0.24 0.012 250)',
           fg: st.wgSeeds === v ? 'oklch(0.95 0.03 165)' : 'oklch(0.7 0.008 250)'
         })),
-        run, cta: sw ? 'RUN THE SWEEP AGAIN' : 'RUN THE SWEEP',
+        run, cancel: () => { if (this._wgCancel) this._wgCancel(); },
+        cta: sw ? 'RUN THE SWEEP AGAIN' : 'RUN THE SWEEP',
         pctDone: st.wgTotal ? Math.round(st.wgDone / st.wgTotal * 100) + '%' : '0%',
         progress: st.wgDone + ' of ' + st.wgTotal + ' battles',
         error: st.wgError,
@@ -4486,6 +4777,14 @@ class Component extends DCLogic {
         stamp: sw ? sw.reps + ' BATTLES · ' + sw.seeds + ' AT EACH SETTING · ' + (sw.ms / 1000).toFixed(1) + ' S'
              : '',
         ranLabel: sw ? SL.label : '',
+        provenance: sw ? [
+          { k: 'OPERATION / SCENARIO', v: sw.scenarioName + ' · ' + sw.scenario },
+          { k: 'LEVER / SETTINGS', v: sw.leverLabel + ' · ' + sw.settings.map(x => x.label).join('; ') },
+          { k: 'PAIRED BATTLES', v: sw.battlesPerSetting + ' per setting · seeds ' + sw.seedStart + '–' + sw.seedEnd },
+          { k: 'VARIABILITY MODE', v: sw.variabilityLabel },
+          { k: 'CONTROL MODE', v: sw.mode },
+          { k: 'DECLARED DIFFERENCES', v: sw.differences }
+        ] : [],
         axisHead: sw ? SL.unit : '',
         /* THE PAIRING IS THE WHOLE LICENCE FOR THE ATTRIBUTION AND IT IS SAID
            WHERE THE INTERVAL IS SHOWN, NOT IN A FOOTNOTE SOMEWHERE ELSE. */
@@ -5153,24 +5452,6 @@ class Component extends DCLogic {
     const rollT = synced ? roll : null;
     const rec = up ? M.record() : null;
     const can = up ? M.tools() : [];
-    const showIndicatorPreview = !!(up && sc === '2d' && M.comparing());
-    const selectedIndicator = showIndicatorPreview && typeof M.comparisonIndicator === 'function'
-      ? M.comparisonIndicator() : 'tactical';
-    const indicatorOptions = [
-      ['tactical', 'A COMPACT', 'Compact tactical label'],
-      ['edge', 'B EDGE TAB', 'Map-edge tab'],
-      ['inline', 'C INLINE', 'Minimal inline identifier']
-    ].map(([k, label, title]) => ({
-      label, title,
-      pressed: String(selectedIndicator === k),
-      on: () => {
-        if (typeof M.setComparisonIndicator === 'function') M.setComparisonIndicator(k);
-        this.forceUpdate();
-      },
-      bg: selectedIndicator === k ? 'oklch(0.86 0.025 240)' : 'transparent',
-      fg: selectedIndicator === k ? 'oklch(0.18 0.015 240)' : 'oklch(0.72 0.008 250)'
-    }));
-
     /* ---- the scale chips ------------------------------------------------
        THE GPU CHIP IS NOT DRAWN UNTIL THAT RENDERER SAYS IT IS RUNNING.
        map3dReady() is the whole availability test — the module publishes
@@ -5188,7 +5469,7 @@ class Component extends DCLogic {
     /* A change that starts inside the map — an operation picked off the
        theatre picture, a casualty picked off a tactical one — has to reach
        this page, and while the clock is stopped nothing else re-renders it. */
-    if (M && !this._mapSub) { this._mapSub = true; M.onChange(() => { if (this.state.page === 'map') this.forceUpdate(); }); }
+    if (M && !this._mapSub) { this._mapSub = true; M.onChange(() => { if (this.state.page === 'map' || (this.state.page === 'dash' && this.state.dashCardTab === 'globe')) this.forceUpdate(); }); }
 
     /* ---- the tool row, in the order the design draws it ---------------- */
     const ORDER = ['zoomOut', 'zoomIn', 'fit', 'legend', 'layersAll', 'sideBySide'];
@@ -5954,8 +6235,6 @@ class Component extends DCLogic {
         fg: sc === k ? 'oklch(0.95 0.02 165)' : 'oklch(0.74 0.008 250)'
       })),
       tools,
-      showIndicatorPreview,
-      indicatorOptions,
       toolCount: mounting ? 'THE CONTROLS APPEAR WHEN THE RENDERER IS DRAWING'
         : tools.length + ' CONTROL' + (tools.length === 1 ? '' : 'S') + ' IN THIS SCALE',
       scopeNote: mounting
@@ -6087,10 +6366,14 @@ class Component extends DCLogic {
       isData: st.page === 'data',
       resetAll: () => {
         if (st.cfg.flightVariability && this.E) this.buildBoth(st.scenario, false);
+        window.FPCON.set(window.FPCON.DEFAULT);
+        this._knownPending = new Set();
+        this._decisionWindows = new Map();
         this.setState({
           cfg: { hitl: true, mode: 'fair', ingest: true, bar: 25, flightVariability: false },
+          fpcon: window.FPCON.DEFAULT,
           t: 0, running: false, resOpen: false, resetOpen: false,
-          decisions: {}, extra: [], thread: [], wgSweep: null, wgRanLever: null, wgError: null,
+          decisions: {}, extra: [], thread: [], decisionNotice: '', wgSweep: null, wgRanLever: null, wgError: null,
           speed: 4, group: 'loc', scope: '2d', side: false, panelOpen: false,
           lay2: { hold: true, fall: true, crit: true, treated: true, dead: true, hv: true, air: true, routes: true, lp: true },
           lay3: { geo: true, terrain: true, arcs: true, trails: true, cas: true, columns: true, threat: true, sectors: true, labels: true }
@@ -6290,6 +6573,7 @@ class Component extends DCLogic {
       bd: neutral ? 'oklch(0.3 0.012 250)' : 'oklch(0.38 0.06 ' + linkHue + ')',
       rows: [
         { k: 'TRANSPORT', v: 'Cursor on Target over UDP · receive-only' },
+        { k: 'DEVICE', v: 'Sempulse Halo (example) · CipherOx CRI M1 (reference)' },
         /* NAMING THE SYSTEM ON THE OTHER END, AND NAMING WHAT HAS NOT BEEN
            DONE IN THE SAME BREATH. A reviewer who works in military medicine
            asks "produced by what" inside the first minute, and "some wearable
@@ -6602,6 +6886,11 @@ class Component extends DCLogic {
     ));
     const p = pending[0];
     const decided = p ? st.decisions[p.id] : null;
+    const status = p ? this.decisionStatus(p, s) : { actionable:false, text:'' };
+    const window = p && this._decisionWindows && this._decisionWindows.get(p.id);
+    const wallLeft = window ? Math.max(0, (window.until - Date.now()) / 1000) : 0;
+    const wallSpan = window ? Math.max(1, window.until - window.firstSeen) : 15000;
+    const wallUsed = window ? Math.max(0, Math.min(100, (Date.now() - window.firstSeen) / wallSpan * 100)) : 100;
     const handled = A.audit.filter(e => e.t <= st.t && e.action === 'AUTO-DISPATCH')
       .map(e => {
         /* Same for a tasking handled under standing authority. The audit
@@ -6614,34 +6903,7 @@ class Component extends DCLogic {
                  open: m ? this.openRec(Number(m[1])) : null };
       }).filter(h => this.searchMatch(h.t, h.text)).slice(-6).reverse();
     const rec = st.extra.length ? st.extra[st.extra.length - 1] : null;
-    const act = (kind) => () => {
-      if (!p) return;
-      const prev = A.audit.filter(e => e.t <= st.t).slice(-1)[0];
-      /* Search narrows what is rendered, not what remains operationally
-         outstanding. Keep follow-up attention alive for every unmatched
-         proposal after acting on the one visible result. */
-      const others = allPending.filter(x => x.id !== p.id);
-      this.navigate('map', {
-        decisions: { ...st.decisions, [p.id]: kind },
-        interruptOpen: others.length > 0,
-        extra: st.extra.concat([(() => {
-          /* The operator's own row. It used to carry an invented number
-             dressed up as a hash, which is exactly the thing this screen
-             tells a reviewer not to trust. It now carries a real SHA-256
-             over its own text, linked to the last entry the engine wrote, so
-             the row is recomputable on the same terms as every other row. */
-          const last = st.extra.length ? st.extra[st.extra.length - 1] : prev;
-          const action = kind === 'APPROVED' ? 'APPROVE' : 'REJECT';
-          const detail = 'E-' + String(p.id).padStart(4, '0') + (kind === 'APPROVED' ? ' authorised · ' : ' held · ') + p.call + ' → ' + this.cidOf(p.casId);
-          return {
-            seq: (prev ? prev.seq : 0) + 1 + st.extra.length, t: st.t, actor: 'OPERATOR',
-            action, detail,
-            prev: last ? last.hash : 'GENESIS',
-            hash: this.auditHash(last ? last.hash : 'GENESIS', [st.t.toFixed(2), 'OPERATOR', action, detail].join('|'))
-          };
-        })()])
-      });
-    };
+    const act = (kind) => () => this.actOnDecision(p, kind, s);
     /* EVERY ESCALATION THE RUN RAISED, AND WHAT BECAME OF IT. Frame.pending
        is the queue of things still waiting, and at T+180 it is empty because
        nothing is still waiting — which is not the same as nothing having been
@@ -6658,8 +6920,14 @@ class Component extends DCLogic {
         chip: pending.length + (pending.length === 1 ? ' DECISION REQUIRES YOU' : ' DECISIONS REQUIRE YOU'),
         eid: 'E-' + String(p.id).padStart(4, '0'), summary: p.call + ' → ' + this.cidOf(p.casId),
         raised: 'RAISED T+' + p.tRaised.toFixed(1), elapsed: this.mmss(Math.max(0, st.t - p.tRaised)),
-        lapse: this.mmss(Math.max(0, p.tRaised + 8 - st.t)),
-        lapseW: Math.max(0, Math.min(100, (st.t - p.tRaised) / 8 * 100)) + '%',
+        lapse: this.pad(Math.floor(wallLeft / 60)) + ':' + this.pad(Math.ceil(wallLeft) % 60) + ' REAL TIME',
+        lapseW: wallUsed + '%',
+        status: status.text,
+        statusFg: status.actionable ? 'oklch(0.68 0.008 250)' : 'oklch(0.86 0.13 25)',
+        commitDisabled: !status.actionable,
+        commitBg: status.actionable ? 'oklch(0.72 0.14 165)' : 'oklch(0.29 0.012 250)',
+        commitFg: status.actionable ? 'oklch(0.17 0.03 165)' : 'oklch(0.55 0.008 250)',
+        commitCursor: status.actionable ? 'pointer' : 'not-allowed',
         aTitle: 'OPTION A · COMMIT', aServe: this.cidOf(p.casId), aEta: Math.round(p.eta) + ' min from wounding',
         aSlack: Math.round(p.deadline - p.eta), aGain: p.gain, aPayload: p.route.map(r => this.E.PAYLOADS[r.payload].short).join(' + '),
         bTitle: 'OPTION B · HOLD', bServe: p.altId ? this.cidOf(p.altId) : '—',
@@ -7219,7 +7487,79 @@ class Component extends DCLogic {
      because its recorded engine close time has not arrived yet. */
   pendingFor(s) {
     const decisions = this.state.decisions || {};
-    return (s && s.pending || []).filter(p => !decisions[p.id]);
+    const live = (s && s.pending || []).filter(p => !decisions[p.id]);
+    const byId = new Map(live.map(p => [p.id, p]));
+    const now = Date.now();
+    for (const [id, w] of (this._decisionWindows || new Map())) {
+      if (!decisions[id] && now < w.until && !byId.has(id)) byId.set(id, w.proposal);
+    }
+    return [...byId.values()].sort((a, b) => a.tRaised - b.tRaised || a.id - b.id);
+  }
+
+  decisionStatus(p, s) {
+    if (!p) return { actionable: false, text: 'No proposal is waiting.' };
+    if (p.unavailable || p.staleReason) return { actionable: false, text: p.staleReason || 'Operational conditions changed; this route is no longer feasible.' };
+    const operational = this.proposalOperationalStatus(p, s);
+    if (!operational.actionable) return operational;
+    const live = (s && s.pending || []).some(x => x.id === p.id);
+    const w = this._decisionWindows && this._decisionWindows.get(p.id);
+    if (live) return { actionable: true, text: 'Simulation continues at the selected speed.' };
+    if (w && Date.now() < w.until) {
+      if (p.closeReason === 'SIMULATION_WINDOW_ELAPSED')
+        return { actionable: true, text: 'Simulation time elapsed; the protected operator response window remains open.' };
+      const why = {
+        AIRCRAFT_UNAVAILABLE: 'The assigned aircraft is no longer available.',
+        AIRCRAFT_COMMITTED: 'The assigned aircraft has already been committed.',
+        CASUALTY_RESOLVED: 'The casualty condition changed; the original route is no longer feasible.'
+      }[p.closeReason];
+      return { actionable: false, text: why || 'Operational conditions changed; the original route is no longer feasible.' };
+    }
+    return { actionable: false, text: 'This proposal expired before action and is no longer feasible.' };
+  }
+
+  proposalOperationalStatus(p, s) {
+    if (!p || !s) return { actionable: false, text: 'Current operational state is unavailable; Commit is disabled.' };
+    const aircraft = (s.fleet || []).find(d => d.call === p.call);
+    if (!aircraft) return { actionable: false, text: 'The assigned aircraft is no longer available.' };
+    if (aircraft.state !== 'IDLE') return { actionable: false, text: 'The assigned aircraft has already been committed.' };
+    const open = new Set((s.rows || []).map(c => c.id));
+    if ((p.route || []).some(leg => !open.has(leg.casId)))
+      return { actionable: false, text: 'A casualty condition changed; the original route is no longer feasible.' };
+    const stock = (s.stock || []).find(site => site.name === aircraft.base);
+    const fields = { BLOOD: 'blood', PLASMA: 'plasma', TXA: 'txa', TQ_KIT: 'tq', CHEST_SEAL: 'seal' };
+    const needed = {};
+    for (const leg of (p.route || [])) needed[leg.payload] = (needed[leg.payload] || 0) + 1;
+    if (!stock || Object.keys(needed).some(k => (stock[fields[k]] || 0) < needed[k]))
+      return { actionable: false, text: 'Required stock changed; the original route is no longer feasible.' };
+    return { actionable: true, text: '' };
+  }
+
+  actOnDecision(p, kind, s) {
+    if (!p) return;
+    const snapshot = s || this.snap();
+    const stillPending = !(this.state.decisions || {})[p.id] &&
+      this.pendingFor(snapshot).some(item => item.id === p.id);
+    if (!stillPending) {
+      this.setState({ decisionNotice: 'This proposal is already closed and no outcome was recorded.' });
+      return;
+    }
+    const status = this.decisionStatus(p, snapshot);
+    if (kind === 'APPROVED' && !status.actionable) {
+      this.setState({ decisionNotice: status.text, interruptOpen: false });
+      return;
+    }
+    const st = this.state, A = this.run().A;
+    const prev = A.audit.filter(e => e.t <= st.t).slice(-1)[0];
+    const last = st.extra.length ? st.extra[st.extra.length - 1] : prev;
+    const action = kind === 'APPROVED' ? 'APPROVE' : 'REJECT';
+    const detail = 'E-' + String(p.id).padStart(4, '0') + (kind === 'APPROVED' ? ' authorised · ' : ' held · ') + p.call + ' → ' + this.cidOf(p.casId);
+    const record = {
+      seq: (prev ? prev.seq : 0) + 1 + st.extra.length, t: st.t, actor: 'OPERATOR',
+      action, detail, prev: last ? last.hash : 'GENESIS',
+      hash: this.auditHash(last ? last.hash : 'GENESIS', [st.t.toFixed(2), 'OPERATOR', action, detail].join('|'))
+    };
+    const decisions = { ...st.decisions, [p.id]: kind };
+    this.setState({ decisions, extra: st.extra.concat([record]), interruptOpen: false, decisionNotice: '' });
   }
 
   decChip(s) {
@@ -7234,28 +7574,30 @@ class Component extends DCLogic {
 
   alertVals(s) {
     const t = this.decTally(s);
-    const base = { show: false, count: null, label: '', title: '',
+    const pending = this.pendingFor(s), p = pending[0];
+    const window = p && this._decisionWindows && this._decisionWindows.get(p.id);
+    const wall = window ? Math.max(0, Math.ceil((window.until - Date.now()) / 1000)) : 0;
+    const open = () => {
+      if (this._decisionToastTO) { clearTimeout(this._decisionToastTO); this._decisionToastTO = 0; }
+      this.setState({ interruptOpen: false });
+      this.navigate('dec');
+    };
+    const base = { show: false, toast: false, bell: false, count: null, label: '', detail: '', title: '', open,
+                   className: 'decision-bell', aria: 'Open Decisions',
                    bg: 'oklch(0.22 0.012 250)', edge: 'oklch(0.34 0.012 250)',
                    fg: 'oklch(0.8 0.008 250)', glyph: 'oklch(0.7 0.008 250)',
                    pipBg: 'oklch(0.4 0.13 25)', pipFg: 'oklch(0.96 0.02 25)' };
     if (t.pend) return { alert: Object.assign({}, base, {
-      show: true, count: String(t.pend),
-      label: t.pend === 1 ? 'DECISION REQUIRES YOU' : 'DECISIONS REQUIRE YOU',
+      show: this.state.page !== 'dec', count: String(t.pend),
+      toast: !!this.state.interruptOpen, bell: !this.state.interruptOpen,
+      className: this.state.interruptOpen ? 'decision-toast' : 'decision-bell',
+      aria: 'Open Decisions, ' + t.pend + ' pending',
+      label: t.pend + ' PENDING · NEXT E-' + String(p.id).padStart(4, '0'),
+      detail: p.call + ' → ' + this.cidOf(p.casId) + ' · ' +
+        this.pad(Math.floor(wall / 60)) + ':' + this.pad(wall % 60) + ' REMAINING',
       title: 'Open the Decisions board. An escalation lapses eight minutes after it is raised.',
       bg: 'oklch(0.32 0.11 25)', edge: 'oklch(0.55 0.17 25)',
-      fg: 'oklch(0.92 0.12 25)', glyph: 'oklch(0.85 0.15 25)' }) };
-    if (t.asked) {
-      const missed = t.took < t.asked;
-      return { alert: Object.assign({}, base, {
-        show: true, count: null, label: t.took + ' / ' + t.asked + ' DECIDED',
-        title: missed
-          ? (t.asked - t.took) + ' of ' + t.asked + ' escalations were never answered. They lapsed and the sortie did not fly.'
-          : 'Every escalation this run was answered.',
-        bg: missed ? 'oklch(0.26 0.06 25)' : 'oklch(0.24 0.04 165)',
-        edge: missed ? 'oklch(0.42 0.1 25)' : 'oklch(0.36 0.06 165)',
-        fg: missed ? 'oklch(0.88 0.09 25)' : 'oklch(0.86 0.07 165)',
-        glyph: missed ? 'oklch(0.8 0.12 25)' : 'oklch(0.76 0.06 165)' }) };
-    }
+      fg: '#fff', glyph: '#fff' }) };
     return { alert: base };
   }
 
@@ -7371,18 +7713,106 @@ class Component extends DCLogic {
       cost: pend.altId ? this.cidOf(pend.altId) + ' unserved this cycle' : 'nothing flies, nothing is claimed',
       grounds: pend.grounds
     } : null;
-    const mini = this.miniMap(s);
     const briefFiltered = brief.filter(b => this.searchMatch(b.tag, b.text));
-    const noMatches = !!st.q && queue.length === 0 && briefFiltered.length === 0;
+    const overviewCorpus = [
+      'command overview', 'projected late unreachable', 'tightest deadline', 'pending authorization',
+      'lift ready', 'forward blood plasma', 'outcome comparison', 'casualty risk', 'deadline exceptions',
+      'human authority', 'casualty coverage', 'telemetry', 'network constraints', 'lift and forward supply',
+      'active outbound tasking', 'decision feed', 'evidence', 'ask angel', 'theater map', 'casualties',
+      'state', 'supply', 'fleet', 'decisions', 'closed', 'pre-deployment', 'no open escalation',
+      ...(s.rows || []).flatMap(r => [r.cid, r.site, r.injury, r.tRem, r.arrival, r.slack, r.tasking, r.reach, r.needs, r.cls]),
+      ...this.pendingFor(s).flatMap(x => [x.call, this.cidOf(x.casId), x.tRaised, x.eta, x.deadline, x.gain, ...(x.grounds || [])]),
+      s.open, s.inside, s.unreachable, s.missed, s.ready, s.total, s.airborne,
+      s.bloodU, s.plasmaU, s.admitted, s.notAssertable, s.dA, s.dB
+    ];
+    const noMatches = !!st.q && !this.searchMatch(...overviewCorpus);
+    const stock = s.stock || [], fleet = s.fleet || [], pending = this.pendingFor(s);
+    const stale = (s.rows || []).filter(r => Number(r.staleMin) > 2);
+    const missedPredicate = r => r.slack != null ? r.slack < 0 : (r.tRem != null && r.arrival == null);
+    const riskSource = (s.rows || []).filter(r => missedPredicate(r) && this.searchMatch(
+      r.cid, r.site, r.injury, r.tRem, r.arrival, r.slack, r.tasking,
+      r.reach, r.needs, r.cls
+    ));
+    const riskRows = riskSource.slice(0, 7).map(r => ({
+      cid: r.cid, meta: (r.site || '').replace('SITE ', '') + ' · ' + (r.injury || ''),
+      deadline: r.tRem == null ? '—' : this.mmss(Math.max(0, r.tRem)),
+      arrival: r.arrival == null ? '—' : this.mmss(r.arrival),
+      slack: r.slack == null ? 'NO ASSET' : (r.slack >= 0 ? '+' : '−') + Math.abs(Math.round(r.slack)) + ' min',
+      slackCls: r.slack != null && r.slack < 0 ? 'cmd62-red' : r.slack == null ? 'cmd62-red' : 'cmd62-ok',
+      tasking: r.tasking || 'QUEUED', cls: r.slack != null && r.slack < 0 ? 'breach' : '',
+      open: () => { this.navigate('cas', { expand: r.id, casTab: 'board' }); this.revealRec(); }
+    }));
+    const p = pending[0], elapsed = p ? Math.max(0, st.t - p.tRaised) : 0;
+    const decision = p ? this.decisionStatus(p, s) : { actionable: false, text: '' };
+    const decisionWindow = p && this._decisionWindows && this._decisionWindows.get(p.id);
+    const simLeft = p ? Math.max(0, p.tRaised + 8 - st.t) : 0;
+    const wallLeft = decisionWindow ? Math.max(0, (decisionWindow.until - Date.now()) / 1000) : 0;
+    const wallSeconds = Math.ceil(wallLeft);
+    const wallCountdown = this.pad(Math.floor(wallSeconds / 60)) + ':' + this.pad(wallSeconds % 60);
+    const decisionUrgency = p
+      ? (simLeft > 0 ? this.mmss(simLeft) + ' SIMULATION WINDOW REMAINING' : 'SIMULATION WINDOW ELAPSED') +
+        (decisionWindow ? (wallLeft > 0 ? ' · ' + wallCountdown + ' MINIMUM REAL-TIME PROTECTION REMAINING' : ' · MINIMUM REAL-TIME PROTECTION ELAPSED') : '')
+      : '';
+    const stockBlood = stock.reduce((n, b) => n + (b.blood || 0), 0);
+    const timedCount = (s.rows || []).filter(r => r.tRem != null).length;
+    const stockPlasma = stock.reduce((n, b) => n + (b.plasma || 0), 0);
+    const constrained = stock.filter(b => !(b.blood || 0) && !(b.plasma || 0)).length;
+    const dash62 = {
+      status: finished ? 'RUN COMPLETE' : !st.deployed ? 'PRE-DEPLOYMENT' : s.missed || pending.length ? 'COMMAND ATTENTION' : stale.length ? 'STALE TELEMETRY' : 'RUN ACTIVE',
+      sub: !st.deployed ? 'Capability is not deployed. No live outcome claim is made.' : finished ? 'Closed record · outcome figures are final.' : 'Exceptions first: casualty deadlines, machine action, and decisions held for human authority.',
+      stamp: (finished ? 'RUN COMPLETE · T+180' : st.running ? 'LIVE · T+' + Math.floor(st.t) : 'PAUSED · T+' + Math.floor(st.t)) + ' · LOCAL',
+      risk: finished ? '—' : cold ? '—' : s.missed, riskUnit: finished ? 'closed run' : cold ? 'not started' : s.missed === 1 ? 'casualty' : 'casualties', riskClass: !finished && !cold && s.missed ? 'alert' : '',
+      tight: finished ? '—' : s.tightest ? this.mmss(Math.max(0, s.tightest.tRem)) : '—', tightUnit: finished ? 'closed run' : s.tightest ? s.tightest.cid : cold ? 'not started' : 'none open', tightClass: !finished && s.tightest && s.tightest.tRem < 0 ? 'alert' : '',
+      decisions: pending.length, decUnit: pending.length === 1 ? 'decision' : 'decisions', decClass: pending.length ? 'wait' : '',
+      lift: s.ready, liftUnit: s.total + ' total · ' + s.airborne + ' airborne', liftClass: s.total && !s.ready ? 'wait' : '',
+      supply: stockBlood + ' / ' + stockPlasma, supplyUnit: (stockBlood + stockPlasma) + 'U · ' + stock.length + ' launch points', supplyClass: constrained ? 'wait' : '',
+      deathLabel: 'OUTCOME COMPARISON', death: !st.deployed || !s.readable ? '—' : s.delta > 0 ? '−' + s.delta : s.delta < 0 ? '+' + Math.abs(s.delta) : '0',
+      deathUnit: !st.deployed ? 'not deployed' : !s.readable ? 'not yet readable' : s.delta > 0 ? 'fewer dead, same inputs' : s.delta < 0 ? 'more dead, same inputs' : 'level, same inputs',
+      pre: !st.deployed, preText: 'No ANGEL SWARM outcome comparison is asserted until capability is deployed. Readiness reflects only the force presently loaded.',
+      hasRisk: riskRows.length > 0 && !finished, noRisk: riskRows.length === 0 || finished,
+      riskEmptyTitle: st.q ? 'NO CASUALTY RECORDS MATCH' : finished ? 'NO LIVE DEADLINE QUEUE' : cold ? 'NO CASUALTIES YET' : 'NO PROJECTED MISSES',
+      riskEmpty: st.q ? 'The current search does not match any casualty risk.' : finished ? 'The run is closed; inspect the casualty record for outcomes.' : cold ? 'The clock has not started, so nothing is open.' : 'No open casualty currently meets the engine’s projected-miss predicate.',
+      risks: riskRows, riskPanelClass: riskRows.length && !finished ? 'hot' : '',
+      hasDecision: !!p, noDecision: !p, authPanelClass: p ? 'auth' : '', noMatches,
+      decisionTitle: p ? pending.length + (pending.length === 1 ? ' decision requires you' : ' decisions require you') : 'Nothing requires you',
+      decisionMeta: p ? 'RAISED T+' + Number(p.tRaised).toFixed(1) + ' · ' + this.mmss(elapsed) + ' ELAPSED · ' + decisionUrgency : '',
+      decisionSummary: p ? p.call + ' → ' + this.cidOf(p.casId) : '', decisionReasons: p ? (p.grounds || []).join(' · ') || 'Named grounds are recorded on the decision.' : '',
+      decisionStatus: p ? decision.text : '', decisionAction: p && !decision.actionable ? 'REVIEW DECISION' : 'REVIEW AND AUTHORIZE',
+      noDecisionText: cold ? 'Nothing has been raised, because nothing has happened yet.' : 'Everything inside standing authority has gone. New exceptions will appear here.',
+      coverage: finished ? 'CLOSED' : timedCount == null ? '—' : Math.round((s.inside || 0) / Math.max(1, timedCount) * 100) + '%', coverageText: finished ? 'No live coverage claim is made for a closed run.' : (s.inside || 0) + ' of ' + (timedCount == null ? '—' : timedCount) + ' current open casualties projected inside deadline on present reach.',
+      openCount: s.open, stale: stale.length, staleClass: stale.length ? 'cmd62-warn' : '', staleText: stale.length ? stale.length + ' telemetry reading' + (stale.length === 1 ? ' is' : 's are') + ' more than two minutes old.' : 'No stale telemetry exception is open.',
+      network: s.ready + '/' + s.total, airborne: s.airborne, blood: stockBlood + 'U', plasma: stockPlasma + 'U', constraints: constrained, constraintClass: constrained ? 'cmd62-warn' : '',
+      globeSelected: st.dashCardTab === 'globe', machineSelected: st.dashCardTab === 'machine',
+      globeTabIndex: st.dashCardTab === 'globe' ? 0 : -1, machineTabIndex: st.dashCardTab === 'machine' ? 0 : -1,
+      globeControls: st.dashCardTab === 'globe' ? 'command-globe-panel' : null,
+      machineControls: st.dashCardTab === 'machine' ? 'command-machine-panel' : null,
+      globeGated: !!st.running,
+      globeAvailable: !st.running,
+      globeWaiting: !(window.ANGELMAP && window.ANGELMAP.ready() && window.ANGELMAP.readyGlobe()),
+      globeState: window.ANGELMAP && window.ANGELMAP.error() ? 'GLOBE UNAVAILABLE · ' + window.ANGELMAP.error() : 'BRINGING THE GLOBE UP',
+      showGlobe: () => this.setState({ dashCardTab: 'globe' }),
+      showMachine: () => this.setState({ dashCardTab: 'machine' }),
+      tabKey: e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
+        e.preventDefault();
+        const tab = e.key === 'ArrowLeft' || e.key === 'Home' ? 'globe' : 'machine';
+        this.setState({ dashCardTab: tab }, () => {
+          const el = document.getElementById(tab === 'globe' ? 'command-globe-tab' : 'command-machine-tab');
+          if (el) el.focus();
+        });
+      },
+      outbound: fleet.filter(f => f.state === 'OUTBOUND').length, outboundRows: fleet.filter(f => f.state === 'OUTBOUND').slice(0, 3).map(f => ({ tail: f.call, detail: (f.target || 'target not recorded') + ' · ' + (f.carrying || 'payload not recorded') })), outboundText: fleet.filter(f => f.state === 'OUTBOUND').length ? 'Tasking is active; see Decision Feed for the authority trail.' : 'No aircraft is outbound. The machine has no active tasking to report.',
+      openCas: () => this.navigate('cas', { casTab: 'board' }), openSupply: () => this.navigate('cas', { casTab: 'supply' }), openFleet: () => this.navigate('cas', { casTab: 'fleet' }), openDec: () => this.navigate('dec'), openFeed: () => this.navigate('feed', { feedTab: 'dec' }), openEvidence: () => this.navigate('ev', { evTab: 'cf' }), openChat: () => this.navigate('chat'), openMap: () => this.navigate('map')
+    };
     return {
-      tiles, brief: briefFiltered, queue, causes, esc, mini,
+      tiles, brief: briefFiltered, queue, causes, esc, dash62,
       dash: {
         sub: finished ? s.admitted + ' casualties admitted over 180 minutes, all resolved. This is the record of the run, not a live board.'
           : cold ? 'Nothing is open. The run has not started.' : s.open + ' open casualties ranked by time remaining, not by appearance.',
         stamp: (finished ? 'RUN COMPLETE · T+180' : st.running ? 'LIVE · ' + st.speed + '×' : 'PAUSED') + ' · LOCAL',
         briefTitle: finished ? 'What this run did' : 'Allocation brief',
         briefChip: finished ? 'COMPUTED FROM THE CLOSED RECORD · NOT A MODEL' : 'COMPUTED FROM LIVE STATE · NOT A MODEL',
-        mapTitle: finished ? 'Theater at T+180' : 'Live theater',
+        mapTitle: finished ? 'Theater at T+180' : 'Theater Map',
         queueTitle: finished ? 'Deaths not prevented' : 'Deadline queue',
         qc1: 'CASUALTY', qc2: 'SITE · MECHANISM',
         qc3: 'DEADLINE', qc4: finished ? 'REACHED' : 'ARRIVAL',
@@ -7578,6 +8008,45 @@ class Component extends DCLogic {
     };
   }
 
+  fpconVals() {
+    const all = window.FPCON.CONDITIONS;
+    const current = window.FPCON.current();
+    const choose = (key, focus) => {
+      const selected = window.FPCON.set(key);
+      this.setState({ fpcon: selected }, () => {
+        if (!focus) return;
+        const option = document.querySelector('[data-primary-fpcon="' + selected + '"]');
+        if (option) option.focus();
+      });
+    };
+    const keyDown = index => e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        /* Keep radio activation local. This surface has other global keyboard
+           controls, and a display-only FPCON choice must never reach them. */
+        e.preventDefault();
+        e.stopPropagation();
+        choose(all[index].key, true);
+        return;
+      }
+      if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)) return;
+      e.preventDefault();
+      const step = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1;
+      const next = e.key === 'Home' ? 0 : e.key === 'End' ? all.length - 1
+        : (index + step + all.length) % all.length;
+      choose(all[next].key, true);
+    };
+    return {
+      ...current,
+      options: all.map((condition, index) => ({
+        ...condition,
+        checked: condition.key === current.key ? 'true' : 'false',
+        tab: condition.key === current.key ? 0 : -1,
+        on: () => choose(condition.key, false),
+        keyDown: keyDown(index)
+      }))
+    };
+  }
+
   setGroups() {
     const st = this.state, cfg = st.cfg;
     const set = (k, v) => () => this.setState({ cfg: { ...cfg, [k]: v } });
@@ -7673,7 +8142,7 @@ class Component extends DCLogic {
        of it has to sit left of the verdict printed beside it. The axis over
        the board is relabelled to match, so the ticks still mean what they
        say. */
-    const barPct = Math.max(4, Math.min(80, span / win * 100));
+    const barPct = Math.max(4, Math.min(100, span / win * 100));
     const transit = r.reach != null && span > 0.01 ? Math.max(6, Math.min(100, r.reach / span * 100)) : 0;
     const RED = 'oklch(0.82 0.15 25)', TEAL = 'oklch(0.8 0.11 165)', NEU = 'oklch(0.7 0.008 250)';
     const car = r.car;

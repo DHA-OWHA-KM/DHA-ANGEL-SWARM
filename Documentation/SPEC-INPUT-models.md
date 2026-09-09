@@ -116,10 +116,14 @@ signal-quality insult drawn from `motion | lowperf | dropout | noise`
 (`train/ppg_cri.py:194,206-207`). 14 epochs, batch 256, AdamW lr 3e-3, OneCycleLR,
 grad-clip 4.0, seed 1729, CPU, total 632.6 s (`train/train.log`).
 
-**Provenance string shown on screen** (`app/models/ppg_cri.meta.json`, rendered at
-`js/device.js:471`): "Synthetic cohort. Waveform morphology follows the published
-response of the peripheral pulse to central volume loss; it is not patient data and
-no patient data was used. The fielded analogue is CipherOx CRM, FDA 510(k) K173929."
+**Provenance context shown on screen** (`app/models/ppg_cri.meta.json`, rendered at
+`js/device.js:471`) describes a synthetic cohort, published peripheral-pulse response
+to central volume loss, and no patient data, and names the **CipherOx CRI M1
+(reference)** as reference context for the operating principle. The associated
+510(k) **K173929** citation is an external-device record, not an ANGEL SWARM
+integration or regulatory-status claim. Other project materials cite De Novo
+**DEN160020** for the external device; this inventory records but does not resolve
+that identifier discrepancy.
 
 **Validation figures — every one traceable.** Source of truth is
 `app/models/ppg_cri.meta.json`, produced by `train/ppg_cri.py:376-386` and
@@ -185,10 +189,11 @@ A 0.30 threshold line is drawn on the estimate chart.
 **Live monitor mechanics** (`js/device.js` `Monitor`). Ring buffer of 1,500 samples.
 Waveform synthesised at 100 Hz from a direct JS port of the training generator
 (`makeSubject`, `synth`, `pulse`) so the demonstration is a fair test, not a canned
-trace. **One inference per second over the trailing 5 s window**, mirroring the
-fielded device's cadence. History capped at 180 readings, latency ring at 400
-samples. Drawn: scrolling PPG on top; below it the estimate line, the 95% interval
-as a filled ribbon, and the withheld ground truth as a dashed line.
+trace. **One inference per second over the trailing 5 s window.** History is capped
+at 180 readings and the latency ring at 400 samples. This is a prototype reference
+cadence, not a claim about the cadence of a named real device. Drawn: scrolling PPG
+on top; below it the estimate line, the 95% interval as a filled ribbon, and the
+withheld ground truth as a dashed line.
 
 **Four casualty scenarios** (`js/device.js:684-689`), each a 45 s ramp from `from` to `to`:
 Stable 0.93→0.90 · Slow bleed 0.88→0.22 · Arterial bleed 0.80→0.05 · Blood given at
@@ -1011,6 +1016,14 @@ Three pieces: a Go UDP listener + SSE republisher inside the launcher
 (`cmd/angelswarm/telemetry.go`), a Go device emitter (`cmd/cotsim/main.go`), and the
 browser client (`app/js/telemetry.js`).
 
+The named-device distinction is intentional: **Sempulse Halo (example)** is an
+example edge physiological source; **CipherOx CRI M1 (reference)** is reference
+context for the compensatory-reserve operating principle; and **BATDOK-J** remains a
+separate plausible producer/interface. ANGEL SWARM has not tested integration with a
+real Sempulse Halo, CipherOx CRI M1 or BATDOK-J and claims no compatibility, military
+fielding, FDA or other regulatory status for any named relationship, or completed
+integration. The only exercised source is the repository's simulator.
+
 ### 5.1 Transport and format
 
 | Hop | Transport | Format |
@@ -1658,12 +1671,14 @@ corrected; the model sheet was not.** `js/montecarlo.js:52-63` also uses the cor
 values. The model sheet is the one screen written to survive a hostile reading, and it
 carries the retracted numbers.
 
-**C5. The CRM lead-time citation on the model sheet.** `js/app.js:5608`: "Field testing
+**C5. The CRI M1 lead-time citation on the model sheet.** `js/app.js:5608`: "Field testing
 flagged casualties 16–25 min ahead, ordering triage priority correctly in 93% of cases
 (Mil Med 2025;190 Suppl 2:371)." **Contradiction:** `js/sim.js:106` states the 16:35
 and 25:44 figures "often quoted as a '16-25 min field range' are **TWO INDIVIDUAL
 CASUALTIES** at the 2024 Army Warfighter Expeditionary Experiment, not a cohort range."
-The model sheet presents them as a cohort finding.
+The model sheet presents them as a cohort finding. This is historical external-device
+reference context, not evidence of an ANGEL SWARM integration, compatibility,
+military fielding or regulatory status.
 
 **C6. "Both marks draw now."** `js/app.js:3095-3100` and `js/app.js:5573-5580` both
 assert at length that the deterministic mark renders and that "every calculation on

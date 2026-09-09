@@ -62,7 +62,7 @@
 (function () {
   'use strict';
 
-  var FRAME_SRC = './console.html?v=7';
+  var FRAME_SRC = './console.html?v=13';
 
   /* ---- the dock ---------------------------------------------------------
      One frame, one box, created on first arrival at the Theater Map and kept
@@ -70,7 +70,7 @@
      over the slot every animation frame, and clipped to whatever scrolls it,
      so it cannot paint over the chrome above it. */
   var dock = null, frame = null, W = null, booted = false, bootErr = null;
-  var slot = null, lastBox = '';
+  var slot = null, lastBox = '', lastGlobeMode = '';
   var listeners = [];
 
   function ensureDock() {
@@ -86,6 +86,13 @@
     frame.title = 'ANGEL SWARM map';
     frame.setAttribute('scrolling', 'no');
     frame.style.cssText = 'display:block;width:100%;height:100%;border:0;background:transparent';
+    /* The embedded console owns the same renderers but has a full standalone
+       startup surface. Guard it while the host stylesheet is being installed:
+       opacity keeps layout and requestAnimationFrame alive, unlike display:none
+       or visibility:hidden. */
+    frame.style.opacity = '0.001';
+    frame.style.pointerEvents = 'none';
+    frame.dataset.angelmapGuarded = 'true';
     frame.src = FRAME_SRC;
     frame.addEventListener('load', onFrameLoad);
     dock.appendChild(frame);
@@ -262,6 +269,13 @@
     '#shell>*:not(#views){display:none!important}',
     'html body #shell #views{position:absolute!important;inset:0!important;margin:0!important;padding:0!important;width:auto!important;height:auto!important;max-width:none!important;border:0!important;overflow:hidden!important}',
     '#views>.viewport{margin:0!important}',
+    /* The operations viewport carries a legacy 560px minimum. In a compact
+       dashboard slot the iframe can be only 218px high, so leaving that
+       minimum in place makes every renderer fit an invisible 560px canvas and
+       lets the host clip most of the result. The embedded map owns the whole
+       iframe at every size; collapse its viewport to that exact box. */
+    'html body #views>.viewport[data-pane="DASHBOARD"]{position:absolute!important;inset:0!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;overflow:hidden!important}',
+     '.band,#cmdbar,#toolbar,#roleSw,#railL,#railR,#footbar,.classification-banner,.application-bar{display:none!important}',
     /* THE THEATRE PICTURE. The rest of that pane is the old operations
        screen — its tables, its status bars, its threshold settings — and on
        this destination the map is the destination. */
@@ -279,6 +293,8 @@
        of "still down" sampled a moment apart would disagree on screen. The
        operations list is the design's side panel of cards. */
     '#theaterStage .thZoom,#theaterStage .thStats,#theaterStage .thHint,#joaList{display:none!important}',
+    'html[data-globe-mode="compact"] .thHead{display:none!important}',
+    'body.compact-globe .thHead{display:none!important}',
     /* THE FLAT TACTICAL SHEET and the GPU map that shares its stage. */
     '.viewport[data-pane="MISSION"]{overflow:hidden!important}',
     'html body #stage{position:absolute!important;inset:0!important;border-radius:0!important;border:0!important}',
@@ -298,11 +314,14 @@
     '#g3Counts{display:none!important}',
     '#g3Wrap .g3Right{display:none!important}',
     '#missCompare{display:none!important}',
-    /* Comparison identity is controlled by the visible design header. The
-       frame's own preview sits beneath that header and cannot be reached, so
-       it is suppressed along with the inherited edge hairlines and role-level
-       fold control that have no job in this embedded layout. */
-    '.cmpIndicatorPreview{display:none!important}',
+    /* The standalone console keeps the pair below its own mission summary.
+       Here that summary is suppressed and the visible design header is the
+       relevant boundary. Its measured bottom inset keeps the capsules high
+       in the map without ever letting them hang underneath the header. */
+    'html body.compare #stage .paneTag{' +
+      'top:var(--map-inset-t, 104px)!important}',
+    /* The embedded design owns the surrounding chrome. The inherited edge
+       hairlines and role-level fold control have no job in this layout. */
     'html body #stage::before,html body #stage::after{display:none!important}',
     'html body #cqMissionMore{display:none!important}',
 
@@ -388,6 +407,18 @@
       var br = d.createElement('script');
       br.textContent = BRIDGE;
       d.head.appendChild(br);
+      /* Appending the strip and forcing its computed style happen in this
+         load task, before the browser can paint the iframe. Reveal immediately
+         afterwards instead of waiting on animation frames: a map nested in a
+         nearly-transparent browser fixture can have those frames throttled,
+         which would also throttle the native Globe behind the guard. Failure
+         paths still never reveal because every reveal line remains inside
+         this successful injection branch. */
+      void W.getComputedStyle(d.documentElement).display;
+      frame.style.opacity = '1';
+      frame.style.pointerEvents = 'auto';
+      frame.dataset.angelmapGuarded = 'false';
+      frame.dataset.angelmapRevealed = 'true';
       waitForApp(0);
     } catch (e) { bootErr = String(e && e.message || e); }
   }
@@ -473,6 +504,7 @@
                 is nothing behind a third chip — so its answer is part of
                 what this watch publishes. */
              ready3d() ? '3' : '',
+             readyGlobe() ? 'G' : '',
              selJoa, panelKey()].join('|');
       } catch (e) { return; }
       if (k === seen) return;
@@ -523,6 +555,14 @@
     dock.style.height = r.height + 'px';
     dock.style.visibility = 'visible';
     dock.style.pointerEvents = 'auto';
+    var mode = slot.getAttribute('data-globe-mode') ||
+      (slot.closest && slot.closest('.cmd62-globe-slot') ? 'compact' : 'normal');
+    if (booted && W && W.document && mode !== lastGlobeMode) {
+      lastGlobeMode = mode;
+      W.document.documentElement.setAttribute('data-globe-mode', mode);
+      if (W.document.body) W.document.body.classList.toggle('compact-globe', mode === 'compact');
+      try { W.APP._paneForce = true; W.render(); } catch (e) { /* contained */ }
+    }
     var sb = scrollBox(slot), clip = '';
     if (sb) {
       var b = sb.getBoundingClientRect();
@@ -681,6 +721,23 @@
      under it. If that shape ever changes this measures nothing and the bar
      goes back to running edge to edge, which is the harmless answer. */
   var BAR_BAND = 100;           /* the strip along the bottom the bar lives in */
+  function syncInsetCss(de, left, right, top, bottom) {
+    if (!de) return false;
+    var values = {
+      '--map-inset-l': left + 'px',
+      '--map-inset-r': right + 'px',
+      '--map-inset-t': top + 'px',
+      '--map-inset-b': bottom + 'px'
+    };
+    var changed = false;
+    Object.keys(values).forEach(function (property) {
+      if (de.style.getPropertyValue(property) === values[property]) return;
+      de.style.setProperty(property, values[property]);
+      changed = true;
+    });
+    return changed;
+  }
+
   function sidePanels() {
     var out = [];
     try {
@@ -748,13 +805,7 @@
          corner the design puts a panel in. Restyling it from the strip below
          moves it without touching that file — and a custom property is what
          lets a static rule carry a number that is measured every frame. */
-      var de = W.document && W.document.documentElement;
-      if (de && de.style.getPropertyValue('--map-inset-r') !== IR + 'px') {
-        de.style.setProperty('--map-inset-l', IL + 'px');
-        de.style.setProperty('--map-inset-r', IR + 'px');
-        de.style.setProperty('--map-inset-t', IT + 'px');
-        de.style.setProperty('--map-inset-b', IB + 'px');
-      }
+      syncInsetCss(W.document && W.document.documentElement, IL, IR, IT, IB);
     } catch (e) { /* contained */ }
   }
 
@@ -797,9 +848,15 @@
   if (!customElements.get('angel-map')) {
     customElements.define('angel-map', class extends HTMLElement {
       connectedCallback() {
+        var compact = !!(this.closest && this.closest('.cmd62-globe-slot'));
+        if (compact) this.setAttribute('data-globe-mode', 'compact');
         this.style.display = 'block';
         this.style.width = '100%';
-        this.style.height = this.getAttribute('height') || '560px';
+        /* The general Theater Map owns a 560px surface. The overview card
+           owns the height of its compact slot; applying the general inline
+           height here made the dock itself 560px tall and let the card clip
+           it at 218px no matter how carefully the renderer fitted its sphere. */
+        this.style.height = this.getAttribute('height') || (compact ? '100%' : '560px');
         slot = this;
         ensureDock();
         watchGeometry();
@@ -807,7 +864,15 @@
         nudge();
       }
       disconnectedCallback() {
-        if (slot === this) { slot = null; observeSlot(null); nudge(); }
+        if (slot === this) {
+          slot = null;
+          observeSlot(null);
+          /* A replacement cover must own the old map box immediately. Waiting
+             for the next animation frame leaves the fixed dock able to catch
+             one last pointer or key event after its slot is gone. */
+          place();
+          nudge();
+        }
       }
     });
   }
@@ -900,6 +965,18 @@
   function globeOn() {
     var g = gb();
     if (!g || !g.ready || !g.ready()) return false;
+    /* The slot can be painted before the dock's geometry observer gets its
+       first turn. Propagate its renderer mode before mounting so compact
+       chrome and fit limits are correct on the very first frame. */
+    try {
+      var mode = slot && slot.getAttribute('data-globe-mode') ||
+        (slot && slot.closest && slot.closest('.cmd62-globe-slot') ? 'compact' : 'normal');
+      if (W && W.document) {
+        W.document.documentElement.setAttribute('data-globe-mode', mode);
+        if (W.document.body) W.document.body.classList.toggle('compact-globe', mode === 'compact');
+        lastGlobeMode = mode;
+      }
+    } catch (e) { /* place() will retry the propagation */ }
     /* Just flown out of. See onHandoff. */
     if (globeHeldUntil && (window.performance || Date).now() < globeHeldUntil) return false;
     globeHeldUntil = 0;
@@ -943,6 +1020,11 @@
         if (!pressScopeChip(LABEL[to] || 'TACTICAL 2D')) {
           try { W.setMapScope(to); } catch (e) { /* the theatre still stands */ }
         }
+         try {
+           window.dispatchEvent(new CustomEvent('angelmap:handoff', {
+             detail: { scope: to, operation: joaKey || null }
+           }));
+         } catch (e) { /* navigation remains available through the map scope */ }
         fire();
       });
     } catch (e) { /* a globe with no handoff is still a globe */ }
@@ -1060,28 +1142,6 @@
   }
   function comparing() { var a = A(); return !!(a && a.mapView === 'COMPARE'); }
 
-  var INDICATOR_KINDS = { tactical: true, edge: true, inline: true };
-  function comparisonIndicator() {
-    if (!booted) return 'tactical';
-    try {
-      var k = W.document.documentElement.dataset.cmpIndicator;
-      return INDICATOR_KINDS[k] ? k : 'tactical';
-    } catch (e) { return 'tactical'; }
-  }
-  function setComparisonIndicator(kind) {
-    if (!booted || !INDICATOR_KINDS[kind]) return false;
-    try {
-      var root = W.document.documentElement;
-      root.dataset.cmpIndicator = kind;
-      if (typeof W.syncComparisonIndicatorPreview === 'function') {
-        W.document.querySelectorAll('.cmpIndicatorPreview').forEach(function (control) {
-          W.syncComparisonIndicatorPreview(root, control, kind);
-        });
-      }
-      fire();
-      return true;
-    } catch (e) { return false; }
-  }
   /* ---- THE THEATRE PICTURE HAS TWO RENDERERS AND ONE BUS ------------------
      zoomAnyMap('THEATRE') moves APP.theaterView — the camera of the canvas
      map. Where theater3d.js came up that canvas is asleep and the picture on
@@ -1335,6 +1395,9 @@
   }
 
   window.ANGELMAP = {
+    /* Shared with the browser regression harness so it exercises the exact
+       publisher used by host geometry changes rather than a test double. */
+    _syncInsetCss: syncInsetCss,
     /* is there an application in the dock yet */
     ready: function () { return booted; },
     error: function () { return bootErr; },
@@ -1350,18 +1413,25 @@
     setScope: function (s) {
       if (!booted) return false;
       if (s === '3D' && !ready3d()) return false;
+      var before = scope();
       if (s === 'GLOBE') {
         if (!readyGlobe()) return false;
         var ok = globeOn();
-        fire();
+        /* A native handoff holds Globe off for 2.5 seconds. Publishing a
+           change for each rejected remount request made the dashboard ask
+           again forever, then reopen Globe as soon as the hold expired.
+           Notify only when ownership actually changed; the 200ms frame
+           watcher remains the eventual source for delayed renderer changes. */
+        if (ok && scope() !== before) fire();
         return ok;
       }
+      if (before === s && !globeWanted) return true;
       /* Keep the outgoing painted globe in place until Theatre has loaded its
          layers and painted. This prevents an empty or partially rendered pane
          without hiding the entire map frame behind an unrelated blackout. */
       if (globeWanted) globeOff(true, s === 'THEATRE');
       try { W.setMapScope(s); } catch (e) { return false; }
-      fire();
+      if (scope() !== before) fire();
       return true;
     },
     press: function (k) {
@@ -1378,8 +1448,6 @@
     layersAll: function () { var r = layersAll(); fire(); return r; },
     anyLayerOff: anyLayerOff,
     comparing: comparing,
-    comparisonIndicator: comparisonIndicator,
-    setComparisonIndicator: setComparisonIndicator,
     roll: roll,
     record: record,
     figures: figures,
@@ -1493,4 +1561,13 @@
       } catch (e) { return null; }
     }
   };
+  /* The root shell can mount before the embedded application has booted. This
+     one-shot host event closes that gap without asking the shell to poll. */
+  try { window.dispatchEvent(new CustomEvent('angelmap:available')); } catch (e) {
+    try {
+      var ev = document.createEvent('Event');
+      ev.initEvent('angelmap:available', false, false);
+      window.dispatchEvent(ev);
+    } catch (ignore) { /* an old host without event construction */ }
+  }
 })();

@@ -1,10 +1,19 @@
 # GITHUB-PREP — measurements, findings, and the decisions that are yours
 
-**Prepared 8 September 2026.** Everything below was measured on this tree, not assumed. Nothing was deleted, moved or committed. Two files were created: `/README.md` and `/.gitignore`. This file is the third.
+**Originally prepared 8 September 2026; current-tree addendum measured 9 September 2026.** Sections retaining 8 September sizes, paths, assertion totals, or preparation narrative are historical evidence from that packaging pass, not claims about the current checkout.
+
+## Current-tree addendum — 9 September 2026
+
+- The current tracked tree contains **291 files totaling approximately 192.4 MiB**.
+- The tracked Windows launcher is `ANGEL-SWARM-windows-x64.exe`; it is a PE32+ x86-64 executable and **requires the adjacent tracked `app/` directory**. It is not a single-file application.
+- The zero-network baseline includes the launcher, local application assets, workers, maps, vendored runtimes, CRI-Net and MiniLM. It does **not** include `app/models/llm.gguf`.
+- Qwen2.5-0.5B-Instruct remains an optional, user-requested download for Mission brief prose. Its absence is supported and must not be counted as an offline-package failure.
+- Current verification status belongs to the live `app/selftest.html` summary and the exact tracked commit. The 118-check results below remain dated evidence of the 8 September packaging run.
+- The repository-authorship disclosure is maintained in `README.md`. Third-party authorship and licensing remain separate in the SBOM.
 
 ---
 
-## 1. What the repository actually weighs
+## 1. Historical 8 September working-tree measurement
 
 **Total working tree: 2.7 GB.** Every directory over 5 MB:
 
@@ -51,7 +60,7 @@ GitHub warns above **50 MB** per file and rejects above **100 MB**.
 
 ## 2. Findings
 
-### 2.1 The Go binaries ARE reproducible from source in this tree — verified, not assumed
+### 2.1 Historical Go 1.24.7 rebuild — verified on 8 September
 
 `go.mod` declares **zero module requirements**, so `cmd/` builds fully offline. Tested on this machine with Go 1.24.7:
 
@@ -62,7 +71,7 @@ go build -ldflags="-s -w" -o cotsim ./cmd/cotsim        →  2,236,708 bytes
                                 shipped cotsim linux    →  2,183,352 bytes   (+2.4%)
 ```
 
-The binaries built here run correctly — the built launcher served `app/`, the app booted with **zero page errors**, and `selftest.html` returned **118 passed / 0 failed**. They are not byte-identical to the shipped August binaries, which is expected: those were compiled with a different Go point release and Go embeds build metadata. **This is not a finding against the repository — the source is the artefact.** The nine prebuilt binaries are `.gitignore`d and the build command is in the README.
+The binaries built in that pass ran correctly — the built launcher served `app/`, the app booted with **zero page errors**, and the then-current `selftest.html` returned **118 passed / 0 failed**. They were not byte-identical to the shipped August binaries, which is expected: those were compiled with a different Go point release and Go embeds build metadata. This paragraph is historical evidence, not the current test total or current tracked-binary inventory.
 
 ### 2.2 There is an empty git repository nested inside `OUT/` — this will silently break your commit
 
@@ -216,8 +225,8 @@ Everything asserted in the README was checked against this tree rather than carr
 |---|---|---|
 | 23 / 34 / 35 deaths on 20 / 38 / 0 sorties, seed 42, PACOM_CORAL, deployed | `app/selftest.html` lines 290–293, 642, run headless against the built launcher | asserted and passing |
 | 118 assertions | ran the self-test in headless Chromium | **118 passed, 0 failed** |
-| PACOM CORAL row of the win table | `node winprob.mjs PACOM_CORAL 200` | 24.23 / 29.14, mean −4.905, CI −5.215…−4.595, d<sub>z</sub> −2.191, 0 worse / 1 tie / 199 better — **identical to the published table** |
-| EUCOM FJORD row (the weakest theatre) | `node winprob.mjs EUCOM_FJORD 200` | 16.75 / 18.61, mean −1.865, CI −2.045…−1.685, 4 worse / 23 tie / 173 better, **worst single-battle diff = +1** — identical, and confirms "never worse by more than one" |
+| PACOM CORAL row of the win table | `node Documentation/verification/winprob.mjs PACOM_CORAL 200` | 24.23 / 29.14, mean −4.905, CI −5.215…−4.595, d<sub>z</sub> −2.191, 0 worse / 1 tie / 199 better — **identical to the published table** |
+| EUCOM FJORD row (the weakest theatre) | `node Documentation/verification/winprob.mjs EUCOM_FJORD 200` | 16.73 / 18.61, mean −1.875, CI −2.053…−1.697, 3 worse / 23 tie / 174 better, **worst single-battle diff = +1** — identical, and confirms "never worse by more than one" |
 | A server is required; `file://` breaks it | `cmd/angelswarm/main.go` header comment and the Web Worker constraint | confirmed |
 | The launcher works, built from source | built it, served `app/`, loaded `index.html` in headless Chromium | title correct, **0 page errors** |
 | `python3 -m http.server` is a valid alternative | served `app/` on 8899 | `index.html` 200, `selftest.html` 200, `.wasm` 200 with `content-type: application/wasm` |

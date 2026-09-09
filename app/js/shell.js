@@ -1,6 +1,6 @@
-/* ==========================================================================
+/* --------------------------------------------------------------------------
    ANGEL SWARM — THE SHELL
-   ==========================================================================
+   --------------------------------------------------------------------------
    The navigation, the chrome and the page frame, rebuilt to the Design Canvas
    canvas in DESIGN/ANGEL_SWARM.dc.html.
 
@@ -14,21 +14,27 @@
    out of the running simulation at the moment it is drawn — the canvas's own
    numbers were placeholders for spacing, and this file does not carry any of
    them.
-   ========================================================================== */
+   -------------------------------------------------------------------------- */
 (function () {
   'use strict';
 
-  /* ---- the nine, in the canvas's order ---------------------------------- */
+  /* ---- the operator's workflow order ------------------------------------ */
   const NAV = [
-    { k:'dash', label:'Command Overview', icon:'grid',   badge:null },
-    { k:'cas',  label:'Live Casualties',  icon:'heart',  badge:'open' },
-    { k:'dec',  label:'Decision',         icon:'fork',   badge:'esc' },
-    { k:'feed', label:'Decision Feed',    icon:'feed',   badge:null },
-    { k:'tty',  label:'Analyst Terminal', icon:'term',   badge:null },
-    { k:'ops',  label:'Ops Center Wall',  icon:'wall',   badge:null },
-    { k:'ev',   label:'Evidence',         icon:'shield', badge:null },
-    { k:'chat', label:'Ask ANGEL',        icon:'chat',   badge:'ai' },
-    { k:'map',  label:'Theater Map',      icon:'map',    badge:null }
+    { k:'dash',    page:'dash', label:'Command Overview', icon:'grid',   badge:null },
+    { k:'map',     page:'map',  label:'Theater Map',      icon:'map',    badge:null,
+      views:['MISSION','DASHBOARD'] },
+    { k:'ops',     page:'ops',  label:'Ops Center Wall',  icon:'wall',   badge:null },
+    { k:'dec',     page:'dec',  label:'Decisions',        icon:'fork',   badge:'esc' },
+    { k:'cas',     page:'cas',  label:'Live Casualties',  icon:'heart',  badge:'open' },
+    { k:'wargame', page:'ev',   label:'War Game',         icon:'feed',   badge:null,
+      sec:'CONFIDENCE', tabGroup:'ev', tab:'CONF' },
+    { k:'sensor',  page:'tty',  label:'Sensor & Model',   icon:'term',   badge:null,
+      sec:'SENSOR', tabGroup:'tty', tab:'SENSOR' },
+    { k:'track',   page:'track', label:'Resupply Tracking', icon:'air',  badge:null,
+      virtual:'TRACK' },
+    { k:'ev',      page:'ev',   label:'Evidence',         icon:'shield', badge:null,
+      sec:'ANALYSIS', tabGroup:'ev', tab:'EV' },
+    { k:'chat',    page:'chat', label:'Ask Angel',        icon:'chat',   badge:'ai' }
   ];
 
   /* ---- WHERE THE OTHER FIFTEEN WENT -------------------------------------
@@ -42,6 +48,7 @@
     dec:  ['TASKING'],
     feed: ['AUDIT', 'STREAM'],
     tty:  ['QUERY', 'DOCTRINE', 'DATA', 'SENSOR'],
+    track:['TRACK'],
     ops:  ['DASHBOARD'],
     ev:   ['CONFIDENCE', 'COMPARE', 'ANALYSIS', 'ROI', 'COST', 'AFTERACTION'],
     chat: ['BRIEF'],
@@ -49,6 +56,43 @@
   };
   const OWNER = {};
   for (const page in SECTIONS) for (const v of SECTIONS[page]) OWNER[v] = page;
+  OWNER.CONFIDENCE = 'wargame';
+  OWNER.SENSOR = 'sensor';
+  OWNER.AUDIT = 'auth';
+  OWNER.STREAM = 'auth';
+  OWNER.DATA = 'data';
+
+  const SECONDARY = {
+    tty:      { page:'tty', sec:'QUERY', tabGroup:'tty', tab:'TTY' },
+    auth:     { page:'feed', sec:'AUDIT' },
+    data:     { page:'tty', sec:'DATA', tabGroup:'tty', tab:'DATA' },
+    settings: { page:'settings', utility:true }
+  };
+  const VIEW_TABS = {
+    QUERY:['tty','QUERY'], DOCTRINE:['tty','DOCTRINE'], DATA:['tty','DATA'], SENSOR:['tty','SENSOR'],
+    CONFIDENCE:['ev','CONF'], COMPARE:['ev','CMP'], ANALYSIS:['ev','ANA'], ROI:['ev','ROI'],
+    COST:['ev','COST'], AFTERACTION:['ev','AAR']
+  };
+
+  function setViewTab(view) {
+    const intent = VIEW_TABS[view];
+    if (intent && window.DPB && typeof window.DPB.setTab === 'function') {
+      window.DPB.setTab(intent[0], intent[1]);
+    }
+  }
+
+  function destination(k) {
+    return NAV.find(n => n.k === k) || SECONDARY[k] || { k, page:k };
+  }
+
+  function owns(k, view) {
+    const n = destination(k);
+    if (['CONFIDENCE','SENSOR','AUDIT','STREAM','DATA'].includes(view) &&
+        OWNER[view] && OWNER[view] !== k) return false;
+    if (n.views) return n.views.includes(view);
+    if (n.sec) return n.sec === view;
+    return (SECTIONS[n.page] || []).includes(view);
+  }
 
   const ICON = {
     grid:  '<rect x="3" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.55 0.09 165)"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" fill="oklch(0.72 0.14 165)"/>',
@@ -56,6 +100,7 @@
     fork:  '<path d="M12 21V11m0 0L5 4m7 7 7-7" stroke="oklch(0.8 0.15 75)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="4" r="2.6" fill="oklch(0.85 0.15 75)"/><circle cx="5" cy="4" r="2.6" fill="oklch(0.55 0.1 75)"/>',
     feed:  '<circle cx="5" cy="6" r="2.4" fill="oklch(0.72 0.14 210)"/><circle cx="5" cy="12" r="2.4" fill="oklch(0.72 0.14 210)"/><circle cx="5" cy="18" r="2.4" fill="oklch(0.5 0.09 210)"/><path d="M10 6h11M10 12h11M10 18h7" stroke="oklch(0.68 0.12 210)" stroke-width="2.2" stroke-linecap="round"/>',
     term:  '<rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="oklch(0.26 0.05 145)" stroke="oklch(0.6 0.13 145)" stroke-width="1.5"/><path d="M6.5 9.5 9.5 12l-3 2.5M12 15h5.5" stroke="oklch(0.85 0.19 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+    air:   '<path d="M12 2.4c.8 0 1.4.6 1.4 1.4v4.6l7.6 4.3v2.1l-7.6-2.2v3.9l2.4 1.9v1.6L12 18.8 8.2 20v-1.6l2.4-1.9v-3.9L3 14.8v-2.1l7.6-4.3V3.8c0-.8.6-1.4 1.4-1.4Z" fill="oklch(0.8 0.14 165)"/><path d="M12 5.4V18" stroke="oklch(0.3 0.05 165)" stroke-width="1.4"/>',
     wall:  '<rect x="2" y="4" width="20" height="13" rx="2" fill="oklch(0.32 0.07 200)" stroke="oklch(0.68 0.13 200)" stroke-width="1.5"/><path d="M8 21h8M12 17v4" stroke="oklch(0.68 0.13 200)" stroke-width="2" stroke-linecap="round"/><path d="M5.5 13.5 9 9l3 3.5L15 7l3.5 6.5" stroke="oklch(0.85 0.16 200)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
     shield:'<path d="M12 2.5 4 6v6.2c0 4.6 3.4 8.4 8 9.3 4.6-.9 8-4.7 8-9.3V6l-8-3.5Z" fill="oklch(0.42 0.12 300)" stroke="oklch(0.72 0.16 300)" stroke-width="1.4"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9" stroke="oklch(0.93 0.1 300)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
     chat:  '<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 4v-4H5.5A2.5 2.5 0 0 1 3 14.5v-8Z" fill="oklch(0.4 0.12 330)" stroke="oklch(0.72 0.16 330)" stroke-width="1.4"/><path d="m12 7 1.1 2.6L15.7 11l-2.6 1.1L12 14.7l-1.1-2.6L8.3 11l2.6-1.1L12 7Z" fill="oklch(0.93 0.11 330)"/>',
@@ -65,12 +110,15 @@
 
   const S = {
     page: 'dash',
+    heldView: null,
     query: '',
     search: null,
     blockedAttempt: false
   };
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const fpconVars = condition => `--fpcon-bg:${condition.bg};--fpcon-line:${condition.line};` +
+    `--fpcon-text:${condition.text};--fpcon-mark:${condition.mark}`;
 
   /* ---- live figures, read at the moment of drawing ---------------------- */
   /* A casualty's absolute deadline is the minute they were wounded plus the
@@ -164,20 +212,27 @@
       if (n.badge === 'ai')   return '<span class="d-ai">&#10022; AI</span>';
       return '';
     };
-    return `<div class="d-brand">
+    return `<button type="button" class="d-brand" data-page="dash"
+        aria-label="ANGEL SWARM home — Command Overview">
         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M12 3 4 7v5c0 4.4 3.2 8.2 8 9 4.8-.8 8-4.6 8-9V7l-8-4Z" stroke="oklch(0.7 0.16 25)" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 8v8M8 12h8" stroke="oklch(0.8 0.17 25)" stroke-width="2.4" stroke-linecap="round"/></svg>
         <div style="display:flex;flex-direction:column;gap:3px">
           <span class="d-brand-n">ANGEL SWARM</span>
           <span class="d-brand-s">DHA &middot; PHYSIOLOGICAL-DEADLINE BLOOD ALLOCATION</span>
-        </div></div>
-      <nav class="d-nav">${NAV.map(n =>
+        </div></button>
+      <nav class="d-nav" aria-label="Primary navigation">${NAV.map(n =>
         `<button type="button" class="d-nav-i${S.page===n.k?' on':''}" data-page="${n.k}"
+           ${n.sec ? `data-sec="${n.sec}"` : ''}
            aria-current="${S.page===n.k?'page':'false'}">${svg(n.icon)}
            <span class="l">${n.label}</span>${badge(n)}</button>`).join('')}</nav>
-      <div class="d-nav-sep">
-        <button type="button" class="d-nav-i" data-page="ev" data-sec="AUDIT"><span class="l">Authority &amp; Policy</span></button>
-        <button type="button" class="d-nav-i" data-page="tty" data-sec="DATA"><span class="l">Data Sources</span></button>
-        <button type="button" class="d-nav-i" data-page="settings"><span class="l">Settings</span></button>
+      <div class="d-nav-sep" role="navigation" aria-label="Secondary navigation">
+        <button type="button" class="d-nav-i${S.page==='tty'?' on':''}" data-page="tty" data-sec="QUERY"
+          aria-current="${S.page==='tty'?'page':'false'}"><span class="l">Analyst Terminal</span></button>
+        <button type="button" class="d-nav-i${S.page==='auth'?' on':''}" data-page="auth" data-sec="AUDIT"
+          aria-current="${S.page==='auth'?'page':'false'}"><span class="l">Authority &amp; Policy</span></button>
+        <button type="button" class="d-nav-i${S.page==='data'?' on':''}" data-page="data" data-sec="DATA"
+          aria-current="${S.page==='data'?'page':'false'}"><span class="l">Data Sources</span></button>
+        <button type="button" class="d-nav-i${S.page==='settings'?' on':''}" data-page="settings"
+          aria-current="${S.page==='settings'?'page':'false'}"><span class="l">Settings</span></button>
       </div>
       ${edgeHTML(L)}`;
   }
@@ -202,6 +257,7 @@
   /* ---- the top bar ------------------------------------------------------ */
   function topHTML(L) {
     const A = window.APP;
+    const fpcon = window.FPCON.current();
     const t = L ? L.now : 0;
     const hh = String(Math.floor(t / 60)).padStart(2,'0');
     const mm = String(Math.floor(t % 60)).padStart(2,'0');
@@ -224,7 +280,8 @@
     return `<div class="d-top">
       <div style="display:flex;gap:12px;align-items:center">
         ${search}
-        <span class="d-fpcon">FPCON BRAVO</span>
+        <span class="d-fpcon d-fpcon--${esc(fpcon.tone)}"
+          style="${fpconVars(fpcon)}">FPCON ${esc(fpcon.key)}</span>
       </div>
       <div style="display:flex;gap:16px;align-items:center">
         <span class="d-auth">${auth}</span>
@@ -273,6 +330,12 @@
       if (ev.target.closest('[data-search-clear]')) {
         S.query = ''; S.blockedAttempt = false; paint(); return;
       }
+      const fpcon = ev.target.closest('[data-fpcon]');
+      if (fpcon) {
+        window.FPCON.set(fpcon.dataset.fpcon);
+        paint();
+        return;
+      }
       const b = ev.target.closest('[data-page]');
       if (!b) return;
       go(b.dataset.page, b.dataset.sec);
@@ -290,14 +353,99 @@
         paint();
       }
     });
+    host.addEventListener('keydown', ev => {
+      const brand = ev.target.closest && ev.target.closest('.d-brand[data-page="dash"]');
+      if (brand && (ev.key === ' ' || ev.key === 'Enter')) {
+        /* app.js owns a window-level Space shortcut for Play/Pause. Consume
+           brand activation inside the shell before that shortcut sees it. */
+        ev.preventDefault();
+        ev.stopPropagation();
+        go('dash');
+        const home = host.querySelector('.d-brand[data-page="dash"]');
+        if (home) home.focus();
+        return;
+      }
+      const option = ev.target.closest && ev.target.closest('[data-fpcon]');
+      if (!option) return;
+      if (ev.key === ' ' || ev.key === 'Enter') {
+        /* The legacy console owns a window-level Space shortcut for mission
+           Play/Pause. A focused display radio must consume activation here,
+           before that shortcut sees it, or changing a label starts the run. */
+        ev.preventDefault();
+        ev.stopPropagation();
+        const key = option.dataset.fpcon;
+        window.FPCON.set(key);
+        paint();
+        const selected = host.querySelector(`[data-fpcon="${key}"]`);
+        if (selected) selected.focus();
+        return;
+      }
+      if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(ev.key)) return;
+      ev.preventDefault();
+      const conditions = window.FPCON.CONDITIONS;
+      const at = conditions.findIndex(condition => condition.key === option.dataset.fpcon);
+      const step = (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') ? 1 : -1;
+      const next = ev.key === 'Home' ? 0 : ev.key === 'End' ? conditions.length - 1
+        : (at + step + conditions.length) % conditions.length;
+      const key = conditions[next].key;
+      window.FPCON.set(key);
+      paint();
+      const selected = host.querySelector(`[data-fpcon="${key}"]`);
+      if (selected) selected.focus();
+    });
+    /* The legacy keyboard listener renders synchronously. Prime the page tab
+       during capture so a previously-open subsection cannot reclaim the view
+       before the shell's selected destination synchronizes. */
+    window.addEventListener('keydown', ev => {
+      const path = typeof ev.composedPath === 'function' ? ev.composedPath() : [];
+      if (path.some(node => node && node.tagName === 'ANGEL-RESUPPLY-TRACK')) return;
+      const target = ev.target;
+      const editing = target && target.closest &&
+        target.closest('input,textarea,[contenteditable="true"]');
+      if (ev.ctrlKey || ev.metaKey || ev.altKey || editing) return;
+      const key = ev.key;
+      let fallback = null;
+      if (key === 'd' || key === 'D' || key === '0') { setViewTab('DATA'); fallback = 'DATA'; }
+      else if (key === '4') { setViewTab('COMPARE'); fallback = 'COMPARE'; }
+      else if (key === 'c' || key === 'C') { setViewTab('ROI'); fallback = 'ROI'; }
+      else if (key === 'q' || key === 'Q') { setViewTab('QUERY'); fallback = 'QUERY'; }
+      else if (key === 'm' || key === 'M') { setViewTab('SENSOR'); fallback = 'SENSOR'; }
+      else if (key === 'u' || key === 'U') { setViewTab('CONFIDENCE'); fallback = 'CONFIDENCE'; }
+      if (fallback) setTimeout(() => {
+        if (fallback === 'SENSOR') {
+          const palette = window.ANGEL && window.ANGEL.get && window.ANGEL.get('palette');
+          if (!palette || !palette.items().some(item => item.id === 'view:SENSOR')) return;
+        }
+        openView(fallback);
+      }, 0);
+    }, true);
   }
 
+  function openView(view) {
+    setViewTab(view);
+    if (typeof window.goView === 'function') window.goView(view);
+    const owner = OWNER[view];
+    if (owner) CS.navigate(S, owner);
+    S.heldView = null;
+    if (window.APP) window.APP._paneForce = true;
+    paint();
+  }
   function go(page, sec) {
     CS.navigate(S, page);
-    if (sec && typeof window.goView === 'function') window.goView(sec);
+    const n = destination(page);
+    const ownedPage = n.page;
+    const ownedSec = sec || n.sec;
+    if (n.tabGroup && window.DPB && typeof window.DPB.setTab === 'function') {
+      window.DPB.setTab(n.tabGroup, n.tab);
+    }
+    if (n.virtual || n.utility) S.heldView = window.APP && window.APP.view;
     else {
-      const first = (SECTIONS[page] || [])[0];
-      if (first && typeof window.goView === 'function') window.goView(first);
+      S.heldView = null;
+      if (ownedSec && typeof window.goView === 'function') window.goView(ownedSec);
+      else {
+        const first = (SECTIONS[ownedPage] || [])[0];
+        if (first && typeof window.goView === 'function') window.goView(first);
+      }
     }
     if (window.APP) window.APP._paneForce = true;
     paint();
@@ -313,6 +461,9 @@
     const next = box.firstElementChild;
     const cur = main.querySelector(':scope > .d-top');
     if (!cur) { main.insertBefore(next, main.firstChild); return; }
+    const curFpcon = cur.querySelector('.d-fpcon');
+    const nextFpcon = next.querySelector('.d-fpcon');
+    if (curFpcon && nextFpcon) curFpcon.replaceWith(nextFpcon.cloneNode(true));
     const curWrap = cur.querySelector('.d-search-wrap');
     const nextWrap = next.querySelector('.d-search-wrap');
     if (!curWrap || !nextWrap) { cur.replaceWith(next); return; }
@@ -345,16 +496,23 @@
     const rail = document.getElementById('dRail');
     const main = document.getElementById('dMain');
     if (!rail || !main) return;
-    const owner = window.APP && OWNER[window.APP.view];
-    if (owner && owner !== S.page) {
+    const view = window.APP && window.APP.view;
+    const owner = view && OWNER[view];
+    const currentDestination = destination(S.page);
+    const holdingDetached = (currentDestination.virtual || currentDestination.utility) &&
+      S.heldView === view;
+    /* Detached pages do not own a legacy APP.view. Keep them open while that
+       underlying view is unchanged, then yield to explicit legacy navigation. */
+    if (!holdingDetached && owner && !owns(S.page, view)) {
       CS.navigate(S, owner);
+      S.heldView = null;
     }
     if (missionActive() && S.query) S.query = '';
     if (!missionActive()) S.blockedAttempt = false;
     const cls = document.querySelector('#dShell > .d-class');
     if (cls) cls.outerHTML = classHTML(L);
     rail.innerHTML = railHTML(L);
-    const page = window.DPAGES && window.DPAGES[S.page];
+    const page = window.DPAGES && window.DPAGES[destination(S.page).page];
     S.search = null;
     const body = page ? page(L) : emptyPage(S.page);
     syncTop(main, L);
@@ -364,7 +522,15 @@
       pageHost.id = 'dPage';
       main.appendChild(pageHost);
     }
-    pageHost.innerHTML = body;
+    const focusedFpcon = pageHost.contains(document.activeElement) &&
+      document.activeElement.dataset ? document.activeElement.dataset.fpcon : null;
+    const preserveTracker = S.page === 'track' &&
+      pageHost.querySelector('angel-resupply-track');
+    if (!preserveTracker) pageHost.innerHTML = body;
+    if (focusedFpcon) {
+      const focused = pageHost.querySelector(`[data-fpcon="${focusedFpcon}"]`);
+      if (focused) focused.focus();
+    }
   }
 
   function emptyPage(k) {
@@ -373,11 +539,37 @@
       <p>Not yet adapted to this design.</p></div></div>`;
   }
 
+  function settingsPage() {
+    const current = window.FPCON.get();
+    return `<div class="d-head"><div><h1>Settings</h1>
+      <p>Operator display and console preferences.</p></div></div>
+      <div class="d-settings">
+        <section class="d-card d-setting-card" aria-labelledby="dFpconTitle">
+          <header><div><h2 id="dFpconTitle">Force Protection Condition</h2>
+            <p>Operator-set force-protection status. This display setting does not change, pause, or restart the mission simulation.</p>
+          </div></header>
+          <div class="d-fpcon-options" role="radiogroup" aria-labelledby="dFpconTitle">
+            ${window.FPCON.CONDITIONS.map(condition => {
+              const checked = condition.key === current;
+              return `<button type="button"
+                class="d-fpcon-option d-fpcon--${esc(condition.tone)}${checked ? ' on' : ''}"
+                role="radio" aria-checked="${checked}" tabindex="${checked ? '0' : '-1'}"
+                data-fpcon="${esc(condition.key)}" style="${fpconVars(condition)}">
+                <span class="d-fpcon-dot" aria-hidden="true"></span>
+                <span><b>FPCON ${esc(condition.key)}</b><small>${esc(condition.label)}</small></span>
+              </button>`;
+            }).join('')}
+          </div>
+        </section>
+      </div>`;
+  }
+
   window.DSHELL = {
     mount, paint, go, NAV, SECTIONS, OWNER, live, esc, MIN, svg, casId, dueAt,
-    searchContext, query, matches, noMatches, missionActive, wallRemaining, countdown
+    searchContext, query, matches, noMatches, missionActive, wallRemaining, countdown, openView
   };
   window.DPAGES = window.DPAGES || {};
+  window.DPAGES.settings = settingsPage;
 
   if (document.readyState === 'loading')
     document.addEventListener('DOMContentLoaded', () => { mount(); paint(); });

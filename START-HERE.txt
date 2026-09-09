@@ -6,8 +6,9 @@ UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 WHAT IS IN THIS FOLDER
 ======================
 
-This package arrives as THREE zips. Unzip all three into the same
-place. They are thirds of one folder and none runs on its own.
+Whether obtained as a Git clone, a repository ZIP, or the historical
+three-part distribution, keep the folder intact. The platform launcher is
+not a single-file application: it requires the adjacent app/ directory.
 
   the four platform binaries   the program itself
   app/                         everything it serves
@@ -31,13 +32,40 @@ place. They are thirds of one folder and none runs on its own.
                                repository. See documents/GITHUB-PREP.md
                                for the six decisions left open — the
                                licence above all.
-  START-HERE.txt               this file
-  VERSION.txt, CHECKSUMS.txt   what you are holding, and the digests
-                               for parts 2 and 3
+  START-HERE.txt               this plain-text guide
+  VERSION.txt, CHECKSUMS.txt   what you are holding, and distribution
+                               digests
 
 
-NEW IN 1.0 — WHERE THIS SITS
-============================
+NEW IN 1.1 — RESUPPLY TRACKING
+==============================
+
+RESUPPLY TRACKING now sits directly below SENSOR & MODEL in the left
+rail. It is a standalone synthetic capability demonstration with immutable
+tracker-only commitment fixtures: names, times, routes, payloads, phases and
+exceptions are not projections of engine tasking, scenarios, casualties,
+host playback, run snapshots, fleet history or Arm B ledgers. Its own
+deterministic clock supports seek, play/pause, a tracker-owned normal/8×
+playback toggle labelled SPEED ×8 and SPEED ×1, and reroute controls, including
+nominal, diverted, aborted, lost, deadline-miss, cold-chain-failure and
+delivered states. The speed toggle changes only the tracker's deterministic
+clock, never host playback or engine state. It calls no model and changes no
+engine state or outcome.
+The reference result remains 23 / 34 / 35 survivable deaths on 20 / 38 / 0
+sorties at seed 42, JOA CORAL, deployed; it is not produced by this tracker.
+All tracker names, times, routes and payloads are synthetic demonstration
+fixtures and cannot be treated as operational output. Its Canvas 2-D
+schematic and Arm B scheduled-push comparison are tracker-only states.
+
+The control labelled "Send to medic's ATAK" opens an explanation only.
+No BATDOK-J, ATAK, TAK Server, Marti REST or outbound CoT integration is
+implemented, and pressing it transmits nothing. CoT is ingested, not
+emitted. The tracker adds no network request and has no dependency on
+enterprise reachback to display the state already present.
+
+
+WHERE THIS SITS
+===============
 
 The one question this package could not previously answer is the first
 one a program office asks: where does this belong among the things we
@@ -90,11 +118,12 @@ To pick a different port:  ANGEL-SWARM-linux-x64 -port 9000
 THE FIRST FIVE MINUTES
 ======================
 
-The application opens on COMMAND OVERVIEW, as a COMMANDER. Thirteen
+The application opens on COMMAND OVERVIEW, as a COMMANDER. Fourteen
 destinations run down the left rail:
 
   Command Overview   Theater Map        Live Casualties
   Decisions          Analyst Terminal   Sensor & Model
+  Resupply Tracking
   Ops Center Wall    Evidence           War Game
   Ask ANGEL          Authority & Policy Data Sources
   Settings
@@ -109,8 +138,13 @@ THE FIVE-SCREEN TOUR, IF YOU HAVE FIVE MINUTES:
   2  Theater Map        the same battle, at four scales
   3  Evidence           where the deaths that remain came from
   4  Ops Center Wall    the result as a board, readable across a room
-  5  Settings ->        118 assertions against this engine, in your
+  5  Settings ->        196 total checks covering engine and host UI:
      Engine self-test   own browser, offline
+
+Live result measured 9 September 2026: 196 total checks covering engine
+      and host UI behavior; 195 pass and 1 fail. RESUPPLY TRACKING is
+      12/12 passing; the sole failure is the EUCOM_FJORD nominal seed-42
+      directional assertion (16 > 15).
 
 If you would rather be walked through it, Settings -> Display ->
 Guided walkthrough puts a bar at the foot of the window that steps
@@ -145,7 +179,7 @@ read out of the engine at the moment the screen is drawn, not typed in
 
 AND THE COMPARISON FOLLOWS YOU. An ANGEL SWARM figure never appears in
 this application without the CURRENT — TRIAGE & PROXIMITY figure beside
-it, at the same size — under twelve screen titles and on the navigation
+it, at the same size — under thirteen screen titles and on the navigation
 rail, whatever destination is open. Before the comparison is readable it
 says so in words rather than printing a number it cannot stand behind.
 
@@ -215,14 +249,17 @@ HOW YOU KNOW IT WORKS
 =====================
 
 Settings → "Engine self-test" opens selftest.html, a page that runs
-118 assertions directly against the shipped engine — js/sim.js,
-js/optimizer.js, js/mc.worker.js and the adapter — in your own browser,
-offline, with nothing mocked. It asserts the reference result quoted
-above, determinism, the common random numbers that make the three arms
-one battle, the conservation invariants, the deadline arithmetic, the
-SHA-256 audit chain and its tamper-evidence, and every one of the seven
-theatres. A red row would be a real disagreement between what this
-engine does and what this package claims it does. There are none.
+196 checks covering engine and host UI behavior — including 12 standalone
+RESUPPLY TRACKING checks — against js/sim.js, js/optimizer.js,
+js/mc.worker.js and the adapter in your own browser, offline, with nothing
+mocked. It asserts the reference result quoted above, determinism, the
+common random numbers that make the three arms one battle, the conservation
+invariants, the deadline arithmetic, the SHA-256 audit chain and its
+tamper-evidence, and every one of the seven theatres. The live result
+measured 9 September 2026 is 195 pass and 1 fail; RESUPPLY TRACKING is
+12/12. The sole failure is the EUCOM_FJORD nominal seed-42 directional
+assertion (16 > 15). A red row is a real disagreement between what this
+engine does and what this package claims it does.
 
 
 THE PAPERWORK IS IN documents/
@@ -246,7 +283,7 @@ as both Markdown and Word:
                                         rejected, and every trap hit
   ANGEL-SWARM-WIN-PROBABILITY-v5.9      1,400 paired battles across all seven
                                         theatres, measured on this engine:
-                                        seven wins from seven, adverse in six
+                                        seven wins from seven, adverse in five
                                         battles, never by more than one.
                                         Reproduce it with documents/winprob.mjs
   ANGEL-SWARM-SECURITY-AND-ATO          the STRIDE threat model, what is
@@ -334,14 +371,17 @@ It answers in verbatim quotes with a similarity score and refuses when
 nothing in the corpus matches. It cannot hallucinate, because it can
 only return text that is already there.
 
-THERE IS NO LANGUAGE MODEL. None is shipped and none is loaded.
-NOTHING ON ANY SCREEN IS GENERATED. Ask ANGEL says so in its own
-header, and that is the stronger position rather than the weaker one:
-a template over the run record cannot hallucinate a casualty count, and
-a verbatim quote cannot invent doctrine. Ask ANGEL answers questions
-about the run from the run's own record, badged RUN RECORD · COMPUTED,
-NOT GENERATED; it quotes doctrine verbatim; and where it can do
-neither it says so and lists what it can be asked instead.
+THE ZERO-NETWORK BASELINE SHIPS NO LANGUAGE-MODEL WEIGHTS, LOADS NO
+LANGUAGE MODEL AND GENERATES NOTHING ON SCREEN. Ask ANGEL says so in
+its own header, and that is the stronger position rather than the
+weaker one: a template over the run record cannot hallucinate a
+casualty count, and a verbatim quote cannot invent doctrine. Ask ANGEL
+answers questions about the run from the run's own record, badged RUN
+RECORD · COMPUTED, NOT GENERATED; it quotes doctrine verbatim; and
+where it can do neither it says so and lists what it can be asked
+instead. A separate, optional Qwen GGUF download can enable clearly
+marked generated prose in the Mission brief pane; it is not shipped
+and is not part of this offline baseline.
 
 Plus: a DuckDB analytical engine you can type arbitrary SQL into
 (Analyst Terminal -> SQL CONSOLE), four map renderers, a casualty-flow
@@ -377,7 +417,7 @@ arithmetic over this run's own record, fixed doctrine, published physiology,
 or a human decision. None of those is machine learning and none of them
 pretends to be.
 
-In the left navigation rail, TWO destinations of the thirteen carry a
+In the left navigation rail, TWO destinations of the fourteen carry a
 sparkle: Sensor & Model, and Ask ANGEL. Nothing else does.
 
 ONE THING WE WOULD RATHER TELL YOU THAN HAVE YOU FIND. On two surfaces
@@ -461,10 +501,10 @@ extracts, and operational use requires the actual publication.
 The Monte Carlo reports the confidence interval AND the number of
 replications where the system did worse rather than better, because
 that number is the one worth knowing. Across 1,400 paired battles in
-all seven theatres, ANGEL SWARM produced one more death in six of them
-— 0.43%, never worse by more than one — and four of those six are in
+all seven theatres, ANGEL SWARM produced one more death in five of them
+— 0.36%, never worse by more than one — and three of those five are in
 EUCOM FJORD, which still wins on its interval. Seed 42 in FJORD is one
-of the six, and it is left in the scenario list rather than hidden.
+of the five, and it is left in the scenario list rather than hidden.
 
 The interface is a demonstration, not a fielded system: there is no
 authentication, no identity and no access control, and the security

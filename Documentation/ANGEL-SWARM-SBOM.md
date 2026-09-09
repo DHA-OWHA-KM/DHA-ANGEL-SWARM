@@ -1,9 +1,15 @@
 # ANGEL SWARM — Software Bill of Materials
 
-**Format:** CycloneDX 1.6 JSON — `OUT/ANGEL-SWARM-SBOM.json`. This document is the human-readable rendering of that file; the JSON is authoritative.
+**Format:** CycloneDX 1.6 JSON — `Documentation/ANGEL-SWARM-SBOM.json`. This document is the human-readable rendering of that file; the JSON is authoritative for the dated 5 September 2026 inventory only.
 **Generated:** 2026-09-05T06:17:20Z by `_sbom_gen.mjs`, which measures every hash and size off the file on disk.
 **Serial number:** `urn:uuid:ad5fac77-ad58-45c8-b6f1-e3ed7aa14853`
 **Classification:** UNCLASSIFIED // PUBLIC RELEASE // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
+
+> **Dated inventory:** This SBOM records the 5 September 2026 build and is
+> retained as historical component and licence evidence. Product files and
+> documentation have changed since it was generated. Use `CHECKSUMS-REPO.txt`
+> for current tracked-file integrity; do not treat the hashes or copied
+> self-test total below as measurements of the current checkout.
 
 ---
 
@@ -112,7 +118,7 @@ An empty `go.sum` is the strongest supply-chain statement in this whole document
 | Parameters | 104,162 | 22,565,376 |
 | ONNX opset | 13 | 14 |
 | Licence | **NOASSERTION** — trained in this repository, no licence file written | **Apache-2.0**, declared in `app/models/minilm/meta.json` and matching the upstream `sentence-transformers` model card |
-| Provenance | Synthetic cohort. Waveform morphology follows the published response of the peripheral pulse to central volume loss; it is not patient data and no patient data was used. The fielded analogue is CipherOx CRM, FDA 510(k) K173929. | npm @lat.md/embed-minilm-fp16 (fp16 safetensors + tokenizer); huggingface.co is unreachable from the build sandbox |
+| Provenance | Synthetic cohort. Waveform morphology follows the published response of the peripheral pulse to central volume loss; it is not patient data and no patient data was used. **CipherOx CRI M1 is the reference device** for the compensatory-reserve concept; the model is not that device. | npm @lat.md/embed-minilm-fp16 (fp16 safetensors + tokenizer); huggingface.co is unreachable from the build sandbox |
 | Quality | MAE 0.0694 on held-out subjects (split by subject — no person appears in both sets); 95% interval coverage 0.9616 | fp32→int8 minimum cosine similarity 0.9686230421066284; 15/23 evaluation questions correct at rank 1, 22/23 within the top 5 |
 | Model card in build | `app/models/ppg_cri.meta.json` | `app/models/minilm/meta.json` |
 
@@ -151,6 +157,8 @@ Neither model is accompanied by a signature or an in-build integrity check today
 | `app/data/doctrine.json` | 448,266 | `ff1889ab266de03b…` | Paraphrased doctrine corpus for retrieval. Demonstration text, not an extract of any publication. |
 
 Digests are truncated here for width; the JSON carries all 64 characters. All of this is first-party and carries **no licence file**, so it is `NOASSERTION` throughout rather than assumed to be permissive.
+
+The telemetry names are deliberately separate: **Sempulse Halo (example)** is a wearable source; **CipherOx CRI M1 (reference)** anchors the compensatory-reserve concept; **BATDOK-J** is the plausible producer/interface. The shipped listener is receive-only and off unless `-cot` is passed; `cotsim` exercises a prototype medical detail extension that is not a ratified CoT schema. **ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1, or BATDOK-J.** This SBOM therefore makes no compatibility, operational-use, or completed-integration claim about them.
 
 ---
 

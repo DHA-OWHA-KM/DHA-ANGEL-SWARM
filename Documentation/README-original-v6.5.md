@@ -3,6 +3,8 @@
 > This is the `README.md` exactly as it shipped in the ANGEL SWARM v6.5 package on 8 September 2026, kept here as a record. It is not the repository's front page — see [`../README.md`](../README.md) for that.
 >
 > **Its relative links do not resolve in this repository.** It was written against the full working tree, where the documents lived in `OUT/`, the landscape research in `RESEARCH/`, the Go source in `cmd/` and the contracts at the root. In this repository those are `Documentation/`, `Documentation/`, `src/cmd/` and — in the case of `PROV_CONTRACT.md` — not published at all. Nothing below has been edited to fix that; the links are left broken on purpose, because correcting them would make this something other than the archive copy it exists to be.
+>
+> **Current device clarification (the sole editorial exception):** **Sempulse Halo (example)**, **CipherOx CRI M1 (reference)**, and **BATDOK-J** as a separate plausible producer/interface. ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1, or BATDOK-J. This is not a claim of compatibility, military fielding, regulatory status or completed integration; the prototype listener remains receive-only, off by default, and limited to its documented CoT `<detail>` dialect.
 
 ---
 

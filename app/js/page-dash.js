@@ -1,215 +1,193 @@
 /* ==========================================================================
-   COMMAND OVERVIEW — the canvas's dash page, on live figures
-   ==========================================================================
-   Layout, type, colour and spacing are the canvas's. Every number is read
-   out of the running simulation at the moment it is drawn. The canvas's own
-   figures (18 casualties, 6 lift, 31U, −12) were placeholders for spacing
-   and none of them appear here.
-
-   THE DELTA TILE IS RED, NOT TEAL. The canvas draws "−12 deaths, same
-   inputs" as a teal success tile. The instruction on this project is that a
-   death figure is red — the number, the bar and the marker. The tile keeps
-   its shape and its position; only the family changes.
+   COMMAND OVERVIEW — commander's live decision brief
+   All figures are read from DSHELL.live() or the arm ledgers at render time.
    ========================================================================== */
 (function () {
   'use strict';
   const D = () => window.DSHELL;
+  const DECISION_WINDOW_MIN = 8;
+  const MIN_DECISION_RESPONSE_MS = 15000;
+  const INJ = { TRUNCAL_HEM:'truncal haemorrhage', JUNCTIONAL_HEM:'junctional haemorrhage',
+    EXTREMITY_HEM:'extremity haemorrhage', AIRWAY:'airway', MINOR:'minor', OTHER:'other' };
 
-  function tile(lab, fig, unit, kind) {
-    const cls = kind ? ' ' + kind : '';
-    return `<div class="d-tile${cls}${kind==='crit'?' d-death':''}">
-      <span class="d-lab">${lab}</span>
-      <div class="d-val"><span class="d-fig">${fig}</span>
-      <span class="d-unit">${unit}</span></div></div>`;
+  const destination = (page, sec) =>
+    ` data-page="${page}"${sec ? ` data-sec="${sec}"` : ''}` +
+    (page === 'cas' && sec ? ` data-cas="tab:${sec}"` : '') +
+    (page === 'ev' && sec ? ` data-bgrp="ev" data-btab="${sec === 'COMPARE' ? 'CMP' : sec}" data-bview="${sec}"` : '');
+
+  const action = (label, page, sec, cls) =>
+    `<button type="button" class="${cls || 'do-link'}"${destination(page, sec)}>${label}</button>`;
+
+  function tile(label, figure, unit, kind, page, sec) {
+    return `<button type="button" class="d-tile do-tile${kind ? ' ' + kind : ''}${kind === 'crit' ? ' d-death' : ''}"
+      ${destination(page, sec)}>
+      <span class="d-lab">${label}</span><span class="d-val"><span class="d-fig">${figure}</span>
+      <span class="d-unit">${unit}</span></span></button>`;
+  }
+
+  function shelf(L) {
+    let blood = 0, plasma = 0, sites = 0, constrained = 0;
+    for (const b of (L.A.bases || [])) {
+      const s = b.stock || {}, n = (s.BLOOD || 0) + (s.PLASMA || 0);
+      blood += s.BLOOD || 0; plasma += s.PLASMA || 0;
+      if (n > 0) sites++; else constrained++;
+    }
+    return { blood, plasma, units:blood + plasma, sites, constrained };
+  }
+
+  function outbound(L) {
+    const sorties = L.A.sortieLog || [];
+    return (L.A.drones || []).filter(d => d.state === 'OUTBOUND').map(d => {
+      const sortie = sorties.find(s => s.id === d.sortieId);
+      return { d, actor: sortie && sortie.actor ? sortie.actor : 'authority not recorded' };
+    });
+  }
+
+  function stale(L) {
+    return L.open.filter(c => (L.now - c.tPinged) > 2);
+  }
+
+  function matches(r) {
+    const c = r.c;
+    return D().matches(D().casId(c), c.id, c.cls, c.role, c.unitName, c.injury,
+      INJ[c.injury], c.needs, c.assignedTo, r.site && r.site.b.name,
+      r.unreachable ? 'unreachable no asset breach' : '',
+      r.slack !== null && r.slack < 0 ? 'late negative slack' : '',
+      c.assignedTo != null ? 'tasked outbound' : 'queued');
   }
 
   window.DPAGES = window.DPAGES || {};
   window.DPAGES.dash = function (L) {
-    const esc = D().esc, MIN = D().MIN;
-    D().searchContext('Search casualty, site, injury, tasking…', 'queue and brief records');
-    if (!L) return `<div class="d-head"><div><h1>Command Overview</h1>
-      <p>Waiting for the run.</p></div></div>`;
+    D().searchContext('Search casualty, site, injury, tasking…', 'command overview records');
+    if (!L) return `<div class="do-page"><div class="d-head"><div><h1>Command Overview</h1>
+      <p>Waiting for the run. No operational claim is available yet.</p></div></div>
+      <section class="do-empty" role="status"><b>RUN STATE UNAVAILABLE</b><span>The command brief will populate when the simulation publishes.</span></section></div>`;
 
-    const tight = L.tightest;               // a row: { c, left, eta, slack, ... }
-    const tightMin = tight ? Math.max(0, tight.left) : null;
-    const delta = L.deadB - L.deadA;      // positive = fewer dead under ANGEL SWARM
-    const blood = shelf(L);
-    const queue = L.timed.filter(r => timedMatches(r));
+    const stock = shelf(L), flying = outbound(L), old = stale(L);
+    const visible = L.timed.filter(matches);
+    const pending = (L.A.queue || []).filter(p => p.state === 'PENDING');
+    const tight = L.tightest, delta = L.deadB - L.deadA;
+    const status = !L.deployed ? 'PRE-DEPLOYMENT'
+      : L.unreachable || pending.length ? 'COMMAND ATTENTION' : old.length ? 'STALE TELEMETRY' : 'RUN ACTIVE';
 
-    /* THE DELTA IS A DEATH FIGURE. Red, and never phrased as lives saved. */
-    const deltaTile = !L.deployed
-      ? tile('VS CURRENT — TRIAGE & PROXIMITY', '—', 'not deployed', '')
-      : tile('VS CURRENT — TRIAGE & PROXIMITY',
-             (delta > 0 ? '−' : delta < 0 ? '+' : '') + Math.abs(delta),
-             delta === 0 ? 'level, same inputs' : 'dead, same inputs', 'crit');
+    return `<div class="do-page">
+      <div class="d-head do-head"><div><div class="do-eyebrow">${status}</div>
+        <h1>Command Overview</h1>
+        <p>${!L.deployed ? 'Capability is not deployed. Both arms are running current triage and proximity.'
+          : 'Exceptions first: casualty deadlines, machine action, and decisions held for human authority.'}</p></div>
+        <div class="do-head-actions"><span class="d-meta">T+${Math.floor(L.now)} MIN · LOCAL</span>
+          ${action('THEATER MAP', 'map', '', 'd-btn')}</div></div>
 
-    return `<div class="d-head">
-        <div><h1>Command Overview</h1>
-        <p>Every open casualty ranked by time remaining, not by appearance.</p></div>
-        <div style="display:flex;gap:9px;align-items:center">
-          <span class="d-meta">T+${Math.floor(L.now)} MIN &middot; LOCAL</span>
-          <button class="d-btn" type="button" data-dcmd="rerun">RE-RUN ALLOCATION</button>
-        </div></div>
-
-      <div class="d-tiles">
-        ${tile('UNREACHABLE IN TIME', L.unreachable, L.unreachable === 1 ? 'casualty' : 'casualties',
-               L.unreachable ? 'crit' : '')}
-        ${tile('TIGHTEST DEADLINE', tight ? MIN(tightMin) : '—',
-               tight ? 'min &middot; ' + esc(D().casId(tight.c)) : 'none open', '')}
-        ${tile('BLOOD FORWARD', blood.units, 'U &middot; ' + blood.sites +
-               (blood.sites === 1 ? ' site' : ' sites'), '')}
-        ${tile('LIFT AVAILABLE', L.lift.ready, 'of ' + L.lift.all + ' &middot; ' + L.lift.air + ' airborne', '')}
-        ${deltaTile}
+      <div class="do-kpis">
+        ${tile('PROJECTED LATE OR UNREACHABLE', L.unreachable, L.unreachable === 1 ? 'casualty' : 'casualties',
+          L.unreachable ? 'crit' : '', 'cas', 'CASUALTIES')}
+        ${tile('TIGHTEST DEADLINE', tight ? D().MIN(Math.max(0, tight.left)) : '—',
+          tight ? D().casId(tight.c) : 'none open', tight && tight.left <= 0 ? 'crit' : '', 'cas', 'CASUALTIES')}
+        ${tile('PENDING AUTHORIZATION', pending.length, pending.length === 1 ? 'decision' : 'decisions',
+          pending.length ? 'warn' : '', 'dec')}
+        ${tile('LIFT READY', L.lift.ready, `of ${L.lift.all} · ${L.lift.air} airborne`,
+          L.lift.all && !L.lift.ready ? 'warn' : '', 'cas', 'FLEET')}
+        ${tile('BLOOD / PLASMA FORWARD', `${stock.blood}/${stock.plasma}`, `${stock.units}U · ${stock.sites} stocked sites`,
+          stock.constrained ? 'warn' : '', 'cas', 'SUPPLY')}
+        ${!L.deployed
+          ? tile('VS CURRENT — TRIAGE & PROXIMITY', '—', 'not deployed', '', 'ev', 'COMPARE')
+          : tile('VS CURRENT — TRIAGE & PROXIMITY', delta === 0 ? '0' : (delta > 0 ? '−' : '+') + Math.abs(delta),
+            delta === 0 ? 'level, same inputs' : 'dead, same inputs', 'crit', 'ev', 'COMPARE')}
       </div>
 
-      <div class="d-cols">
-        <div class="d-stack">
-          ${briefCard(L, queue)}
-          ${queueCard(L, queue)}
-        </div>
-        <div class="d-stack">
-          ${escCard(L)}
-          ${theaterCard(L)}
-        </div>
-      </div>`;
+      ${!L.deployed ? `<section class="do-notice"><div><b>PRE-DEPLOYMENT</b>
+        <span>No ANGEL SWARM outcome comparison is asserted until capability is deployed. Readiness below reflects the force presently loaded.</span></div>
+        ${action('REVIEW EVIDENCE', 'ev', '', 'do-link')}</section>` : ''}
+
+      <div class="do-primary">
+        ${riskCard(L, visible)}
+        ${decisionCard(L, pending)}
+      </div>
+      <div class="do-readiness">
+        ${coverageCard(L, old)}
+        ${networkCard(L, stock)}
+        ${activityCard(L, flying)}
+      </div>
+      <nav class="do-routes" aria-label="Operational tools">
+        ${route('Decision Feed', 'Every action and outcome in order.', 'feed')}
+        ${route('Evidence', 'Inspect comparison and provenance.', 'ev')}
+        ${route('Ask ANGEL', 'Query live state or the installed corpus.', 'chat')}
+        ${route('Theater Map', 'Open the full operational picture.', 'map')}
+      </nav>
+    </div>`;
   };
 
-  /* ---- what is actually on the shelf, per launch point ------------------ */
-  function shelf(L) {
-    let units = 0, sites = 0;
-    for (const b of (L.A.bases || [])) {
-      const s = b.stock || {};
-      const u = (s.BLOOD || 0) + (s.PLASMA || 0);
-      if (u > 0) sites++;
-      units += u;
-    }
-    return { units, sites };
+  function riskCard(L, rows) {
+    const shown = rows.slice(0, 7);
+    return `<section class="d-card do-risk"><header><div><span class="do-section-k">CASUALTY RISK</span>
+      <h2>Deadline exceptions</h2></div>${action('OPEN CASUALTY BOARD', 'cas', 'CASUALTIES')}</header>
+      <div class="do-table-head"><span>CASUALTY / RESPONDING SITE</span><span>DEADLINE</span><span>ARRIVAL</span><span>SLACK</span><span>ACTION</span></div>
+      <div class="do-risk-list">${shown.map(r => riskRow(L, r)).join('') ||
+        (D().query() ? D().noMatches('casualty risks') :
+          `<div class="do-zero" role="status"><b>NO DEADLINE ALERTS</b><span>${L.open.length ? 'Every open, time-critical casualty is inside present reach.' : 'Nothing is open. No allocation is being made.'}</span></div>`)}</div>
+      ${rows.length > shown.length ? `<footer>${rows.length - shown.length} further matching casualties on the full board</footer>` : ''}</section>`;
   }
 
-  /* ---- the allocation brief --------------------------------------------- */
-  /* Three lines, the canvas's three labels. Each one is a real statement
-     about this run or it is not drawn at all — an empty slot is honest and a
-     manufactured sentence is not. */
-  function briefCard(L, timed) {
-    const esc = D().esc, MIN = D().MIN;
-    const rows = [];
-    const worst = timed.find(r => r.unreachable || (r.slack !== null && r.slack < 0)) || timed[0];
-    if (worst) {
-      const c = worst.c;
-      rows.push(['TOP RISK', 'risk',
-        `${esc(D().casId(c))} at ${esc(c.unitName || 'the line')} is inside ${MIN(Math.max(0, worst.left))}. ` +
-        (worst.unreachable
-          ? 'No launch point can reach this casualty at all.'
-          : worst.slack !== null && worst.slack < 0
-            ? `The nearest aircraft arrives ${Math.abs(Math.round(worst.slack))} minutes late.`
-            : `Inside the reach of ${worst.sites} launch point${worst.sites === 1 ? '' : 's'}.`)]);
-    }
-    const flying = (L.A.drones || []).filter(d => d.state === 'OUTBOUND' && d.task)
-      .filter(d => D().matches(d.tail, d.id, d.type, d.plat && d.plat.label,
-        d.baseName, d.state, d.task, d.target != null ? D().casId({ id:d.target }) : '',
-        'action outbound tasked standing authority'));
-    if (flying.length) {
-      const d = flying[0];
-      rows.push(['ACTION', 'act',
-        `${esc(d.tail || ('AC-' + d.id))} is outbound. Executed under standing authority.`]);
-    }
-    const stale = L.open.filter(c => (L.now - c.tPinged) > 2)
-      .filter(c => casualtyMatches(c)).length;
-    if (stale) rows.push(['CHANGE', '',
-      `${stale} ${stale === 1 ? 'casualty has' : 'casualties have'} a reading the network ` +
-      `will not act on. No deadline is asserted and no sortie is tasked against an estimate.`]);
-
-    if (!rows.length && !D().query())
-      rows.push(['STATE', '', 'Nothing is open. No allocation is being made.']);
-
-    return `<section class="d-card"><header>
-        <h2>Allocation brief</h2>
-        <span class="d-meta">GENERATED LOCALLY &middot; T+${Math.floor(L.now)}</span></header>
-      <div class="body">${rows.length ? rows.map(([k, cls, v]) =>
-        `<div class="d-line-item ${cls}"><span class="k">${k}</span><span class="v">${v}</span></div>`
-      ).join('') : D().noMatches('brief records')}</div></section>`;
+  function riskRow(L, r) {
+    const c = r.c, breach = r.unreachable || (r.slack !== null && r.slack < 0);
+    return `<button type="button" class="do-risk-row${breach ? ' breach' : ''}"${destination('cas', 'CASUALTIES')}>
+      <span><b>${D().esc(D().casId(c))}</b><small>${D().esc((r.site && r.site.b ? r.site.b.name : 'no responding site') + ' · ' + (INJ[c.injury] || String(c.injury || '').toLowerCase()))}</small></span>
+      <span>${D().MIN(Math.max(0, r.left))}</span><span>${r.eta === null ? '—' : D().MIN(r.eta)}</span>
+      <span class="${breach ? 'bad' : 'ok'}">${r.slack === null ? 'NO ASSET' : (r.slack > 0 ? '+' : '−') + Math.abs(Math.round(r.slack)) + ' min'}</span>
+      <span>${c.assignedTo != null ? 'TASKED' : r.unreachable ? 'NO ASSET' : 'QUEUED'}</span></button>`;
   }
 
-  /* ---- the deadline queue ----------------------------------------------- */
-  const COLS = '96px 1fr 88px 92px 72px 128px';
-  function queueCard(L, queue) {
-    const esc = D().esc, MIN = D().MIN;
-    const INJ = { TRUNCAL_HEM:'truncal haem', JUNCTIONAL_HEM:'junctional haem',
-                  EXTREMITY_HEM:'extremity haem', AIRWAY:'airway', OTHER:'other' };
-    const rows = queue.slice(0, 8).map(r => {
-      const c = r.c, breach = r.unreachable || (r.slack !== null && r.slack < 0);
-      return `<div class="row${breach ? ' breach' : ''}" style="grid-template-columns:${COLS}">
-        <span class="id">${esc(D().casId(c))}</span>
-        <span class="sub">${esc((r.site ? r.site.b.name : c.unitName || '—') + ' · ' +
-                                (INJ[c.injury] || String(c.injury || '').toLowerCase()))}</span>
-        <span class="r">${MIN(Math.max(0, r.left))}</span>
-        <span class="r">${r.eta === null ? '—' : MIN(r.eta)}</span>
-        <span class="r">${r.slack === null
-          ? '<span style="color:var(--d-t6);font-size:10px">NO ASSET</span>'
-          : `<span class="d-slack ${r.slack < 0 ? 'neg' : 'pos'}">${r.slack > 0 ? '+' : ''}${Math.round(r.slack)}</span>`}</span>
-        <span class="r" style="font-size:10px;color:${c.assignedTo ? 'oklch(0.74 0.05 165)' : 'var(--d-t5)'}">${
-          c.assignedTo ? 'TASKED' : (r.unreachable ? 'NO ASSET' : 'QUEUED')}</span></div>`;
-    }).join('');
-
-    return `<section class="d-card"><header>
-        <h2>Deadline queue</h2>
-        <span class="d-meta" style="color:var(--d-cyan-2);cursor:pointer" data-page="cas">OPEN FULL BOARD</span></header>
-      <div class="d-tbl">
-        <div class="hd" style="grid-template-columns:${COLS}">
-          <span>CASUALTY</span><span>SITE &middot; MECHANISM</span>
-          <span class="r">DEADLINE</span><span class="r">ARRIVAL</span>
-          <span class="r">SLACK</span><span class="r">TASKING</span></div>
-        ${rows || (D().query() ? D().noMatches('queue records') : '<div class="row" style="grid-template-columns:1fr;color:var(--d-t6)">No casualty is inside a deadline this system holds.</div>')}
-      </div></section>`;
+  function decisionCard(L, pending) {
+    const p = pending[0], elapsed = p ? Math.max(0, L.now - p.tRaised) : 0;
+    const simLeft = Math.max(0, DECISION_WINDOW_MIN - elapsed);
+    const wallLeft = p && p.tWallRaised != null
+      ? Math.max(0, Math.ceil((MIN_DECISION_RESPONSE_MS - (Date.now() - p.tWallRaised)) / 1000))
+      : null;
+    const simUrgency = simLeft > 0
+      ? `${D().MIN(simLeft)} SIMULATION WINDOW REMAINING`
+      : 'SIMULATION WINDOW ELAPSED';
+    const wallUrgency = wallLeft === null ? ''
+      : wallLeft > 0
+        ? `${Math.floor(wallLeft / 60)}:${String(wallLeft % 60).padStart(2, '0')} MINIMUM RESPONSE PROTECTION REMAINING`
+        : 'MINIMUM RESPONSE PROTECTION ELAPSED';
+    const urgency = simUrgency + (wallUrgency ? ` · ${wallUrgency}` : '');
+    return `<section class="d-card do-decision${p ? ' active' : ''}"><header><div>
+      <span class="do-section-k">HUMAN AUTHORIZATION</span><h2>${p ? `${pending.length} ${pending.length === 1 ? 'decision requires' : 'decisions require'} you` : 'Nothing requires you'}</h2></div>
+      ${action('OPEN DECISIONS', 'dec')}</header>${p ? `<div class="do-decision-body">
+        <span class="do-decision-time">RAISED T+${Number(p.tRaised).toFixed(1)} · ${D().MIN(elapsed)} ELAPSED · ${urgency}</span>
+        <strong>${D().esc(p.summary || 'Allocation proposal awaiting authority')}</strong>
+        <div class="do-grounds"><span>WHY ESCALATED</span><b>${D().esc((p.reasons || []).join(' · ') || 'Named grounds are recorded on the decision.')}</b></div>
+        <p>The machine has stopped at its authority boundary. Open the proposal to commit or hold the route; failure to decide is recorded with its cost.</p>
+        ${action('REVIEW AND AUTHORIZE', 'dec', '', 'do-primary-action')}
+      </div>` : `<div class="do-zero"><b>NO OPEN ESCALATION</b><span>Everything inside standing authority has gone. New exceptions will appear here.</span>
+        ${action('READ DECISION FEED', 'feed')}</div>`}</section>`;
   }
 
-  function casualtyMatches(c) {
-    return D().matches(D().casId(c), c.id, c.cls, c.role, c.unitName,
-      c.injury, c.needs, c.assignedTo,
-      c.assignedTo != null ? 'tasked' : 'queued', 'stale reading change');
+  function coverageCard(L, old) {
+    const timed = L.timed.length, inside = timed - L.unreachable, pct = timed ? Math.round(inside / timed * 100) : null;
+    return `<section class="d-card do-summary"><header><h2>Casualty coverage</h2>${action('OPEN BOARD', 'cas', 'CASUALTIES')}</header>
+      <div class="do-summary-body"><strong>${pct === null ? '—' : pct + '%'}</strong><span>${inside} of ${timed} casualties projected inside deadline on present reach</span>
+      <dl><div><dt>Open casualties</dt><dd>${L.open.length}</dd></div><div><dt>Stale readings</dt><dd class="${old.length ? 'warn' : ''}">${old.length}</dd></div></dl>
+      ${old.length ? `<p class="warn">${old.length} reading${old.length === 1 ? ' is' : 's are'} more than two minutes old. Review before relying on the telemetry.</p>` : '<p>No stale telemetry exception is open.</p>'}</div></section>`;
   }
 
-  function timedMatches(r) {
-    const c = r.c;
-    return D().matches(D().casId(c), c.id, c.cls, c.role, c.unitName,
-      c.injury, c.needs, c.assignedTo, r.site && r.site.b.name,
-      r.unreachable ? 'unreachable no asset breach' : '',
-      r.slack !== null && r.slack < 0 ? 'late negative slack' : 'inside deadline',
-      c.assignedTo != null ? 'tasked' : 'queued',
-      r.left, r.eta, r.slack);
+  function networkCard(L, stock) {
+    return `<section class="d-card do-summary"><header><h2>Lift and forward supply</h2></header>
+      <div class="do-summary-body"><strong>${L.lift.ready}/${L.lift.all}</strong><span>airframes ready · ${L.lift.air} airborne</span>
+      <dl><div><dt>Whole blood</dt><dd>${stock.blood}U</dd></div><div><dt>Plasma</dt><dd>${stock.plasma}U</dd></div>
+      <div><dt>Without blood / plasma</dt><dd class="${stock.constrained ? 'warn' : ''}">${stock.constrained} launch point${stock.constrained === 1 ? '' : 's'}</dd></div></dl>
+      <div class="do-inline-actions">${action('SUPPLY', 'cas', 'SUPPLY')}${action('FLEET', 'cas', 'FLEET')}</div></div></section>`;
   }
 
-  /* ---- the escalation card ---------------------------------------------- */
-  function escCard(L) {
-    const esc = D().esc;
-    if (!L.awaiting) {
-      return `<section class="d-card"><header><h2>Escalation</h2>
-        <span class="d-meta">NONE OPEN</span></header>
-        <div class="body"><span style="font-size:12.5px;color:var(--d-t4)">Nothing is waiting on you. Everything inside standing authority has gone.</span></div></section>`;
-    }
-    return `<section class="d-card esc"><header>
-        <h2>ESCALATION &middot; AWAITING YOU</h2>
-        <span class="d-meta" style="color:oklch(0.85 0.05 75)">${L.awaiting} open</span></header>
-      <div class="body">
-        <span style="font-size:12.5px;line-height:1.55;color:oklch(0.9 0.006 250)">${
-          L.awaiting === 1 ? 'One decision is not delegable under standing authority.'
-                           : L.awaiting + ' decisions are not delegable under standing authority.'}</span>
-        <button class="d-btn" type="button" data-page="dec" style="align-self:flex-start">OPEN THE DECISION &rarr;</button>
-        <span class="d-note">Failure to decide is recorded with its cost.</span>
-      </div></section>`;
+  function activityCard(L, flying) {
+    return `<section class="d-card do-summary"><header><h2>Machine action</h2>${action('DECISION FEED', 'feed')}</header>
+      <div class="do-summary-body"><strong>${flying.length}</strong><span>active outbound tasking${flying.length === 1 ? '' : 's'}</span>
+      <div class="do-activity">${flying.slice(0, 3).map(({ d, actor }) => `<div><b>${D().esc(d.tail || ('AC-' + d.id))}</b>
+        <span>${d.target != null ? D().esc(D().casId({id:d.target})) : 'target not recorded'} · ${D().esc(String(actor).toLowerCase())}</span></div>`).join('') ||
+        '<p>No aircraft is outbound. The machine has no active tasking to report.</p>'}</div></div></section>`;
   }
 
-  /* ---- live theater, a doorway to the map ------------------------------- */
-  function theaterCard(L) {
-    const esc = D().esc;
-    return `<section class="d-card"><header>
-        <h2>Live theater</h2><span class="d-meta">${esc(L.scn.gridZone || '')}</span></header>
-      <div id="dTheaterSlot" style="height:214px;position:relative;background:oklch(0.14 0.012 250);cursor:pointer" data-page="map">
-        <div style="position:absolute;inset:0;background-image:linear-gradient(oklch(0.22 0.01 250) 1px,transparent 1px),linear-gradient(90deg,oklch(0.22 0.01 250) 1px,transparent 1px);background-size:34px 34px"></div>
-        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center">
-          <div style="font:600 10px var(--d-mono);letter-spacing:.1em;color:var(--d-t6)">OPEN THEATER MAP</div>
-          <div style="font:400 10px var(--d-mono);color:var(--d-t7);margin-top:6px">${L.lift.air} airborne &middot; ${L.open.length} open</div>
-        </div>
-      </div></section>`;
+  function route(label, desc, page) {
+    return `<button type="button" data-page="${page}" class="do-route"><span><b>${label}</b><small>${desc}</small></span><i aria-hidden="true">→</i></button>`;
   }
 })();

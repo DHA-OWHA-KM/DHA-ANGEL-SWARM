@@ -4,18 +4,16 @@
 
 `UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY`
 
-*This is the Markdown rendering of [`START-HERE.txt`](START-HERE.txt). The content is
-unchanged; only the folder names have been updated to the repository layout — what the
-.txt calls `documents/` is `Documentation/`, and `deck/` is `Documentation/deck/` — and
-the document references have been made into working links. The .txt is preserved
-unchanged.*
+*This is the Markdown rendering of [`START-HERE.txt`](START-HERE.txt), with repository
+paths and working document links.*
 
 ---
 
 ## WHAT IS IN THIS FOLDER
 
-This package arrives as THREE zips. Unzip all three into the same place. They are
-thirds of one folder and none runs on its own.
+Whether obtained as a Git clone, a repository ZIP, or the historical three-part
+distribution, keep the folder intact. The platform launcher is not a single-file
+application: it requires the adjacent `app/` directory.
 
 | Path | What it is |
 | --- | --- |
@@ -27,15 +25,43 @@ thirds of one folder and none runs on its own.
 | `src/`, `train/` | the launcher source and the training code |
 | [`README.md`](README.md) | the repository front page: what this is, the result with its conditions, WHERE THIS SITS IN WHAT THE DEPARTMENT HAS ALREADY BOUGHT, how to run it, and what is deliberately not claimed |
 | `.gitignore` | the ignore rules for publishing this as a repository. See [`Documentation/GITHUB-PREP.md`](Documentation/GITHUB-PREP.md) for the six decisions left open — the licence above all. |
-| `START-HERE.txt` | this file |
-| `VERSION.txt`, `CHECKSUMS.txt` | what you are holding, and the digests for parts 2 and 3 |
+| `START-HERE.txt` | the plain-text counterpart of this guide |
+| `VERSION.txt`, `CHECKSUMS.txt` | what you are holding, and distribution digests |
 
 The films are also carried at the repository root in [`Videos/`](Videos/) as standalone
 HQ copies; the application itself loads them from `app/video/` by relative path.
 
 ---
 
-## NEW IN 1.0 — WHERE THIS SITS
+
+## NEW IN 1.1 — RESUPPLY TRACKING
+
+Resupply Tracking sits directly below Sensor & Model in the left rail. It is a
+standalone synthetic capability demonstration with immutable tracker-only
+commitment fixtures: names, times, routes, payloads, phases, exceptions, and the
+margin-sorted queue are not projections of engine tasking, scenarios, casualties,
+host playback, run snapshots, fleet history, or Arm B ledgers. Its own deterministic
+clock supports seek, play/pause, a tracker-owned normal/8× playback toggle labelled
+`SPEED ×8` and `SPEED ×1`, and reroute controls, including nominal, diverted,
+aborted, lost, deadline-miss, cold-chain-failure and delivered states. The speed
+toggle changes only the tracker's deterministic clock, never host playback or
+engine state. It calls no model, changes no engine state or outcome, and includes a Canvas 2D schematic plus
+an Arm B scheduled-push comparison state. The unchanged reference result remains
+**23 / 34 / 35 survivable deaths on 20 / 38 / 0 sorties** at seed 42, JOA CORAL,
+deployed; it is not produced by this tracker.
+
+All tracker names, times, routes and payloads are synthetic demonstration fixtures
+and cannot be treated as operational output. `Send to medic's ATAK` opens an
+informational, future-only explanation. No BATDOK-J, ATAK, TAK Server, Marti REST
+or outbound CoT integration is implemented; the modal emits nothing and the page
+makes no request.
+
+`Send to medic's ATAK` opens an explanation only. No BATDOK-J, ATAK, TAK Server, Marti
+REST or outbound CoT integration is implemented, and pressing it transmits nothing.
+**CoT is ingested, not emitted.** The tracker adds no network request and has no
+dependency on enterprise reachback to display state already present.
+
+## WHERE THIS SITS
 
 The one question this package could not previously answer is the first one a program
 office asks: where does this belong among the things we already fund? It is answered
@@ -57,7 +83,6 @@ a new section 6a showing that none of those four widens the accreditation bounda
 today, and in the rehearsal pack as a spoken beat with five prepared answers.
 
 ---
-
 ## HOW TO RUN IT
 
 | Platform | How |
@@ -115,7 +140,7 @@ go build -ldflags="-s -w" -o cotsim ./src/cmd/cotsim
 
 ## THE FIRST FIVE MINUTES
 
-The application opens on COMMAND OVERVIEW, as a COMMANDER. Thirteen destinations run
+The application opens on COMMAND OVERVIEW, as a COMMANDER. Fourteen destinations run
 down the left rail:
 
 - Command Overview
@@ -124,6 +149,7 @@ down the left rail:
 - Decisions
 - Analyst Terminal
 - Sensor & Model
+- Resupply Tracking
 - Ops Center Wall
 - Evidence
 - War Game
@@ -144,7 +170,7 @@ mid-run, without a reload.
 | 2 | Theater Map | the same battle, at four scales |
 | 3 | Evidence | where the deaths that remain came from |
 | 4 | Ops Center Wall | the result as a board, readable across a room |
-| 5 | Settings → Engine self-test | 118 assertions against this engine, in your own browser, offline |
+| 5 | Settings → Engine self-test | Offline checks against the shipped engine and host UI, including determinism, common random numbers, all scenarios, War Game worker behavior and RESUPPLY TRACKING. The live result measured 9 September 2026 is 196 total, 195 pass and 1 fail; RESUPPLY TRACKING is 12/12. The sole failure is the EUCOM_FJORD nominal seed-42 directional assertion (16 > 15). |
 
 If you would rather be walked through it, Settings → Display → Guided walkthrough puts a
 bar at the foot of the window that steps through exactly those five with one line about
@@ -178,12 +204,24 @@ change with it.
 
 AND THE COMPARISON FOLLOWS YOU. An ANGEL SWARM figure never appears in this application
 without the CURRENT — TRIAGE & PROXIMITY figure beside it, at the same size — under
-twelve screen titles and on the navigation rail, whatever destination is open. Before
+thirteen screen titles and on the navigation rail, whatever destination is open. Before
 the comparison is readable it says so in words rather than printing a number it cannot
 stand behind.
 
 Press Ctrl-K (Cmd-K on a Mac) at any time to search everything: every view, every
 action, every casualty, and the doctrine library. Press ? for the keyboard shortcuts.
+
+---
+
+## WAR GAME — REPRODUCIBLE FORCE-DESIGN SWEEPS
+
+War Game opens against the operation/scenario currently selected in Settings or on the map and prints that scenario's force assumptions. Choose one of five levers — **fleet size, launch points, datalink outage, triage error, responder qualification/mix** (the qualified receiver on scene, not rank/MOS). Under the lever, include at least two of the displayed scenario-derived values; those cards are the actual settings the worker will test. Then run 20, 30 or 40 paired battles per included setting. Seeds are deterministic and contiguous from 1000, so 20 battles use 1000–1019, 30 use 1000–1029 and 40 use 1000–1039.
+
+Choose the variability mode before running: **nominal** uses published platform timing; **observed-flight variability** applies the shipped observed-flight profile. At every lever setting both arms fight the same altered world under common random numbers. Triage error affects only **CURRENT — TRIAGE & PROXIMITY**, because ANGEL SWARM does not consume triage category. Other declared method differences are not hidden: ANGEL includes telementoring and ANGEL-only in-flight abort/hold logic.
+
+The progress count is completed paired battles. Successful completion terminates the worker pool and produces the full study. Cancel, changing the scenario or variability during a run, worker load or handshake timeout, protocol mismatch, and worker/runtime failure all terminate the workers and retain no partial findings. Those results retain the scenario, lever settings, seed range, variability and control mode beside the paired gap, 95% confidence interval and better/tied/worse record. A later scenario or variability change invalidates the old result and regenerates the labels.
+
+**Reproduce a sweep:** select the displayed operation/scenario; select the displayed nominal or observed-flight mode; choose the displayed lever, include the settings listed in the completed provenance, choose the 20/30/40 battle count, and press **Run the sweep**. Matching those bound inputs and the seed range reproduces the same deterministic paired study.
 
 ---
 
@@ -237,14 +275,15 @@ do hold.
 
 ## HOW YOU KNOW IT WORKS
 
-Settings → "Engine self-test" opens `selftest.html`, a page that runs 118 assertions
-directly against the shipped engine — `js/sim.js`, `js/optimizer.js`, `js/mc.worker.js`
-and the adapter — in your own browser, offline, with nothing mocked. It asserts the
+Settings → "Engine self-test" opens `selftest.html`, which checks the shipped engine —
+`js/sim.js`, `js/optimizer.js`, `js/mc.worker.js` — and the adapter in your own
+browser, offline, with nothing mocked. Its coverage includes the
 reference result quoted above, determinism, the common random numbers that make the
 three arms one battle, the conservation invariants, the deadline arithmetic, the SHA-256
-audit chain and its tamper-evidence, and every one of the seven theatres. A red row
-would be a real disagreement between what this engine does and what this package claims
-it does. There are none.
+audit chain and its tamper-evidence, every scenario, the War Game path and Resupply
+Tracking. The live result measured 9 September 2026 is **196 total, 195 pass and 1
+fail**; **Resupply Tracking is 12/12**. The sole failure is the **EUCOM_FJORD nominal
+seed-42 directional assertion (16 > 15)**. A red row is a real disagreement.
 
 ---
 
@@ -261,7 +300,7 @@ Markdown and Word:
 | [ANGEL-SWARM-DHA-alignment-onepager](Documentation/ANGEL-SWARM-DHA-alignment-onepager.md) | the same on one page |
 | [ANGEL-SWARM-IL5-deployment-cost-impact-analysis](Documentation/ANGEL-SWARM-IL5-deployment-cost-impact-analysis.md) | what an IL5 MVP fielding would cost, and how long it would take |
 | [ANGEL-SWARM-ARCHITECTURE](Documentation/ANGEL-SWARM-ARCHITECTURE.md) | how it is built, what was rejected, and every trap hit |
-| [ANGEL-SWARM-WIN-PROBABILITY-v5.9](Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md) | 1,400 paired battles across all seven theatres, measured on this engine: seven wins from seven, adverse in six battles, never by more than one. Reproduce it with [`Documentation/verification/winprob.mjs`](Documentation/verification/winprob.mjs) |
+| [ANGEL-SWARM-WIN-PROBABILITY-v5.9](Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md) | 1,400 paired battles across all seven theatres, measured on this engine: seven wins from seven, adverse in five battles, never by more than one. Reproduce it with [`Documentation/verification/winprob.mjs`](Documentation/verification/winprob.mjs) |
 | [ANGEL-SWARM-SECURITY-AND-ATO](Documentation/ANGEL-SWARM-SECURITY-AND-ATO.md) | the STRIDE threat model, what is measured versus what an operational fielding would still require, and the RMF pathway to an IL5 ATO |
 | [ANGEL-SWARM-SBOM](Documentation/ANGEL-SWARM-SBOM.md) | the software bill of materials, CycloneDX 1.6, every dependency hashed off disk |
 | [ANGEL-SWARM-DOCTRINAL-TERMINOLOGY](Documentation/ANGEL-SWARM-DOCTRINAL-TERMINOLOGY.md) | what the current method is actually called in doctrine, and the search that established that no publication names the assignment rule |
@@ -320,13 +359,14 @@ the standalone analyst console (`app/console.html`). It answers in verbatim quot
 a similarity score and refuses when nothing in the corpus matches. It cannot
 hallucinate, because it can only return text that is already there.
 
-THERE IS NO LANGUAGE MODEL. None is shipped and none is loaded. NOTHING ON ANY SCREEN IS
-GENERATED. Ask ANGEL says so in its own header, and that is the stronger position rather
-than the weaker one: a template over the run record cannot hallucinate a casualty count,
-and a verbatim quote cannot invent doctrine. Ask ANGEL answers questions about the run
-from the run's own record, badged RUN RECORD · COMPUTED, NOT GENERATED; it quotes
-doctrine verbatim; and where it can do neither it says so and lists what it can be asked
-instead.
+THE ZERO-NETWORK BASELINE SHIPS NO LANGUAGE-MODEL WEIGHTS, LOADS NO LANGUAGE MODEL AND
+GENERATES NOTHING ON SCREEN. Ask ANGEL says so in its own header, and that is the stronger
+position rather than the weaker one: a template over the run record cannot hallucinate a
+casualty count, and a verbatim quote cannot invent doctrine. Ask ANGEL answers questions
+about the run from the run's own record, badged RUN RECORD · COMPUTED, NOT GENERATED; it
+quotes doctrine verbatim; and where it can do neither it says so and lists what it can be
+asked instead. A separate, optional Qwen GGUF download can enable clearly marked generated
+prose in the Mission brief pane; it is not shipped and is not part of this offline baseline.
 
 Plus: a DuckDB analytical engine you can type arbitrary SQL into (Analyst Terminal → SQL
 CONSOLE), four map renderers, a casualty-flow Sankey, a five-lever paired Monte Carlo on
@@ -359,7 +399,7 @@ one mean something. Anything unmarked is the tasking optimiser, arithmetic over 
 run's own record, fixed doctrine, published physiology, or a human decision. None of
 those is machine learning and none of them pretends to be.
 
-In the left navigation rail, TWO destinations of the thirteen carry a sparkle: Sensor &
+In the left navigation rail, TWO destinations of the fourteen carry a sparkle: Sensor &
 Model, and Ask ANGEL. Nothing else does.
 
 ONE THING WE WOULD RATHER TELL YOU THAN HAVE YOU FIND. On two surfaces — Analyst
@@ -409,13 +449,19 @@ path, and you can run it.
 WHAT IT SPEAKS. Cursor on Target over UDP — the message format TAK already carries
 across tactical networks. The medical values ride in a `<detail>` extension, which is
 CoT's own extension mechanism used as intended. It is NOT a ratified medical CoT schema
-and nothing here claims otherwise. A wearable that already reaches ATAK or BATDOK
-reaches this with nothing new on the soldier.
+and nothing here claims otherwise.
+
+DEVICE NAMES, PRECISELY. Sempulse Halo (example), CipherOx CRI M1 (reference).
+BATDOK-J is separate, and is only a plausible producer/interface for a translated feed.
+ANGEL SWARM has not tested an integration with any real Sempulse
+Halo, CipherOx CRI M1 or BATDOK-J. Nothing here claims compatibility, military fielding,
+FDA status or a completed integration.
 
 WHAT cotsim IS NOT. It is not a device driver, and it is not a claim that any monitor
 speaks this dialect today. It exists so the ingest path is exercised by a real socket
-from outside the program rather than by the simulation reading its own memory. Point a
-real feed at the same port and the application cannot tell the difference.
+from outside the program rather than by the simulation reading its own memory. A real
+feed would first have to produce the documented prototype dialect; that translation and
+integration have not been tested with the named devices.
 
 THE SECURITY POSTURE, PLAINLY. The listener is off unless `-cot` is passed. When enabled
 it binds 127.0.0.1 unless you ALSO pass `-cot-external` — two flags, not one, to put a
@@ -439,8 +485,8 @@ they are not extracts, and operational use requires the actual publication.
 The Monte Carlo reports the confidence interval AND the number of replications where the
 system did worse rather than better, because that number is the one worth knowing.
 Across 1,400 paired battles in all seven theatres, ANGEL SWARM produced one more death
-in six of them — 0.43%, never worse by more than one — and four of those six are in
-EUCOM FJORD, which still wins on its interval. Seed 42 in FJORD is one of the six, and
+in five of them — 0.36%, never worse by more than one — and three of those five are in
+EUCOM FJORD, which still wins on its interval. Seed 42 in FJORD is one of the five, and
 it is left in the scenario list rather than hidden.
 
 The interface is a demonstration, not a fielded system: there is no authentication, no
@@ -449,3 +495,26 @@ to.
 
 Every number on every screen comes from the simulation you are watching. The decision
 log is hash-chained and exportable.
+
+## WHERE THIS SITS
+
+The one question this package could not previously answer is the first one a program
+office asks: where does this belong among the things we already fund? It is answered
+now, from primary sources researched on 5 September and recorded with a URL and a date
+for every claim in
+[`Documentation/COMPLEMENT-LANDSCAPE-sources.md`](Documentation/COMPLEMENT-LANDSCAPE-sources.md).
+
+The short form. In May 2026 the 44th Medical Brigade completed an operational
+validation of autonomous Class VIII aerial resupply with Soaring M25 aircraft. THE
+AIRCRAFT WERE AUTONOMOUS. THE TASKING WAS NOT. The Department has bought every layer
+around the decision this system makes — the airframes below it, the triage sensing
+beside it, the Maven Smart System above it — and has bought none of that decision. This
+is the missing tasking rule for aircraft the Services already own. It supplements; it
+does not supplant.
+
+The full argument is in [README.md](README.md), in the use case, in the DHA alignment
+paper, in the architecture record as four concrete interfaces, in the security annex as
+a new section 6a showing that none of those four widens the accreditation boundary
+today, and in the rehearsal pack as a spoken beat with five prepared answers.
+
+---

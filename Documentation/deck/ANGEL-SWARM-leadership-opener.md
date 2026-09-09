@@ -19,8 +19,8 @@ Three slides, cut for a 90-second opening before a live demonstration. Source: [
 
 | | Claim | Detail |
 |---|---|---|
-| **01 · SENSE** | The monitor already on him | Compensatory reserve, straight off a wearable |
-| | The feed the force carries | Cursor on Target, across TAK and ATAK |
+| **01 · SENSE** | Prospective monitor input | Sempulse Halo (example); CipherOx CRI M1 (reference) |
+| | A plausible producer/interface | BATDOK-J, separate from either monitor; Cursor on Target over TAK / ATAK |
 | | No reachback required | It decides on the tactical tier |
 | **02 · PREDICT** *(AI)* | Minutes, not a category | When his body can no longer compensate |
 | | A trained network, shipped | CRI-Net — 104,162 parameters, in the box |
@@ -33,6 +33,8 @@ Three slides, cut for a 90-second opening before a live demonstration. Source: [
 | | On this laptop, offline | No install, no network, no account |
 
 *The `AI` badge appears against **02 · PREDICT** only. It is the single learned-weights step in the loop, and the deck marks it as such — the same provenance rule the application enforces on screen.*
+
+*Telemetry remains receive-only and off by default, using a prototype CoT `<detail>` dialect rather than a ratified medical schema. ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1, or BATDOK-J. No compatibility, military fielding, regulatory status or completed integration is claimed.*
 
 ---
 
@@ -77,7 +79,7 @@ Sources on the slide: METASTART · CRASH-2 · *J Trauma Acute Care Surg* 2026 ·
 
 | Section | Claim | Detail |
 |---|---|---|
-| **ACQUISITION** | 125 devices, nothing dropped | 62 messages a second, over a real socket |
+| **ACQUISITION** | 125 synthetic emitters, nothing dropped | 62 messages a second, over a real socket |
 | | Cut the feed on camera | Link goes down; tasking runs on last-known state |
 | **THE MODEL** *(AI)* | Error 0.069 against 0.159 | CRI-Net versus heart rate alone, held out by person |
 | | It refuses when unsure | 0.063 error when it acts, 0.115 when it will not |

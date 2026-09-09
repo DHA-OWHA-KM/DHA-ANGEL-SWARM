@@ -91,11 +91,11 @@ Both cuts are silent H.264 today. Confirmed by inspection: single video stream, 
 
 There is a lot of self-verification already built in. Start by running it rather than by writing new tests.
 
-- [ ] **The engine self-test.** Serve the app and open `/selftest.html` — 118 assertions against the shipped engine, offline, in under a second. Last recorded run: 118 passed, 0 failed. A red row is a real disagreement between what the engine does and what the package claims.
+- [ ] **The engine self-test.** Serve the app and open `/selftest.html` offline. Use its live summary rather than a copied total. The 9 September 2026 Windows-package run recorded 196 total checks: 195 passed and the EUCOM_FJORD nominal seed-42 directional assertion failed (16 > 15). A red row is a real disagreement between what the engine does and what the package claims.
 - [ ] **The seven-theatre table.** From the repository root:
       `node Documentation/verification/winprob.mjs PACOM_CORAL 200` and the other six. It should reproduce [`ANGEL-SWARM-WIN-PROBABILITY-v5.9.md`](Documentation/ANGEL-SWARM-WIN-PROBABILITY-v5.9.md) exactly.
-- [ ] **The network claim.** Pull the cable, spin the globe, walk all thirteen destinations and all four map scales. Nothing should be fetched.
-- [ ] **The ingest path.** `-cot :6969` plus `cotsim -devices 125 -rate 0.05`, then kill the emitter and watch LINK STALE → LINK DOWN while tasking continues on last-known state. That behaviour is the whole concept.
+- [ ] **The network claim.** Pull the cable, spin the globe, walk all fourteen destinations and all four map scales. Nothing should be fetched.
+- [ ] **The ingest path.** `-cot :6969` plus `cotsim -devices 125 -rate 0.05`, then kill the emitter and watch LINK STALE → LINK DOWN while tasking continues on last-known state. This tests only the receive-only, off-by-default prototype CoT path and its non-ratified medical extension. Sempulse Halo (example), CipherOx CRI M1 (reference). BATDOK-J is a separate plausible producer/interface. ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1 or BATDOK-J, and claims no compatibility, military fielding, FDA status or completed integration. That behaviour is the whole concept.
 - [ ] **All four platforms.** The binaries are tracked now, so test the actual download path: Download ZIP → unzip → `chmod +x` → run. Windows, macOS Apple Silicon, macOS Intel, Linux.
 - [ ] **The known open defect.** 22 console errors are recorded in [`Documentation/verification/security-and-sbom/verification.md`](Documentation/verification/security-and-sbom/verification.md) — unsubstituted template expressions painted into SVG attributes. Confirm whether they still occur in v6.5 and whether they are visible on screen.
 - [ ] **The one we would rather find ourselves.** R-11: the doctrine similarity score on Analyst Terminal → DOCTRINE and in Ask ANGEL's doctrine answers is term overlap over eleven inline passages, while the badge above it names the sentence encoder. Confirm the wording of the fix before a judge finds the label.
@@ -117,7 +117,7 @@ Reading order, shortest path to competence:
 5. [ ] [`Documentation/ANGEL-SWARM-DHA-alignment-onepager.md`](Documentation/ANGEL-SWARM-DHA-alignment-onepager.md) — the prototype against what DHA leadership asked for, on one page
 6. [ ] [`Documentation/ANGEL-SWARM-REHEARSAL.md`](Documentation/ANGEL-SWARM-REHEARSAL.md) — the hostile questions and the prepared answers
 
-The three numbers everyone on the team should be able to say without looking: **23 against 34** at seed 42 in PACOM CORAL; **seven theatres won from seven** over 1,400 paired battles; **worse in six of 1,400, never by more than one**. Quote the interval, not the seed.
+The three numbers everyone on the team should be able to say without looking: **23 against 34** at seed 42 in PACOM CORAL; **seven theatres won from seven** over 1,400 paired battles; **worse in five of 1,400, never by more than one**. Quote the interval, not the seed.
 
 ### 4.2 Assign individuals per section — **OPEN**
 

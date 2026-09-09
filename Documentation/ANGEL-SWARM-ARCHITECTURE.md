@@ -1,6 +1,6 @@
 # ANGEL SWARM — architecture and decision record
 
-**Current as of v1.0, 8 September 2026.** The body of this document is the
+**Current as of v1.1, 9 September 2026.** The body of this document is the
 v3.1 decision record — how the local-deployment build and its telemetry
 ingest tier were built, what was measured, and every trap that was hit. That
 record is still accurate about the things it describes and is deliberately
@@ -14,10 +14,10 @@ wherever the two disagree.**
 | | |
 |---|---|
 | **Package** | **Three** archives, not two, split only by a 30 MB delivery limit. The checksums for parts 2 and 3 travel inside part 1 at `CHECKSUMS.txt` |
-| **What is presented** | The **design application**, `app/index.html` — thirteen destinations, four map scales. The standalone analyst console `app/console.html` still ships, still works, and is what most of the sections below describe. Both are served from the same folder |
+| **What is presented** | The **design application**, `app/index.html` — fourteen destinations, four map scales. The standalone analyst console `app/console.html` still ships, still works, and is what most of the sections below describe. Both are served from the same folder |
 | **Arms** | **Three**, not two: ANGEL SWARM **23**, CURRENT — TRIAGE & PROXIMITY **34**, NO FORWARD DELIVERY **35**, on **20 / 38 / 0** sorties. Seed 42, JOA CORAL, 125 casualties, 47 of them in the survivable cohort |
 | **Scenarios** | **All seven are selectable**, grouped by combatant command — PACOM CORAL, BASALT, MARINER, TIMBER; EUCOM GRANITE, AMBER, FJORD. They were previously pinned to CORAL with the rest shown but inert |
-| **Proof** | `app/selftest.html`, reached from Settings → Engine self-test: **118 assertions against the shipped engine**, in the browser, offline, nothing mocked — **118 pass, 0 fail**, in well under a second. Re-run against the v6.4 build for this revision |
+| **Proof** | `app/selftest.html`, reached from Settings → Engine self-test: the live result measured 9 September 2026 is **196 total checks covering engine and host UI behavior; 195 pass and 1 fail**, in the browser, offline, nothing mocked. **RESUPPLY TRACKING is 12/12 passing**; the sole failure is the **EUCOM_FJORD nominal seed-42 directional assertion (16 > 15)** |
 | **Replication** | The v3.1 Monte Carlo figures below are superseded by `ANGEL-SWARM-WIN-PROBABILITY-v5.9.md` — 200 paired replications in each of seven theatres, **1,400 in total**. See §0.1 |
 | **Interoperability** | `app/js/dataproducts.js` — a FHIR-shaped bundle (**4,151 resources**), the decision record with full 64-hex SHA-256 digests, the run result as JSON and CSV, five JSON Schemas validated under ajv 8 draft 2020-12 offline, and `datacatalog.json` |
 | **Security** | `ANGEL-SWARM-SECURITY-AND-ATO.md` and a CycloneDX 1.6 SBOM with every hash measured off disk |
@@ -25,6 +25,7 @@ wherever the two disagree.**
 | **Fourth map scale** | A **canvas-2D orthographic globe** above the theatre. It is **not** deck.gl and holds **no GPU context**. See §0.3 |
 | **Two engines, now synchronised** | The design shell and the map frame each run their own instance of the simulation, and nothing joined them until v6.4. See §0.4 — it explains a whole class of behaviour and its absence explained a whole class of defect |
 | **Subsumption interfaces** | The four concrete paths by which this enters an architecture that already exists — MSS third-party application via Open DAGIR OTA, a medical-logistics lane in an Agent Network-style framework, a tasking service behind a ground control station over STANAG 4586, and a FHIR-shaped export into the DHA clinical lane — with the boundary on each. **CoT is ingest-only; 4586 is a target interface, not an implemented one.** New in v6.5. See §0.5 |
+| **Resupply Tracking** | A fourteenth destination and standalone synthetic capability demonstration with immutable tracker-only fixtures and controls. It is not a projection of engine state, run snapshots, scenarios, casualties, fleet history or Arm B ledgers. See §0.6 |
 
 ### 0.1 The v3.1 replication figures are superseded
 
@@ -34,7 +35,7 @@ They have been re-measured on the shipped engine in the exact configuration
 table is the one to quote**:
 
 > **ANGEL SWARM wins all seven theatres. Every 95% interval excludes zero.
-> Across 1,400 paired battles it produced more dead in 6 — 0.43% — and never
+> Across 1,400 paired battles it produced more dead in 5 — 0.36% — and never
 > by more than one.**
 
 PACOM CORAL is **−4.905** (95% interval −5.215 … −4.595), worse in **0 of
@@ -213,15 +214,43 @@ facts about this build, not caveats about ambition.
   packet, and a datagram over `cotMaxDatagram` (8192) is dropped unread. The
   system *consumes* the Cursor on Target feed a joint operations area already
   produces — it adds a track consumer, not a new interface. `cmd/cotsim` does
-  emit CoT, but it is a device simulator standing in for fielded monitors so
-  the ingest path is exercised by a real socket from outside the program; it is
-  not part of the application and not a device driver. An emit path is the
-  obvious next step and is **not claimed today**.
+  emit CoT, but it is a device simulator standing in for a hypothetical
+  monitor feed so the ingest path is exercised by a real socket from outside
+  the program; it is not part of the application and not a device driver. An
+  emit path is the obvious next step and is **not claimed today**.
+- **The named edge systems have distinct roles, not an integration.**
+  **Sempulse Halo (example)** is a wearable source; **CipherOx CRI M1
+  (reference)** anchors the compensatory-reserve concept; **BATDOK-J** is the
+  plausible producer/interface. **ANGEL SWARM has not tested an integration
+  with any real Sempulse Halo, CipherOx CRI M1, or BATDOK-J.** No compatibility,
+  operational use, or completed integration is claimed, and the medical detail
+  extension exercised here is not a ratified CoT schema.
 - **The exported health resources are FHIR-shaped, not conformance-tested.**
   Every exported resource carries that tag in its own `meta.tag`. The word
   "compliant" is not used in the build or in this record.
 - **STANAG 4586 is not implemented.** It is named as the correct target
   interface and nothing more.
+
+
+### 0.6 Resupply Tracking is standalone synthetic demonstration
+
+Resupply Tracking owns immutable synthetic demo commitments and its own deterministic
+clock. Its seek, play/pause, tracker-owned normal/8× playback toggle
+(`SPEED ×8` / `SPEED ×1`), reroute and exception controls drive
+tracker-only fixtures: nominal phases plus diverted, aborted, lost, deadline-miss,
+cold-chain-failure and delivered states. Names, times, routes and payloads are
+synthetic tracker fixtures and cannot be treated as operational output. The
+margin-sorted queue and Arm B scheduled-push comparison state are also tracker-owned.
+Nothing is read from or projected over engine tasking, scenarios, casualties, host
+playback, run snapshots, as-of fleet history or Arm B ledgers, and no model runs on
+this path. The speed toggle changes only the tracker's deterministic clock, never
+host playback or engine state. The tracker does not modify engine state or outcomes.
+
+The destination's schematic is Canvas 2D and local. It creates no deck.gl instance,
+adds no library, has no network interface and makes no request. `Send to medic's ATAK`
+opens an informational, future-only modal; it emits nothing. No BATDOK-J, ATAK, TAK
+Server, Marti REST or outbound CoT integration exists. **CoT remains ingest-only** for
+the separate optional telemetry path.
 
 ---
 
@@ -335,14 +364,18 @@ archive when reachback exists. They are layers, not alternatives.
   `/telemetry/stream`, both behind the same loopback check as everything
   else. Constants: `cotMaxDatagram` 8192, `hubBuffer` 256, `subBuffer` 64.
 - `src/cmd/cotsim` — a device emitter shipped for all four platforms. It
-  stands in for fielded monitors so the ingest path is exercised by a real
-  socket from outside the program. It is **not** a device driver and the
-  medical detail extension it emits is **not** a ratified CoT schema; both
+  stands in for a hypothetical monitor feed so the ingest path is exercised
+  by a real socket from outside the program. It is **not** a device driver and
+  the medical detail extension it emits is **not** a ratified CoT schema; both
   are stated in the source and in START-HERE.txt.
 - `app/js/telemetry.js` — device registry, message rate, and a link state of
   **LIVE / STALE / DOWN** (`STALE_MS` 6000, `DOWN_MS` 15000). Renders an
   ingest chip into the toolbar and an ingest card into the SENSOR pane.
   Exposes `TELEMETRY.readingFor(id)`, which returns `null` past `DOWN_MS`.
+- `app/js/resupply-track.js` — standalone synthetic resupply-tracking fixtures,
+  deterministic clock, route phase ladder and explicit no-transmission ATAK modal.
+- `app/angel-resupply-track.js` — shell adapter that mounts the tracker-only
+  demonstration; it adds no engine or network boundary.
 - The seam is in `optimizer.js`: where a live reading exists for a casualty
   it supersedes the simulated one, writing the same `knownCrm` / `knownAt` /
   `knownQ` fields the tasking already read, so everything downstream is
@@ -361,8 +394,9 @@ seed 42, fair, PACOM CORAL, still **23 versus 34**.
 ## CRI-Net — the trained network
 
 1-D CNN reading 5 s of photoplethysmogram at 100 Hz, emitting compensatory
-reserve. Mirrors the operating principle of CipherOx CRM, FDA 510(k)
-K173929. Trained from scratch; `train/ppg_cri.py` ships.
+reserve. Uses **CipherOx CRI M1 as the reference device** for the
+compensatory-reserve concept; it is not that device and has not been tested
+with it. Trained from scratch; `train/ppg_cri.py` ships.
 
 - **104,162 parameters**, 419,797-byte ONNX, opset 13
 - 62,400 windows from 240 synthetic subjects, 14 epochs, CPU, 633 s

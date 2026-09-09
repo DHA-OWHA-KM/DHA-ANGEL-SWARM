@@ -121,6 +121,7 @@
 
     /* ---- tabs --------------------------------------------------------- */
     function tab(grp, def) { return TABS[grp] || def; }
+    function setTab(grp, key) { TABS[grp] = key; }
     function seg(grp, def, items) {
       const on = tab(grp, def);
       return '<div class="d-seg">' + items.map(it =>
@@ -211,7 +212,7 @@
       return ((arm && arm.queue) || []).filter(p => p.state === 'PENDING');
     }
 
-    return { esc, dock, release, slot, tab, seg, act, pad, lpad, call, pay, payShort, sgn, droneOf,
+    return { esc, dock, release, slot, tab, setTab, seg, act, pad, lpad, call, pay, payShort, sgn, droneOf,
              zulu, shelf, link, pending, H };
   })();
 

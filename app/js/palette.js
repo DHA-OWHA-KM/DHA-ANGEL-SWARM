@@ -450,7 +450,9 @@
        device.js registers no key handler at all. */
     if ((ev.key === 'm' || ev.key === 'M') && hasView('SENSOR')) {
       ev._angelClaimed = true;
-      goView('SENSOR');
+      const shell = window.DSHELL;
+      if (shell && typeof shell.openView === 'function') shell.openView('SENSOR');
+      else goView('SENSOR');
     }
   }), true);
 
@@ -583,10 +585,33 @@
         sub: subEl ? subEl.textContent.trim() : '',
         hay: v,
         keys: k ? [k.textContent.trim()] : [],
-        run: () => goView(v)
+        run: () => {
+          const shell = window.DSHELL;
+          if (shell && typeof shell.openView === 'function') shell.openView(v);
+          else goView(v);
+        }
       });
     });
     return out;
+  }
+
+  /* The design shell folds legacy panes into operator-facing destinations.
+     Keep those destination names searchable as first-class commands while the
+     legacy view catalogue below continues to expose every owned subsection. */
+  function shellDestinationItems() {
+    const shell = window.DSHELL;
+    if (!shell || !Array.isArray(shell.NAV) || typeof shell.go !== 'function') return [];
+    return shell.NAV.map(n => ({
+      id: 'destination:' + n.k,
+      section: 'Go to',
+      icon: '›',
+      colour: n.k,
+      title: n.label,
+      sub: n.sec ? 'Open its existing ' + n.sec.toLowerCase() + ' section' : '',
+      hay: [n.k, n.page, n.sec].filter(Boolean).join(' '),
+      keys: [],
+      run: () => shell.go(n.k, n.sec)
+    }));
   }
 
   function actionItems() {
@@ -831,7 +856,8 @@
   }
 
   function catalogue() {
-    return [].concat(viewItems(), actionItems(), sqlItems(), doctrineItems(), recordItems());
+    return [].concat(shellDestinationItems(), viewItems(), actionItems(),
+                     sqlItems(), doctrineItems(), recordItems());
   }
 
   /* Items that are not in the catalogue because they only exist for a

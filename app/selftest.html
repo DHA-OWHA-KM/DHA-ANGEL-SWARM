@@ -142,7 +142,7 @@
 <script src="./js/mc.worker.js"></script>
 <script src="./js/map-layout-state.js"></script>
 <script src="./js/context-search-state.js"></script>
-<script src="./js/comparison-indicators.js"></script>
+<script src="./js/resupply-track.js"></script>
 
 <script type="module">
 window.onmessage = null;   /* mc.worker.js installs a worker handler; not wanted on a page */
@@ -729,6 +729,90 @@ test('the chain is append-only: every entry\'s prev is its predecessor\'s hash',
   eq(bad, 0, 'broken links');
 });
 
+group('PENDING DECISION WINDOWS',
+      'Human-authority proposals retain real interaction time without allowing changed routes to launch.');
+
+function decisionEngineFixture() {
+  const p = {
+    id:900001, state:'PENDING', droneId:1, leadId:11, tRaised:0, tWallRaised:0,
+    summary:'TEST-1 → CAS-11, CAS-12',
+    route:[{ casId:11, payloadKey:'BLOOD' }, { casId:12, payloadKey:'BLOOD' }]
+  };
+  return {
+    p,
+    arm: {
+      interactiveDecisionWindow:true, queue:[p],
+      drones:[{ id:1, state:'IDLE', baseIdx:0 }],
+      bases:[{ stock:{ BLOOD:2 } }],
+      casualties:[
+        { id:11, outcome:null, assignedTo:1 },
+        { id:12, outcome:null, assignedTo:1 }
+      ],
+      stats:{ expired:0 }, audit:[]
+    }
+  };
+}
+
+test('a changed leg invalidates the whole proposal instead of silently shortening its route', () => {
+  const f = decisionEngineFixture();
+  ok(proposalValidity(f.arm, f.p.id).ok, 'the complete fixture route was not initially feasible');
+  f.arm.casualties[1].outcome = 'SAVED';
+  const validity = proposalValidity(f.arm, f.p.id);
+  ok(!validity.ok && /original route is no longer feasible/i.test(validity.reason),
+     'a partially stale route remained approvable');
+});
+
+test('simulated expiry waits for 15 real seconds, then closes even on a paused frame', () => {
+  const f = decisionEngineFixture();
+  const realNow = Date.now;
+  try {
+    Date.now = () => 14999;
+    reapQueue(f.arm, 9);
+    eq(f.p.state, 'PENDING', 'the proposal expired inside its protected response window');
+    Date.now = () => 15000;
+    reapQueue(f.arm, 9);
+    eq(f.p.state, 'EXPIRED', 'the proposal remained pending after wall protection ended');
+    eq(f.arm.stats.expired, 1, 'wall-time expiry was not counted exactly once');
+    ok(f.arm.audit.some(e => e.action === 'EXPIRE' && e.meta.proposal === f.p.id),
+       'wall-time expiry did not write the system audit outcome');
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test('late approval rebuilds the real flight timeline instead of launching into the past', () => {
+  const realNow = Date.now;
+  try {
+    Date.now = () => 0;
+    const world = createWorld('PACOM_CORAL', 42);
+    const arm = createArm(world, 'LATE', 'ANGEL', 'fair');
+    arm.telementor = true;
+    arm.hitl = true;
+    arm.autoApproveAbove = 0.10;
+    arm.hvaWeight = 1.6;
+    arm.interactiveDecisionWindow = true;
+    const rng = makeRNG(127);
+    for (let t = 0; t <= 32; t += 0.25) stepArm(arm, world, t, 0.25, rng);
+    const p = arm.queue.find(q => q.state === 'PENDING' && q.route[0].eta < 32);
+    ok(p, 'the reference engine did not produce a protected late-approval fixture');
+    const d = arm.drones.find(x => x.id === p.droneId);
+    const fromX = d.x, fromY = d.y;
+    const deliveriesBefore = arm.deliveryLog.length;
+    ok(approveProposal(arm, world, p.id, 32, 'OPERATOR'),
+       'the still-feasible protected proposal could not be approved');
+    gt(d.tArrive, 32, 'late approval retained an arrival before authorization');
+    near(d.tArrive, 32 + nominalFlightMinutes(d, fromX, fromY, d.destX, d.destY), 1e-12,
+         'late approval did not rebuild travel time from authorization');
+    near(d.route[0].eta, d.tArrive, 1e-12,
+         'the recorded route ETA disagrees with the committed flight');
+    stepArm(arm, world, 32.25, 0.25, rng);
+    eq(arm.deliveryLog.length, deliveriesBefore,
+       'late approval caused an immediate delivery before the rebuilt arrival');
+  } finally {
+    Date.now = realNow;
+  }
+});
+
 /* -------------------------------------------------------------------------- */
 group('THE SEEKABLE SNAPSHOT',
       'snapshot(run, t) is a pure fold of the run\'s ledgers. It must never walk backwards.');
@@ -778,6 +862,298 @@ test('the same t always returns the same frame', () => {
 test('the datalink outage the scenario schedules is reported by the fold at the right minute', () => {
   eq([E.snapshot(BUILT, 92).commsDown, E.snapshot(BUILT, 60).commsDown].join('|'), 'true|false');
 });
+
+/* ------------------------------------------------------------ resupply track */
+group('RESUPPLY TRACK',
+      'A self-contained synthetic capability demonstration with its own deterministic clock and no engine or network path.');
+
+const RT = window.ResupplyTrack;
+
+test('the tracker module exposes the complete phase vocabulary', () =>
+  eq(RT.ALL_PHASES.join('|'), 'TASKED|RIGGING|LAUNCHED|IN TRANSIT|TERMINAL|DELIVERED|DIVERTED|ABORTED|LOST'));
+test('the default synthetic demonstration reproduces the reference values and always has multiple commitments', () => {
+  const data = RT.snapshot(268, { arm:'A', selected:'084' });
+  const m = data.mission;
+  eq([m.casualty, m.phase, m.tMinus, m.deadlineRemaining, m.margin].join('|'), 'CAS-084|IN TRANSIT|372|540|168');
+  eq([RT.duration(m.tMinus), RT.duration(m.deadlineRemaining), RT.duration(m.margin, true)].join('|'),
+     '00:06:12|00:09:00|+00:02:48');
+  eq(data.missions.length, 4);
+  ok(data.missions.every(x => x.mission && x.casualty && x.payload), 'synthetic commitment was incomplete');
+});
+test('all six nominal phases are reachable in monotonic order', () => {
+  const got = [0, 39, 88, 96, 580, 640].map(t => RT.snapshot(t, { arm:'A', selected:'084' }).mission.phase);
+  eq(got.join('|'), RT.NOMINAL.join('|'));
+  const rigging = RT.snapshot(87.999, { arm:'A', selected:'084' }).mission;
+  const launched = RT.snapshot(88, { arm:'A', selected:'084' }).mission;
+  const airborne = RT.snapshot(89, { arm:'A', selected:'084' }).mission;
+  eq([rigging.progress, rigging.position.x, rigging.position.y].join('|'), '0|74|236',
+     'rigging moved the aircraft away from its launch base');
+  eq([launched.phase, launched.progress, launched.position.x, launched.position.y].join('|'),
+     'LAUNCHED|0|74|236', 'the aircraft did not start at its base at the launch instant');
+  ok(airborne.progress > 0 && airborne.position.x > launched.position.x,
+     'the aircraft did not begin moving after launch');
+  const complete = RT.snapshot(640, { arm:'A', selected:'084' }).mission;
+  ok(complete.stamps[4].done && complete.stamps[5].done && complete.deliveryState === 'DELIVERY CONFIRMED',
+     'delivered state did not retain completed phase history');
+});
+test('seeking forward and backward restores timing and aircraft position', () => {
+  const a = RT.snapshot(221.5, { arm:'A', selected:'084' }).mission;
+  RT.snapshot(600, { arm:'A', selected:'084' });
+  const b = RT.snapshot(221.5, { arm:'A', selected:'084' }).mission;
+  eq([a.phase, a.tMinus, a.position.x, a.position.y].join('|'),
+     [b.phase, b.tMinus, b.position.x, b.position.y].join('|'));
+  ok(a.route.length > 2 && a.progress > 0 && a.progress < 1, 'seekable route position was not projected');
+});
+test('a changed route ETA jumps rather than following an animated countdown', () => {
+  const before = RT.snapshot(268, { arm:'A', selected:'084' }).mission;
+  const after = RT.snapshot(268, { arm:'A', selected:'084', rerouted:true }).mission;
+  eq(after.tMinus - before.tMinus, 118);
+  eq(before.margin - after.margin, 118);
+  ok(JSON.stringify(after.route) !== JSON.stringify(before.route), 'reroute did not visibly alter the theatre track');
+  const delivered = RT.snapshot(758, { arm:'A', selected:'084', rerouted:true }).mission;
+  eq([delivered.phase, delivered.tMinus, delivered.progress].join('|'), 'DELIVERED|0|1');
+  eq([delivered.position.x, delivered.position.y].join('|'), '566|238');
+  ok(delivered.stamps[4].done && delivered.stamps[5].done,
+     'rerouted delivery did not complete its effective timeline');
+  for (const key of ['091', '084', '112']) {
+    const terminal = RT.snapshot(RT.durationSeconds, { arm:'A', selected:key, rerouted:true }).mission;
+    eq([terminal.phase, terminal.tMinus, terminal.progress].join('|'), 'DELIVERED|0|1',
+       key + ' could not reach rerouted delivery within the demonstration horizon');
+  }
+});
+test('live commitments are sorted by signed margin ascending', () => {
+  const q = RT.snapshot(268, { arm:'A', selected:'084' }).missions;
+  eq(q.map(x => x.key).join('|'), '091|084|112|076');
+  ok(q.slice(0, 3).every((x, i, a) => !i || a[i - 1].margin <= x.margin), 'queue not sorted by signed margin');
+});
+test('Arm B exposes the scheduled stock-resupply state without relabelling it as tasking', () => {
+  const b = RT.snapshot(268, { arm:'B' });
+  eq([b.arm, b.missions.length, b.nextPush].join('|'), 'B|0|572');
+});
+test('deadline misses remain signed and delivery verdicts stay fixed at arrival', () => {
+  const live = RT.snapshot(268, { arm:'A', selected:'091' }).mission;
+  eq([live.margin, RT.duration(live.margin, true), live.deliveryState].join('|'),
+     '−52|−00:00:52|PAST THE DEADLINE'.replace('−52', '-52'));
+  const delivered = RT.snapshot(510, { arm:'A', selected:'091' }).mission;
+  eq([delivered.phase, delivered.deliveryState].join('|'), 'DELIVERED|DELIVERED AFTER DEADLINE');
+  const lateLater = RT.snapshot(900, { arm:'A', selected:'091' }).mission;
+  eq([lateLater.margin, lateLater.deliveryState].join('|'), '-52|DELIVERED AFTER DEADLINE');
+  const onTimeBefore = RT.snapshot(500, { arm:'A', selected:'084' }).mission;
+  const onTimeLater = RT.snapshot(809, { arm:'A', selected:'084' }).mission;
+  eq([onTimeBefore.margin, onTimeBefore.deliveryState].join('|'), '168|DELIVERY · COMMITTED');
+  eq([onTimeLater.margin, onTimeLater.deliveryState].join('|'), '168|DELIVERY CONFIRMED');
+  const reroutedLater = RT.snapshot(900, { arm:'A', selected:'084', rerouted:true }).mission;
+  eq([reroutedLater.margin, reroutedLater.deliveryState].join('|'), '50|DELIVERY CONFIRMED');
+});
+test('diverted, aborted, and lost states stop T-minus with an explicit reason', () => {
+  for (const phase of RT.OFF_NOMINAL) {
+    const options = { arm:'A', selected:'084', exception:phase, exceptionAt:268 };
+    const prior = RT.snapshot(200, options).mission;
+    const m = RT.snapshot(268, options).mission;
+    const later = RT.snapshot(700, options).mission;
+    eq(prior.phase, 'IN TRANSIT');
+    eq(m.phase, phase);
+    eq(m.tMinus, null);
+    ok(m.reason && m.deliveryState.startsWith('NO DELIVERY'), phase + ' lacked a reason or no-delivery state');
+    eq([later.position.x, later.position.y, later.position.h].join('|'),
+       [m.position.x, m.position.y, m.position.h].join('|'),
+       phase + ' aircraft moved after its event time');
+  }
+});
+test('a cold-chain failure is never represented as a clean commitment or delivery', () => {
+  const live = RT.snapshot(268, { arm:'A', selected:'084', cold:true }).mission;
+  ok(live.coldFailed && live.deliveryState.includes('COLD-CHAIN FAILED'), 'live cold-chain breach looked clean');
+  const delivered = RT.snapshot(640, { arm:'A', selected:'084', cold:true }).mission;
+  eq(delivered.deliveryState, 'DELIVERED · COLD-CHAIN FAILED');
+});
+test('standalone snapshots do not accept or mutate run records and expose no engine projection API', () => {
+  const options = { arm:'A', selected:'084', rerouted:true, cold:true, exception:null };
+  const before = JSON.stringify(options);
+  RT.snapshot(268, options);
+  eq(JSON.stringify(options), before);
+  eq(typeof RT.project, 'undefined');
+  ok(Object.isFrozen(RT) && Object.isFrozen(RT.NOMINAL), 'standalone API was mutable');
+});
+test('the seed-42 engine result stays frozen while the standalone browser view remains interactive and offline', async () => {
+  const f = E.snapshot(BUILT, 180);
+  eq([f.dA, f.dB, f.dC, f.tA.sorties, f.tB.sorties, f.tC.sorties].join('/'), '23/34/35/20/38/0');
+  const frame = document.createElement('iframe');
+  frame.title = 'Isolated resupply tracking browser fixture';
+  frame.style.cssText = 'position:fixed;width:1280px;height:800px;left:-4000px;top:-4000px;border:0';
+  frame.src = './?destination=resupply-tracking&context-search-selftest=primary';
+  document.body.appendChild(frame);
+  const instance = await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('tracking browser fixture timed out')), 30000);
+    const poll = () => {
+      const w0 = frame.contentWindow, fixture = w0 && w0.ANGEL_DESIGN && w0.ANGEL_DESIGN.contextSearchFixture;
+      if (typeof fixture === 'function') {
+        const value = fixture();
+        const tracker = frame.contentDocument && frame.contentDocument.querySelector('angel-resupply-track');
+        if (value && value.E && tracker && tracker.shadowRoot && tracker.shadowRoot.querySelector('tbody tr')) {
+          clearTimeout(timer); resolve(value); return;
+        }
+      }
+      setTimeout(poll, 40);
+    };
+    frame.onload = poll;
+  });
+  const w = frame.contentWindow;
+  const tracker = frame.contentDocument.querySelector('angel-resupply-track');
+  ok(w.location.search.includes('destination=resupply-tracking'), 'tracking route has no stable direct URL');
+  let shadow = tracker && tracker.shadowRoot;
+  ok(shadow && shadow.querySelector('canvas'), 'active tracking route did not render its Canvas theatre');
+  ok(shadow.querySelector('.mainGrid > .demoCard > .demo'),
+     'demonstration controls were not moved into the right-column control card');
+  ok(!shadow.querySelector('.wrap > .demo'),
+     'demonstration controls still consumed the top-of-page content row');
+  ok(Array.from(shadow.querySelectorAll('.demo button')).every(button => button.querySelector('svg[aria-hidden="true"]')),
+     'a demonstration control was missing its identifying icon');
+  const controlIconColors = Array.from(shadow.querySelectorAll('.demo button .ctlIcon'))
+    .map(icon => w.getComputedStyle(icon).color);
+  ok(new Set(controlIconColors).size >= 9,
+     'demonstration control icons were not given distinct, high-contrast colors');
+  eq(shadow.querySelectorAll('tbody tr[data-key]').length, 4, 'standalone demonstration did not expose all commitments');
+  const hostTime = instance.state.t;
+  tracker.seek(300);
+  eq(instance.state.t, hostTime, 'tracker seek modified host playback');
+  let row = tracker.shadowRoot.querySelector('tr[data-key="112"]');
+  row.focus();
+  row.dispatchEvent(new w.KeyboardEvent('keydown', { key:'Enter', bubbles:true, composed:true }));
+  await pauseFor(40);
+  eq(tracker.currentSnapshot().selected, '112', 'queue row was not keyboard selectable');
+  eq(tracker.shadowRoot.activeElement && tracker.shadowRoot.activeElement.dataset.key, '112',
+     'queue selection did not preserve keyboard focus');
+  tracker.setDemoState({ t:320 });
+  eq(tracker.shadowRoot.activeElement && tracker.shadowRoot.activeElement.dataset.key, '112',
+     'standalone repaint destroyed keyboard focus');
+  tracker.setDemoState({ selected:'084', t:268 });
+  const speedControl = tracker.shadowRoot.querySelector('[data-speed]');
+  speedControl.click();
+  eq([tracker.state.speed, speedControl.textContent.trim()].join('|'),
+     '8|SPEED ×8', 'speed control did not enable eight-times playback');
+  tracker.state.playing = true;
+  tracker.lastTick = 1000;
+  tracker.tick(1125);
+  cancelAnimationFrame(tracker.raf);
+  tracker.state.playing = false;
+  near(tracker.currentSnapshot().t, 269, .001, 'eight-times playback did not advance the tracker clock');
+  speedControl.click();
+  eq([tracker.state.speed, speedControl.textContent.trim()].join('|'),
+     '14|SPEED ×14', 'speed control did not enable fourteen-times playback');
+  tracker.state.playing = true;
+  tracker.lastTick = 2000;
+  tracker.tick(2125);
+  cancelAnimationFrame(tracker.raf);
+  tracker.state.playing = false;
+  near(tracker.currentSnapshot().t, 270.75, .001, 'fourteen-times playback did not advance the tracker clock');
+  speedControl.click();
+  eq([tracker.state.speed, speedControl.textContent.trim()].join('|'),
+     '1|SPEED ×1', 'speed control did not cycle back to normal playback');
+  tracker.shadowRoot.querySelector('[data-speed]').click();
+  tracker.shadowRoot.querySelector('[data-reset]').click();
+  eq(tracker.state.speed, 1, 'reset did not restore normal playback speed');
+  eq([
+    tracker.currentSnapshot().t,
+    tracker.shadowRoot.querySelector('[data-focus="scrub"]').value,
+    tracker.shadowRoot.querySelector('.clock').textContent
+  ].join('|'), '0|0|T+00:00:00', 'reset did not restore the map and timeline to time zero');
+  eq(Array.from(tracker.shadowRoot.querySelectorAll('.demo button')).map(button =>
+    button.textContent.trim()).join('|'),
+    'RESET|PLAY|SPEED ×1|ABORT|ARM A · ANGEL SWARM|ARM B · CURRENT|AIRCRAFT LOSS|COLD BREACH|DIVERT|RE-ROUTE',
+    'demonstration controls were not arranged in operational order');
+  tracker.setDemoState({ selected:'084', t:268 });
+  const scrub = tracker.shadowRoot.querySelector('[data-focus="scrub"]');
+  const stableDemo = tracker.shadowRoot.querySelector('.demo');
+  let controlsReparented = false;
+  let buttonContentsReplaced = false;
+  const controlsObserver = new w.MutationObserver(records => {
+    controlsReparented ||= records.some(record =>
+      Array.from(record.removedNodes).some(node => node === stableDemo || (node.contains && node.contains(stableDemo))));
+    buttonContentsReplaced ||= records.some(record =>
+      record.type === 'childList' && record.target.closest && record.target.closest('.demo button'));
+  });
+  controlsObserver.observe(tracker.shadowRoot, { childList:true, subtree:true });
+  for (const value of [175, 543, 869]) {
+    scrub.value = value;
+    scrub.dispatchEvent(new w.Event('input', { bubbles:true, composed:true }));
+    eq(tracker.shadowRoot.querySelector('[data-focus="scrub"]'), scrub,
+       'timeline input was replaced during a continuous drag');
+    eq(Math.round(tracker.currentSnapshot().t), value,
+       'timeline input stopped seeking during a continuous drag');
+  }
+  await pauseFor(0);
+  controlsObserver.disconnect();
+  ok(!controlsReparented && stableDemo.isConnected,
+     'tracker repaint detached or reparented the live demonstration controls');
+  ok(!buttonContentsReplaced,
+     'tracker repaint replaced button contents while controls were idle');
+  tracker.setDemoState({ selected:'084', t:268 });
+  const beforeReroute = tracker.currentSnapshot().mission.tMinus;
+  tracker.shadowRoot.querySelector('[data-rerouted]').click();
+  eq(tracker.currentSnapshot().mission.tMinus - beforeReroute, 118, 'browser reroute did not jump ETA');
+  tracker.shadowRoot.querySelector('[data-arm="B"]').click();
+  await pauseFor(40);
+  ok(tracker.shadowRoot.querySelector('.empty'), 'Arm B scheduled-push state did not open');
+  tracker.shadowRoot.querySelector('[data-arm="A"]').click();
+  await pauseFor(40);
+  tracker.shadowRoot.querySelector('[data-cold]').click();
+  ok(tracker.shadowRoot.querySelector('.row.alert'), 'cold-chain breach did not become visible');
+  tracker.shadowRoot.querySelector('[data-exception="LOST"]').click();
+  ok(tracker.shadowRoot.querySelector('.exception'), 'exceptional mission rendered a nominal phase ladder');
+  ok(tracker.shadowRoot.querySelector('.rows').textContent.includes('AIRFRAME LOST'),
+     'airborne loss was incorrectly reported as on the ground');
+  tracker.shadowRoot.querySelector('[data-exception="LOST"]').click();
+  tracker.shadowRoot.querySelector('[data-play]').click();
+  eq([
+    tracker.shadowRoot.querySelector('[data-play] span').textContent,
+    tracker.shadowRoot.querySelector('[data-play] .ctlIcon').dataset.controlIcon
+  ].join('|'), 'PAUSE|pause', 'active playback did not show the Pause label and icon');
+  await pauseFor(140);
+  tracker.shadowRoot.querySelector('.send').dispatchEvent(
+    new w.PointerEvent('pointerdown', { bubbles:true, composed:true })
+  );
+  await pauseFor(40);
+  ok(tracker.state.modal, 'ATAK explanation did not open from pointer-down during active playback');
+  eq(tracker.shadowRoot.querySelector('#atak-status strong').textContent,
+     'EMSEC ASSESSMENT IS REQUIRED BEFORE FIELDING.',
+     'EMSEC fielding warning was not placed at the top of the dialog');
+  eq(tracker.shadowRoot.querySelector('.emsec'), null,
+     'obsolete red EMSEC callout remained at the bottom of the dialog');
+  let dialog = tracker.shadowRoot.querySelector('[role="dialog"]');
+  eq(tracker.state.playing, false, 'opening the proposed ATAK dialog did not pause playback');
+  ok(dialog && dialog.contains(tracker.shadowRoot.activeElement), 'proposed ATAK dialog did not contain focus');
+  const proposal = dialog.querySelector('pre');
+  proposal.focus();
+  await pauseFor(240);
+  eq(tracker.shadowRoot.querySelector('[role="dialog"]'), dialog,
+     'playback repaint replaced the open proposed ATAK dialog');
+  eq(tracker.shadowRoot.activeElement, proposal,
+     'proposed ATAK dialog lost keyboard focus after opening during playback');
+  const close = tracker.shadowRoot.querySelector('[data-close]');
+  close.dispatchEvent(new w.KeyboardEvent('keydown', { key:'Tab', shiftKey:true, bubbles:true, composed:true }));
+  eq(tracker.shadowRoot.activeElement.tagName, 'PRE', 'dialog did not trap backward focus');
+  tracker.shadowRoot.activeElement.dispatchEvent(new w.KeyboardEvent('keydown', { key:'Escape', bubbles:true, composed:true }));
+  await pauseFor(40);
+  ok(!tracker.shadowRoot.querySelector('[role="dialog"]'), 'Escape did not close the proposed ATAK dialog');
+  ok(tracker.shadowRoot.activeElement && tracker.shadowRoot.activeElement.classList.contains('send'), 'dialog did not restore focus');
+  const resourcesBefore = w.performance.getEntriesByType('resource').length;
+  for (const width of [1280, 1440, 1920]) {
+    frame.style.width = width + 'px';
+    await pauseFor(30);
+    const grid = tracker.shadowRoot.querySelector('.grid');
+    const cols = grid ? Array.from(grid.children).map(x => x.getBoundingClientRect()) : [];
+    ok(tracker.scrollWidth <= tracker.clientWidth && !(cols.length === 2 && cols[0].right > cols[1].left),
+       'tracking content overlapped at ' + width + 'px');
+  }
+  eq(w.performance.getEntriesByType('resource').length, resourcesBefore, 'tracker interactions initiated a request');
+  const offOrigin = w.performance.getEntriesByType('resource').filter(r => new w.URL(r.name).origin !== w.location.origin);
+  eq(offOrigin.length, 0, 'tracking route made an off-origin request');
+  frame.remove();
+});
+/* The tracker browser fixture is intentionally run after the shell's
+   wall-clock-sensitive browser checks so loading a second complete console
+   cannot contend with their one-second timing assertion. */
+const RESUPPLY_TRACK_GROUP = GROUPS.pop();
 
 /* -------------------------------------------------------------------------- */
 group('ALL SEVEN JOINT OPERATING AREAS',
@@ -966,6 +1342,381 @@ test('returning to Single clears Side by side from every mirrored control', () =
      'a mirrored highlight survived the layout change');
 });
 
+/* -------------------------------------------------------------- brand home */
+group('BRAND HOME NAVIGATION',
+      'The complete ANGEL SWARM brand returns to Command Overview through the live destination/history contract.');
+
+test('primary brand home supports pointer and keyboard navigation without resetting the mission', async () => {
+  const frame = document.createElement('iframe');
+  frame.title = 'Primary ANGEL SWARM brand home browser fixture';
+  frame.style.cssText = 'position:fixed;left:-1400px;top:0;width:1280px;height:800px;border:0';
+  frame.src = './?destination=live-casualties&context-search-selftest=primary';
+  document.body.appendChild(frame);
+  try {
+    await new Promise((resolve, reject) => {
+      const to = setTimeout(() => reject(new Error('Brand home fixture did not load')), 20000);
+      frame.onload = () => { clearTimeout(to); resolve(); };
+    });
+    const d = frame.contentDocument, w = frame.contentWindow;
+    const until = async fn => {
+      const end = performance.now() + 20000;
+      while (performance.now() < end) {
+        const value = fn();
+        if (value) return value;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      throw new Error('Brand home fixture did not become ready');
+    };
+    let brand = await until(() => d.querySelector('button.brand-home'));
+    const fixture = await until(() => w.ANGEL_DESIGN && w.ANGEL_DESIGN.contextSearchFixture);
+    const app = fixture();
+    await until(() => app.state.page === 'cas');
+    eq(brand.getAttribute('aria-label'), 'ANGEL SWARM home — Command Overview',
+       'brand home does not identify its destination');
+    eq(brand.tabIndex, 0, 'brand home is not in the keyboard tab order');
+    brand.focus();
+    eq(d.activeElement, brand, 'brand home could not receive keyboard focus');
+    ok(getComputedStyle(brand).outlineStyle !== 'none',
+       'brand home has no visible focus treatment');
+    const engine = app.E, time = app.state.t, deployed = app.state.deployed;
+    brand.click();
+    await until(() => app.state.page === 'dash');
+    eq(new URL(w.location.href).searchParams.get('destination'), 'command-overview',
+       'brand home did not update the destination URL');
+    eq(app.E, engine, 'brand home replaced the live mission engine');
+    eq(app.state.deployed, deployed, 'brand home reset deployment state');
+    ok(app.state.t >= time, 'brand home reset mission time');
+    ok(/Command Overview/i.test(d.body.textContent),
+       'Command Overview state was not visible after brand activation');
+    app.navigate('cas');
+    await until(() => app.state.page === 'cas');
+    brand = d.querySelector('button.brand-home');
+    brand.focus();
+    const key = new w.KeyboardEvent('keydown', {
+      key: ' ', code: 'Space', bubbles: true, cancelable: true
+    });
+    ok(!brand.dispatchEvent(key), 'primary brand Space activation was not consumed');
+    await until(() => app.state.page === 'dash');
+    eq(new URL(w.location.href).searchParams.get('destination'), 'command-overview',
+       'primary brand Space activation did not update the destination URL');
+    eq(app.E, engine, 'primary brand Space activation replaced the mission engine');
+  } finally {
+    frame.remove();
+  }
+});
+
+test('analyst brand home consumes Space before the global Play/Pause shortcut', async () => {
+  const frame = document.createElement('iframe');
+  frame.title = 'Analyst ANGEL SWARM brand home browser fixture';
+  frame.style.cssText = 'position:fixed;left:-1400px;top:0;width:1280px;height:800px;border:0';
+  frame.src = './console.html';
+  document.body.appendChild(frame);
+  try {
+    await new Promise((resolve, reject) => {
+      const to = setTimeout(() => reject(new Error('Analyst brand home fixture did not load')), 20000);
+      frame.onload = () => { clearTimeout(to); resolve(); };
+    });
+    const d = frame.contentDocument, w = frame.contentWindow;
+    const until = async fn => {
+      const end = performance.now() + 20000;
+      while (performance.now() < end) {
+        const value = fn();
+        if (value) return value;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      throw new Error('Analyst brand home fixture did not become ready');
+    };
+    await until(() => d.querySelector('.d-nav-i[data-page="cas"]'));
+    d.querySelector('.d-nav-i[data-page="cas"]').click();
+    await until(() => d.querySelector('.d-nav-i[data-page="cas"].on'));
+    const brand = d.querySelector('button.d-brand[data-page="dash"]');
+    const world = w.APP.world, time = w.APP.t, running = w.APP.running;
+    brand.focus();
+    const key = new w.KeyboardEvent('keydown', {
+      key: ' ', code: 'Space', bubbles: true, cancelable: true
+    });
+    ok(!brand.dispatchEvent(key), 'analyst brand Space activation was not consumed');
+    await until(() => d.querySelector('.d-nav-i[data-page="dash"].on'));
+    eq(w.APP.world, world, 'analyst brand home replaced the mission world');
+    eq(w.APP.running, running, 'analyst brand Space activation toggled Play/Pause');
+    ok(w.APP.t >= time, 'analyst brand home reset mission time');
+  } finally {
+    frame.remove();
+  }
+});
+
+/* ------------------------------------------------ Command Overview globe card */
+group('COMMAND OVERVIEW GLOBE / MACHINE ACTION',
+      'The root card defaults to the singleton globe, preserves live machine data, and never creates a second renderer owner.');
+
+test('Globe and Machine Action share one accessible card and one renderer dock', async () => {
+  const frame = document.createElement('iframe');
+  frame.title = 'Command Overview globe card browser fixture';
+  /* Keep the renderer in Chromium's visible compositing area. Moving it far
+     off-screen throttles requestAnimationFrame and makes native idle-spin
+     assertions lie. */
+  frame.style.cssText = 'position:fixed;inset:0;width:1280px;height:800px;border:0;opacity:1;pointer-events:none;z-index:2147483646';
+  frame.src = './?command-globe-selftest=1';
+  document.body.appendChild(frame);
+  try {
+    await new Promise((resolve, reject) => {
+      const to = setTimeout(() => reject(new Error('Command Overview fixture did not load')), 20000);
+      frame.onload = () => { clearTimeout(to); resolve(); };
+    });
+    const d = frame.contentDocument, w = frame.contentWindow;
+    const until = async fn => {
+      const end = performance.now() + 20000;
+      while (performance.now() < end) {
+        const value = fn();
+        if (value) return value;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      throw new Error('Command Overview globe card did not become ready');
+    };
+    const globe = await until(() => d.getElementById('command-globe-tab'));
+    const fixture = await until(() => w.ANGEL_DESIGN && w.ANGEL_DESIGN.commandGlobeFixture);
+    eq(globe.getAttribute('aria-selected'), 'true', 'Globe was not selected by default');
+    eq(globe.getAttribute('role'), 'tab', 'Globe control is not a tab');
+    const machine = d.getElementById('command-machine-tab');
+    eq(globe.getAttribute('aria-controls'), 'command-globe-panel',
+      'selected Globe tab does not identify its mounted panel');
+    eq(machine.hasAttribute('aria-controls'), false,
+      'inactive Machine Action tab references an unmounted panel');
+    ok(getComputedStyle(globe).borderTopColor !== getComputedStyle(machine).borderTopColor,
+      'Globe and Machine Action did not receive distinct card accents');
+    const hit0 = fixture.availabilityHits();
+    w.dispatchEvent(new w.Event('angelmap:available'));
+    eq(fixture.availabilityHits(), hit0 + 1, 'late ANGELMAP availability did not request an active-Globe repaint');
+    let fakeReady = false, fakeScope = 'THEATRE', fakeSetCalls = 0;
+    const fake = {
+      ready: () => fakeReady,
+      readyGlobe: () => fakeReady,
+      scope: () => fakeScope,
+      setScenario: () => true,
+      setScope: value => { fakeSetCalls++; fakeScope = value; return true; },
+      sync: () => true
+    };
+    eq(fixture.probe(fake), null, 'Globe ownership was cached before delayed readiness');
+    eq(fakeSetCalls, 0, 'setScope was called before delayed readiness');
+    fakeReady = true;
+    eq(fixture.probe(fake), 'GLOBE', 'delayed readiness did not converge to Globe ownership');
+    eq(fakeSetCalls, 1, 'delayed readiness did not issue exactly one Globe request');
+    const card = machine.closest('.cmd62-card');
+    const globeHeight = card.getBoundingClientRect().height;
+    machine.click();
+    await until(() => d.getElementById('command-machine-panel'));
+    eq(machine.getAttribute('aria-controls'), 'command-machine-panel',
+      'selected Machine Action tab does not identify its mounted panel');
+    eq(globe.hasAttribute('aria-controls'), false,
+      'inactive Globe tab references an unmounted panel');
+    const inactiveHits = fixture.availabilityHits();
+    w.dispatchEvent(new w.Event('angelmap:available'));
+    eq(fixture.availabilityHits(), inactiveHits, 'availability event repainted while Machine Action was active');
+    await until(() => w.ANGELMAP && w.ANGELMAP.ready() && w.ANGELMAP.scope() === 'THEATRE');
+    const machineHeight = card.getBoundingClientRect().height;
+    ok(Math.abs(globeHeight - machineHeight) <= 2, 'tab switch changed the card height');
+    const machineText = d.getElementById('command-machine-panel').textContent;
+    ok(/active outbound tasking/i.test(machineText), 'Machine Action lost its outbound value/copy');
+    ok(/Decision Feed/i.test(machineText), 'Machine Action lost its Decision Feed route');
+    globe.click();
+    await until(() => d.getElementById('command-globe-panel'));
+    /* Exercise the late-availability signal directly as well as the real
+       boot path; this must remain harmless and converge without polling. */
+    w.dispatchEvent(new w.Event('angelmap:available'));
+    await until(() => w.ANGELMAP && w.ANGELMAP.ready() && w.ANGELMAP.readyGlobe() && w.ANGELMAP.scope() === 'GLOBE');
+    const dockFrame = d.getElementById('angelMapFrame');
+    ok(dockFrame && ((dockFrame.dataset.angelmapGuarded === 'false' &&
+      dockFrame.dataset.angelmapRevealed === 'true' && Number(dockFrame.style.opacity) > .5) ||
+      dockFrame.dataset.angelmapGuarded === 'true'),
+      'embedded console frame was not guarded before reveal');
+    const oldChrome = ['.band', '#cmdbar', '#toolbar', '#roleSw', '#railL', '#railR', '#footbar'];
+    ok(oldChrome.every(sel => {
+      const el = dockFrame.contentDocument.querySelector(sel);
+      return !el || getComputedStyle(el).display === 'none';
+    }), 'old console startup chrome remained visible above the renderer');
+    ok(!!dockFrame.contentDocument.querySelector('#theaterStage canvas, #gbCanvas'),
+      'embedded map content is not visible after chrome suppression');
+    const globeEngine = dockFrame && dockFrame.contentWindow && dockFrame.contentWindow.__ANGEL_GLOBE;
+    ok(globeEngine && typeof globeEngine.stats === 'function', 'ready Globe did not expose its native stats contract');
+    await until(() => globeEngine.live && globeEngine.live());
+    const compactSlot = d.querySelector('.cmd62-globe-slot angel-map');
+    ok(compactSlot && compactSlot.getAttribute('data-globe-mode') === 'compact', 'dashboard slot did not carry compact Globe mode');
+    const compactStats = globeEngine.stats();
+    ok(compactStats.compact === true, 'native Globe did not receive compact mode');
+    ok(compactStats.h <= 220, 'compact Globe retained the embedded console minimum height');
+    ok(compactStats.R <= Math.min(compactStats.w, compactStats.h) * .41, 'compact Globe radius exceeded its slot fit bound');
+    ok(compactStats.idleFor >= 3500, 'compact Globe did not enter immediate-spin state');
+    const compactStage = dockFrame.contentDocument;
+    const compactHead = compactStage.querySelector('.thHead');
+    ok(compactHead && getComputedStyle(compactHead).display === 'none',
+      'compact Globe left the full theater heading visible');
+    const compactCaptions = Array.from(compactStage.querySelectorAll('.thHead'));
+    ok(compactCaptions.every(el => getComputedStyle(el).display === 'none') &&
+      !compactCaptions.some(el => getComputedStyle(el).display !== 'none' &&
+        /Indo-Pacific|COMMAND/.test(el.textContent)),
+      'compact Globe retained visible global theater chrome');
+    const pacom = compactStats.bounds;
+    ok(!!pacom && compactStats.theater === 'PACOM', 'native Globe did not expose PACOM bounds');
+    const pacomCx = (pacom.lon0 + pacom.lon1) / 2;
+    const pacomCy = (pacom.lat0 + pacom.lat1) / 2;
+    ok(Math.abs(compactStats.cx - pacomCx) < 12 && Math.abs(compactStats.cy - pacomCy) < 12,
+      'compact Globe did not start PACOM-centered');
+    const lon0 = globeEngine.stats().lon;
+    await new Promise(r => setTimeout(r, 3600));
+    const spun = globeEngine.stats().lon !== lon0 ||
+      (typeof globeEngine.probeIdleSpin === 'function' && globeEngine.probeIdleSpin());
+    ok(spun, 'native Globe idle rotation did not advance');
+    const canvas = compactStage.getElementById('gbCanvas');
+    const pointer = (type, x, y, id, target) => (target || canvas).dispatchEvent(
+      new dockFrame.contentWindow.PointerEvent(type, {
+        bubbles: true, pointerId: id || 41, clientX: x, clientY: y,
+        pointerType: 'mouse', buttons: type === 'pointerup' || type === 'pointercancel' ? 0 : 1
+      }));
+    const coral = await until(() => globeEngine.hitPoint && globeEngine.hitPoint('CORAL'));
+    const cr = canvas.getBoundingClientRect();
+    const px = cr.left + coral.x, py = cr.top + coral.y;
+    const selections0 = globeEngine.stats().gestureSelections;
+    pointer('pointerdown', px, py, 40);
+    pointer('pointerup', px, py, 40);
+    eq(globeEngine.stats().gestureSelections, selections0 + 1,
+      'stationary JOA press did not select exactly once during idle spin');
+    const cameraBeforeClick = globeEngine.stats().lon;
+    pointer('pointerdown', px, py, 41);
+    pointer('pointermove', px + 3, py + 2, 41);
+    pointer('pointerup', px + 3, py + 2, 41);
+    eq(globeEngine.selected(), 'CORAL', 'minor pointer jitter did not select the pressed JOA');
+    eq(globeEngine.stats().gestureSelections, selections0 + 2,
+      'minor-jitter JOA press did not select exactly once');
+    eq(globeEngine.stats().lon, cameraBeforeClick, 'minor pointer jitter rotated the Globe');
+    ok(!globeEngine.stats().dragging, 'completed JOA click left dragging active');
+    const cameraBeforeDrag = globeEngine.stats().lon;
+    pointer('pointerdown', px, py, 42);
+    pointer('pointermove', px + 24, py, 42);
+    pointer('pointerup', px + 24, py, 42);
+    ok(globeEngine.stats().lon !== cameraBeforeDrag, 'deliberate pointer drag did not rotate the Globe');
+    ok(!globeEngine.stats().dragging, 'deliberate drag did not finish cleanly');
+    globeEngine.select(null);
+    pointer('pointerdown', px, py, 43);
+    pointer('pointercancel', px, py, 43);
+    eq(globeEngine.selected(), null, 'cancelled pointer selected a JOA');
+    ok(!globeEngine.stats().dragging, 'pointer cancellation left dragging active');
+    pointer('pointerdown', px, py, 44);
+    pointer('pointerup', cr.right + 20, cr.bottom + 20, 44, dockFrame.contentWindow);
+    ok(!globeEngine.stats().dragging, 'release outside the Globe left dragging active');
+    eq(globeEngine.selected(), null, 'release outside the Globe selected the operation');
+    /* Trigger the renderer's real zoom handoff rather than approximating it
+       with a rail click. The dashboard must follow the handoff to the full map
+       and must not reopen Globe when the native 2.5s hold expires. */
+    const nativeSetScope = w.ANGELMAP.setScope;
+    let scopeRequests = 0;
+    w.ANGELMAP.setScope = value => {
+      scopeRequests++;
+      return nativeSetScope(value);
+    };
+    globeEngine.select('CORAL');
+    globeEngine.spinTo(122.4, 21.6);
+    ok(typeof globeEngine.probeHandoff === 'function' && globeEngine.probeHandoff('CORAL'),
+      'native Globe did not complete its handoff');
+    const mapNav = Array.from(d.querySelectorAll('.app-nav-menu > div')).find(x => /Theater Map/.test(x.textContent));
+    ok(mapNav, 'Theater Map navigation control is missing');
+    await until(() => mapNav.getAttribute('data-selected') === 'true' &&
+      ['THEATRE', '2D', '3D'].includes(w.ANGELMAP.scope()) &&
+      w.ANGELMAP.scope() !== 'GLOBE');
+    const handedScope = w.ANGELMAP.scope();
+    const requestsAtHandoff = scopeRequests;
+    await new Promise(r => setTimeout(r, 3200));
+    eq(mapNav.getAttribute('data-selected'), 'true', 'native handoff did not stay on Theater Map');
+    eq(w.ANGELMAP.scope(), handedScope, 'dashboard restored Globe after the native handoff hold');
+    ok(scopeRequests - requestsAtHandoff < 6, 'native handoff caused an unbounded scope-request loop');
+    eq(dockFrame.contentDocument.documentElement.getAttribute('data-globe-mode'), 'normal',
+      'compact Globe mode leaked into the dedicated Theater Map');
+    w.ANGELMAP.setScope = nativeSetScope;
+    const homeNav = Array.from(d.querySelectorAll('.app-nav-menu > div')).find(x => /Command Overview/.test(x.textContent));
+    ok(homeNav, 'Command Overview navigation control is missing');
+    homeNav.click();
+    await until(() => d.getElementById('command-globe-tab') &&
+      w.ANGELMAP.scope() === 'GLOBE' && globeEngine.live());
+    eq(d.querySelectorAll('angel-map').length, 1, 'more than one globe slot exists');
+    await until(() => w.ANGELMAP);
+    ok(d.querySelectorAll('#angelMapDock').length <= 1, 'more than one ANGELMAP dock exists');
+    ok(d.querySelectorAll('#angelMapFrame').length <= 1, 'more than one ANGELMAP iframe exists');
+    const remountCanvas = dockFrame.contentDocument.getElementById('gbCanvas');
+    const remountR = remountCanvas.getBoundingClientRect();
+    const remountLon = globeEngine.stats().lon;
+    remountCanvas.dispatchEvent(new dockFrame.contentWindow.PointerEvent('pointerdown',
+      { bubbles:true, pointerId:45, clientX:remountR.left + remountR.width / 2,
+        clientY:remountR.top + remountR.height / 2, buttons:1 }));
+    remountCanvas.dispatchEvent(new dockFrame.contentWindow.PointerEvent('pointermove',
+      { bubbles:true, pointerId:45, clientX:remountR.left + remountR.width / 2 + 20,
+        clientY:remountR.top + remountR.height / 2, buttons:1 }));
+    remountCanvas.dispatchEvent(new dockFrame.contentWindow.PointerEvent('pointerup',
+      { bubbles:true, pointerId:45, clientX:remountR.left + remountR.width / 2 + 20,
+        clientY:remountR.top + remountR.height / 2 }));
+    const remountMoved = Math.abs(globeEngine.stats().lon - remountLon);
+    ok(!globeEngine.stats().dragging && remountMoved > 1 && remountMoved < 30,
+      'repeated mount multiplied gesture handling or retained drag state');
+    const zoomIn = dockFrame.contentDocument.querySelector('#theaterStage [data-thzoom="in"]');
+    const remountRadius = globeEngine.stats().R;
+    zoomIn.dispatchEvent(new dockFrame.contentWindow.MouseEvent('click', { bubbles:true }));
+    ok(globeEngine.stats().R > remountRadius &&
+      globeEngine.stats().R <= remountRadius * 1.5,
+      'repeated mount accumulated Globe zoom-control listeners');
+    /* Starting a live run replaces the entire compact renderer target, not
+       merely its pixels. The same mounted component and embedded engine must
+       then continue on the dedicated Theater Map. */
+    const instance = fixture.instance();
+    const activeScenario = instance.state.scenario;
+    instance.setState({ deployed:true, running:true, t:12 });
+    const gate = await until(() => d.querySelector('.cmd62-globe-gate'));
+    eq(d.querySelectorAll('.cmd62-globe-slot angel-map').length, 0,
+      'active run left the compact renderer mounted beneath its cover');
+    ok(/Scenario in progress/i.test(gate.getAttribute('aria-label') || ''),
+      'active-run cover has no understandable accessible name');
+    ok(/Continue on Theater Map/i.test(gate.textContent),
+      'active-run cover does not direct the operator to Theater Map');
+    await until(() => d.getElementById('angelMapDock').style.display === 'none');
+    const gateBox = gate.getBoundingClientRect();
+    ok(gate.contains(d.elementFromPoint(gateBox.left + gateBox.width / 2,
+      gateBox.top + gateBox.height / 2)),
+      'covered Globe still intercepted pointer hit-testing');
+    const blocked = globeEngine.stats();
+    eq(blocked.dragging, false, 'covered Globe retained an active drag');
+    const wideBox = gate.getBoundingClientRect();
+    ok(wideBox.width > 300 && wideBox.height >= 218,
+      'active-run cover did not fill the desktop card');
+    frame.style.width = '360px';
+    w.dispatchEvent(new w.Event('resize'));
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const narrowBox = gate.getBoundingClientRect();
+    const narrowPanel = d.getElementById('command-globe-panel').getBoundingClientRect();
+    ok(Math.abs(narrowBox.width - narrowPanel.width) <= 1 && narrowBox.height >= 218 &&
+      gate.scrollWidth <= gate.clientWidth,
+      'active-run cover did not fill its narrow panel without overflowing');
+    frame.style.width = '1280px';
+    gate.click();
+    await until(() => mapNav.getAttribute('data-selected') === 'true');
+    eq(instance.state.scenario, activeScenario, 'cover navigation changed the active scenario');
+    eq(instance.state.running, true, 'cover navigation stopped the active run');
+    ok(instance.state.t >= 12, 'cover navigation reset the active run clock');
+    homeNav.click();
+    const keyboardGate = await until(() => d.querySelector('.cmd62-globe-gate'));
+    keyboardGate.focus();
+    eq(d.activeElement, keyboardGate, 'active-run cover could not receive keyboard focus');
+    eq(keyboardGate.tagName, 'BUTTON', 'active-run cover does not use native keyboard activation');
+    keyboardGate.click();
+    await until(() => mapNav.getAttribute('data-selected') === 'true');
+    eq(instance.state.scenario, activeScenario, 'keyboard cover activation changed the scenario');
+    eq(instance.state.running, true, 'keyboard cover activation stopped the run');
+    instance.setState({ running:false });
+    homeNav.click();
+    await until(() => d.querySelector('.cmd62-globe-slot angel-map'));
+    eq(d.querySelectorAll('.cmd62-globe-gate').length, 0,
+      'paused run falsely retained the active-scenario cover');
+  } finally {
+    frame.remove();
+  }
+});
+
 /* -------------------------------------------------------- contextual search */
 group('CONTEXTUAL SCREEN SEARCH',
       'Screen filtering is scoped, reset on destination changes, and unavailable throughout an active mission.');
@@ -1048,7 +1799,7 @@ let CONSOLE_FRAME = null;
 async function consoleFrame() {
   if (CONSOLE_FRAME) return CONSOLE_FRAME;
   const frame = document.createElement('iframe');
-  frame.src = './console.html';
+  frame.src = './console.html?casualty-layout-selftest=1';
   frame.title = 'Contextual search browser fixture';
   frame.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0';
   document.body.appendChild(frame);
@@ -1074,6 +1825,197 @@ async function consoleType(frame, value) {
   input.dispatchEvent(new Event('input', { bubbles:true }));
   await new Promise(resolve => setTimeout(resolve, 20));
 }
+
+test('the shipped shell keeps the requested primary and secondary navigation order and ownership', async () => {
+  const frame = await consoleFrame();
+  const w = frame.contentWindow, doc = frame.contentDocument;
+  const primary = Array.from(doc.querySelectorAll('.d-nav > [data-page]'));
+  const secondary = Array.from(doc.querySelectorAll('.d-nav-sep > [data-page]'));
+  eq(primary.map(el => el.querySelector('.l').textContent.trim()).join('|'),
+     'Command Overview|Theater Map|Ops Center Wall|Decisions|Live Casualties|War Game|Sensor & Model|Resupply Tracking|Evidence|Ask Angel',
+     'primary navigation labels or order changed');
+  eq(secondary.map(el => el.querySelector('.l').textContent.trim()).join('|'),
+     'Analyst Terminal|Authority & Policy|Data Sources|Settings',
+     'secondary navigation labels or order changed');
+
+  const expected = {
+    dash:'DECIDE', map:'DASHBOARD', ops:'DASHBOARD', dec:'TASKING',
+    cas:'CASUALTIES', wargame:'CONFIDENCE', sensor:'SENSOR',
+    track:null, ev:'ANALYSIS', chat:null
+  };
+  const expectedTabs = { wargame:['ev','CONF'], sensor:['tty','SENSOR'], ev:['ev','EV'] };
+  for (const page of Object.keys(expected)) {
+    const el = doc.querySelector('.d-nav > [data-page="' + page + '"]');
+    el.click();
+    await new Promise(resolve => setTimeout(resolve, 20));
+    if (expected[page]) eq(w.APP.view, expected[page], page + ' opened the wrong owned section');
+    eq(doc.querySelector('.d-nav-i.on').dataset.page, page,
+       page + ' did not retain the selected primary destination');
+    if (expectedTabs[page]) {
+      const [group, tab] = expectedTabs[page];
+      ok(doc.querySelector(`[data-bgrp="${group}"][data-btab="${tab}"].on`),
+         page + ' did not select its visible owned subsection');
+    }
+    if (page === 'track') {
+      const tracker = doc.querySelector('angel-resupply-track');
+      ok(tracker && tracker.shadowRoot && tracker.shadowRoot.querySelector('.title'),
+         'Resupply Tracking did not render its existing tracker page');
+      const playControl = tracker.shadowRoot.querySelector('[data-play]');
+      for (const hostRunning of [false, true]) {
+        w.APP.running = hostRunning;
+        const down = new w.KeyboardEvent('keydown', {
+          key:' ', code:'Space', bubbles:true, composed:true, cancelable:true
+        });
+        const up = new w.KeyboardEvent('keyup', {
+          key:' ', code:'Space', bubbles:true, composed:true, cancelable:true
+        });
+        playControl.dispatchEvent(down);
+        playControl.dispatchEvent(up);
+        eq(w.APP.running, hostRunning,
+           'tracker Space activation changed host mission playback');
+        eq(down.defaultPrevented, false,
+           'tracker Space activation lost its native button default');
+      }
+      w.APP.running = false;
+      tracker.setDemoState({ t:300, selected:'112', arm:'B' });
+      playControl.click();
+      ok(tracker.state.playing, 'tracker playback fixture did not start');
+      w.DSHELL.paint();
+      w.DSHELL.paint();
+      eq(doc.querySelector('angel-resupply-track'), tracker,
+         'explicit shell paints replaced the active tracker element');
+      ok(tracker.state.playing, 'explicit shell paints stopped tracker playback');
+      await pauseFor(1100);
+      const afterPaint = doc.querySelector('angel-resupply-track');
+      eq(afterPaint, tracker, 'shell repaint replaced the active tracker element');
+      ok(afterPaint.state.playing ||
+         afterPaint.state.t >= w.ResupplyTrack.durationSeconds,
+         'recurring shell repaint stopped tracker playback before completion');
+      eq(afterPaint.state.selected + '|' + afterPaint.state.arm, '112|B',
+         'tracker selection reset during the recurring shell repaint');
+      afterPaint.shadowRoot.querySelector('[data-play]').click();
+    }
+  }
+
+  doc.querySelector('[data-page="settings"]').click();
+  await pauseFor(20);
+  w.DSHELL.openView('QUERY');
+  await pauseFor(20);
+  ok(doc.querySelector('[data-page="tty"].on'),
+     'legacy palette navigation could not leave Settings');
+  doc.querySelector('[data-page="settings"]').click();
+  await pauseFor(20);
+  w.dispatchEvent(new w.KeyboardEvent('keydown', { key:'q', bubbles:true }));
+  await pauseFor(40);
+  ok(doc.querySelector('[data-page="tty"].on'),
+     'legacy keyboard navigation could not leave Settings');
+  for (const [key, owner] of [['s','auth'], ['1','dash']]) {
+    doc.querySelector('[data-page="settings"]').click();
+    await pauseFor(20);
+    w.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles:true }));
+    await pauseFor(1050);
+    ok(doc.querySelector(`[data-page="${owner}"].on`),
+       key + ' legacy keyboard navigation could not leave Settings');
+  }
+
+  const palette = w.ANGEL && w.ANGEL.get && w.ANGEL.get('palette');
+  ok(palette, 'command palette API was unavailable');
+  const paletteDestinations = palette.items()
+    .filter(item => item.id.indexOf('destination:') === 0)
+    .map(item => item.title);
+  eq(paletteDestinations.join('|'),
+     'Command Overview|Theater Map|Ops Center Wall|Decisions|Live Casualties|War Game|Sensor & Model|Resupply Tracking|Evidence|Ask Angel',
+     'command palette destination vocabulary did not match the reordered rail');
+
+  w.DSHELL.go('dash');
+  doc.body.dispatchEvent(new w.KeyboardEvent('keydown', { key:'s', bubbles:true }));
+  await new Promise(resolve => setTimeout(resolve, 1050));
+  eq(w.APP.view, 'STREAM', 'the existing S shortcut no longer opened Ground Stream');
+  eq(doc.querySelector('.d-nav-sep .d-nav-i.on').dataset.page, 'auth',
+     'Ground Stream keyboard navigation did not select its visible owner');
+  doc.body.dispatchEvent(new w.KeyboardEvent('keydown', { key:'d', bubbles:true }));
+  await new Promise(resolve => setTimeout(resolve, 1050));
+  eq(w.APP.view, 'DATA', 'the existing D shortcut no longer opened Data Sources');
+  eq(doc.querySelector('.d-nav-sep .d-nav-i.on').dataset.page, 'data',
+     'Data keyboard navigation did not select Data Sources');
+  palette.open();
+  const paletteInput = doc.getElementById('ckInput');
+  paletteInput.value = 'the difference';
+  paletteInput.dispatchEvent(new w.Event('input', { bubbles:true }));
+  await new Promise(resolve => setTimeout(resolve, 20));
+  const compareCommand = Array.from(doc.querySelectorAll('#ckList .ckRow'))
+    .find(row => /the difference/i.test(row.textContent));
+  ok(compareCommand, 'the legacy Compare palette command was unavailable');
+  compareCommand.click();
+  await new Promise(resolve => setTimeout(resolve, 20));
+  ok(doc.querySelector('[data-bgrp="ev"][data-btab="CMP"].on'),
+     'the legacy palette command did not select its visible Evidence subsection');
+  eq(doc.querySelector('.d-nav-i.on').dataset.page, 'ev',
+     'legacy palette navigation did not select its visible destination owner');
+
+  w.DSHELL.go('sensor');
+  doc.body.dispatchEvent(new w.KeyboardEvent('keydown', { key:'q', bubbles:true }));
+  await new Promise(resolve => setTimeout(resolve, 1050));
+  w.DSHELL.paint();
+  eq(w.APP.view, 'QUERY', 'Q from Sensor & Model no longer opened the SQL console');
+  ok(doc.querySelector('[data-bgrp="tty"][data-btab="QUERY"].on'),
+     'Q from Sensor & Model did not select the visible SQL console subsection');
+  eq(doc.querySelector('.d-nav-sep .d-nav-i.on').dataset.page, 'tty',
+     'Q did not select the visible Analyst Terminal owner');
+
+  if (palette.items().some(item => item.id === 'view:SENSOR')) {
+    w.DSHELL.go('data');
+    doc.body.dispatchEvent(new w.KeyboardEvent('keydown', { key:'m', bubbles:true }));
+    await new Promise(resolve => setTimeout(resolve, 1050));
+    w.DSHELL.paint();
+    eq(w.APP.view, 'SENSOR', 'M from Data Sources no longer opened Sensor & Model');
+    ok(doc.querySelector('[data-bgrp="tty"][data-btab="SENSOR"].on'),
+       'M from Data Sources did not select the visible Sensor Model subsection');
+    eq(doc.querySelector('.d-nav-i.on').dataset.page, 'sensor',
+       'M did not select the visible Sensor & Model owner');
+  }
+
+  w.DSHELL.go('ev');
+  doc.querySelector('[data-bgrp="ev"][data-btab="CMP"]').click();
+  doc.body.dispatchEvent(new w.KeyboardEvent('keydown', { key:'u', bubbles:true }));
+  await new Promise(resolve => setTimeout(resolve, 1050));
+  w.DSHELL.paint();
+  eq(w.APP.view, 'CONFIDENCE', 'U from Compare no longer opened the replication study');
+  ok(doc.querySelector('[data-bgrp="ev"][data-btab="CONF"].on'),
+     'U from Compare did not select the visible replication subsection');
+  eq(doc.querySelector('.d-nav-i.on').dataset.page, 'wargame',
+     'U did not select the visible War Game owner');
+
+  doc.querySelector('.d-nav-sep > [data-page="tty"]').click();
+  await new Promise(resolve => setTimeout(resolve, 20));
+  eq(w.APP.view, 'QUERY', 'Analyst Terminal did not open its existing console');
+  eq(doc.querySelector('.d-nav-sep .d-nav-i.on').dataset.page, 'tty',
+     'Analyst Terminal did not retain its selected secondary state');
+
+  /* Badge fixtures need only the rail's state contract. Keep them off a live
+     destination page so page renderers do not interpret deliberately minimal
+     synthetic records as full casualty or proposal objects. */
+  w.APP.view = 'SETTINGS';
+  w.DSHELL.go('settings');
+  const casualtyStart = w.APP.armA.casualties.length;
+  const queueStart = w.APP.armA.queue.length;
+  const openBefore = w.DSHELL.live().open.length;
+  const pendingBefore = w.DSHELL.live().awaiting;
+  w.APP.armA.casualties.push({
+    id:999999, tInjury:0, deadlineMin:9000, outcome:null, treated:false
+  });
+  w.APP.armA.queue.push({ state:'PENDING' });
+  w.DSHELL.paint();
+  const casualtyNav = doc.querySelector('.d-nav > [data-page="cas"]');
+  const decisionNav = doc.querySelector('.d-nav > [data-page="dec"]');
+  eq(casualtyNav.querySelector('.d-pill.red').textContent, String(openBefore + 1),
+     'Live Casualties lost its live badge treatment');
+  eq(decisionNav.querySelector('.d-pill.amb').textContent, String(pendingBefore + 1),
+     'Decisions lost its escalation badge treatment');
+  w.APP.armA.casualties.splice(casualtyStart);
+  w.APP.armA.queue.splice(queueStart);
+  w.DSHELL.go('dash');
+});
 
 test('the shipped shell filters, shows no-match, hides unsuitable screens, and clears alternate navigation', async () => {
   const frame = await consoleFrame();
@@ -1114,6 +2056,87 @@ test('the shipped shell filters, shows no-match, hides unsuitable screens, and c
   A.running = false; A.finished = true;
   w.DSHELL.go('cas');
   w.DSHELL.paint();
+  const inside = (outer, inner) => {
+    const a = outer.getBoundingClientRect(), b = inner.getBoundingClientRect();
+    return b.left >= a.left - 1 && b.right <= a.right + 1;
+  };
+  const inside2d = (outer, inner) => {
+    const a = outer.getBoundingClientRect(), b = inner.getBoundingClientRect();
+    return inside(outer, inner) && b.top >= a.top - 1 && b.bottom <= a.bottom + 1;
+  };
+  const casualtyBoard = doc.querySelector('.pa-board');
+  const liveRowCount = casualtyBoard.querySelectorAll('.pa-row').length;
+  const renderRow = w.DPAGES.cas.renderRow;
+  const testLive = { now:125, A:{ drones:[] } };
+  const casualty = (id, cls = 'IMMEDIATE', extra = {}) => Object.assign({
+    id, cls, role:'RIFLE', injury:'TRUNCAL_HEM', needs:['BLOOD','TXA'],
+    reportedCrm:68, tPinged:124, assignedTo:null, treated:false, outcome:null
+  }, extra);
+  const reach = (left, eta, slack, extra = {}) => Object.assign({
+    left, eta, slack, unreachable:false, site:{ b:{ name:'LONG GENERATED LAUNCH POINT LABEL' } }
+  }, extra);
+  const states = [
+    ['normal-untreated', casualty(991), reach(61, 37, 24),
+      ['T-61', '+24 slack', 'not tasked', 'untreated']],
+    ['breach', casualty(992), reach(0, 123, -123),
+      ['T-0', 'MISS −123', 'arrives 123:00']],
+    ['unreachable', casualty(993, 'IMMEDIATE', { tPinged:1 }),
+      reach(18, null, null, { unreachable:true }),
+      ['T-18', 'no launch point reaches this position', 'reading 124 min old']],
+    ['expectant', casualty(994, 'EXPECTANT'), reach(44, 40, 4),
+      ['T-44', 'outside the survivable cohort']],
+    ['treated', casualty(995, 'DELAYED', { treated:true, outcome:'SAVED' }), reach(32, 28, 4),
+      ['T-32', 'treated', 'survived']],
+    ['no-deadline', casualty(996), null,
+      ['no deadline asserted', 'not time-critical', 'untreated']],
+    ['untreated-resolved', casualty(997, 'IMMEDIATE', { outcome:'DIED' }), reach(0, 70, -70),
+      ['T-0', 'untreated', 'died']],
+    ['no-deadline-resolved', casualty(998, 'EXPECTANT', { outcome:'SAVED' }), null,
+      ['no deadline asserted', 'untreated', 'survived']],
+    ['scale-30', casualty(999), reach(30, 20, 10),
+      ['T-30', '+10 slack', 'untreated']]
+  ];
+  const fixture = doc.createElement('div');
+  fixture.dataset.casualtyLayoutFixture = '';
+  fixture.innerHTML = states.map(([state, c, r]) =>
+    renderRow(testLive, c, r).replace('class="pa-row', `data-layout-state="${state}" class="pa-row`)).join('');
+  while (fixture.firstChild) casualtyBoard.appendChild(fixture.firstChild);
+  const fixtureRows = Array.from(casualtyBoard.querySelectorAll('[data-layout-state]'));
+  eq(fixtureRows.length, states.length,
+     'the production casualty renderer did not create every layout state');
+  states.forEach(([state,,, expected]) => {
+    const text = fixtureRows.find(row => row.dataset.layoutState === state).textContent;
+    expected.forEach(label => ok(text.includes(label), `${state} lost its ${label} status text`));
+    ok(!text.includes('&middot;'), `${state} exposed an encoded separator as source text`);
+  });
+  for (const width of [1180, 900]) {
+    frame.style.width = width + 'px';
+    frame.style.height = '900px';
+    const casualtyRows = Array.from(doc.querySelectorAll('.pa-row'));
+    ok(casualtyRows.length > fixtureRows.length &&
+       casualtyRows.every(row => inside(row.closest('.pa-board'), row)),
+       `a casualty row escaped its board at ${width}px`);
+    ok(casualtyRows.every(row => Array.from(row.querySelectorAll('.pa-bars,.pa-meta,.pa-t,.pa-note'))
+         .every(part => inside(row, part))),
+       `a casualty timeline annotation escaped its row at ${width}px`);
+    ok(fixtureRows.every(row => {
+      const bars = row.querySelector('.pa-bars').getBoundingClientRect();
+      const meta = row.querySelector('.pa-meta').getBoundingClientRect();
+      return meta.width >= 100 && meta.left >= bars.right - 1;
+    }), `a casualty annotation was clipped or overlapped its timeline at ${width}px`);
+    const thirtyBar = casualtyBoard.querySelector('[data-layout-state="scale-30"] .pa-bar')
+      .getBoundingClientRect();
+    const thirtyTick = casualtyBoard.querySelectorAll('.pa-ruler-ticks > span')[3]
+      .getBoundingClientRect();
+    ok(Math.abs(thirtyBar.right - thirtyTick.left) <= 1.5,
+       `a 30-minute casualty bar did not end at the +30 ruler tick at ${width}px`);
+    ok(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth,
+       `live casualty rows introduced horizontal page overflow at ${width}px`);
+  }
+  fixtureRows.forEach(row => row.remove());
+  eq(casualtyBoard.querySelectorAll('.pa-row').length, liveRowCount,
+     'the casualty layout fixture was not removed cleanly');
+  frame.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0';
   const before = doc.querySelectorAll('.pa-row').length;
   const firstId = doc.querySelector('.pa-row .pa-id .n').textContent.split('·')[0].trim();
   await consoleType(frame, firstId.toLowerCase());
@@ -1177,8 +2200,8 @@ test('the shipped shell filters, shows no-match, hides unsuitable screens, and c
   w.DSHELL.paint();
   await new Promise(resolve => setTimeout(resolve, 20));
   eq(w.DSHELL.query(), '', 'alternate navigation carried the prior query into Decision Feed');
-  ok(doc.querySelector('[data-page="feed"]').classList.contains('on'),
-     'alternate navigation did not synchronize the shell destination');
+  ok(doc.querySelector('[data-page="auth"]').classList.contains('on'),
+     'alternate navigation did not synchronize the owned Authority & Policy destination');
 });
 
 test('the shipped shell preserves composed search text through a live repaint', async () => {
@@ -1357,8 +2380,255 @@ async function primaryType(frame, value) {
   await pauseFor(40);
 }
 
+async function waitForPrimary(predicate, message, timeout) {
+  const end = performance.now() + (timeout || 90000);
+  while (performance.now() < end) {
+    if (predicate()) return;
+    await pauseFor(50);
+  }
+  throw new Error(message || 'primary console condition timed out');
+}
+
+test('the War Game runs, cancels, fails all-or-nothing, and invalidates findings with the selected operation', async () => {
+  const frame = await primaryFrame();
+  const instance = primaryInstance(frame);
+  await primaryGo(frame, 'wargame', { wgLever:'launch', wgSeeds:1, wgSweep:null, wgError:null });
+
+  let vals = instance.wargameVals();
+  eq(vals.wg.settings.length, 3, 'launch-point settings were not exposed as planner controls');
+  const launchCards = Array.from(frame.contentDocument.querySelectorAll('div')).filter(el =>
+    el.children.length === 2 && Array.from(el.children).every(x => x.tagName === 'SPAN') &&
+    /INCLUDED · LAUNCH POINTS/.test(el.textContent));
+  eq(launchCards.length, 3, 'scenario-derived launch-point controls did not render');
+  launchCards.find(el => el.children[0].textContent.trim() === '3').dispatchEvent(
+    new frame.contentWindow.MouseEvent('click', { bubbles:true }));
+  await waitForPrimary(() => instance.state.wgSettings.launch && instance.state.wgSettings.launch.length === 2,
+    'planner setting selection did not update', 5000);
+  const protectedCard = Array.from(frame.contentDocument.querySelectorAll('div')).find(el =>
+    el.children.length === 2 && Array.from(el.children).every(x => x.tagName === 'SPAN') &&
+    el.children[0].textContent.trim() === '2' && /INCLUDED · LAUNCH POINTS/.test(el.textContent));
+  protectedCard.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles:true }));
+  await pauseFor(50);
+  eq(instance.state.wgSettings.launch.length, 2,
+     'planner could reduce a sensitivity sweep below two settings');
+  vals = instance.wargameVals();
+  vals.wg.run();
+  await waitForPrimary(() => instance.state.wgRunning, 'War Game never entered its running state', 5000);
+  ok(instance.state.wgTotal === 2 && instance.state.wgDone <= instance.state.wgTotal,
+     'War Game progress did not report completed versus total paired battles');
+  await waitForPrimary(() => !instance.state.wgRunning, 'real-worker War Game sweep did not finish');
+  const completed = instance.state.wgSweep;
+  ok(completed && completed.points.length === 2, 'real-worker sweep did not retain the planner-selected launch-point findings');
+  eq(completed.settings.map(x => x.label).join('|'), '1 LAUNCH POINTS|2 LAUNCH POINTS',
+     'completed provenance did not retain the exact planner-selected values');
+  eq(completed.points.map(x => x.v).join('|'), '1|2',
+     'excluded setting reached the completed worker findings');
+  eq(completed.scenario, 'PACOM_CORAL');
+  eq(completed.seedStart + '/' + completed.seedEnd + '/' + completed.battlesPerSetting, '1000/1000/1');
+  ok(completed.points.every(p => p.n === 1 && Number.isFinite(p.a) && Number.isFinite(p.b) &&
+     Number.isFinite(p.gap) && Number.isFinite(p.ci) && p.won + p.tied + p.lost === 1),
+     'rendered findings were incomplete or did not preserve paired records');
+  await pauseFor(50);
+  const completedText = frame.contentDocument.body.textContent;
+  ok(/PACOM_CORAL/.test(completedText) && /SEEDS 1000/.test(completedText) &&
+     /DECLARED DIFFERENCES/.test(completedText) && /better.*level.*worse/i.test(completedText),
+     'completed War Game did not render provenance and paired interpretation');
+
+  await primarySetState(instance, { wgLever:'fleet', wgSeeds:40, wgSweep:completed, wgError:null });
+  const frozen = instance.wargameVals();
+  eq(frozen.wg.ranLabel, 'LAUNCH POINTS',
+     'changing the selected lever relabelled an earlier finding');
+  ok(frozen.wg.provenance.some(x => /PACOM_CORAL/.test(x.v)) &&
+     frozen.wg.provenance.some(x => /1 per setting.*1000/.test(x.v)),
+     'changing controls rewrote the completed run provenance');
+
+  const cancelledWorkers = [];
+  instance._wgWorkerFactory = () => {
+    const fake = {
+      terminated:false,
+      terminate(){ this.terminated = true; },
+      postMessage(){ /* hold every job until the planner cancels */ }
+    };
+    cancelledWorkers.push(fake);
+    return fake;
+  };
+  instance.wargameVals().wg.run();
+  await waitForPrimary(() => instance.state.wgRunning, 'cancellation fixture never started', 5000);
+  instance.wargameVals().wg.cancel();
+  await waitForPrimary(() => !instance.state.wgRunning, 'cancellation did not stop the sweep', 5000);
+  ok(!instance.state.wgSweep && /cancelled.*No partial findings/i.test(instance.state.wgError),
+     'cancellation retained partial findings or lacked an explicit all-or-nothing message');
+  ok(cancelledWorkers.length > 0 && cancelledWorkers.every(w => w.terminated),
+     'cancellation did not terminate every outstanding worker');
+
+  const failCase = async (mode, expected) => {
+    const made = [];
+    instance._wgTimeouts = { hello:25, job:25 };
+    instance._wgWorkerFactory = () => {
+      const fake = {
+        terminated:false,
+        terminate(){ this.terminated = true; },
+        postMessage(m) {
+          if (mode === 'hello-timeout') return;
+          setTimeout(() => {
+            if (this.terminated || !this.onmessage) return;
+            if (m.type === 'hello') {
+              this.onmessage({ data: mode === 'load'
+                ? { type:'hello', ok:false, engine:false, error:'fixture load error' }
+                : { type:'hello', ok:true, engine:true } });
+            } else if (mode === 'job-timeout') {
+              return;
+            } else if (mode === 'runtime') {
+              this.onmessage({ data:{ type:'error', id:m.id, error:'fixture runtime error' } });
+            } else {
+              this.onmessage({ data:{ type:'result', result:{ id:m.id } } });
+            }
+          }, 0);
+        }
+      };
+      made.push(fake);
+      return fake;
+    };
+    await primarySetState(instance, { wgLever:'launch', wgSeeds:1, wgSweep:null, wgError:null });
+    instance.wargameVals().wg.run();
+    await waitForPrimary(() => !instance.state.wgRunning && !!instance.state.wgError,
+      mode + ' failure did not terminate the sweep', 5000);
+    ok(!instance.state.wgSweep && expected.test(instance.state.wgError),
+       mode + ' failure surfaced a partial finding or the wrong explicit error');
+    ok(made.length > 0 && made.every(w => w.terminated),
+       mode + ' failure did not terminate every worker');
+  };
+  await failCase('load', /could not load.*No partial findings/i);
+  await failCase('hello-timeout', /asked to say hello.*No partial findings/i);
+  await failCase('job-timeout', /nothing came back.*No partial findings/i);
+  await failCase('runtime', /failed inside the engine.*No partial findings/i);
+  await failCase('protocol', /incomplete or mismatched.*No partial findings/i);
+  instance._wgWorkerFactory = null;
+  instance._wgTimeouts = null;
+
+  await primarySetState(instance, {
+    wgLever:'comms', wgSettings:{ ...(instance.state.wgSettings || {}), comms:[0, 6] },
+    wgSweep:completed, wgRanLever:completed.lever, wgError:null
+  });
+  instance.pickScenario('EUCOM_GRANITE')();
+  await waitForPrimary(() => instance.state.scenario === 'EUCOM_GRANITE', 'scenario did not change', 5000);
+  ok(!instance.state.wgSweep && !instance.state.wgRanLever &&
+     Object.keys(instance.state.wgSettings).length === 0,
+     'scenario change retained findings or setting choices from the previous operation');
+  const changed = instance.wargameVals();
+  ok(changed.wg.context.some(x => /EUCOM_GRANITE/.test(x.v)) &&
+     changed.wg.context.some(x => /15/.test(x.v)) &&
+     changed.wg.settings.some(x => x.value === '15'),
+     'War Game context and setting controls did not regenerate from the selected scenario');
+  instance.pickScenario('PACOM_CORAL')();
+  await waitForPrimary(() => instance.state.scenario === 'PACOM_CORAL',
+    'scenario fixture did not restore JOA CORAL', 5000);
+});
+
+test('the primary application keeps the requested navigation order, grouping, and routes', async () => {
+  const frame = await primaryFrame();
+  const instance = primaryInstance(frame), doc = frame.contentDocument, w = frame.contentWindow;
+  const menus = doc.querySelectorAll('.app-nav-menu');
+  const visible = menu => Array.from(menu.children)
+    .filter(el => w.getComputedStyle(el).display !== 'none')
+    .sort((a, b) => Number(w.getComputedStyle(a).order) - Number(w.getComputedStyle(b).order));
+  const label = el => el.textContent.replace('✦ AI', '').trim().replace(/\s+/g, ' ');
+  const primaryLabels = visible(menus[0]).map(label);
+  const secondaryLabels = visible(menus[1]).map(label);
+  eq(primaryLabels.join('|'),
+     'Command Overview|Theater Map|Ops Center Wall|Decisions|Live Casualties|War Game|Sensor & Model|Resupply Tracking|Evidence|Ask Angel',
+     'the primary application menu labels or visible order changed');
+  eq(secondaryLabels.join('|'), 'Analyst Terminal|Authority & Policy|Data Sources|Settings',
+     'the primary application secondary grouping or order changed');
+
+  const routes = [
+    ['Command Overview','dash'], ['Theater Map','map'], ['Ops Center Wall','ops'],
+    ['Decisions','dec'], ['Live Casualties','cas'], ['War Game','wargame'],
+    ['Sensor & Model','sensor'], ['Resupply Tracking','track'],
+    ['Evidence','ev'], ['Ask Angel','chat']
+  ];
+  for (const [name, page] of routes) {
+    const item = visible(doc.querySelectorAll('.app-nav-menu')[0]).find(el => label(el) === name);
+    item.click();
+    await pauseFor(40);
+    eq(instance.state.page, page, name + ' opened the wrong primary application destination');
+    eq(item.getAttribute('data-selected'), 'true', name + ' lost its selected state');
+  }
+
+  for (const [name, page] of [['Analyst Terminal','tty'], ['Authority & Policy','auth']]) {
+    const item = visible(doc.querySelectorAll('.app-nav-menu')[1]).find(el => label(el) === name);
+    item.click();
+    await pauseFor(40);
+    eq(instance.state.page, page, name + ' opened the wrong secondary destination');
+    eq(item.getAttribute('data-selected'), 'true', name + ' lost its selected state');
+  }
+});
+
+test('the primary Live Casualties board contains final row annotations at supported console widths', async () => {
+  const frame = await primaryFrame();
+  const instance = primaryInstance(frame), doc = frame.contentDocument;
+  await primarySetState(instance, {
+    t:180, running:false, q:'', blockedAttempt:false, casTab:'board',
+    casFilter:'ALL', group:'loc', showAll:true, expand:null
+  });
+  await primaryGo(frame, 'cas');
+  const inside = (outer, inner) => {
+    const a = outer.getBoundingClientRect(), b = inner.getBoundingClientRect();
+    return b.left >= a.left - 1 && b.right <= a.right + 1;
+  };
+  const inside2d = (outer, inner) => {
+    const a = outer.getBoundingClientRect(), b = inner.getBoundingClientRect();
+    return inside(outer, inner) && b.top >= a.top - 1 && b.bottom <= a.bottom + 1;
+  };
+  for (const width of [1280, 1024, 900]) {
+    frame.style.width = width + 'px';
+    await pauseFor(40);
+    const board = doc.querySelector('.cas-board');
+    const rows = Array.from(doc.querySelectorAll('.cas-board-row'));
+    ok(board && rows.length > 0, `the primary casualty board had no final rows at ${width}px`);
+    ok(rows.every(row => inside(board, row)),
+       `a primary casualty row escaped its board at ${width}px`);
+    ok(rows.every(row => Array.from(row.querySelectorAll('.cas-row-bars,.cas-row-meta,.cas-row-meta>span'))
+         .every(part => inside2d(row, part))),
+       `a primary casualty annotation escaped its row at ${width}px`);
+    ok(rows.every(row => {
+      const bars = row.querySelector('.cas-row-bars').getBoundingClientRect();
+      const meta = row.querySelector('.cas-row-meta').getBoundingClientRect();
+      return meta.width >= 100 && meta.left >= bars.right - 1;
+    }), `a primary casualty status overlapped its timeline at ${width}px`);
+    const ticks = board.querySelector('.cas-board-axis-ticks').getBoundingClientRect();
+    const bars = rows[0].querySelector('.cas-row-bars').getBoundingClientRect();
+    ok(Math.abs(ticks.left - bars.left) <= 1 && Math.abs(ticks.width - bars.width) <= 1,
+       `the primary casualty ruler drifted from its timeline at ${width}px`);
+    ok(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth,
+       `primary casualty rows introduced horizontal page overflow at ${width}px`);
+  }
+  const boardText = doc.querySelector('.cas-board').textContent;
+  ok(boardText.includes('DIED') && boardText.includes('LIVED'),
+     'the final primary casualty board lost death or survival status meaning');
+  await primarySetState(instance, {
+    t:60, running:false, q:'', casTab:'board', group:'dl', showAll:true, expand:null
+  });
+  frame.style.width = '1024px';
+  await pauseFor(40);
+  const liveBoard = doc.querySelector('.cas-board');
+  const liveRows = Array.from(doc.querySelectorAll('.cas-board-row'));
+  ok(liveBoard && liveRows.length > 0,
+     'the primary casualty board had no active-run rows at the screenshot width');
+  ok(liveRows.every(row => Array.from(row.querySelectorAll('.cas-row-bars,.cas-row-meta,.cas-row-meta>span'))
+       .every(part => inside2d(row, part))),
+     'an active primary casualty annotation escaped or was clipped at 1024px');
+  ok(doc.documentElement.scrollWidth <= doc.documentElement.clientWidth,
+     'active primary casualty rows introduced horizontal page overflow at 1024px');
+  frame.style.width = '1280px';
+  await primarySetState(instance, {
+    t:0, running:false, q:'', blockedAttempt:false, casTab:'board',
+    casFilter:'ALL', group:'loc', showAll:false, expand:null
+  });
+});
+
 function primaryClickText(frame, text) {
-  const el = Array.from(frame.contentDocument.querySelectorAll('span'))
+  const el = Array.from(frame.contentDocument.querySelectorAll('span,button'))
     .find(node => node.textContent.trim() === text);
   ok(el, 'could not find the primary console control "' + text + '"');
   el.click();
@@ -1460,8 +2730,8 @@ test('the primary route filters before caps, composes with existing controls, pr
   ok(doc.querySelector('.context-no-match'), 'Fleet did not show its screen-appropriate no-match state');
 
   await primaryGo(frame, 'dash');
-  await primaryType(frame, 'brief');
-  await primaryClickText(frame, 'OPEN FULL BOARD →');
+  await primaryType(frame, 'deadline');
+  await primaryClickText(frame, 'OPEN CASUALTY BOARD');
   eq(input().value, '', 'a programmatic in-screen destination link carried the prior query');
 
   await primaryType(frame, 'casualty');
@@ -1477,6 +2747,24 @@ test('the primary route filters before caps, composes with existing controls, pr
   await primaryClickText(frame, 'ALL');
   ok(!/NO RECORDS MATCH/i.test(doc.body.textContent),
      'clearing the Decision Feed category filter did not restore the text match');
+
+  let missedFixture = null;
+  for (let t = 0; t < 180 && !missedFixture; t += 0.25) {
+    const snapshot = instance.E.snapshot(instance.runD, t);
+    if (snapshot.missed > 0) missedFixture = { t, snapshot };
+  }
+  ok(missedFixture, 'the deployed run has no projected-miss fixture');
+  instance.snap = () => missedFixture.snapshot;
+  await primaryGo(frame, 'dash');
+  await primarySetState(instance, {
+    deployed:true, t:missedFixture.t, running:false,
+    q:'definitely-no-command-overview-match'
+  });
+  ok(doc.querySelector('.context-no-match') &&
+     /COMMAND ATTENTION/.test(doc.querySelector('.cmd62-kicker').textContent),
+     'an unmatched search hid the root overview operational-attention state');
+  delete instance.snap;
+  await primarySetState(instance, { q:'' });
 
   let pendingFixture = null;
   for (let t = 0; t < 180 && !pendingFixture; t += 0.25) {
@@ -1516,15 +2804,299 @@ test('the primary route filters before caps, composes with existing controls, pr
      doc.body.textContent.indexOf('AUTHORISE A · COMMIT') >= 0,
      'a matching pending proposal did not restore its decision action surface');
   await primaryClickText(frame, 'AUTHORISE A · COMMIT');
-  ok(instance.state.interruptOpen,
-     'acting on one filtered proposal suppressed attention for unmatched pending proposals');
+  ok(!instance.state.interruptOpen &&
+     instance.pendingFor(fixtureSnapshot).some(item => item.id === unmatchedProposal.id),
+     'acting on one filtered proposal lost the unmatched pending proposal');
   ok(instance.state.decisions[matchedProposal.id] === 'APPROVED',
      'the visible filtered proposal action did not record its decision');
+  await primaryGo(frame, 'dash');
+  ok(doc.querySelector('.decision-bell'),
+     'the remaining unmatched proposal did not retain a persistent pending bell');
   delete instance.snap;
   await primarySetState(instance, {
     t:0, running:false, deployed:false, decisions:{}, extra:[],
     q:'', blockedAttempt:false, interruptOpen:false
   });
+});
+
+test('pending decisions stay non-blocking, actionable, and honest across speed, width, staleness, and expiry', async () => {
+  const frame = await primaryFrame();
+  const w = frame.contentWindow, doc = frame.contentDocument;
+  const instance = primaryInstance(frame);
+  let fixture = null;
+  for (let t = 0; t < 180 && !fixture; t += 0.25) {
+    const snapshot = instance.E.snapshot(instance.runD, t);
+    const protectedCandidate = snapshot.pending &&
+      snapshot.pending.find(p => p.closeReason === 'SIMULATION_WINDOW_ELAPSED');
+    if (protectedCandidate) fixture = { t, snapshot, proposal:protectedCandidate };
+  }
+  ok(fixture, 'the deployed run has no pending-decision fixture');
+  const proposal = fixture.proposal;
+  const nextProposal = {
+    ...proposal, id:proposal.id + 300000, call:'SELFTEST-NEXT-PROPOSAL',
+    grounds:(proposal.grounds || []).slice(),
+    route:(proposal.route || []).map(r => ({ ...r }))
+  };
+  const firstSnapshot = { ...fixture.snapshot, pending:[proposal] };
+  const activeSnapshot = { ...fixture.snapshot, pending:[proposal, nextProposal] };
+  instance.snap = () => firstSnapshot;
+  instance._knownPending = new Set();
+  instance._decisionWindows = new Map();
+  await primaryGo(frame, 'dash');
+  await primarySetState(instance, {
+    deployed:true, t:fixture.t, running:true, speed:10, decisions:{}, extra:[],
+    interruptOpen:false, decisionNotice:'', q:'', blockedAttempt:false
+  });
+  instance.checkPendingAttention();
+  await pauseFor(30);
+
+  let toast = doc.querySelector('.decision-toast');
+  const dashboardDecisionMeta = doc.querySelector('.cmd62-meta');
+  ok(dashboardDecisionMeta &&
+     /00:1[34-5] MINIMUM REAL-TIME PROTECTION REMAINING/.test(dashboardDecisionMeta.textContent) &&
+     !/15:00 MINIMUM REAL-TIME PROTECTION REMAINING/.test(dashboardDecisionMeta.textContent),
+     'the root overview formatted a 15-second response window as minutes');
+  ok(toast, 'a newly surfaced proposal did not enter the application bar as a condensed toast');
+  eq(frame.contentWindow.getComputedStyle(toast).backgroundColor, 'rgb(255, 0, 0)',
+     'the decision toast did not use the required pure red notification color');
+  ok(Number(frame.contentWindow.getComputedStyle(toast.querySelector('.decision-toast-copy strong')).fontWeight) >= 700 &&
+     Number(frame.contentWindow.getComputedStyle(toast.querySelector('.decision-toast-copy span')).fontWeight) >= 700,
+     'the decision toast heading and context were not both rendered in bold type');
+  ok(!doc.querySelector('.authority-veil,[role="dialog"],[role="alertdialog"]'),
+     'the pending decision introduced a modal or blocking veil');
+  eq(instance.state.page, 'dash', 'the toast stole the operator away from the current page');
+  ok(instance.state.running && instance.state.speed === 10,
+     'raising the toast changed accelerated playback');
+  const firstToastTimer = instance._decisionToastTO;
+  instance.snap = () => activeSnapshot;
+  instance.checkPendingAttention();
+  instance.forceUpdate();
+  await pauseFor(30);
+  toast = doc.querySelector('.decision-toast');
+  eq(instance._decisionToastTO, firstToastTimer,
+     'a staggered proposal restarted the timer without restarting the active toast animation');
+  ok(/2 PENDING · NEXT E-/.test(toast.textContent) &&
+     toast.textContent.indexOf(proposal.call) >= 0 &&
+     /00:\d{2} REMAINING/.test(toast.textContent),
+     'the condensed toast omitted its count, proposal context, or usable countdown');
+  const applicationBar = toast.parentElement;
+  ok(applicationBar.classList.contains('application-bar') &&
+     applicationBar.lastElementChild === toast,
+     'the decision toast was not anchored in the application bar’s dedicated top-right slot');
+  await pauseFor(5050);
+  ok(!doc.querySelector('.decision-toast') && doc.querySelector('.decision-bell'),
+     'a staggered proposal created an invisible gap instead of transitioning the toast to the bell');
+  instance.snap = () => ({ ...activeSnapshot, pending:[] });
+  ok(instance.pendingFor(instance.snap()).length === 2,
+     'accelerated simulated expiry erased proposals inside the protected real-time window');
+  instance.snap = () => activeSnapshot;
+  const timeoutThenResolved = instance.runD.A.proposals.find(p =>
+    p.closeReason === 'SIMULATION_WINDOW_ELAPSED' && p.route.some(leg => {
+      const c = instance.runD.A.cas.find(x => x.id === leg.casId);
+      return c && c.tResolved != null && c.tResolved > p.tActed && c.tResolved < 180;
+    }));
+  ok(timeoutThenResolved, 'the real run has no timeout-then-casualty-change fixture');
+  const resolvedLeg = timeoutThenResolved.route.find(leg => {
+    const c = instance.runD.A.cas.find(x => x.id === leg.casId);
+    return c && c.tResolved != null && c.tResolved > timeoutThenResolved.tActed && c.tResolved < 180;
+  });
+  const resolvedAt = instance.runD.A.cas.find(c => c.id === resolvedLeg.casId).tResolved + 0.25;
+  const resolvedSnapshot = instance.E.snapshot(instance.runD, resolvedAt);
+  instance._decisionWindows = new Map([[timeoutThenResolved.id, {
+    proposal:timeoutThenResolved, firstSeen:Date.now(), until:Date.now() + 15000
+  }]]);
+  const beforeStaleAudit = instance.state.extra.length;
+  const lateStatus = instance.decisionStatus(timeoutThenResolved, resolvedSnapshot);
+  ok(!lateStatus.actionable && /casualty condition changed/i.test(lateStatus.text),
+     'a casualty resolving after timeout left Commit actionable');
+  instance.actOnDecision(timeoutThenResolved, 'APPROVED', resolvedSnapshot);
+  await pauseFor(20);
+  eq(instance.state.extra.length, beforeStaleAudit,
+     'a stale timeout proposal wrote a false approval audit record');
+  instance.snap = () => activeSnapshot;
+  instance._decisionWindows = new Map([
+    [proposal.id, { proposal, firstSeen:Date.now(), until:Date.now() + 15000 }],
+    [nextProposal.id, { proposal:nextProposal, firstSeen:Date.now(), until:Date.now() + 15000 }]
+  ]);
+  await primarySetState(instance, { decisionNotice:'', interruptOpen:true });
+  frame.width = '480';
+  frame.style.setProperty('width', '480px', 'important');
+  await pauseFor(100);
+  const narrowWidth = doc.querySelector('.decision-toast').getBoundingClientRect().width;
+  ok(narrowWidth <= 230,
+     'the decision toast overflowed its narrow application-bar slot', '<= 230px', narrowWidth + 'px');
+  ok(frame.contentWindow.getComputedStyle(doc.querySelector('.decision-toast-copy span')).display !== 'none',
+     'the narrow decision toast hid the proposal context and response countdown');
+  frame.width = '1280';
+  frame.style.setProperty('width', '1280px', 'important');
+
+  toast.click();
+  await pauseFor(30);
+  eq(instance.state.page, 'dec', 'clicking the decision toast did not open Decisions');
+  ok(!doc.querySelector('.decision-toast'), 'the toast remained floating over the Decisions page');
+  ok(!instance.state.interruptOpen && !instance._decisionToastTO,
+     'opening Decisions did not permanently dismiss the transient toast state');
+  await primaryGo(frame, 'dash');
+  ok(!doc.querySelector('.decision-toast') && doc.querySelector('.decision-bell'),
+     'leaving Decisions resurrected the dismissed toast instead of the persistent bell');
+  await primarySetState(instance, { interruptOpen:true });
+  instance._decisionToastTO = setTimeout(() => {
+    instance._decisionToastTO = 0;
+    instance.setState({ interruptOpen:false });
+  }, 40);
+  await pauseFor(90);
+  ok(!doc.querySelector('.decision-toast'), 'the condensed toast did not slide away after its brief interval');
+  const indicator = doc.querySelector('.decision-bell');
+  ok(indicator && indicator.querySelector('.decision-bell-pip'),
+     'the toast did not resolve to a persistent bell with pending count');
+  eq(frame.contentWindow.getComputedStyle(indicator).backgroundColor, 'rgb(255, 0, 0)',
+     'the persistent decision bell did not retain the required pure red notification color');
+  ok(frame.contentWindow.getComputedStyle(indicator).animationName.indexOf('pendingBellGlow') >= 0,
+     'the persistent red decision bell did not carry its pulse treatment');
+  indicator.focus();
+  eq(doc.activeElement, indicator, 'the collapsed pending indicator was not keyboard focusable');
+  indicator.click();
+  await pauseFor(30);
+  eq(instance.state.page, 'dec', 'the persistent bell did not open Decisions');
+  ok(!doc.querySelector('.decision-toast') && !doc.querySelector('.decision-bell'),
+     'decision attention controls remained over the Decisions destination');
+  instance.actOnDecision(proposal, 'HELD', activeSnapshot);
+  await pauseFor(20);
+  eq(instance.state.decisions[proposal.id], 'HELD', 'the Decision board action did not record the outcome');
+  ok(instance.state.extra.some(e => e.action === 'REJECT' && e.actor === 'OPERATOR'),
+     'the Decision board action did not write the shared operator audit record');
+  ok(!instance.state.interruptOpen && !instance._decisionToastTO,
+     'answering one queued decision re-armed a toast without a lifecycle timer');
+  await primaryGo(frame, 'dash');
+  await pauseFor(5100);
+  const queueBell = doc.querySelector('.decision-bell');
+  ok(queueBell && frame.contentWindow.getComputedStyle(queueBell).opacity !== '0' &&
+     instance.pendingFor(activeSnapshot).some(item => item.id === nextProposal.id),
+     'the persistent bell disappeared after answering one item in a multi-decision queue');
+
+  const stale = instance.runD.A.proposals.find(p =>
+    p.closeReason && p.closeReason !== 'SIMULATION_WINDOW_ELAPSED');
+  ok(stale, 'the real projected run has no operationally stale proposal fixture');
+  const staleSnapshot = { ...fixture.snapshot, pending:[] };
+  instance.snap = () => staleSnapshot;
+  instance._decisionWindows = new Map([[stale.id, {
+    proposal:stale, firstSeen:Date.now(), until:Date.now() + 15000
+  }]]);
+  await primarySetState(instance, { decisions:{}, extra:[], interruptOpen:true, decisionNotice:'' });
+  await primaryGo(frame, 'dec');
+  const boardCommit = Array.from(doc.querySelectorAll('button'))
+    .find(el => /AUTHORISE A · COMMIT/.test(el.textContent));
+  ok(boardCommit && boardCommit.disabled,
+     'the full Decision board left stale Commit enabled');
+  ok(/RESPONSE WINDOW.*REAL TIME/i.test(doc.body.textContent) &&
+     /no longer feasible|already been committed|no longer available|condition changed/i.test(doc.body.textContent),
+     'the full Decision board did not share the shelf countdown and stale explanation');
+  await primaryGo(frame, 'dash');
+
+  instance._decisionWindows.get(stale.id).until = Date.now() - 1;
+  await primarySetState(instance, { decisionNotice:'' });
+  ok(!doc.querySelector('.decision-toast') && !doc.querySelector('.decision-bell'),
+     'an expired proposal retained an application-bar attention control');
+
+  const passiveExpirySnapshot = { ...activeSnapshot, pending:[] };
+  instance.snap = () => passiveExpirySnapshot;
+  instance._decisionWindows = new Map([[proposal.id, {
+    proposal, firstSeen:Date.now(), until:Date.now() + 140
+  }]]);
+  await primarySetState(instance, {
+    running:false, interruptOpen:false, decisions:{}, extra:[], decisionNotice:''
+  });
+  const passiveAuditBefore = instance.state.extra.length;
+  await pauseFor(360);
+  eq(instance.pendingFor(passiveExpirySnapshot).length, 0,
+     'a collapsed paused proposal survived its wall-clock deadline');
+  ok(!doc.querySelector('.decision-toast') && !doc.querySelector('.decision-bell'),
+     'collapsed paused expiry left actionable decision controls visible');
+  instance.actOnDecision(proposal, 'HELD', passiveExpirySnapshot);
+  await pauseFor(20);
+  eq(instance.state.extra.length, passiveAuditBefore,
+     'Hold recorded an outcome after the retained proposal expired');
+
+  instance._decisionWindows = new Map([[proposal.id, {
+    proposal, firstSeen:Date.now(), until:Date.now() + 15000
+  }]]);
+  await primarySetState(instance, { decisionNotice:'old run notice', interruptOpen:true });
+  instance.resetRun();
+  await pauseFor(30);
+  eq(instance._decisionWindows.size, 0, 'reset retained a prior run response window');
+  eq(instance.state.decisionNotice, '', 'reset retained a prior run decision status');
+  instance.snap = () => activeSnapshot;
+  instance._knownPending = new Set();
+  const replayStart = Date.now();
+  await primarySetState(instance, { deployed:true, t:fixture.t, running:false });
+  instance.checkPendingAttention();
+  await pauseFor(20);
+  ok(instance._decisionWindows.get(proposal.id).until >= replayStart + 14900,
+     'a repeated proposal id reused the prior run response deadline');
+
+  delete instance.snap;
+  instance._decisionWindows = new Map();
+  await primarySetState(instance, {
+    t:0, running:false, deployed:false, decisions:{}, extra:[],
+    q:'', blockedAttempt:false, interruptOpen:false, decisionNotice:''
+  });
+});
+
+test('the primary route preserves composed search text through a recurring repaint', async () => {
+  const frame = await primaryFrame();
+  const w = frame.contentWindow, doc = frame.contentDocument;
+  const instance = primaryInstance(frame);
+  await primarySetState(instance, {
+    t:0, running:false, deployed:false, q:'', blockedAttempt:false,
+    casTab:'supply', casFilter:'ALL', deployOpen:false,
+    deploying:false, depOnline:0, interruptOpen:false
+  });
+  await primaryGo(frame, 'cas', { casTab:'supply' });
+
+  const field = doc.getElementById('contextSearch');
+  const supplyName = instance.snap().stock[0].name;
+  const composed = supplyName.toLowerCase();
+  const setValue = Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype, 'value').set;
+  field.focus();
+  field.dispatchEvent(new w.CompositionEvent('compositionstart', {
+    bubbles:true, data:''
+  }));
+  setValue.call(field, composed);
+  field.setSelectionRange(composed.length, composed.length);
+  field.dispatchEvent(new w.InputEvent('input', {
+    bubbles:true, inputType:'insertCompositionText', data:composed, isComposing:true
+  }));
+
+  const composingField = doc.getElementById('contextSearch');
+  const caret = composingField.selectionStart;
+  await primarySetState(instance, { deploying:true, depOnline:0 });
+  await pauseFor(310);
+  eq(doc.getElementById('contextSearch'), composingField,
+     'a recurring primary-console repaint replaced the search input during composition');
+  eq(doc.activeElement, composingField,
+     'a recurring primary-console repaint blurred the search input during composition');
+  eq(composingField.selectionStart, caret,
+     'a recurring primary-console repaint moved the search caret during composition');
+
+  composingField.dispatchEvent(new w.CompositionEvent('compositionend', {
+    bubbles:true, data:composed
+  }));
+  composingField.dispatchEvent(new w.InputEvent('input', {
+    bubbles:true, inputType:'insertFromComposition', data:composed, isComposing:false
+  }));
+  await pauseFor(40);
+
+  eq(instance.state.q, composed,
+     'the committed primary composed value did not become the search query');
+  ok(!doc.querySelector('.context-no-match') && doc.body.textContent.indexOf(supplyName) >= 0,
+     'the committed primary composed value did not retain its matching record');
+  eq(doc.getElementById('contextSearch'), composingField,
+     'committing primary composed text replaced the search input');
+  eq(doc.activeElement, composingField,
+     'committing primary composed text blurred the search input');
+  eq(composingField.selectionStart, composed.length,
+     'committing primary composed text moved the search caret');
+  await primarySetState(instance, { deploying:false });
 });
 
 test('the primary route blocks and narrates the full active-mission countdown lifecycle', async () => {
@@ -1604,145 +3176,131 @@ test('the primary route blocks and narrates the full active-mission countdown li
 });
 
 /* -------------------------------------------------------------------------- */
-group('COMPARISON PANE INDICATOR PREVIEW',
-      'The temporary A, B and C treatments switch together without touching map state.');
+group('COMPARISON PANE CAPSULES',
+      'The selected 01 Capsule treatment sizes itself from its labels and keeps both role colors distinct.');
 
-function comparisonIndicatorFixture() {
-  const root = document.createElement('div');
-  const control = document.createElement('div');
-  control.innerHTML =
-    '<button data-cmp-indicator="tactical"></button>' +
-    '<button data-cmp-indicator="edge"></button>' +
-    '<button data-cmp-indicator="inline"></button><output></output>';
-  return { root, control };
-}
-
-test('all three named treatments can be selected', () => {
-  const f = comparisonIndicatorFixture();
-  ['tactical', 'edge', 'inline'].forEach(kind => {
-    eq(syncComparisonIndicatorPreview(f.root, f.control, kind), true);
-    eq(f.root.dataset.cmpIndicator, kind);
-    eq(f.control.querySelectorAll('[aria-pressed="true"]').length, 1);
-    eq(f.control.querySelector('[data-cmp-indicator="' + kind + '"]').getAttribute('aria-pressed'), 'true');
-  });
-});
-
-test('the selector reports each treatment by its full preview name', () => {
-  const f = comparisonIndicatorFixture();
-  const names = [];
-  ['tactical', 'edge', 'inline'].forEach(kind => {
-    syncComparisonIndicatorPreview(f.root, f.control, kind);
-    names.push(f.control.querySelector('output').textContent);
-  });
-  eq(names.join('|'), 'COMPACT TACTICAL LABEL|MAP-EDGE TAB|MINIMAL INLINE IDENTIFIER');
-});
-
-test('a toolbar selection updates every visible preview control together', () => {
-  const a = comparisonIndicatorFixture(), b = comparisonIndicatorFixture();
-  a.control.className = 'cmpIndicatorPreview';
-  b.control.className = 'cmpIndicatorPreview';
-  document.body.append(a.control, b.control);
-  b.control.querySelector('[data-cmp-indicator="edge"]').click();
-  eq(a.control.querySelector('[data-cmp-indicator="edge"]').getAttribute('aria-pressed'), 'true');
-  eq(b.control.querySelector('[data-cmp-indicator="edge"]').getAttribute('aria-pressed'), 'true');
-  eq(document.documentElement.dataset.cmpIndicator, 'edge');
-  a.control.remove(); b.control.remove();
-});
-
-test('boxed pane labels contain both full arm names', async () => {
+test('pane labels match the content-sized capsule geometry', async () => {
   const frame = document.createElement('iframe');
-  frame.style.cssText = 'position:fixed;left:-2000px;top:0;width:1025px;height:120px;visibility:hidden';
+  frame.style.cssText = 'position:fixed;left:-2000px;top:0;width:920px;height:300px;border:0;opacity:0';
   document.body.append(frame);
   const loaded = new Promise((resolve, reject) => {
     frame.onload = resolve;
     frame.onerror = () => reject(new Error('indicator CSS fixture did not load'));
   });
-  frame.srcdoc = '<!doctype html><html data-theme="console-dark" data-cmp-indicator="tactical"><head>' +
+  frame.srcdoc = '<!doctype html><html data-theme="console-dark"><head>' +
     '<base href="' + new URL('.', location.href) + '">' +
     '<link rel="stylesheet" href="./css/theme.css">' +
-    '<link rel="stylesheet" href="./css/app.css?v=7">' +
+    '<link rel="stylesheet" href="./css/app.css?v=10">' +
     '<link rel="stylesheet" href="./css/fonts.css">' +
+    '<script src="./angel-map.js?v=10"><\/script>' +
+    '<style>body.compare .paneTag{top:168px}</style>' +
     '</head><body class="compare" data-theme="console-dark">' +
-    '<div id="stage" style="position:relative;width:100vw;height:120px">' +
+    '<div id="stage" style="position:relative;width:100vw;height:300px">' +
+    '<div id="missCompare" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:min(430px,calc(100% - 24px));height:142px"></div>' +
+    '<div class="mapTools" style="position:absolute;top:10px;right:12px;width:120px;height:32px"></div>' +
+    '<div id="legend" style="position:absolute;left:12px;bottom:12px;width:140px;height:80px"></div>' +
     '<div class="paneTag a"><i></i><b>ANGEL SWARM</b></div>' +
     '<div class="paneTag b"><i></i><b>CURRENT — TRIAGE &amp; PROXIMITY</b></div>' +
     '</div></body></html>';
   await loaded;
   try {
     const doc = frame.contentDocument;
-    for (const viewport of [{ width:1025, pane:200 }, { width:443, pane:132 }]) {
-      frame.style.width = viewport.width + 'px';
+    for (const viewport of [920, 443]) {
+      frame.style.width = viewport + 'px';
       await new Promise(resolve => frame.contentWindow.requestAnimationFrame(
         () => frame.contentWindow.requestAnimationFrame(resolve)));
-      for (const kind of ['tactical', 'edge']) {
-        doc.documentElement.dataset.cmpIndicator = kind;
-        for (const pane of doc.querySelectorAll('.paneTag')) {
+      for (const state of ['compare', 'compare standby']) {
+        doc.body.className = state;
+        await new Promise(resolve => frame.contentWindow.requestAnimationFrame(
+          () => frame.contentWindow.requestAnimationFrame(resolve)));
+        const panes = Array.from(doc.querySelectorAll('.paneTag'));
+        const furniture = Array.from(doc.querySelectorAll('#missCompare,.mapTools,#legend'))
+          .map(element => ({ name: element.id || element.className, bounds: element.getBoundingClientRect() }));
+        const stageBounds = doc.querySelector('#stage').getBoundingClientRect();
+        const seam = (stageBounds.left + stageBounds.right) / 2;
+        const capsuleFont = parseFloat(getComputedStyle(panes[0]).fontSize);
+        ok(panes[1].getBoundingClientRect().width >
+          panes[0].getBoundingClientRect().width + capsuleFont * 6,
+          'capsules size independently from their label content at ' + viewport + 'px');
+        eq(Math.round(stageBounds.width), viewport,
+          'fixture exercises the ' + viewport + 'px effective map width');
+        ok(viewport > 443 ? capsuleFont === 13 : capsuleFont < 8,
+          'the complete capsule scales only for the narrow effective map width');
+        for (const pane of panes) {
           const label = pane.querySelector('b');
-          const textBox = label.getBoundingClientRect();
+          const marker = pane.querySelector('i');
+          const bounds = pane.getBoundingClientRect();
+          const labelBounds = label.getBoundingClientRect();
+          const markerBounds = marker.getBoundingClientRect();
+          const style = getComputedStyle(pane);
+          const labelStyle = getComputedStyle(label);
+          const markerStyle = getComputedStyle(marker);
           const range = doc.createRange();
           range.selectNodeContents(label);
-          const textRects = Array.from(range.getClientRects());
-          const bounds = pane.getBoundingClientRect();
-          const style = getComputedStyle(pane);
-          eq(Math.round(bounds.width), viewport.pane,
-            kind + ' fixture uses production pane width at ' + viewport.width + 'px');
-          const innerRight = bounds.right - parseFloat(style.paddingRight) -
-            parseFloat(style.borderRightWidth);
-          const innerLeft = bounds.left + parseFloat(style.paddingLeft) +
-            parseFloat(style.borderLeftWidth);
-          const innerBottom = bounds.bottom - parseFloat(style.paddingBottom) -
-            parseFloat(style.borderBottomWidth);
-          const innerTop = bounds.top + parseFloat(style.paddingTop) +
-            parseFloat(style.borderTopWidth);
-          ok(textRects.length > 0, kind + ' renders text rectangles');
-          for (const text of textRects) {
-            ok(text.left >= innerLeft - 0.01,
-              kind + ' keeps ' + pane.textContent.trim() + ' inside its left edge');
-            ok(text.right <= innerRight + 0.01,
-              kind + ' keeps ' + pane.textContent.trim() + ' inside its right edge');
-            ok(text.top >= innerTop - 0.01,
-              kind + ' keeps ' + pane.textContent.trim() + ' inside its top edge');
-            ok(text.bottom <= innerBottom + 0.01,
-              kind + ' keeps ' + pane.textContent.trim() + ' inside its bottom edge');
+          eq(Array.from(range.getClientRects()).length, 1,
+            pane.textContent.trim() + ' remains on one line at ' + viewport + 'px');
+          /* Absolutely positioned inline-level boxes are blockified by layout;
+             the content-sized inline-flex declaration therefore computes to flex. */
+          eq(style.display, 'flex');
+          eq(style.whiteSpace, 'nowrap');
+          ok(Math.abs(parseFloat(labelStyle.lineHeight) - capsuleFont) < .01,
+            pane.textContent.trim() + ' keeps the reference line-height');
+          ok(parseFloat(style.borderRadius) > bounds.height,
+            pane.textContent.trim() + ' has the full capsule radius');
+          ok(Math.abs(markerBounds.width - capsuleFont * .54) < .1,
+            pane.textContent.trim() + ' scales its circular dot proportionally');
+          ok(Math.abs(markerBounds.height - capsuleFont * .54) < .1,
+            pane.textContent.trim() + ' keeps a circular dot');
+          eq(markerStyle.borderRadius, '50%');
+          ok(markerBounds.right < labelBounds.left,
+            'the capsule dot has reserved space before ' + pane.textContent.trim());
+          ok(Math.abs((labelBounds.top + labelBounds.bottom) / 2 -
+            (bounds.top + bounds.bottom) / 2) <= 1,
+            pane.textContent.trim() + ' is optically centered without a fixed height');
+          ok(bounds.left >= stageBounds.left + 12 - .01 &&
+            bounds.right <= stageBounds.right - 12 + .01,
+            pane.textContent.trim() + ' stays inside its map pane');
+          ok(pane.classList.contains('a') ? bounds.right <= seam - 12 + .51 :
+            bounds.left >= seam + 12 - .51,
+            pane.textContent.trim() + ' preserves the center-seam gutter');
+          for (const item of furniture) {
+            ok(bounds.right <= item.bounds.left || bounds.left >= item.bounds.right ||
+              bounds.bottom <= item.bounds.top || bounds.top >= item.bounds.bottom,
+              pane.textContent.trim() + ' clears ' + item.name + ' at ' + viewport + 'px');
           }
-          const textTop = Math.min(...textRects.map(rect => rect.top));
-          const textBottom = Math.max(...textRects.map(rect => rect.bottom));
-          const textCenter = (textTop + textBottom) / 2;
-          const paneCenter = (bounds.top + bounds.bottom) / 2;
-          ok(Math.abs(textCenter - paneCenter) <= 0.51,
-            kind + ' vertically centers ' + pane.textContent.trim(),
-            'within 0.51px', Math.abs(textCenter - paneCenter));
-          ok(Math.abs((textBox.top + textBox.bottom) / 2 - paneCenter) <= 0.51,
-            kind + ' centers the label box for ' + pane.textContent.trim());
+          eq(style.color, pane.classList.contains('a') ?
+            'rgb(76, 212, 230)' : 'rgb(242, 169, 59)');
         }
       }
     }
-    frame.style.width = '1025px';
-    doc.documentElement.dataset.cmpIndicator = 'tactical';
+    const embeddedRule = doc.createElement('style');
+    embeddedRule.textContent =
+      'html body.compare #stage .paneTag{top:var(--map-inset-t,104px)!important}';
+    doc.head.append(embeddedRule);
+    const syncInsetCss = frame.contentWindow.ANGELMAP._syncInsetCss;
+    syncInsetCss(doc.documentElement, 0, 120, 96, 0);
+    await new Promise(resolve => frame.contentWindow.requestAnimationFrame(
+      () => frame.contentWindow.requestAnimationFrame(resolve)));
+    eq(doc.documentElement.style.getPropertyValue('--map-inset-t'), '96px');
+    for (const pane of doc.querySelectorAll('.paneTag')) {
+      eq(Math.round(pane.getBoundingClientRect().top), 96,
+        pane.textContent.trim() + ' follows the embedded header inset');
+      ok(pane.getBoundingClientRect().top < 168,
+        pane.textContent.trim() + ' sits above the standalone mission-summary position');
+    }
+    syncInsetCss(doc.documentElement, 0, 120, 140, 0);
     await new Promise(resolve => frame.contentWindow.requestAnimationFrame(resolve));
-    const probePane = doc.querySelector('.paneTag.b');
-    const probeLabel = probePane.querySelector('b');
-    probeLabel.textContent += ' — DELIBERATELY TOO LONG FOR THIS LABEL';
-    const probeRange = doc.createRange();
-    probeRange.selectNodeContents(probeLabel);
-    const probeBounds = probePane.getBoundingClientRect();
-    const probeStyle = getComputedStyle(probePane);
-    const probeInnerRight = probeBounds.right - parseFloat(probeStyle.paddingRight) -
-      parseFloat(probeStyle.borderRightWidth);
-    ok(Array.from(probeRange.getClientRects()).some(rect => rect.right > probeInnerRight),
-      'rendered-text guard detects deliberate nowrap overflow');
+    eq(doc.documentElement.style.getPropertyValue('--map-inset-r'), '120px',
+      'header-only geometry change leaves the right inset unchanged');
+    eq(doc.documentElement.style.getPropertyValue('--map-inset-t'), '140px',
+      'header-only geometry change republishes the top inset');
+    for (const pane of doc.querySelectorAll('.paneTag')) {
+      eq(Math.round(pane.getBoundingClientRect().top), 140,
+        pane.textContent.trim() + ' follows an expanded embedded header');
+    }
   } finally {
     frame.remove();
   }
-});
-
-test('changing the indicator leaves comparison and camera state untouched', () => {
-  const f = comparisonIndicatorFixture();
-  const mapState = { mapView: 'COMPARE', mapMode: '2D', zoom: 1.5, cx: 42, cy: 19 };
-  const before = JSON.stringify(mapState);
-  syncComparisonIndicatorPreview(f.root, f.control, 'edge');
-  syncComparisonIndicatorPreview(f.root, f.control, 'inline');
-  eq(JSON.stringify(mapState), before);
 });
 
 /* ------------------------------------------------------------------ webcrypto */
@@ -1753,6 +3311,8 @@ async function webSha(s) {
 
 /* ------------------------------------------------------------------- runner */
 const out = document.getElementById('out');
+GROUPS.push(RESUPPLY_TRACK_GROUP);
+
 let PASS = 0, FAIL = 0, LINES = [];
 
 async function runAll() {

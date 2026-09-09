@@ -29,6 +29,7 @@
   const D = () => window.DSHELL;
   const S = { focus: null, rec: null };
   const EXPIRE_MIN = 8;          /* optimizer.js:reapQueue — 8 minutes and it lapses */
+  const MIN_RESPONSE_MS = 15000;
 
   const callOf = d => {
     if (!d) return 'THE AIRCRAFT';
@@ -47,10 +48,16 @@
     const A = window.APP;
     if (bits[0] === 'focus') { S.focus = id; }
     else if (bits[0] === 'a' && A && typeof window.approveProposal === 'function') {
-      if (window.approveProposal(A.armA, A.world, id, A.t, 'OPERATOR')) S.rec = mark(A.armA);
+      if (window.approveProposal(A.armA, A.world, id, A.t, 'OPERATOR')) {
+        S.rec = mark(A.armA); S.notice = '';
+      } else {
+        const p = A.armA.queue.find(q => q.id === id);
+        S.notice = (p && p.staleReason) || 'This proposal is no longer actionable.';
+      }
     } else if (bits[0] === 'b' && A && typeof window.rejectProposal === 'function') {
       if (window.rejectProposal(A.armA, id, A.t, 'OPERATOR',
-          'held by the allocation authority')) S.rec = mark(A.armA);
+          'held by the allocation authority')) { S.rec = mark(A.armA); S.notice = ''; }
+      else S.notice = 'This proposal has already closed.';
     }
     if (D()) D().paint();
   });
@@ -118,14 +125,25 @@
     const lead = legs[0];
     const elapsed = L.now - p.tRaised;
     const lapse = Math.max(0, EXPIRE_MIN - elapsed);
+    const wallLeft = p.tWallRaised == null ? null
+      : Math.max(0, Math.ceil((MIN_RESPONSE_MS - (Date.now() - p.tWallRaised)) / 1000));
+    const usableLeft = wallLeft == null
+      ? MIN(lapse)
+      : `${Math.floor(wallLeft / 60)}:${String(wallLeft % 60).padStart(2, '0')} real time`;
+    const validity = typeof window.proposalValidity === 'function'
+      ? window.proposalValidity(arm, p.id) : { ok: !p.staleReason, reason: p.staleReason };
+    const unavailable = !validity.ok;
 
     return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span class="pa-chip">${pend.length} ${pend.length === 1 ? 'DECISION REQUIRES YOU' : 'DECISIONS REQUIRE YOU'}</span>
         <span style="font:400 11px var(--d-mono);color:var(--d-t5)">raised T+${p.tRaised.toFixed(1)} &middot; ${
-          MIN(elapsed)} elapsed &middot; authority lapses in ${MIN(lapse)} and the cost of not deciding is written to the record</span>
+          MIN(elapsed)} elapsed &middot; response window ${usableLeft} and the cost of not deciding is written to the record</span>
       </div>
 
       ${lede(L, p, d, lead, legs)}
+      ${(S.notice || unavailable) ? `<div role="status" style="margin-top:12px;padding:10px 12px;border:1px solid var(--d-red);color:var(--d-red);font:600 11px/1.45 var(--d-mono)">${
+        D().esc(S.notice || validity.reason || 'Operational conditions changed; this route is no longer feasible.')
+      }</div>` : ''}
 
       <div class="pa-opts">
         ${optA(L, p, d, legs)}
@@ -136,7 +154,7 @@
       ${S.rec ? record(L) : ''}
 
       <div class="pa-acts">
-        <button class="pa-auth" type="button" data-dec="a:${p.id}">AUTHORISE A &middot; COMMIT</button>
+        <button class="pa-auth" type="button" data-dec="a:${p.id}" ${unavailable ? 'disabled aria-disabled="true"' : ''}>AUTHORISE A &middot; COMMIT</button>
         <button class="pa-auth alt" type="button" data-dec="b:${p.id}">AUTHORISE B &middot; HOLD</button>
         <button class="pa-link" type="button" data-page="chat">ask ANGEL what else this aircraft could do</button>
       </div>

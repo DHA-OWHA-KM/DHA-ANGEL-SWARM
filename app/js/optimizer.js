@@ -256,7 +256,9 @@ let _propId = 0;
 function queueProposal(arm, d, route, value, tNow, world, reasons) {
   const lead = arm.casualties.find(k => k.id === route[0].casId);
   const p = {
-    id: ++_propId, tRaised: tNow, droneId: d.id, route, value,
+    id: ++_propId, tRaised: tNow,
+    tWallRaised: arm.interactiveDecisionWindow ? Date.now() : null,
+    droneId: d.id, route, value,
     state: 'PENDING',
     summary: `${d.plat.label}-${d.id} → ${route.map(l => 'CAS-' + l.casId).join(', ')}`,
     payloads: route.map(l => PAYLOADS[l.payloadKey].label),
@@ -278,16 +280,55 @@ function queueProposal(arm, d, route, value, tNow, world, reasons) {
           reasons: p.reasons });
   return p;
 }
+const MIN_DECISION_RESPONSE_MS = 15000;
+function proposalValidity(arm, id, world, tNow) {
+  const p = arm.queue.find(q => q.id === id);
+  if (!p || p.state !== 'PENDING') return { ok: false, reason: 'This proposal is no longer pending.' };
+  const d = arm.drones.find(k => k.id === p.droneId);
+  if (!d) return { ok: false, reason: 'The assigned aircraft is no longer available.' };
+  if (d.state !== 'IDLE') return { ok: false, reason: 'The assigned aircraft has already been committed.' };
+  const base = arm.bases[d.baseIdx];
+  if (!base) return { ok: false, reason: 'The launch point is no longer available.' };
+  const needed = {};
+  for (const leg of p.route) needed[leg.payloadKey] = (needed[leg.payloadKey] || 0) + 1;
+  const casualtiesCurrent = p.route.every(l => {
+    const c = arm.casualties.find(k => k.id === l.casId);
+    return c && c.outcome === null && c.assignedTo === p.droneId;
+  });
+  const stockCurrent = Object.keys(needed).every(k => (base.stock[k] || 0) >= needed[k]);
+  if (!casualtiesCurrent || !stockCurrent)
+    return { ok: false, reason: 'The casualty assignment or required stock changed; the original route is no longer feasible.' };
+  if (!world || tNow == null) return { ok: true, legs: p.route.slice() };
+  const legs = [];
+  let px = d.x, py = d.y, depart = tNow, loadKg = 0;
+  for (const original of p.route) {
+    const c = arm.casualties.find(k => k.id === original.casId);
+    const payload = PAYLOADS[original.payloadKey];
+    if (!c || !payload) return { ok: false, reason: 'The original route is incomplete and can no longer be committed.' };
+    loadKg += payload.kg;
+    if (loadKg > d.plat.payloadKg || !inRange(d, c.x, c.y, loadKg))
+      return { ok: false, reason: 'The delayed route is no longer inside aircraft range or payload limits.' };
+    const eta = depart + expectedFlightMinutes(arm, d, px, py, c.x, c.y);
+    if (payload.coldChain &&
+        coldTempAfter(eta - tNow, ambientAt(world.ambientC, eta), d.type) > PARAMS.COLD_MAX_C)
+      return { ok: false, reason: 'The delayed route would break the payload cold chain.' };
+    if (original.payloadKey === 'TXA' && eta - c.tInjury > PARAMS.TXA_WINDOW_MIN)
+      return { ok: false, reason: 'The delayed route would arrive outside the TXA treatment window.' };
+    legs.push({ ...original, x: c.x, y: c.y, eta });
+    px = c.x; py = c.y; depart = eta + HANDOFF_MIN;
+  }
+  return { ok: true, legs };
+}
 function approveProposal(arm, world, id, tNow, actor) {
   const p = arm.queue.find(q => q.id === id);
-  if (!p || p.state !== 'PENDING') return false;
+  const validity = proposalValidity(arm, id, world, tNow);
+  if (!p || !validity.ok) {
+    if (p) p.staleReason = validity.reason;
+    return false;
+  }
   const d = arm.drones.find(k => k.id === p.droneId);
-  if (!d || d.state !== 'IDLE') { p.state = 'EXPIRED'; return false; }
-  const base = arm.bases[d.baseIdx];
-  const legs = p.route.filter(l => base.stock[l.payloadKey] >= 1);
-  if (!legs.length) { p.state = 'EXPIRED'; return false; }
   arm._authActor = actor || 'OPERATOR'; arm._authProposal = p.id;
-  launch(arm, d, legs, tNow, world);
+  launch(arm, d, validity.legs, tNow, world);
   p.state = 'APPROVED'; p.tActed = tNow;
   arm.stats.approved++;
   audit(arm, tNow, actor || 'OPERATOR', 'APPROVE', p.summary, { proposal: p.id });
@@ -319,7 +360,23 @@ function reapQueue(arm, tNow) {
     const d = arm.drones.find(k => k.id === p.droneId);
     const lead = arm.casualties.find(k => k.id === p.leadId);
     const dead = lead && lead.outcome !== null;
-    if (!d || d.state !== 'IDLE' || dead || tNow - p.tRaised > 8) {
+    const simulationExpired = tNow - p.tRaised > 8;
+    const wallProtected = !!arm.interactiveDecisionWindow && p.tWallRaised != null &&
+      Date.now() - p.tWallRaised < MIN_DECISION_RESPONSE_MS;
+    const invalid = !d || d.state !== 'IDLE' || dead;
+    if ((simulationExpired || invalid) && wallProtected) {
+      p.staleReason = invalid
+        ? (!d ? 'The assigned aircraft is no longer available.'
+          : d.state !== 'IDLE' ? 'The assigned aircraft has already been committed.'
+          : 'The casualty condition changed; commit is no longer feasible.')
+        : null;
+      continue;
+    }
+    if (simulationExpired || invalid) {
+      p.expireReason = !d ? 'AIRCRAFT_UNAVAILABLE'
+        : d.state !== 'IDLE' ? 'AIRCRAFT_COMMITTED'
+        : dead ? 'CASUALTY_RESOLVED'
+        : 'SIMULATION_WINDOW_ELAPSED';
       p.state = 'EXPIRED'; p.tActed = tNow;
       for (const leg of p.route) {
         const c = arm.casualties.find(k => k.id === leg.casId);
@@ -765,13 +822,18 @@ function launch(arm, d, route, tNow, world) {
   /* Planning used the expected factor so all candidates were compared on the
      same basis. A committed route now receives one stable factor per leg.
      Recompute cumulative ETAs before any consumer records the tasking. */
-  if (arm.observedFlightVariability) {
+  {
     let px = d.x, py = d.y, depart = tNow;
     for (let i = 0; i < route.length; i++) {
       const leg = route[i];
+      if (arm.observedFlightVariability) {
       const key = ['OUT', d.id, d.sortieId, i, leg.casId].join('|');
       leg.travelFactor = observedFlightFactor(arm.flightVariabilitySeed, key, true);
       leg.travelMin = committedFlightMinutes(arm, d, px, py, leg.x, leg.y, key);
+      } else {
+        leg.travelFactor = 1;
+        leg.travelMin = nominalFlightMinutes(d, px, py, leg.x, leg.y);
+      }
       leg.eta = depart + leg.travelMin;
       px = leg.x; py = leg.y; depart = leg.eta + HANDOFF_MIN;
     }

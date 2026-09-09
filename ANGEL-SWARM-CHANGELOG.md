@@ -2,7 +2,63 @@
 
 UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 
-The complete release history of the ANGEL SWARM prototype, from version 1.1 to version 6.5 (8 September 2026), recording defects found and corrected as well as features added. This is a Markdown rendering of `ANGEL-SWARM-CHANGELOG.txt`, which remains the authoritative copy; every entry is preserved, machine-generated measurement tables are reproduced verbatim inside code blocks, and nothing has been summarised or removed.
+The complete release history of the ANGEL SWARM prototype, through repository version 1.1 (9 September 2026), recording defects found and corrected as well as features added. `ANGEL-SWARM-CHANGELOG.txt` remains the authoritative plain-text copy.
+
+## Repository version 1.1 — 9 September 2026
+
+### 1 · Resupply Tracking changes no number
+
+Resupply Tracking is a standalone synthetic capability demonstration with immutable
+tracker-only commitment fixtures. Its phase, deterministic clock, seek, play/pause,
+normal/8× playback toggle (`SPEED ×8` / `SPEED ×1`), reroute, exception controls,
+Canvas 2D schematic, margin-sorted queue and Arm B
+scheduled-push comparison are tracker-owned; they are not projections of engine
+tasking, scenarios, casualties, host playback, run snapshots, fleet history or
+Arm B ledgers. The nominal, diverted, aborted, lost, deadline-miss, cold-chain
+failure and delivered states are demonstration fixtures. It calls no model and
+changes no engine state or outcome. The speed toggle changes only the tracker's
+deterministic clock, never host playback or engine state.
+
+All tracker names, times, routes and payloads are synthetic demonstration fixtures
+and cannot be treated as operational output. The reference result remains **23 /
+34 / 35 survivable deaths on 20 / 38 / 0 sorties at seed 42, JOA CORAL, deployed**;
+23 against 34 is produced by the engine comparison, not by this tracker. The
+live self-test result measured 9 September 2026 is **196 total checks covering
+engine and host UI behavior; 195 pass and 1 fail**. **RESUPPLY TRACKING is
+12/12 passing**, and the sole failure is the **EUCOM_FJORD nominal seed-42
+directional assertion (16 > 15)**.
+
+### 2 · What did not change
+
+- Engine files were not edited. Their MD5 values at this documentation pass are:
+
+  ```text
+  6c1d79cd7efaa17526ae2b2950992470  app/js/sim.js
+  919b75ffc96a0f680009506be2c68d25  app/js/optimizer.js
+  e84bba6a71a1f43b5f6a255a8c4e01d2  app/js/mc.worker.js
+  cc4f8e774b49927496d7fe0841362190  app/angel-engine.js
+  ```
+
+- The destination adds no external map, dependency, second deck.gl instance, socket or network request. Its track is Canvas 2D over local state.
+- **CoT is ingested, not emitted.** The existing optional listener remains receive-only; the tracker itself has no network interface. No BATDOK-J, ATAK, TAK Server, Marti REST or outbound CoT interface is implemented.
+- `Send to medic's ATAK` opens an informational, future-only explanation and transmits nothing; the page makes no request.
+
+### 3 · Future interface and security boundary
+
+An outbound delivery event is future work, not a hidden capability. It would create an eighth trust boundary and would require authenticated sender identity, authorization, integrity and anti-replay controls, stale-event handling, audit, deployment-specific endpoint validation and an EMSEC determination. A casualty grid paired with an inbound aircraft is targeting data; TLS protects the link, not the emission pattern. BATDOK-J remains the record of care and is not modified to hold the tactical delivery object.
+
+### 4 · Documentation defects corrected
+
+- The shipped documentation had no operating description for a dedicated, seekable tracker and no explicit statement that the tracker cannot move the published result.
+- The medic-facing discussion said architecture mattered more than interface but did not describe the new standalone demonstration surface or separate it from an ATAK integration claim.
+- The terminology record did not define the display-only phase names, signed margin, terminal phase, DTG or resupply track.
+- The rehearsal pack lacked the seek-back, loss, Arm B, package-tracking and no-outcome-change beats.
+
+No supportable source file for the requested broader resupply-tracking prior-art survey was present in this repository. No `RESEARCH/resupply-track-prior-art.md` was created from unsourced assertions.
+
+### 5 · Generated artefacts
+
+The repository does not contain the cited `_sbom_gen.mjs`, SBOM validator or a digest-generation script. Generated SBOM and checksum files were therefore **not hand-edited** and no regeneration or validation is claimed. They must be regenerated from disk with the release generators when those scripts are supplied.
 
 ## Version 6.5 — 8 September 2026 — FINAL
 

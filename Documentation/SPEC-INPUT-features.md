@@ -1,5 +1,13 @@
 # ANGEL SWARM — SPEC INPUT: FEATURES, CONTROLS AND STATES
 
+> **Historical design input, not the current inventory.** This document records
+> the earlier nine-destination shell inspected at the paths and browser session
+> below. The current application has fourteen destinations, a mutable persisted
+> FPCON control, four map scales and additional behavior documented in
+> `Documentation/CODE-MAP.md`, `README.md` and the live browser self-test.
+> References below to what the build does “today” mean the dated build that was
+> inspected for this record, not the current checkout.
+
 **Scope.** The user-facing surface of `/home/build/angel/app`, as served at
 `http://127.0.0.1:8791`. Read-only inventory. Nothing in the application was modified.
 
@@ -10,7 +18,7 @@ of every state are in
 
 **Two registers are used throughout and are never merged:**
 
-- **DOES** — what the build does today, verified in a browser.
+- **DOES** — what the inspected historical build did at the time, verified in a browser.
 - **BROKEN** — a defect. Stated as a defect, with the file:line that causes it.
 
 No designs are proposed anywhere in this document.
@@ -81,7 +89,7 @@ into `#dDock` and positions it over a slot inside the new page). The column belo
 | F33 | **After-action report** | Evidence → AFTER ACTION | Docks AFTERACTION: fewer-dead figure, both-arm table, what drove it, what to change (ranked) | The AAR | dock → `AFTERACTION`, `js/page-afteraction.js` |
 | F34 | **Ask ANGEL** | Rail → Ask ANGEL; type or press a suggestion | Eight rule-matched resolvers over live state, a refusal rule for "who should I save", else MiniLM retrieval quoting the corpus verbatim | A figure computed from the run, or a quoted passage, or an explicit "I cannot" | `js/page-chat.js` |
 | F35 | **Provenance chip discipline** | Any AI-produced answer | Violet `✦` chip marks trained-model output only; arithmetic and retrieval are labelled differently | A defensible AI-provenance claim | `js/page-chat.js`, `js/palette.js` |
-| F36 | **Theater map, three renderers** | Rail → Theater Map → THEATRE / TACTICAL 2D / TACTICAL 3D | Docks DASHBOARD / MISSION / MISSION(3D). 2D offers layers + side-by-side both arms; 3D offers the GPU picture with replay scrub, layer set, legend | The fight, at three scales | `js/page-map.js` |
+| F36 | **Theater map, four scales** | Command Overview → GLOBE; Rail → Theater Map → THEATRE / TACTICAL 2D / TACTICAL 3D | The overview owns the Globe; Theater Map docks DASHBOARD / MISSION / MISSION(3D). 2D offers layers + side-by-side both arms; 3D offers the GPU picture with replay scrub, layer set, legend | The fight, at four scales | `js/page-map.js`, `angel-map.js` |
 | F37 | **Map camera** | `− ZOOM OUT` / `+ ZOOM IN` / `FIT` | Reaches the active renderer's own camera | Navigation | `js/page-map.js:225` `ORDER` |
 | F38 | **Scale-aware controls** | Switch scope | The tool row is rebuilt from a capability table; a control that cannot act in this scope is **absent, not disabled** (3 controls at THEATRE, 6 at 2D, 5 at 3D) | Honest affordances | `js/page-map.js:284–292` |
 | F39 | **Command palette** | `Ctrl-K` | Search across views, actions, doctrine passages, SQL presets, scenarios, casualties, themes, roles | The one surface that still reaches everything | `js/palette.js` |

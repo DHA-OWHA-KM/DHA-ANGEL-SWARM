@@ -30,15 +30,15 @@ This was written as a brief *against* the build of 25 August, so much of it was 
 
 | Since 25 August | |
 |---|---|
-| Destinations | **Thirteen**, not nine — War Game, Sensor & Model, Authority & Policy and Data Sources were promoted out of tabs. See §4 |
+| Destinations | **Fourteen** — the current rail includes the standalone Resupply Tracking destination alongside the thirteen-screen v6.5 set. See §4 and the current `CODE-MAP.md` |
 | Map scales | **Four**, not three — a canvas-2D globe was added above the theatre in v6.3 and its geography regenerated at four times the detail in v6.4. See §5.9 |
 | The route-stage strip | **It no longer opens by itself.** Through v6.3 it defaulted to an arbitrary sortie on arrival; since v6.4 it is a detail view opened by clicking a casualty or an aircraft. See §5.9 |
 | Panel scrolling | **One scroller per column, zero horizontal.** Nested panel-body scrollers were removed in v6.4. See §5.9 |
 | The globe's handoff | Zooming out of the globe now flies to **the operation under the camera**, not to the loaded one, and declines over open ocean. See §5.9 |
 | Arms | **Three**, not two — NO FORWARD DELIVERY (35 dead) joined ANGEL SWARM (23) and CURRENT — TRIAGE & PROXIMITY (34) |
 | The comparison | Since v6.2, **an ANGEL SWARM figure never appears without the CURRENT figure beside it at the same size.** See §6.6 |
-| Proof | `app/selftest.html` ships in the package: **118 assertions against the shipped engine**, in the browser, offline, nothing mocked — **118 pass, 0 fail**, in well under a second. Re-run against the v6.4 build for this revision |
-| Language model | **There is none.** No GGUF is shipped and nothing on any screen is generated. See §5.8 |
+| Proof | `app/selftest.html` ships in the package and checks engine and host UI behavior in the browser, offline, with nothing mocked. Coverage includes determinism, common random numbers, scenarios, the War Game worker path and standalone RESUPPLY TRACK behavior; the live page is authoritative for status. |
+| Language model | **None in the shipped zero-network baseline.** No GGUF ships, so the baseline generates nothing on screen. An optional, separately downloaded Qwen GGUF can enable clearly marked Mission brief prose and is outside that baseline. See §5.8 and `GET-MODEL.md` |
 
 ---
 
@@ -64,7 +64,7 @@ The interface says the trained network "produces every casualty's physiological 
 
 ### 0.2 Both arms start identical, and an undeployed run proves nothing
 
-Arm A is created with `allocatorKey: 'CURRENT'` (`app.js:337`). Until someone deploys, **ANGEL SWARM is running current triage and proximity too.** An undeployed run is not a tie — separate attrition random streams desynchronise the arms, and at seed 42 ANGEL SWARM finishes one death *worse*.
+Arm A is created with `allocatorKey: 'CURRENT'` (`app.js:337`). Until someone deploys, **ANGEL SWARM is running CURRENT — TRIAGE & PROXIMITY too.** An undeployed run is not a tie — separate attrition random streams desynchronise the arms, and at seed 42 ANGEL SWARM finishes one death *worse*.
 
 **Design consequence.** Deployment is not a setting, it is the experiment. Every screen must make the undeployed state unmistakable, and no comparison may be presented before it.
 
@@ -98,7 +98,15 @@ The claim is identical casualties, identical aircraft, identical stock. Two thin
 
 Do not draw these until each is sourced or removed: the "factor of three and a half" pairing gain; "24 vs 34 at seed 42"; "23, 31 and 248 in the reference run"; doctrine "correct answers score from 0.43 upward"; the baseline triage "57.8% sensitivity / 26% over-triage" (the code itself retracts these as mis-sourced and uses 0.90/0.14); the "16–25 minute field range" (the source says that is two individual casualties, not a cohort); and every dollar and schedule figure in the IL5 cost analysis.
 
-**RESOLVED as a standing rule, and the rule now has a machine behind it.** The reference figures are asserted by `app/selftest.html` — 118 assertions against the shipped engine — rather than transcribed. The reference battle is **23 / 34 / 35 survivable deaths on 20 / 38 / 0 sorties**, 125 casualties, 47 of them in the survivable cohort, seed 42, JOA CORAL, capability deployed. Anything a screen or a document states about this run must be derivable from that page.
+**RESOLVED as a standing rule, and the rule now has a machine behind it.** The
+reference figures are asserted by `app/selftest.html` rather than transcribed; its
+live summary, not a copied check total, is authoritative. The reference battle is **23 / 34 / 35 survivable deaths on
+20 / 38 / 0 sorties**, 125 casualties, 47 of them in the survivable cohort, seed
+42, JOA CORAL, capability deployed. Resupply Tracking is not part of that engine
+comparison: it is a standalone synthetic demonstration with immutable tracker-only
+fixtures and its own deterministic clock, seek, play/pause, tracker-owned normal/8×
+playback toggle (`SPEED ×8` / `SPEED ×1`), reroute and exception controls. The
+toggle changes only the tracker clock, never host playback or engine state.
 
 **Everything CRI-Net claims about itself is sound** and read live from the model's own metadata: MAE 0.0694 against 0.1588 for heart rate alone, 96.16% interval coverage, act below 0.4689 and refuse above 0.5911, 70 held-out subjects split by subject.
 
@@ -132,7 +140,7 @@ These are absolute. A design that breaks one is wrong regardless of how it looks
 
 | Rule | |
 |---|---|
-| **Deaths are red** | Every death figure — the number, the bar, the marker — is red. Never green, never teal, never a success colour. The delta against current triage and proximity is a death figure. |
+| **Deaths are red** | Every death figure — the number, the bar, the marker — is red. Never green, never teal, never a success colour. The delta against CURRENT — TRIAGE & PROXIMITY is a death figure. |
 | **Never "lives saved"** | The phrase is **"fewer dead"**. The target is zero. Every number is a person. The footer reads DEATHS COUNTED, NEVER SCORED. |
 | **PACOM** | Never USINDOPACOM, never INDOPACOM. |
 | **No emoji** | Anywhere. |
@@ -166,7 +174,7 @@ The existing canvas drew **one moment**: mid-run, deployed, one escalation pendi
 1. **Deploy** — brings ANGEL SWARM's aircraft up and switches arm A onto the ANGEL allocator. Aircraft come online one at a time on a real-time interval, not instantly. *Does not start the clock.*
 2. **Play** — starts the mission clock. Advances in fixed 0.25-minute steps at a chosen speed. *Does not require deployment.*
 
-**This is the defect that matters most.** A person can start the clock without deploying, in which case both arms run the identical current triage and proximity, the result is 6 versus 6, and the product's entire claim is invisible. At T+24 the application recommends deploying — and in the current build there is no visible control to do it.
+**This is the defect that matters most.** A person can start the clock without deploying, in which case both arms run identical CURRENT — TRIAGE & PROXIMITY, the result is 6 versus 6, and the product's entire claim is invisible. At T+24 the application recommends deploying — and in the current build there is no visible control to do it.
 
 ### 3.1 The path a new operator must take — design this explicitly
 
@@ -205,29 +213,30 @@ Not deployed · clock not started · no casualties yet · no sorties yet · no p
 
 ---
 
-## 4. The thirteen destinations
+## 4. The fourteen destinations
 
-The product has thirteen places to be, in this rail order. Everything else is a tab inside one of them.
+The product has fourteen places to be, in this rail order. Everything else is a tab inside one of them.
 
 | # | Destination | The question it answers |
 |---|---|---|
 | 1 | **Command Overview** | Am I winning, what needs me, what is about to go wrong |
 | 2 | **Theater Map** | Show me the ground — at four scales |
 | 3 | **Live Casualties** | Who is on the ground, how long have they got, is anyone coming |
-| 4 | **Decisions** | What is waiting on my authority, what has been decided, and on what grounds |
-| 5 | **Analyst Terminal** | Let me ask the run anything — transcript, SQL, doctrine, the data file |
-| 6 | **Sensor & Model** | What the trained network reads, and where its output does and does not go |
-| 7 | **Ops Center Wall** | The ten-foot-readable picture for a room |
-| 8 | **Evidence** | Prove it |
-| 9 | **War Game** | What survives a worse world — five levers, swept |
-| 10 | **Ask ANGEL** | Explain this to me in words |
-| 11 | **Authority & Policy** | Who decides, who answers for it, and the film |
-| 12 | **Data Sources** | What this consumes, what it produces, and what is machine-produced |
-| 13 | **Settings** | Scenario, display, clock rate, guided walkthrough, engine self-test |
+| 4 | **Resupply Tracking** | Where is each synthetic delivery unit, what is it carrying, and what is its current status |
+| 5 | **Decisions** | What is waiting on my authority, what has been decided, and on what grounds |
+| 6 | **Analyst Terminal** | Let me ask the run anything — transcript, SQL, doctrine, the data file |
+| 7 | **Sensor & Model** | What the trained network reads, and where its output does and does not go |
+| 8 | **Ops Center Wall** | The ten-foot-readable picture for a room |
+| 9 | **Evidence** | Prove it |
+| 10 | **War Game** | What survives a worse world — five levers, swept |
+| 11 | **Ask ANGEL** | Explain this to me in words |
+| 12 | **Authority & Policy** | Who decides, who answers for it, and the film |
+| 13 | **Data Sources** | What this consumes, what it produces, and what is machine-produced |
+| 14 | **Settings** | Scenario, display, clock rate, guided walkthrough, engine self-test |
 
 Decision and Decision Feed merged into **Decisions**, with `AWAITING AUTHORITY` and `DECISION LOG` as its two tabs. War Game, Sensor & Model, Authority & Policy and Data Sources were promoted out of tabs into destinations of their own.
 
-**Do not tour all thirteen in a brief.** Thirteen destinations is a strength in a package and a liability on a stage.
+**Do not tour all fourteen in a brief.** Fourteen destinations is a strength in a package and a liability on a stage.
 
 ---
 
@@ -249,7 +258,7 @@ Decision and Decision Feed merged into **Decisions**, with `AWAITING AUTHORITY` 
 | Tightest deadline | Minutes remaining on the most urgent open casualty, and who | `tInjury + deadlineMin − now` |
 | Blood forward | Units on the shelf and how many sites hold them | launch-point stock |
 | Lift available | Ready aircraft of total, and how many airborne | drone states |
-| **Versus current triage and proximity** | **Fewer dead of survivable wounds, same inputs — RED** | both arms' survivable death counts |
+| **Versus CURRENT — TRIAGE & PROXIMITY** | **Fewer dead of survivable wounds, same inputs — RED** | both arms' survivable death counts |
 
 The written brief is three labelled lines — **top risk**, **action**, **change** — each a real statement about this run or omitted entirely. Never a manufactured sentence.
 
@@ -354,6 +363,24 @@ The written brief is three labelled lines — **top risk**, **action**, **change
 
 ---
 
+### 5.7a War Game
+
+**What it is.** A reproducible paired force-design experiment over the operation/scenario already selected elsewhere in the application.
+
+**Functionality.** On opening, show the selected scenario and its force assumptions, the chosen variability mode, and the deterministic study size. The operator selects exactly one lever — **fleet size, launch points, datalink outage, triage error, responder qualification/mix** — then includes at least two of its displayed scenario-derived setting values and chooses 20, 30 or 40 paired battles per included setting. These setting cards are controls, not decorative labels. Seeds begin at 1000 and continue contiguously. Nominal mode uses published platform timing; observed-flight variability uses the shipped observed-flight profile.
+
+Each setting is applied to one shared world before the arms are built, and common random numbers keep each ANGEL SWARM / CURRENT — TRIAGE & PROXIMITY pair in that same altered world. **Triage error affects only CURRENT — TRIAGE & PROXIMITY**, because ANGEL SWARM does not consume triage category. The result must also declare the method differences that are not lever effects: ANGEL SWARM includes telementoring and ANGEL-only in-flight abort/hold logic; CURRENT — TRIAGE & PROXIMITY does not.
+
+**Expectation.** "I can change one force assumption, know exactly which operation and timing model I tested, and reproduce the comparison."
+
+**Outcome.** No result exists until all settings complete. Completion terminates the worker pool and publishes the full study. A completed result binds the scenario, lever and settings, seed range, nominal/observed-flight variability, control mode and declared differences to each setting's ANGEL SWARM and CURRENT — TRIAGE & PROXIMITY means, paired gap, 95% confidence interval and better/tied/worse counts.
+
+**Failure and invalidation states.** Progress counts completed paired battles. Cancel terminates all workers and retains no partial findings. Worker construction/load failure, handshake or job timeout, protocol mismatch and engine/runtime error are also all-or-nothing: terminate the pool, name the failure and publish no result. Changing scenario or variability cancels work in progress, invalidates a completed result and regenerates scenario-dependent labels and force context.
+
+**Reproduction.** Restore the result's displayed scenario and variability mode, select its lever and 20/30/40 count, and rerun seeds 1000 through `1000 + count − 1`.
+
+---
+
 ### 5.8 Ask ANGEL
 
 **What it is.** The run, explained in words, with every figure it used printed underneath.
@@ -443,11 +470,11 @@ One indicator, one source, on every screen: **deployed or not · authority deleg
 
 ### 6.3 Telemetry
 
-The application can accept live casualty telemetry over Cursor on Target — the format TAK already carries — receive-only, on loopback unless asked otherwise, off unless enabled. Where a live reading exists it supersedes the simulated one and the tasking layer cannot tell a simulated emitter from a real monitor. **Stop the emitter and the link drops; tasking continues on last-known state.** That behaviour is the edge-autonomy claim and is worth showing.
+The application can accept live casualty telemetry over Cursor on Target — the format TAK already carries — receive-only, on loopback unless asked otherwise, off unless enabled. Where a live reading exists it supersedes the simulated one and the tasking layer treats every conforming message alike. The medical detail extension used here is a prototype schema, not a ratified CoT profile. **Stop the emitter and the link drops; tasking continues on last-known state.** That behaviour is the edge-autonomy claim and is worth showing.
 
 Link states: off · waiting · live · stale · down. With no listener the chip reads `INGEST OFF` and costs nothing. *(The earlier defect — `TELEMETRY.available` being a function, so a truthiness test always passed — is fixed; it is a boolean set from the launcher's own status response.)*
 
-**BATDOK-J is named as the plausible producer** — the JOMIS point-of-injury and en-route care application, government-owned, built by AFRL's 711th Human Performance Wing, selected 2022, fielding FY26. **The interface is stated as `INTERFACE ACCEPTED · NOT TESTED AGAINST A REAL BATDOK-J`**, which is the truth and is worth more than a claim that would not survive one question.
+Keep three things distinct: **Sempulse Halo (example)** is a wearable source; **CipherOx CRI M1 (reference)** anchors the compensatory-reserve concept; **BATDOK-J** is the plausible producer/interface between an edge source and the ingest feed. None is part of this build. **ANGEL SWARM has not tested an integration with any real Sempulse Halo, CipherOx CRI M1, or BATDOK-J.** No compatibility or completed integration is claimed.
 
 ### 6.4 Roles
 

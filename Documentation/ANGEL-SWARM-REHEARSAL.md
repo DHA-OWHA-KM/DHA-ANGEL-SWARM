@@ -3,11 +3,43 @@
 
 UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 
-**Version 1.0 · 8 September 2026, against the v6.4 build.** Every figure in here
+**Version 1.1 · 9 September 2026.** Every figure in here
 was checked against the shipped engine or measured off the running application.
 Where a build change contradicted a line this script used to carry, the old line
 was cut rather than softened — a presenter saying something the demo then
 contradicts is the worst failure this pack can cause.
+
+**New optional tracker beat.** Open **Resupply Tracking** and select a synthetic
+commitment fixture. Let its own deterministic clock move through nominal phases,
+then seek backward, play forward, toggle normal/8× playback with `SPEED ×8` and
+`SPEED ×1`, reroute, and show a diverted, aborted, lost,
+deadline-miss, cold-chain-failure or delivered fixture. The synthetic
+margin-sorted queue, Canvas 2D schematic and Arm B scheduled-push comparison are
+tracker-only states. Make clear that the speed toggle changes only the tracker's
+deterministic clock, never host playback or engine state, and that all names,
+times, routes and payloads are
+synthetic demonstration fixtures, not operational output; the tracker is not a
+projection of tasking, scenarios, casualties, host playback, run snapshots, fleet
+history or Arm B ledgers. This is optional answer material, not an addition to the
+four-minute script.
+
+Two fifteen-second disarms:
+
+> **“Isn't this package tracking?”** “No. This is a standalone synthetic
+> demonstration: its names, times, routes and payloads are tracker-only fixtures,
+> and its deterministic clock, seek, play/pause, `SPEED ×8` / `SPEED ×1`, and
+> reroute controls demonstrate the UI without changing host playback or engine state. It
+> cannot be treated as operational output.”
+
+> **“Does this improve the result?”** “No. It changes no assignment and models
+> no medic behaviour. Twenty-three against thirty-four is produced by the
+> allocation, not by this display.”
+
+The ATAK button is also a disarm: press it only to show the boundary. The modal
+describes a proposed path and **nothing is transmitted**. No BATDOK-J, ATAK or
+TAK integration exists; CoT is ingested, not emitted. If asked about EMSEC:
+“A casualty grid with an aircraft inbound is targeting data. TLS protects the
+link, not the emission pattern. That question must be answered before fielding.”
 
 **v6.5 adds one spoken beat and takes the seconds out of a named place.** The beat
 is *where this sits in what the Department has already bought* — the complement
@@ -83,11 +115,13 @@ Carried over from v6.3 and still true:
 
 | | |
 |---|---|
-| **The comparison line is on every screen** | `23 ANGEL SWARM ▍34 CURRENT — TRIAGE & PROXIMITY`, at the same size, under twelve of the thirteen destination titles — every one but Run Setup — and on the navigation rail. You no longer have to hold the 34 in your head. **This is the one change that makes the talk easier.** *The rail copy of it needs a window at least 800 px tall; the line under the title is there at every size, so you are never without it.* |
+| **The comparison line is on every screen** | `23 ANGEL SWARM ▍34 CURRENT — TRIAGE & PROXIMITY`, at the same size, under thirteen of the fourteen destination titles — every one but Run Setup — and on the navigation rail. You no longer have to hold the 34 in your head. **This is the one change that makes the talk easier.** *The rail copy of it needs a window at least 800 px tall; the line under the title is there at every size, so you are never without it.* |
 | **A guided walkthrough** | Settings → Display. Off by default. Leave it off in front of judges — see §0. |
 
 **Reference result unchanged: 23 / 34 / 35 on 20 / 38 / 0 sorties** — seed 42, JOA
-CORAL, capability deployed — and the self-test still passes 118 of 118.
+CORAL, capability deployed. The self-test covers the shipped engine, host UI,
+War Game worker behavior and the standalone RESUPPLY TRACK path; use its live
+summary rather than memorising a copied check total.
 
 ---
 
@@ -209,10 +243,10 @@ your run untouched — know that before you press it, and know how you are getti
 back. Have the tab already open behind the application if you can.*
 
 > "You should not take any of that on my word. This page ships in the package. It
-> runs a hundred and eighteen assertions against the shipped engine, in your
-> browser, offline, with nothing mocked — determinism, the common random numbers,
+> checks the shipped engine and host UI in your browser, offline, with nothing
+> mocked — determinism, the common random numbers,
 > the conservation invariants, the deadline arithmetic, the SHA-256 audit chain and
-> its tamper-evidence, and all seven theatres. A hundred and eighteen pass. The
+> its tamper-evidence, all scenarios and the War Game worker path. The
 > reference result I just showed you is asserted here rather than asserted in a
 > slide."
 
@@ -360,7 +394,7 @@ run in it and the run takes eighteen seconds of wall clock you cannot shorten.
 ## 3 · What not to do
 
 - **Do not run the 3-minute film.** It costs 60% of the slot.
-- **Do not tour the rail.** Thirteen destinations is a strength in the package and a
+- **Do not tour the rail.** Fourteen destinations is a strength in the package and a
   liability on stage. Three screens: Command Overview, the result sheet, self-test.
 - **Do not say "air-gapped."** It describes a prototype limitation as if it were a design
   goal, and it dies to the obvious question — *then how does a reading from a monitor on
@@ -454,8 +488,8 @@ Do not get defensive. This is the right question.
 > and nothing else. That's a much weaker claim than 'twenty-three people die' and it's
 > the only one I'm making. Across fourteen hundred paired battles on seven theatres,
 > ANGEL SWARM wins all seven — every ninety-five percent interval excludes zero — and
-> in six individual battles out of fourteen hundred it produced one more death. That's
-> nought point four three percent, and never worse by more than one. The self-test
+> in five individual battles out of fourteen hundred it produced one more death. That's
+> nought point three six percent, and never worse by more than one. The self-test
 > page in the package lets you re-derive the reference result yourself in under a
 > second."
 
@@ -466,33 +500,55 @@ you look like you understand your own statistics — which most presenters do no
 
 > "It wins all seven theatres — every ninety-five percent interval excludes zero.
 > Individual battles vary, because that's what a distribution is: across fourteen
-> hundred paired battles it produced one more death in six of them. Nought point four
-> three percent, and never worse by more than one soldier.
+> hundred paired battles it produced one more death in five of them. Nought point three
+> six percent, and never worse by more than one soldier.
 >
 > The weakest theatre is EUCOM FJORD — a compressed laydown where distance stops
 > discriminating between casualties, so a deadline sort has less to work with. It
 > still wins, by one point nine fewer dead against four point nine in CORAL, on a
-> hundred and seventy-three of two hundred battles. Four of those six adverse draws
+> hundred and seventy-four of two hundred battles. Three of those five adverse draws
 > are in FJORD.
 >
-> If you pick one seed you can find one of the six, and I'd rather you knew that from
+> If you pick one seed you can find one of the five, and I'd rather you knew that from
 > me than found it and thought I'd hidden it."
 
 **If a judge produces a losing seed live** — they can, seed 42 in FJORD is one:
 
-> "That's one of the six. One battle isn't a theatre — the interval for FJORD is minus
+> "That's one of the five. One battle isn't a theatre — the interval for FJORD is minus
 > two point zero five to minus one point six nine, and it doesn't touch zero. Run it
 > two hundred times and you get the mean, not the draw."
 
 *Do not say "it does not win every theatre." It wins every theatre. Say "individual
 battles vary" — that is the true statement and it is also the stronger one.*
 
+### ★ Q3a · "Can I reproduce a War Game result?"
+
+> "Yes. War Game opens on the operation/scenario you selected and prints that
+> scenario's force assumptions. Pick fleet size, launch points, datalink outage,
+> triage error, or responder qualification/mix; pick twenty, thirty or forty paired
+> battles per setting; and pick nominal timing or observed-flight variability.
+> The seeds are deterministic from one thousand onward, and both arms receive the
+> same altered world and common random numbers.
+>
+> Triage error changes only CURRENT — TRIAGE & PROXIMITY because ANGEL does not
+> consume triage category. The screen also declares telementoring and ANGEL-only
+> in-flight abort/hold logic as method differences. A completed sweep binds the
+> scenario, settings, seed range and variability to the paired gap, ninety-five
+> percent interval and better/tied/worse record. Restore those displayed inputs
+> and run it again to reproduce it."
+
+**If asked to cancel it live:** press **CANCEL SWEEP**. Progress counts completed
+paired battles. Cancellation terminates every worker and retains no partial finding.
+The same all-or-nothing rule applies to worker load, handshake timeout, protocol and
+runtime failures. Changing scenario or variability cancels work in progress,
+invalidates completed results and regenerates the scenario labels.
+
 ### ⚠ Q4 · "Your biggest bucket is 'nobody could administer'. Doesn't that mean the answer is more medics, not more drones?"
 
 This is the strongest attack available. Have the numbers.
 
 > "It's a real finding and it's on the result sheet by design. But I measured it rather
-> than argued about it. Take the responder qualification from one in ten up to five in
+> than argued about it. Take the responder qualification/mix from one qualified receiver in ten up to five in
 > ten: ANGEL SWARM goes from twenty-three point five to twenty point nine, current
 > tasking goes from twenty-seven point seven to twenty-six point two. Both improve —
 > and **the gap widens**, from four point two to five point four. Better-trained
@@ -515,7 +571,7 @@ This is the strongest attack available. Have the numbers.
 
 > "Deliberately less than you'd expect. Two sets of trained weights ship — a hundred
 > and four thousand parameter CNN for the physiology, and a sentence encoder for
-> doctrine retrieval — and two destinations of the thirteen carry the mark at all.
+> doctrine retrieval — and two destinations of the fourteen carry the mark at all.
 > **There is no language model. Nothing on any screen is generated**, and Ask ANGEL's
 > own header says exactly that. That is the stronger claim, not the weaker one: a
 > template over the run record cannot hallucinate a casualty count, and a verbatim
@@ -541,8 +597,10 @@ This is the strongest attack available. Have the numbers.
 > "Three things, in order. One: telementoring, because 'nobody could administer' is the
 > largest remaining bucket and it is the only one that doesn't respond to more
 > aircraft. Two: close the loop from CRI-Net to the allocator, which is the honest gap
-> I flagged a moment ago. Three: test the BATDOK-J interface against a real BATDOK-J
-> instead of against a specification."
+> I flagged a moment ago. Three: validate the receive-only CoT path against real
+> acquisition components. Keep the roles exact: Sempulse Halo (example), CipherOx
+> CRI M1 (reference), and BATDOK-J as a separate plausible producer/interface.
+> ANGEL SWARM has not tested an integration with any real one of them."
 
 ### Q9 · "Why drones? Why not just evacuate faster?"
 
@@ -812,7 +870,11 @@ lose the room.
 *Be exact about Crimson's date — say "2022" out loud. Presenting four-year-old prior art
 as current is the error that would cost you the person most likely to know it. And do not
 name a MEDRAS project you cannot describe; "sixteen projects, three categories, allocation
-is not one of them" is the whole claim and it is enough.*
+is not one of them" is the whole claim and it is enough. Do not turn historical BATDOK
+prior art into an ANGEL SWARM integration claim: BATDOK-J is only a plausible
+producer/interface here, and the receive-only, off-by-default listener accepts a
+prototype CoT `<detail>` dialect. No real Sempulse Halo (example), CipherOx CRI M1
+(reference), or BATDOK-J integration has been tested.*
 
 ### ⚠ Q21 · "That army.mil article says they were trained to operate the aircraft manually — that's not the same as the tasking being manual."
 
@@ -901,14 +963,19 @@ If you remember nothing else under pressure:
 
 - **35 → 34 → 23.** Nothing flown, today's tasking, ANGEL SWARM. On **0, 38 and 20** sorties.
 - **38 sorties to convert one death.** That is what today's tasking buys.
-- **118 assertions, zero failures.** That is why you don't have to be believed.
-- **Seven theatres out of seven.** 1,400 paired battles, adverse in 6, never by more
+- **The self-test covers engine and host UI behavior**, including determinism,
+  common random numbers, scenarios, War Game worker failure/cancellation and
+  standalone RESUPPLY TRACK behavior. Read its live summary; do not quote a stale total.
+- **Seven theatres out of seven.** 1,400 paired battles, adverse in 5, never by more
   than one. Wins the scenario every time; individual battles vary.
 - **10 of the 23 are "nobody on scene could administer."** The largest bucket, and the
   one that does not move with more aircraft — 12.0 deaths at seven airframes and 12.0
   at twenty-one.
-- **Zero off-origin requests.** Measured at the browser, thirteen destinations, four
-  map scales, two screen sizes.
+- **Zero-network baseline.** The current Windows launcher and its adjacent `app/`
+  loaded the core application and self-test with egress blocked on 9 September
+  2026. The earlier full navigation measurement covered the then-current thirteen
+  destinations, all four map scales and two screen sizes with zero off-origin
+  requests.
 - **44th Medical Brigade, May 2026, Soaring M25.** The aircraft are bought — that
   validation is what proves it, and it proves nothing else. **The allocation rule is
   unbought: DIU (25 Feb 2026), TATRC MEDRAS, NAVAIR PMA-263 — outside all three

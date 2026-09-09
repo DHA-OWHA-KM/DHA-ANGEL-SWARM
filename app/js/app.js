@@ -354,6 +354,10 @@ if (typeof ANGEL !== 'undefined' && ANGEL.provide) ANGEL.provide('flightVariabil
 function resetSim(keepRunning) {
   APP.world = createWorld(APP.scenarioKey, APP.seed);
   APP.armA = createArm(APP.world, 'ANGEL SWARM', 'CURRENT', APP.mode);
+  /* Live operator sessions protect each escalation for a minimum amount of
+     real interaction time. Headless and Monte Carlo arms intentionally omit
+     this flag so deterministic engine runs still use simulated-time expiry. */
+  APP.armA.interactiveDecisionWindow = true;
   APP.armA.hvaWeight = APP.hvaWeight;
   APP.armB = createArm(APP.world, 'CURRENT — TRIAGE & PROXIMITY', 'CURRENT', APP.mode);
   APP.armA.telementor = APP.telementor;
@@ -437,7 +441,13 @@ function loop(ts) {
     let guard = 0;
     while (APP.acc >= APP.dt && guard < 400) { stepSim(); APP.acc -= APP.dt; guard++; }
     APP.tView = Math.min(APP.world.scn.durationMin, APP.t + APP.acc);
-  } else APP.tView = APP.t;
+  } else {
+    APP.tView = APP.t;
+    /* Simulated expiry may first be reached while the guaranteed real-time
+       response window is still open. Keep reaping on wall time while paused
+       so that protected proposal closes when that promise ends. */
+    if (APP.armA && APP.armA.hitl) reapQueue(APP.armA, APP.t);
+  }
   render();
 }
 

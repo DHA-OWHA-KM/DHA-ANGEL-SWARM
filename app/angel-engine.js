@@ -428,6 +428,7 @@ function projectArm(arm, routes, world, bloodAboard) {
       route: p.route.map(l => ({ payload: l.payloadKey, casId: l.casId })),
       grounds: p.reasons.slice(),
       leadReserve: p.leadReserve,
+      closeReason: p.expireReason || null,
       summary: p.summary
     };
   }).sort((a, b) =>
