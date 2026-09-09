@@ -4271,8 +4271,7 @@ function syncChrome() {
   } else if (sc) sc.textContent = '';
   document.querySelectorAll('[data-mode]').forEach(el =>
     el.classList.toggle('on', el.dataset.mode === APP.mode));
-  document.querySelectorAll('[data-mapview]').forEach(el =>
-    el.classList.toggle('on', el.dataset.mapview === APP.mapView));
+  syncMapLayoutHighlights(document, APP.mapView);
   /* THE THREE-WAY MAP SCOPE. Which chip is lit is a function of BOTH the
      destination and the renderer, because the theatre picture is a different
      pane from the two tactical ones. It is computed here, on the per-frame

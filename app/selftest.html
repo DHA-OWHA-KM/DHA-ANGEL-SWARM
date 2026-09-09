@@ -140,6 +140,7 @@
      would have loaded. A real Worker is also spawned below, separately, to prove the
      worker path itself still loads the shipped engine. -->
 <script src="./js/mc.worker.js"></script>
+<script src="./js/map-layout-state.js"></script>
 
 <script type="module">
 window.onmessage = null;   /* mc.worker.js installs a worker handler; not wanted on a page */
@@ -924,6 +925,43 @@ test('the two arms differ in outcome only because they allocate differently', ()
      'same battle, different answer',
      'sameBattle=' + (armPrint(REF.A) === armPrint(REF.B)) +
      ' A=' + REF.A.stats.survivableDeaths + ' B=' + REF.B.stats.survivableDeaths);
+});
+
+/* ========================================================================== */
+group('MAP LAYOUT HIGHLIGHT',
+      'Comparison is the emphasized map mode; the single-map layout stays visually neutral.');
+
+function mapLayoutFixture() {
+  const host = document.createElement('div');
+  host.innerHTML =
+    '<div><span data-mapview="COP">Single</span><span data-mapview="COMPARE">Side by side</span></div>' +
+    '<div><span data-mapview="COP">Single</span><span data-mapview="COMPARE">Side by side</span></div>';
+  return host;
+}
+
+test('Single leaves every mirrored map-layout control dark', () => {
+  const host = mapLayoutFixture();
+  host.querySelectorAll('[data-mapview]').forEach(el => el.classList.add('on'));
+  syncMapLayoutHighlights(host, 'COP');
+  eq(host.querySelectorAll('[data-mapview].on').length, 0,
+     'a map-layout chip remained highlighted in Single');
+});
+
+test('Side by side highlights only that option in every mirrored control', () => {
+  const host = mapLayoutFixture();
+  syncMapLayoutHighlights(host, 'COMPARE');
+  eq(host.querySelectorAll('[data-mapview="COMPARE"].on').length, 2,
+     'not every Side by side chip was highlighted');
+  eq(host.querySelectorAll('[data-mapview="COP"].on').length, 0,
+     'a Single chip was highlighted during comparison');
+});
+
+test('returning to Single clears Side by side from every mirrored control', () => {
+  const host = mapLayoutFixture();
+  syncMapLayoutHighlights(host, 'COMPARE');
+  syncMapLayoutHighlights(host, 'COP');
+  eq(host.querySelectorAll('[data-mapview].on').length, 0,
+     'a mirrored highlight survived the layout change');
 });
 
 /* ------------------------------------------------------------------ webcrypto */
