@@ -380,45 +380,6 @@ body.light #keysheet{background:rgba(20,40,70,.42)}
 
 
 /* =========================================================================
-   5. WELCOME ORIENTATION
-
-   The welcome overlay carries the argument, and it gets a fourth block
-   listing what is actually in the application.
-
-   The dismissible strip that used to live under the command bar has been
-   removed. Measured, it was seven controls of permanent chrome duplicating
-   the top four rail entries, and it persisted across all twenty-one views —
-   it was not in any useful sense "first-run". Its markup, its behaviour and
-   its stylesheet block are gone rather than hidden; see js/palette.js §10.
-   ========================================================================= */
-
-.wcTour{
-  margin-top:8px; padding-top:16px; border-top:1px solid var(--line);
-}
-.wcTour > b{
-  display:block; font:700 8px/1 var(--mono); letter-spacing:.2em;
-  color:var(--faint); margin-bottom:12px;
-}
-.wcTourRow{display:flex; flex-wrap:wrap; gap:8px}
-.wcTourRow button{
-  display:flex; align-items:center; gap:8px; cursor:pointer;
-  background:var(--panel2); border:1px solid var(--line); border-radius:9px;
-  padding:8px 12px; color:var(--dim); text-align:left;
-}
-.wcTourRow button:hover{border-color:var(--line2); color:var(--text)}
-.wcTourRow button .ni{
-  font:900 13px/1 var(--mono); color:var(--niC, var(--angel)); flex:0 0 auto;
-}
-.wcTourRow button i{
-  font-style:normal; display:block; font:400 10px/1.4 var(--sans); color:var(--faint);
-  margin-top:2px;
-}
-.wcTourRow button em{font-style:normal; font:600 11.5px/1.2 var(--sans)}
-
-
-
-
-/* =========================================================================
    6. ROLE PROFILES
 
    The visibility contract three other modules code against. It is a

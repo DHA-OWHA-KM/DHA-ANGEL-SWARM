@@ -1312,38 +1312,7 @@ body.navOpen .navGroup{display:flex}
 .lede{font-size:12.5px !important; line-height:1.6 !important; color:var(--dim); max-width:76ch}
 .jarg{color:var(--faint); font-size:11px}
 
-/* =========================================================== WELCOME ==== */
-/* The welcome overlay covers the viewport, and it used to cover the COMMAND BAR
-   with it — inset:0 at z-index 120 with pointer-events on. Every transport
-   control sat underneath it, so on a cold load pressing play, pause, reset or
-   dragging the scrubber did precisely nothing, with no visible reason why.
-   Verified with elementFromPoint: btnPlay, btnReset and scrub all resolved to
-   #welcome. A modal that silently eats the primary controls is worse than no
-   modal, so the bar now sits above it and stays live. Clicking any control
-   dismisses the overlay on the way through (see app.js), which is what someone
-   reaching for play meant to happen anyway. */
-#welcome{position:fixed; top:calc(var(--bandH) + var(--barH)); left:0; right:0; bottom:var(--footH); z-index:120;
-  display:none; align-items:center; justify-content:center;
-  background:rgba(2,6,11,.90); padding:32px; backdrop-filter:blur(7px)}
-#welcome.show{display:flex}
-#cmdbar{position:relative; z-index:130}
-.wcCard{max-width:1000px; width:100%; background:var(--panel); border:1px solid var(--line);
-  border-radius:16px; padding:32px 32px 24px; box-shadow:var(--shadow); max-height:100%; overflow:auto}
-.wcHead{display:flex; align-items:center; gap:16px; padding-bottom:24px; border-bottom:1px solid var(--line)}
-.wcMark{font-size:34px; color:var(--angel); line-height:1}
-.wcHead h2{font:800 25px/1 var(--sans); letter-spacing:.16em}
-.wcHead p{margin:8px 0 0; font:400 13px/1.4 var(--sans); color:var(--dim)}
-.wcSteps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:24px 0}
-.wcStep{position:relative; padding-left:2px}
-.wcN{display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
-  background:rgba(49,214,138,.14); color:var(--angel); font:800 12px/1 var(--mono); margin-bottom:12px}
-.wcStep b{display:block; font:700 14.5px/1.4 var(--sans); margin-bottom:8px}
-.wcStep p{margin:0; font:400 12px/1.7 var(--sans); color:var(--dim)}
-.wcStep em{font-style:italic; color:var(--text)}
-.wcFoot{display:flex; align-items:center; gap:12px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap}
 .btn.big{padding:12px 24px; font-size:13px}
-.wcFoot .dim{margin-left:auto; font-size:10.5px}
-@media (max-width:1000px){ .wcSteps{grid-template-columns:1fr} }
 
 /* the theater map is now a panel on the Operations screen, not a full screen */
 .viewport[data-pane="DASHBOARD"] #theaterStage{

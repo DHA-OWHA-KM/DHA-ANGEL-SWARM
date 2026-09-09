@@ -287,7 +287,6 @@
     'html body #legend{display:none!important}',
     '#g3Wrap .g3Left{display:none!important}',
     '#dock{display:none!important}',
-    '#welcome{display:none!important}',
     /* ONE FIGURE, ONE PLACE. Each of these is a second copy of something the
        design draws around the map: the GPU map's own count row against the
        tile row, its selection card against the side panel's record, and the
@@ -400,7 +399,6 @@
       if (W && W.APP && W.APP.world && typeof W.mapScopeNow === 'function') {
         booted = true;
         killV4Shell();
-        try { if (typeof W.dismissWelcome === 'function') W.dismissWelcome(); } catch (e) { /* already gone */ }
         bindFrame();
         fire();
         return;

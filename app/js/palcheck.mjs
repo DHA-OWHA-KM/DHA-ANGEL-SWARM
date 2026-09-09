@@ -3,7 +3,6 @@ const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194
 const p = await b.newPage({viewport:{width:1920,height:1080}});
 const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
 await p.goto('http://127.0.0.1:8899/',{waitUntil:'networkidle'});
-await p.evaluate(()=>document.getElementById('welcome')?.classList.remove('show'));
 await p.waitForTimeout(900);
 await p.evaluate(()=>{ APP.running=false; for(let t=0;t<60;t+=0.25){ stepArm(APP.armA,APP.world,t,0.25,APP.rngA);} APP.t=APP.tView=60; APP.view='MISSION'; APP._paneForce=true; render(); });
 await p.waitForTimeout(500);

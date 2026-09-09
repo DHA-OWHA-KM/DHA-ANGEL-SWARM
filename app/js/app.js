@@ -2272,16 +2272,6 @@ function showRunReport() {
 }
 
 /* ======================== ACTIVE SYSTEM (master switch) ================= */
-/* One way to close the welcome overlay, so every entry point agrees. Called
-   from its two buttons, its backdrop, Escape, and any press on the command
-   bar. Idempotent — the command-bar path fires on every press for the life of
-   the session and must be free after the first. */
-function dismissWelcome() {
-  const w = document.getElementById('welcome');
-  if (!w || !w.classList.contains('show')) return;
-  w.classList.remove('show');
-}
-
 function setAngelActive(on) {
   if (APP.angelActive === on) return;
   APP.angelActive = on;
@@ -5180,35 +5170,9 @@ function bindUI() {
      just opened the application does not know exists. Expanding the group is
      the operator asking, so the answer is the whole list. */
   on('navMore', () => document.body.classList.toggle('navOpen'));
-  on('wcSkip', () => dismissWelcome());
-
-  /* Three more ways out of the welcome overlay, because there used to be only
-     two and both were buttons inside the card. Someone who reaches for the
-     transport, clicks the dimmed backdrop, or hits Escape has unambiguously
-     said "I am done reading this" — none of those should be dead ends. */
-  const wc = document.getElementById('welcome');
-  if (wc) wc.addEventListener('pointerdown', e => { if (e.target === wc) dismissWelcome(); });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && wc && wc.classList.contains('show')) dismissWelcome();
     const cm = document.getElementById('confirmModal');
     if (e.key === 'Escape' && cm && cm.classList.contains('show')) { e.preventDefault(); closeConfirm(); }
-  });
-  const bar = document.getElementById('cmdbar');
-  if (bar) bar.addEventListener('pointerdown', () => dismissWelcome(), true);
-  on('wcStart', () => {
-    dismissWelcome();
-    /* Open on the argument, not the map. The fight is one click further in and
-       means nothing until the standard it is measured against is understood. */
-    APP.view = 'STANDARD'; APP._paneForce = true;
-    /* The clock does NOT start here. Opening a page is not a decision to run a
-       mission, and a simulation that begins advancing while the operator is
-       still reading takes the transport out of their hands — they arrive at the
-       fight already several minutes in, with no memory of pressing anything.
-       Nothing moves until Play is pressed. */
-    APP.lastFrame = 0;
-    toast('The standard, first', 'Read why the Golden Hour is gone, then go to ' +
-          'the fight and press play when you are ready.', 'info');
-    syncChrome(); render();
   });
   on('dpConfirm', beginDeployment);
   /* One button, one action. The pane used to ask the operator to press Sync
@@ -5274,7 +5238,6 @@ function bindUI() {
     if (e.code === 'Space') { e.preventDefault(); document.getElementById('btnPlay').click(); }
     if (e.key === 'r' || e.key === 'R') resetSim(false);
     if (e.key === 'Escape') {
-      document.getElementById('welcome').classList.remove('show');
       document.getElementById('modal').classList.remove('show');
       document.getElementById('runModal').classList.remove('show');
       /* One Escape dismisses the topmost thing, not everything under it. The

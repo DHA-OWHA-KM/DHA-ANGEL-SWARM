@@ -1169,38 +1169,11 @@
       note: 'SQL over the whole record' }
   ];
 
-  /* The welcome overlay gets the same list, in its own idiom. Appended, not
-     inserted: the three steps that carry the argument stay first and stay
-     exactly as written. */
-  const extendWelcome = safe('welcome', function () {
-    const card = document.querySelector('#welcome .wcCard');
-    const foot = card && card.querySelector('.wcFoot');
-    if (!card || !foot || card.querySelector('.wcTour')) return;
-    const live = TOUR.filter(t => hasView(t.view));
-    if (!live.length) return;
-    const div = document.createElement('div');
-    div.className = 'wcTour';
-    div.innerHTML = '<b>AND WHAT IS ACTUALLY IN HERE</b><div class="wcTourRow">' +
-      live.map(t => '<button type="button" data-go="' + t.view + '" data-view="' + t.view + '">' +
-        '<span class="ni" aria-hidden="true">' + t.icon + '</span>' +
-        '<span><em>' + esc(t.label) + '</em><i>' + esc(t.note) + '</i></span></button>').join('') +
-      '</div>';
-    card.insertBefore(div, foot);
-    div.addEventListener('click', ev => {
-      const b = ev.target.closest('[data-go]');
-      if (!b) return;
-      const w = $('welcome'); if (w) w.classList.remove('show');
-      goView(b.dataset.go);
-    });
-  });
-
-
   /* ==========================================================================
      11. WIRING
      ====================================================================== */
 
   function boot() {
-    extendWelcome();
     const btn = $('btnPalette');
     if (btn) {
       btn.addEventListener('click', () => CK.show());
