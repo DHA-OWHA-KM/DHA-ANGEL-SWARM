@@ -4,3 +4,4 @@
 # `shasum -a 256 -c CHECKSUMS.txt` fail on checkout. Every file is stored and
 # restored byte-for-byte, on every platform.
 * -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
