@@ -8326,5 +8326,107 @@ class Component extends DCLogic {
   }
 }
 </script>
+<script>
+/* ---- THE MODULES ARE CHECKED AFTER THEY HAVE HAD THEIR CHANCE ------------
+   Nine of the console's scripts are ES modules, and a module that does not
+   evaluate fails silently by design: console.html carries an onerror for each
+   that quietly removes the destination it feeds, the application still boots,
+   and the flat tactical map still draws. So nothing on screen says the globe
+   is gone — the chip simply is not in the row, which is indistinguishable
+   from a build that never had one.
+
+   preflight.html gates the launch on the same question, but it asks it of its
+   own load of the console and then hands over to this page, which loads the
+   console again. This closes that seam from the inside: the page that is
+   actually being demonstrated checks itself.
+
+   One silent reload, once per tab, and only after the deadline — a cold first
+   load fetches forty-nine scripts and is entitled to take its time. If the
+   modules are still missing after that reload the failure is not transient,
+   and a second reload would only hide it, so what follows is a banner that
+   names exactly what is missing. */
+(function () {
+  var MODULES = [
+    ['theater3d',  'Globe and GPU theatre'],
+    ['doctrine',   'Doctrine'],
+    ['copilot',    'Ask Angel'],
+    ['charts',     'Flow'],
+    ['montecarlo', 'Confidence'],
+    ['audio',      'Audio']
+  ];
+  var DEADLINE_MS = 45000, POLL_MS = 600, KEY = 'angel.selfcheck.reloaded';
+  var t0 = Date.now(), finished = false, timer = 0;
+
+  function frameWin() {
+    try { var f = document.getElementById('angelMapFrame'); return (f && f.contentWindow) || null; }
+    catch (e) { return null; }
+  }
+  /* null means "not up yet", which is not the same as "nothing missing" and
+     must never be read as a pass. An array - empty or not - is an answer. */
+  function survey() {
+    var w = frameWin(); if (!w) return null;
+    var booted = false;
+    try { booted = !!(w.APP && w.APP.world); } catch (e) { return null; }
+    if (!booted) return null;
+    var gone = [];
+    for (var i = 0; i < MODULES.length; i++) {
+      var ok = false;
+      try { ok = !!(w.ANGEL && w.ANGEL.has && w.ANGEL.has(MODULES[i][0])); } catch (e) {}
+      if (!ok) gone.push(MODULES[i][1]);
+    }
+    /* theater3d publishes the globe at the very bottom of its own module, so
+       a module that registered but threw on the way down still owes us this. */
+    var globe = false;
+    try { globe = typeof w.__ANGEL_GLOBE !== 'undefined' && !!w.__ANGEL_GLOBE.ready(); } catch (e) {}
+    if (!globe && gone.indexOf('Globe and GPU theatre') < 0) gone.push('Globe');
+    return gone;
+  }
+
+  function banner(gone) {
+    if (document.getElementById('angelSelfCheck')) return;
+    var d = document.createElement('div');
+    d.id = 'angelSelfCheck';
+    d.setAttribute('role', 'alert');
+    d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;' +
+      'background:oklch(0.26 0.09 25);color:oklch(0.97 0.02 25);' +
+      'border-top:2px solid oklch(0.66 0.2 25);padding:12px 16px;' +
+      'font:600 11px/1.5 ui-monospace,"Cascadia Mono",Consolas,monospace;' +
+      'display:flex;gap:14px;align-items:center;justify-content:space-between';
+    var msg = document.createElement('span');
+    msg.textContent = 'NOT ALL FEATURES LOADED \u2014 missing: ' + gone.join(', ') +
+      '. A reload did not recover it. Close this tab and run DEMO.bat for a clean, verified start.';
+    var x = document.createElement('button');
+    x.type = 'button';
+    x.textContent = 'DISMISS';
+    x.style.cssText = 'flex:none;border:1px solid oklch(0.66 0.2 25);background:transparent;' +
+      'color:inherit;padding:7px 14px;font:inherit;letter-spacing:.1em;cursor:pointer';
+    x.addEventListener('click', function () { d.remove(); });
+    d.appendChild(msg); d.appendChild(x);
+    (document.body || document.documentElement).appendChild(d);
+  }
+
+  timer = setInterval(function () {
+    if (finished) return;
+    var gone = survey();
+    if (gone && gone.length === 0) {
+      finished = true; clearInterval(timer);
+      try { sessionStorage.removeItem(KEY); } catch (e) { /* storage denied */ }
+      return;
+    }
+    if (Date.now() - t0 < DEADLINE_MS) return;
+    finished = true; clearInterval(timer);
+    var tried = true;
+    /* Storage denied is treated as "already tried": a reload loop with no way
+       to remember it had happened would be far worse than a banner. */
+    try { tried = sessionStorage.getItem(KEY) === '1'; } catch (e) { tried = true; }
+    if (!tried) {
+      try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+      location.reload();
+      return;
+    }
+    banner(gone && gone.length ? gone : ['the console did not come up']);
+  }, POLL_MS);
+})();
+</script>
 </body>
 </html>

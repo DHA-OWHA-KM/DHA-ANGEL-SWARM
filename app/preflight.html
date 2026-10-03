@@ -29,6 +29,15 @@
          padding:13px;font:600 11px var(--mono);letter-spacing:.12em;cursor:pointer}
   button:hover{border-color:var(--ok);color:var(--ok)}
   iframe{position:fixed;width:1280px;height:800px;left:-9999px;top:0;border:0;visibility:hidden}
+  .film{margin-top:18px;border:1px solid var(--line);border-left:3px solid var(--wait);
+        background:var(--panel);padding:18px 20px}
+  .film h2{margin:0 0 8px;font-size:11px;letter-spacing:.14em;color:var(--wait);font-weight:700}
+  .film p{margin:0 0 10px;font-size:11px;line-height:1.65;color:var(--dim)}
+  .film b{color:var(--t);font-weight:600}
+  .film a{display:inline-block;color:var(--ok);text-decoration:none;border:1px solid var(--line);
+          padding:9px 14px;font-size:11px;letter-spacing:.06em;word-break:break-all}
+  .film a:hover{border-color:var(--ok);background:#141a22}
+  .film code{color:var(--t);font-size:10px}
 </style>
 </head>
 <body>
@@ -40,6 +49,27 @@
     <table id="tbl"></table>
     <button id="btn" hidden>RETRY</button>
   </div>
+
+  <!-- The final film is the one file in this repository tracked by Git LFS,
+       and GitHub's "Download ZIP" does not resolve LFS objects - it ships the
+       134-byte pointer text under the real filename. The stub is the right
+       size to look plausible in a folder listing and will not play. Nothing
+       the application serves can detect this: the server's web root is app/
+       and Videos/ sits above it, so this says so in words rather than
+       pretending to check. -->
+  <section class="film">
+    <h2>BEFORE YOU PRESENT &middot; THE FINAL FILM</h2>
+    <p>The final film is <b>not part of this application</b> and is not served here &mdash;
+       it is a separate file in <code>Videos/</code>. It is tracked by Git LFS, and
+       <b>GitHub&rsquo;s &ldquo;Download ZIP&rdquo; does not include it</b>: you get a 134-byte
+       placeholder with the right filename that will not play. A <code>git clone</code> with
+       Git LFS installed fetches it properly.</p>
+    <p>If your copy of <code>Videos/Angel&nbsp;Swarm-final-09-09-2026.mp4</code> is around
+       <b>134 KB rather than 134 MB</b>, it is the placeholder. Download the real file:</p>
+    <p><a href="https://github.com/DHA-OWHA-KM/DHA-ANGEL-SWARM/raw/main/Videos/Angel%20Swarm-final-09-09-2026.mp4">
+       Download the final ANGEL SWARM film &mdash; 134 MB MP4 &darr;</a></p>
+    <p>Check it before you need it: the real file is <b>134,603,824 bytes</b>.</p>
+  </section>
 </div>
 <iframe id="probe" title="preflight probe"></iframe>
 <script>
