@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ANGEL SWARM — Preflight</title>
+<style>
+  :root{ --bg:#0a0c10; --panel:#11151c; --line:#232a35; --t:#c8d2e0; --dim:#6b7788;
+         --ok:#35d07f; --bad:#ff5c5c; --wait:#d8b24a; --mono:ui-monospace,"Cascadia Mono",Consolas,monospace }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--t);font:400 13px/1.5 var(--mono);
+       display:grid;place-items:center;padding:24px}
+  .wrap{width:min(680px,100%)}
+  .status{border:1px solid var(--line);background:var(--panel);padding:28px 30px;border-left-width:4px}
+  .status[data-s="wait"]{border-left-color:var(--wait)}
+  .status[data-s="ok"]{border-left-color:var(--ok)}
+  .status[data-s="bad"]{border-left-color:var(--bad)}
+  .kicker{font-size:9px;letter-spacing:.18em;color:var(--dim);margin:0 0 10px}
+  h1{margin:0;font-size:clamp(22px,4vw,34px);letter-spacing:-.02em;font-weight:600}
+  .status[data-s="wait"] h1{color:var(--wait)}
+  .status[data-s="ok"] h1{color:var(--ok)}
+  .status[data-s="bad"] h1{color:var(--bad)}
+  .sub{margin:12px 0 0;color:var(--dim);font-size:11px}
+  table{width:100%;border-collapse:collapse;margin-top:22px;font-size:11px}
+  td{padding:6px 0;border-bottom:1px solid var(--line)}
+  td.v{text-align:right;font-weight:600}
+  .v[data-k="ok"]{color:var(--ok)} .v[data-k="bad"]{color:var(--bad)} .v[data-k="wait"]{color:var(--dim)}
+  button{margin-top:22px;width:100%;border:1px solid var(--line);background:#19202b;color:var(--t);
+         padding:13px;font:600 11px var(--mono);letter-spacing:.12em;cursor:pointer}
+  button:hover{border-color:var(--ok);color:var(--ok)}
+  iframe{position:fixed;width:1280px;height:800px;left:-9999px;top:0;border:0;visibility:hidden}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="status" id="box" data-s="wait">
+    <p class="kicker">ANGEL SWARM &middot; DEMO PREFLIGHT</p>
+    <h1 id="head">CHECKING&hellip;</h1>
+    <p class="sub" id="sub">Loading the console and verifying every module the demo needs.</p>
+    <table id="tbl"></table>
+    <button id="btn" hidden>RETRY</button>
+  </div>
+</div>
+<iframe id="probe" title="preflight probe"></iframe>
+<script>
+/* Loads the standalone console out of sight and does not report READY until
+   every module the demo depends on has actually published itself. A module
+   that fails to evaluate is silent by design — the app still boots and the
+   flat map still draws — so booting is not evidence and this checks the
+   modules by name. A failed attempt is retried against a fresh URL so a bad
+   cached copy cannot be what is checked twice. */
+var MODULES = [
+  ['theater3d',  'Globe + GPU theatre'],
+  ['doctrine',   'Doctrine'],
+  ['copilot',    'Ask Angel'],
+  ['charts',     'Flow'],
+  ['montecarlo', 'Confidence'],
+  ['audio',      'Audio']
+];
+var ATTEMPT_MS = 30000, POLL_MS = 400, MAX_ATTEMPTS = 3;
+var probe = document.getElementById('probe'), box = document.getElementById('box'),
+    head = document.getElementById('head'), sub = document.getElementById('sub'),
+    tbl = document.getElementById('tbl'), btn = document.getElementById('btn');
+var attempt = 0, started = 0, timer = 0;
+
+function row(label, state, note) {
+  var k = state === true ? 'ok' : state === false ? 'bad' : 'wait';
+  return '<tr><td>' + label + '</td><td class="v" data-k="' + k + '">' +
+         (note || (k === 'ok' ? 'ok' : k === 'bad' ? 'MISSING' : '···')) + '</td></tr>';
+}
+
+/* Each check is wrapped: a frame still mid-boot throws on these reads, and a
+   throw here must read as "not yet", never as a failure. */
+function probeState() {
+  var W; try { W = probe.contentWindow; } catch (e) { return null; }
+  if (!W) return null;
+  var out = { rows: [], ok: true };
+  function add(label, v) { out.rows.push([label, v]); if (!v) out.ok = false; }
+  var booted = false;
+  try { booted = !!(W.APP && W.APP.world); } catch (e) {}
+  add('Application core', booted);
+  if (!booted) { out.rows = [['Application core', false]]; return out; }
+  for (var i = 0; i < MODULES.length; i++) {
+    var ok = false;
+    try { ok = !!(W.ANGEL && W.ANGEL.has && W.ANGEL.has(MODULES[i][0])); } catch (e) {}
+    add(MODULES[i][1], ok);
+  }
+  var globe = false;
+  try { globe = typeof W.__ANGEL_GLOBE !== 'undefined' && !!W.__ANGEL_GLOBE.ready(); } catch (e) {}
+  add('Globe ready', globe);
+  var t3 = false;
+  try { t3 = !!W.document.getElementById('g3Host'); } catch (e) {}
+  add('Tactical 3D', t3);
+  return out;
+}
+
+function paint(st, elapsed) {
+  if (!st) { tbl.innerHTML = row('Loading the console', null); return; }
+  var html = '';
+  for (var i = 0; i < st.rows.length; i++) {
+    /* Inside the attempt window a missing module is still pending, not failed:
+       these resolve at their own pace and the deadline is the only judge. */
+    var v = st.rows[i][1] ? true : (elapsed < ATTEMPT_MS ? null : false);
+    html += row(st.rows[i][0], v);
+  }
+  tbl.innerHTML = html;
+}
+
+function finish(ok, st) {
+  clearInterval(timer);
+  if (ok) {
+    box.dataset.s = 'ok';
+    head.textContent = 'READY';
+    sub.textContent = 'Every module is live. Opening the application…';
+    paint(st, 0);
+    setTimeout(function () { location.replace('index.html'); }, 700);
+    return;
+  }
+  box.dataset.s = 'bad';
+  head.textContent = 'NOT READY';
+  var missing = [];
+  if (st) for (var i = 0; i < st.rows.length; i++) if (!st.rows[i][1]) missing.push(st.rows[i][0]);
+  sub.textContent = missing.length
+    ? 'Did not come up after ' + MAX_ATTEMPTS + ' attempts: ' + missing.join(', ') +
+      '. Open DevTools (F12) → Console and Network before reloading — that is the evidence needed to fix it.'
+    : 'The console did not boot after ' + MAX_ATTEMPTS + ' attempts.';
+  paint(st, ATTEMPT_MS);
+  btn.hidden = false;
+}
+
+function go() {
+  attempt++;
+  started = Date.now();
+  box.dataset.s = 'wait';
+  head.textContent = 'CHECKING…';
+  sub.textContent = 'Attempt ' + attempt + ' of ' + MAX_ATTEMPTS +
+    ' — loading the console and verifying every module the demo needs.';
+  btn.hidden = true;
+  /* A fresh URL every attempt: a cached copy that failed to parse must never
+     be what the retry re-checks. */
+  probe.src = 'console.html?preflight=' + Date.now();
+  clearInterval(timer);
+  timer = setInterval(function () {
+    var elapsed = Date.now() - started, st = probeState();
+    paint(st, elapsed);
+    if (st && st.ok) { finish(true, st); return; }
+    if (elapsed < ATTEMPT_MS) return;
+    if (attempt < MAX_ATTEMPTS) { go(); return; }
+    finish(false, st);
+  }, POLL_MS);
+}
+
+btn.addEventListener('click', function () { attempt = 0; go(); });
+go();
+</script>
+</body>
+</html>
