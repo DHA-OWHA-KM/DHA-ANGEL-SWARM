@@ -10,6 +10,18 @@ UNCLASSIFIED // SYNTHETIC DATA // FOR DEMONSTRATION ONLY
 
 **Check before you need it.** The real file is **134,603,824 bytes (~134 MB)**. If yours is a few hundred bytes, it is the pointer.
 
+To be certain, check the hash — it is listed in [`../CHECKSUMS-REPO.txt`](../CHECKSUMS-REPO.txt):
+
+```
+SHA-256  c1615768a03380ebd7303e027cf781cbc999b815604afdf8d7dc10c49f9cf32e
+```
+
+```powershell
+Get-FileHash -Algorithm SHA256 '.\Videos\Angel Swarm-final-09-09-2026.mp4'
+```
+
+The pointer file carries that same hash as its `oid` line, so reading the first line of a suspect file tells you at a glance: if it begins `version https://git-lfs.github.com/spec/v1`, it is the placeholder and not the film.
+
 Two ways to get the real thing:
 
 - **Direct download** — [Angel Swarm-final-09-09-2026.mp4 (134 MB)](https://github.com/DHA-OWHA-KM/DHA-ANGEL-SWARM/raw/main/Videos/Angel%20Swarm-final-09-09-2026.mp4). Resolves to `media.githubusercontent.com` and serves the real MP4. No Git required.

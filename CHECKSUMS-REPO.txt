@@ -1,6 +1,6 @@
 ANGEL SWARM v1.1 — repository manifest
 SHA-256 of every tracked file, at its path in DHA-OWHA-KM/DHA-ANGEL-SWARM.
-Generated 9 September 2026. CHECKSUMS-REPO.txt itself is not listed.
+Generated 3 October 2026. CHECKSUMS-REPO.txt itself is not listed.
 Verify from the repository root:  shasum -a 256 -c CHECKSUMS-REPO.txt
 (The four header lines above are reported as 'improperly formatted' and skipped.)
 
@@ -11,7 +11,7 @@ Verify from the repository root:  shasum -a 256 -c CHECKSUMS-REPO.txt
 07679ec6a05a24a4ec7bd098b9ebcae6dc1a0d613236ae0a01bff5385a5772f6  .agents/memory/globe-theatre-handoff.md
 8da68b1e671154b7fd5487d4974aa4f4dce8c06cb34bb08455c10703476d7e68  .agents/memory/map-layout-emphasis.md
 ac04d1d488708f3ddb312eb2900cb7a91e40910a78bad88d3fc1f1a0bdf2717b  .agents/memory/navigation-hover-treatment.md
-3ffccc9a4ae30eee7c0f6b1918c4827ba84547cf9e38227e234d6a2fad49ff39  .gitattributes
+3109f444e3a642332535b6c6cfb823648782d915cca4742b6865142b0ed6b8d7  .gitattributes
 3d7e1d4d9a22105b094c62f0c92f4c95e45c6b1c53175f7d0e6199ee6a4656a6  .gitignore
 0d9da37895e31dc07d2bf074f8473706cb4d50c7f85dd2da20b1e83cc055d1d3  .replit
 cbba9db53d17709a3641431794b41367b68dee92862f6e30b78a8bd8c7cd92e4  ANGEL-SWARM-CHANGELOG.md
@@ -22,6 +22,7 @@ dc69cededfb7ab6563495c9691ad52b4b79e37356b24d8fd3f429d7031b95f03  ANGEL-SWARM-CH
 53a189e5c1af3cca8fdcfaf2a6f4798697db5be6566e795c9df2fd6af67a70e7  ANGEL-SWARM-windows-x64.exe
 19beae3fed59f4ce4f3e8bdc8dc67915cd40a18d4e6bc075887689e173d1ae25  CHECKSUMS.md
 9cfce80b3828b153de3a96265d028d841da04ff9e67907562dfc8d47dd71ed5b  CHECKSUMS.txt
+85a57405d64ce988740fa86a5a2a9ae3cf7ffcafacef1311b19dc6e8b7699837  DEMO.bat
 852ebee3d8023884ef1b84cc266ffdc0ab1d924bacc137467a015cfd9fdf542f  Documentation/ANGEL-SWARM-ARCHITECTURE.docx
 3a3c019ac7afd6236a4eb9369a1ab2570e8782cdf59252d701c1394d0d142528  Documentation/ANGEL-SWARM-ARCHITECTURE.md
 3b485330d8a24636615843b7049a9b1e3eca1b22569295b190d1f199bd9e8aeb  Documentation/ANGEL-SWARM-CHANGELOG.md
@@ -69,7 +70,7 @@ f61c92c94c359633c3fdf6be93157868dc66ef7698252bd96383ac19b24edb83  Documentation/
 d6ebdb8383dea9c00cc9758c814ff8b040393c7bc37748ffcf2d2c0b906b1130  Documentation/deck/ANGEL-SWARM-leadership-opener.md
 7fbc15be3c8b86519c8df5bc0ee4bf4a873dc3773f87465bc5f28d3d0f0b6574  Documentation/deck/ANGEL-SWARM-leadership-opener.pptx
 91d254409086e93192f2a677a3d934e464240995b649a489cdbcb52872699cc7  Documentation/deck/ANGEL-SWARM-pitch.md
-2917c47d7e37fdff775987c65cc3894f8e00903890a802068e8248747c43e8b9  Documentation/deck/ANGEL-SWARM-pitch.pptx
+97df756403e7755a2a4100cd32fd2ab057f11ec8e00797ce1d6e8ea4f4d554fd  Documentation/deck/ANGEL-SWARM-pitch.pptx
 62a4dea46de6c2ebd55f2dac9ec1b441b53076dd73c7351953af1277f2ecd266  Documentation/deck/README.md
 d19289a7cb9491e53fbd9c9ab655ce5a3b4e1b75e452080329ab868a1bbccfc4  Documentation/deck/README.txt
 5c4f0d3c2425faf17d901541e7795c4a83bf2d444dcfcc54ef88bfc8c660d5bd  Documentation/deck/slides/leadership-opener-1.png
@@ -117,12 +118,14 @@ f568a02d8e52a433deca9589475f16ac99af1146116727e3f0c19d355d54bc43  Documentation/
 4f1ad7daa0001d51300c5c23fd84f6c3c953d9c8ca38826ad6d78357715de4b4  README.md
 30b5d558141cdcebb8e0dcaec9863fac2d71e0e292665497aa2c47f14f0fc1ce  START-HERE.md
 7bff63c29ba6ced98524f205f3722fb1c85576d786511e9c8b9bb7a5ae9c698c  START-HERE.txt
+272ae3173019596b86e89be69318d62dbd141659c5133840f057ec3404f3a38d  STOP-DEMO.bat
 3c3599a11dee0d4b8cdd9b20bbdb4caabdc62231b57e65255a02571d2f0537a6  TASKING.md
 85f9577b49572d5944d87804d52f1f42b56f71e26ac6244229529c73e95fea39  VERSION.txt
 b0318d157371dd51e79c13b36bc17a9d356c5cdbfaf5b6dc606d9f5a1aaba02d  Videos/ANGEL-SWARM-film-full-3m15s.mp4
 069089f6543b7bc74d4ebfa77eaa9e8ed184904d6526c72f6e77947daa302b9d  Videos/ANGEL-SWARM-film-short-60s.mp4
 a16430782fb6d67cfdcce627b0f8ab61c48f86a95cfa193110f63fe33bb8744d  Videos/ANGEL-SWARM-white-glove-promo-60s.mp4
-38da9db142b65622a8fde7860f5b98f27b454e17225c1e803d180020bc61ce24  Videos/README.md
+c1615768a03380ebd7303e027cf781cbc999b815604afdf8d7dc10c49f9cf32e  Videos/Angel Swarm-final-09-09-2026.mp4
+977ac5492b4cbb7add7d30a4cac898929da459f62df090e4e59e088e32c7583f  Videos/README.md
 bf98ec3ed4eee2e6b74d44ee965d312bcc7b87f2fbecb6f76e012003e4bde1af  app/README.md
 0674df6e02c54b8aad689420fdeab10c234c97b3494414c2f787aec8025c64c7  app/angel-engine.js
 6b04c1eb7196257f182c14e84228abe6a0169b7f1a430809006718b509d97228  app/angel-map.js
@@ -162,7 +165,7 @@ ff1889ab266de03bb465af4b63abd1d84eb0dd152f43b6ff1d765c1abeeca73b  app/data/doctr
 0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203  app/fonts/ibm-plex-sans-latin-500-normal.woff2
 8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f  app/fonts/ibm-plex-sans-latin-600-normal.woff2
 42e7b0c143c19df9d99fd896e76b48f846edf0902d200bc29796b34d12c33aa7  app/fonts/ibm-plex-sans-latin-700-normal.woff2
-43ace42fe571acccd0f036fd03579c84a09646e32471505dae16d439430c66f9  app/index.html
+e57c8ea48b9680ad832e2f586e4ab3864de71d51e317103280fe107977515aac  app/index.html
 917998d946b2e2ddc98dcb3e3ca37d17328e36f9046b4553226436cd6ccb409e  app/js/README.md
 0621f85a7ccabd40dcfec1daf2bee7a780f5d6eb8cd9e6fdc313449770c50c51  app/js/app.js
 0f26199991f9666a3641dbc753daa2750fb0c13be5a401b4a291dfcd0c7792f5  app/js/audio.js
@@ -223,6 +226,7 @@ ba69d34522df150444c0705769ef3058b7a383b6805b8f2d1af4dd63ab1ffecb  app/models/REA
 db9b443f98188f11938aec1853f0c8288e06a72c9e20b7da9509d5f5400d22a2  app/models/ppg_cri.meta.json
 c74bf4c69e3ad743453b997a8d2d456c74475f9408d77a2e4ccf7cf0906ec2b5  app/models/ppg_cri.onnx
 cfc2ae44b280e193612d92b73b0ce86ebce97d78b2774f39b8de0d53e88e52bb  app/models/ppg_traces.json
+9ee1f80307f34ad1942f4601469471d297f1b62d327acb5a21d81d28e849a7aa  app/preflight.html
 3772a4144765d05321b3febb623dc233af165a6feb0a2573f366a21d2d439fa1  app/selftest.html
 8fe7df74405f3c55f49b7249c74ea1397e65d07dea2b1bd3b4a489bec2e28cbe  app/support.js
 7e7966f7149dc3ec834ed032a7a319199ff29a7bde2fde0128e50c5c25f7ff00  app/vendor/README.md
